@@ -1,0 +1,408 @@
+@import "tailwindcss";
+
+/* MyStoryBox Inspired Design - Modern & Warm */
+:root {
+  /* Background colors */
+  --background-light: #FAF7F2; /* Soft cream color */
+  --background-dark: #1a1a1a; /* Zachtere donkere achtergrond */
+
+  /* Primary brand colors - Warm orange palette */
+  --primary-accent: #FF8C42; /* Vibrant orange - primary brand color */
+  --primary-accent-dark: #F47B3B; /* Darker orange for hover states */
+  --secondary-accent: #FFB84D; /* Warm yellow/gold - secondary accent */
+  --secondary-accent-dark: #F5A623; /* Darker gold for hover */
+  --highlight: #FFC857; /* Bright warm yellow for highlights */
+  
+  /* Text colors - Aangepast voor betere leesbaarheid */
+  --text-dark: #333333; /* Zachter donker voor hoofdtekst */
+  --text-medium: #555555; /* Middelste grijs voor secundaire tekst */
+  --text-light: #E0E0E0; /* Lichtere tekst voor donkere modus */
+  --text-input: #2A2A2A; /* Donkere tekst voor inputvelden */
+  --text-label: #444444; /* Zachtere labels */
+  
+  /* Neutral colors */
+  --neutral: #E6E2DD;
+  --neutral-light: #F5F2ED; /* Lichtere neutrale achtergrond */
+  --success: #7BB661;
+  --warning: #E0AA3E;
+  
+  /* Input field colors */
+  --input-background: #FFFFFF; /* Witte achtergrond voor inputvelden */
+  --input-border: #D4D0C8; /* Zachte rand voor inputvelden */
+  --input-focus: #FF8C42; /* Orange focus kleur */
+  
+  /* Card en component kleuren */
+  --card-background: #FFFFFF; /* Witte kaarten */
+  --card-border: #E6E2DD; /* Zachte randen */
+  
+  /* Current theme (default to light) */
+  --background: var(--background-light);
+  --foreground: var(--text-dark);
+}
+
+/* Dark mode (TV mode) */
+[data-theme="dark"] {
+  --background: var(--background-dark);
+  --foreground: var(--text-light);
+  --text-input: #F0F0F0; /* Lichtere tekst voor dark mode */
+  --text-label: #CCCCCC; /* Lichtere labels voor dark mode */
+  --input-background: #2A2A2A; /* Donkerdere achtergrond voor inputvelden in dark mode */
+  --input-border: #555555; /* Donkerdere rand voor inputvelden in dark mode */
+  --card-background: #222222; /* Donkerdere kaarten */
+  --card-border: #444444; /* Donkerdere randen */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Custom colors - Warm orange theme */
+  --color-orange: var(--primary-accent);
+  --color-orange-dark: var(--primary-accent-dark);
+  --color-gold: var(--secondary-accent);
+  --color-gold-dark: var(--secondary-accent-dark);
+  --color-highlight: var(--highlight);
+  /* Keep teal as alias for backwards compatibility, but maps to orange now */
+  --color-teal: var(--primary-accent);
+  --color-teal-dark: var(--primary-accent-dark);
+  --color-cream: var(--background-light);
+  --color-near-black: var(--background-dark);
+  --color-neutral-sand: var(--neutral);
+  --color-neutral-light: var(--neutral-light);
+  --color-warm-sand: #E6DDD5;
+  --color-warm-amber: var(--secondary-accent);
+  --color-success-green: var(--success);
+  --color-warning-honey: var(--warning);
+  --color-input-text: var(--text-input);
+  --color-label-text: var(--text-label);
+  --color-input-background: var(--input-background);
+  --color-input-border: var(--input-border);
+  --color-input-focus: var(--input-focus);
+  --color-card-background: var(--card-background);
+  --color-card-border: var(--card-border);
+  --color-text-medium: var(--text-medium);
+  
+  /* Fonts */
+  --font-serif: 'Source Serif 4', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: rgb(230 226 221 / 0.4); /* Neutral sand with opacity */
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+  line-height: 1.6; /* Betere regelafstand voor leesbaarheid */
+}
+
+/* Typography classes */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.text-heading {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.text-subheading {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  color: var(--text-medium);
+}
+
+/* Custom utility classes */
+.bg-cream {
+  background-color: var(--background-light);
+}
+
+.bg-near-black {
+  background-color: var(--background-dark);
+}
+
+.bg-card {
+  background-color: var(--card-background);
+}
+
+.text-teal {
+  color: var(--primary-accent);
+}
+
+.text-orange {
+  color: var(--secondary-accent);
+}
+
+.text-highlight {
+  color: var(--highlight);
+}
+
+.bg-teal {
+  background-color: var(--primary-accent);
+}
+
+.bg-teal-dark {
+  background-color: var(--primary-accent-dark);
+}
+
+.bg-orange {
+  background-color: var(--secondary-accent);
+}
+
+.bg-orange-dark {
+  background-color: var(--secondary-accent-dark);
+}
+
+/* Gradient button - Warm orange style */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-accent) 0%, var(--primary-accent-dark) 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 66, 0.35);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--secondary-accent) 0%, var(--secondary-accent-dark) 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 184, 77, 0.25);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 184, 77, 0.35);
+}
+
+.text-input {
+  color: var(--text-input);
+}
+
+.text-label {
+  color: var(--text-label);
+}
+
+.text-medium {
+  color: var(--text-medium);
+}
+
+.border-neutral-sand {
+  border-color: var(--neutral);
+}
+
+.border-card {
+  border-color: var(--card-border);
+}
+
+/* Input field styles */
+.input-field {
+  background-color: var(--input-background);
+  border-color: var(--input-border);
+  color: var(--text-input);
+}
+
+/* Focus states - Orange theme */
+.focus-teal {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.15);
+}
+
+/* Card shadows - MyStoryBox style */
+.card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-shadow-hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Rounded corners - MyStoryBox style */
+.rounded-card {
+  border-radius: 16px;
+}
+
+.rounded-button {
+  border-radius: 12px;
+}
+
+/* Dark mode transition */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Emotional Design - Micro-interactions & Animations */
+
+/* Heart pulse animation */
+@keyframes heart-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.heart-pulse {
+  animation: heart-pulse 2s ease-in-out infinite;
+}
+
+/* Confetti animation */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+.confetti {
+  position: fixed;
+  top: -10px;
+  z-index: 1000;
+  animation: confetti-fall 3s linear forwards;
+}
+
+/* Gentle float animation */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-gentle {
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+/* Warm glow effect */
+.warm-glow {
+  box-shadow: 0 0 20px rgba(255, 140, 66, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.warm-glow:hover {
+  box-shadow: 0 0 30px rgba(255, 140, 66, 0.5);
+}
+
+/* Memory Lane path styling */
+.memory-lane-path {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 140, 66, 0.1) 20%,
+    rgba(255, 140, 66, 0.3) 50%,
+    rgba(255, 140, 66, 0.1) 80%,
+    transparent 100%
+  );
+  position: relative;
+}
+
+.memory-lane-path::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg,
+    transparent 30%,
+    rgba(255, 184, 77, 0.1) 50%,
+    transparent 70%
+  );
+  animation: gentle-float 4s ease-in-out infinite;
+}
+
+/* Seasonal themes */
+.seasonal-spring {
+  background: linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 100%);
+}
+
+.seasonal-summer {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+}
+
+.seasonal-autumn {
+  background: linear-gradient(135deg, #FBE9E7 0%, #FFCCBC 100%);
+}
+
+.seasonal-winter {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+}
+
+/* Emotional color palette extensions */
+.emotion-joy {
+  background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+  color: #F57F17;
+}
+
+.emotion-love {
+  background: linear-gradient(135deg, #FCE4EC 0%, #F8BBD9 100%);
+  color: #C2185B;
+}
+
+.emotion-gratitude {
+  background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
+  color: #2E7D32;
+}
+
+.emotion-reflection {
+  background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+  color: #6A1B9A;
+}
+
+/* Smooth transitions for emotional states */
+.emotional-transition {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Memory bubbles (floating text elements) */
+.memory-bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text-medium);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: gentle-float 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Ripple effect for emotional moments */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.emotional-ripple {
+  position: absolute;
+  border: 2px solid rgba(255, 140, 66, 0.6);
+  border-radius: 50%;
+  animation: ripple 1s linear;
+}
+
+/* Warm breathing animation */
+@keyframes warm-breath {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.warm-breath {
+  animation: warm-breath 4s ease-in-out infinite;
+}
