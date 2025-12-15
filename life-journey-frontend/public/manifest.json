@@ -1,0 +1,16 @@
+{
+  "name": "Life Journey",
+  "short_name": "Journey",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "description": "Leg je levensverhaal vast met een empathische AI-interviewer en deel het veilig met wie jij kiest.",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

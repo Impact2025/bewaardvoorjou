@@ -1,0 +1,38 @@
+# Environment variables (CRITICAL - contains secrets!)
+.env
+.env.*
+!.env.example
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Runtime artifacts
+journey.db
+*.sqlite
+__pycache__/
+*.pyc
+alembic/*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/
