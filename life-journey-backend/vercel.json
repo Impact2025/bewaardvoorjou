@@ -1,14 +1,31 @@
 {
-  "functions": {
-    "api/index.py": {
-      "runtime": "python3.11",
-      "maxDuration": 60
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
-  },
+  ],
   "routes": [
+    {
+      "src": "/api/v1/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/healthz",
+      "dest": "api/index.py"
+    },
     {
       "src": "/(.*)",
       "dest": "api/index.py"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
+  }
 }
