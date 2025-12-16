@@ -33,7 +33,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           {!isPlaying && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/20">
               <Button
-                size="lg"
+
                 className="rounded-full w-16 h-16 bg-white/90 hover:bg-white text-slate-900 shadow-lg"
                 onClick={() => {
                   const video = document.querySelector('video');
@@ -86,7 +86,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
       <Button
         onClick={onNext}
-        size="lg"
+
         className="bg-orange hover:bg-orange/90 text-lg px-8"
       >
         Laten we beginnen

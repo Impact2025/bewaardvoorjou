@@ -118,7 +118,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               {/* Previous button */}
               <Button
                 variant="ghost"
-                size="sm"
+
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
                 className="text-slate-600 disabled:opacity-0 transition-all duration-200"
@@ -154,7 +154,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               ) : (
                 <Button
                   variant="ghost"
-                  size="sm"
+
                   onClick={scrollNext}
                   disabled={!canScrollNext}
                   className="text-slate-600 transition-all duration-200"

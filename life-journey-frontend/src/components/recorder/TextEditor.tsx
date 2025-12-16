@@ -52,7 +52,7 @@ export function TextEditor({ onGetAISuggestion }: TextEditorProps) {
               onClick={onGetAISuggestion}
               disabled={isGettingAISuggestion}
               variant="ghost"
-              size="sm"
+
               className="text-xs text-orange hover:text-orange-dark"
               aria-busy={isGettingAISuggestion}
             >

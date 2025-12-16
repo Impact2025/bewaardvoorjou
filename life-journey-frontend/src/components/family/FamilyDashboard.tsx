@@ -186,7 +186,7 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
             </div>
             <Button
               variant="ghost"
-              size="sm"
+
               onClick={copyInviteUrl}
               className="border-teal-300 text-teal-700 hover:bg-teal-100 flex-shrink-0"
             >

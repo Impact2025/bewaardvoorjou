@@ -121,7 +121,7 @@ function DashboardContent() {
                 {nextChapter && (
                   <Button
                     asChild
-                    size="lg"
+
                     className="bg-white text-teal-700 hover:bg-teal-50 shadow-lg whitespace-nowrap"
                   >
                     <Link href={`/chapter/${nextChapter}`}>
@@ -163,7 +163,7 @@ function DashboardContent() {
                       Volg je voortgang door alle levensfasen
                     </CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" asChild>
                     <Link href="/chapters">
                       <BookOpen className="h-4 w-4 mr-2" />
                       Alle hoofdstukken
@@ -266,7 +266,7 @@ function DashboardContent() {
                         Bekijk de handleiding voor tips en uitleg.
                       </p>
                       <Button
-                        size="sm"
+
                         variant="ghost"
                         onClick={() => setShowOnboarding(true)}
                         className="border-amber-300 text-amber-700 hover:bg-amber-100"

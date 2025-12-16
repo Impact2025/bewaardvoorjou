@@ -45,7 +45,7 @@ export function MemoCard({ memo, onEdit, onDelete }: MemoCardProps) {
           <div className="flex gap-2">
             <Button
               variant="ghost"
-              size="sm"
+
               onClick={() => onEdit(memo)}
               className="h-8 w-8 p-0"
             >
@@ -53,7 +53,7 @@ export function MemoCard({ memo, onEdit, onDelete }: MemoCardProps) {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+
               onClick={() => onDelete(memo.id)}
               className="h-8 w-8 p-0 text-coral hover:text-coral"
             >

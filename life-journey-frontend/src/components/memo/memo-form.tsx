@@ -54,7 +54,7 @@ export function MemoForm({ memo, onSubmit, onCancel, isLoading }: MemoFormProps)
           <h2 className="text-2xl font-serif font-semibold text-heading">
             {memo ? "Memo bewerken" : "Nieuwe memo"}
           </h2>
-          <Button variant="ghost" size="sm" onClick={onCancel} className="h-8 w-8 p-0">
+          <Button variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
             <X className="h-5 w-5" />
           </Button>
         </div>

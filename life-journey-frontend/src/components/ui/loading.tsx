@@ -43,7 +43,7 @@ export function LoadingOverlay({ message = "Laden...", className }: LoadingOverl
     >
       <div className="rounded-lg bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center gap-4">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner />
           <p className="text-sm font-medium text-gray-700">{message}</p>
         </div>
       </div>
@@ -59,7 +59,7 @@ interface LoadingStateProps {
 export function LoadingState({ message = "Laden...", className }: LoadingStateProps) {
   return (
     <div className={cn("flex flex-col items-center justify-center gap-4 py-12", className)}>
-      <LoadingSpinner size="lg" />
+      <LoadingSpinner />
       <p className="text-sm text-gray-600">{message}</p>
     </div>
   );

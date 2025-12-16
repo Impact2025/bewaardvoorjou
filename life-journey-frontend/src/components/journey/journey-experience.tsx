@@ -150,7 +150,7 @@ export function JourneyExperience() {
             </div>
             <Button
               variant="ghost"
-              size="sm"
+
               onClick={() => setShowIntro(true)}
               className="text-orange hover:text-orange/90"
             >
@@ -218,7 +218,7 @@ function HighlightsPanel({ highlights }: HighlightsPanelProps) {
                 {Math.round((highlight.endMs - highlight.startMs) / 1000)} seconden
               </p>
             </div>
-            <Button variant="ghost" size="sm" className="text-orange hover:text-orange/90">
+            <Button variant="ghost" className="text-orange hover:text-orange/90">
               <ArrowUpRight className="h-4 w-4" />
             </Button>
           </div>

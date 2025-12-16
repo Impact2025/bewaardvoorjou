@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              size="icon"
+
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="hidden lg:flex"
             >
@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+
               onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
               className="lg:hidden"
             >
@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </p>
               <p className="text-xs text-slate-600">Administrator</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="ghost" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
@@ -153,7 +153,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <h2 className="font-bold text-slate-900">Admin Menu</h2>
                 <Button
                   variant="ghost"
-                  size="icon"
+
                   onClick={() => setIsMobileSidebarOpen(false)}
                 >
                   <X className="h-5 w-5" />

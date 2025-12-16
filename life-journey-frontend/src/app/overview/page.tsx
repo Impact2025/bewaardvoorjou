@@ -158,7 +158,7 @@ function OverviewContent() {
                           </div>
 
                           {chapter.isUnlocked && (
-                            <Button variant="ghost" size="sm" asChild>
+                            <Button variant="ghost" asChild>
                               <Link href={`/chapter/${chapter.id}`}>
                                 {chapter.mediaCount > 0 ? "Meer toevoegen" : "Start"}
                               </Link>
