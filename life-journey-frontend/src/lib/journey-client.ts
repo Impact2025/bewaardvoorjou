@@ -115,13 +115,24 @@ interface JourneyDetailDto {
 }
 
 const defaultChapterOrder: ChapterId[] = [
-  "roots",
-  "music",
-  "milestones",
-  "humor",
-  "lessons",
-  "people",
-  "message",
+  "intro-reflection",
+  "intro-intention",
+  "intro-uniqueness",
+  "youth-favorite-place",
+  "youth-sounds",
+  "youth-hero",
+  "love-connection",
+  "love-lessons",
+  "love-symbol",
+  "work-dream-job",
+  "work-passion",
+  "work-challenge",
+  "future-message",
+  "future-dream",
+  "future-gratitude",
+  "bonus-funny",
+  "bonus-relive",
+  "bonus-culture",
 ];
 
 function mapMediaAsset(input: JourneyDetailDto["media"][number]): MediaAsset {
