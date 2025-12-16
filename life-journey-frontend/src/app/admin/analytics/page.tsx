@@ -123,7 +123,7 @@ export default function AdminAnalyticsPage() {
                         <span className="text-slate-900 font-bold">{data.users}</span>
                         {idx > 0 && (
                           <Badge
-                            variant="ghost"
+                            variant="outline"
                             className={cn(
                               "text-xs",
                               growth > 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""
@@ -168,7 +168,7 @@ export default function AdminAnalyticsPage() {
                         <span className="text-slate-900 font-bold">€{data.amount.toLocaleString()}</span>
                         {idx > 0 && (
                           <Badge
-                            variant="ghost"
+                            variant="outline"
                             className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200"
                           >
                             +{growth.toFixed(1)}%
