@@ -16,16 +16,17 @@ def create_app() -> FastAPI:
   app.state.limiter = limiter
   app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-  # CORS - allow Vercel frontend
+  # CORS - allow Vercel frontend (explicit and permissive for debugging)
   app.add_middleware(
     CORSMiddleware,
     allow_origins=[
       "https://bewaardvoorjou.vercel.app",  # Production
+      "https://www.bewaardvoorjou.vercel.app",  # WWW variant
       "http://localhost:3000",  # Local development
       "http://localhost:3001",
     ],
     allow_credentials=True,  # Allow cookies/auth headers
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # Explicit methods
     allow_headers=["*"],
     expose_headers=["*"],
   )
@@ -35,7 +36,15 @@ def create_app() -> FastAPI:
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "version": "2025-12-16-v3", "cors_fixed": "true"}
+
+  @app.get("/cors-test", tags=["system"], summary="CORS configuration test")
+  async def cors_test() -> dict[str, str]:
+    return {
+      "status": "ok",
+      "message": "CORS is working",
+      "timestamp": "2025-12-16T12:00:00Z"
+    }
 
   app.include_router(api_router, prefix=settings.api_v1_prefix)
 
