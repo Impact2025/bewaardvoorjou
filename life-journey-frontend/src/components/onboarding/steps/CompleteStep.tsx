@@ -65,7 +65,7 @@ export function CompleteStep({
 
       <Button
         onClick={onComplete}
-        size="lg"
+
         disabled={isLoading}
         className="bg-orange hover:bg-orange/90 text-lg px-10"
       >

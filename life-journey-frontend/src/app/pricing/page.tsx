@@ -306,7 +306,7 @@ export default function PricingPage() {
             Start vandaag nog gratis, geen creditcard nodig
           </p>
           <Button
-            size="lg"
+
             className="bg-gradient-to-r from-orange to-gold hover:from-orange-dark hover:to-orange text-white px-8"
             onClick={() => router.push("/register")}
           >

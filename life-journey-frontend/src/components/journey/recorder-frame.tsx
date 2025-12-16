@@ -680,7 +680,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
           <Button
             onClick={() => setIsAssistantChatOpen(true)}
             variant="ghost"
-            size="sm"
+
             className="border-orange/30 bg-gradient-to-br from-orange/10 to-gold/10 text-orange-dark hover:from-orange/20 hover:to-gold/20 flex items-center gap-2"
           >
             <MessageCircle className="h-4 w-4" />
@@ -776,7 +776,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
                         onClick={getAISuggestion}
                         disabled={isGettingAISuggestion}
                         variant="ghost"
-                        size="sm"
+
                         className="text-xs text-orange hover:text-orange-dark"
                       >
                         <Sparkles className="h-3.5 w-3.5 mr-1" />

@@ -305,7 +305,7 @@ export default function AdminUsersPage() {
                           {joinedDate}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </td>

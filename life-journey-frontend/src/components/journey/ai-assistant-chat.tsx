@@ -142,7 +142,7 @@ export function AIAssistantChat({ chapterId, journeyId, isOpen, onClose }: AIAss
           </div>
           <Button
             variant="ghost"
-            size="icon"
+
             onClick={onClose}
             className="hover:bg-orange/10"
           >

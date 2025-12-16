@@ -370,7 +370,7 @@ function RecordingsContent() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-warm-amber hover:text-warm-amber/80"
                               onClick={() => handleViewText(recording)}
                             >
@@ -378,7 +378,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-warm-amber hover:text-warm-amber/80"
                               onClick={() => handleEditText(recording)}
                             >
@@ -386,7 +386,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-slate-600 hover:text-slate-900"
                               onClick={() => handleDownload(recording)}
                             >
@@ -394,7 +394,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
@@ -449,7 +449,7 @@ function RecordingsContent() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-teal hover:text-teal-dark"
                               onClick={() => setPlayingRecording(recording)}
                             >
@@ -457,7 +457,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-slate-600 hover:text-slate-900"
                               onClick={() => handleDownload(recording)}
                             >
@@ -465,7 +465,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
@@ -520,7 +520,7 @@ function RecordingsContent() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-orange hover:text-orange-dark"
                               onClick={() => setPlayingRecording(recording)}
                             >
@@ -528,7 +528,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-slate-600 hover:text-slate-900"
                               onClick={() => handleDownload(recording)}
                             >
@@ -536,7 +536,7 @@ function RecordingsContent() {
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
+
                               className="text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}

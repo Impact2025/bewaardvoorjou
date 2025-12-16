@@ -111,7 +111,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
           <Button
             onClick={() => setAssistantChatOpen(true)}
             variant="ghost"
-            size="sm"
+
             className="border-orange/30 bg-gradient-to-br from-orange/10 to-gold/10 text-orange-dark hover:from-orange/20 hover:to-gold/20 flex items-center gap-2"
             aria-label="Open AI assistent voor hulp"
           >
