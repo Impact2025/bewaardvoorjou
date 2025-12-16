@@ -20,11 +20,9 @@ def create_app() -> FastAPI:
   app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-      "https://bewaardvoorjou.vercel.app",
-      "https://*.vercel.app",  # All Vercel preview deployments
+      "https://bewaardvoorjou.vercel.app",  # Production
       "http://localhost:3000",  # Local development
       "http://localhost:3001",
-      "*"  # Fallback for other origins
     ],
     allow_credentials=True,  # Allow cookies/auth headers
     allow_methods=["*"],
