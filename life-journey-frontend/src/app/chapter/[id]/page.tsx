@@ -14,7 +14,7 @@ function ChapterContent({ params }: { params: Promise<{ id: string }> }) {
     params.then((resolved) => {
       setChapterId(resolved.id);
       // Update the active chapter in the journey store
-      updateJourney({ activeChapterId: resolved.id });
+      updateJourney({ activeChapterId: resolved.id as import("@/lib/types").ChapterId });
     });
   }, [params, updateJourney]);
 
