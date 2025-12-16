@@ -94,7 +94,7 @@ export function FamilyMemberCard({
           {/* Actions menu */}
           <div className="relative">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="h-8 w-8 p-0"
               onClick={() => setShowActions(!showActions)}
@@ -154,7 +154,7 @@ export function FamilyMemberCard({
           </Badge>
 
           <Badge
-            variant="ghost"
+            variant="outline"
             className={cn(statusColors.bg, statusColors.text, "border-0")}
           >
             <StatusIcon className="h-3 w-3 mr-1" />
@@ -162,7 +162,7 @@ export function FamilyMemberCard({
           </Badge>
 
           {member.invite_status === "accepted" && (
-            <Badge variant="ghost" className="border-slate-300">
+            <Badge variant="outline" className="border-slate-300">
               {ACCESS_LABELS[member.access_level]}
             </Badge>
           )}

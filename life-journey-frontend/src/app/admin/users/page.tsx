@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
               <UserPlus className="h-4 w-4 mr-2" />
               Create User
             </Button>
-            <Button variant="ghost">
+            <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
@@ -305,7 +305,7 @@ export default function AdminUsersPage() {
                           {joinedDate}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <Button variant="ghost" size="icon">
+                          <Button variant="outline" size="icon">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </td>

@@ -198,7 +198,7 @@ export default function AdminSubscriptionsPage() {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{percentage.toFixed(1)}% of total</span>
-                      <Badge variant="ghost" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
                         {tier.growth}
                       </Badge>
                     </div>
@@ -233,7 +233,7 @@ export default function AdminSubscriptionsPage() {
                   </div>
                   <div className="text-right">
                     <Badge
-                      variant="ghost"
+                      variant="outline"
                       className={cn(
                         transaction.status === "completed" && "bg-emerald-50 text-emerald-700 border-emerald-200",
                         transaction.status === "pending" && "bg-amber-50 text-amber-700 border-amber-200",

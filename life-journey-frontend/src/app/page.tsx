@@ -309,7 +309,7 @@ export default function Home() {
             </Button>
             <Button
               asChild
-              variant="ghost"
+              variant="outline"
               className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6"
             >
               <Link href="/about">
