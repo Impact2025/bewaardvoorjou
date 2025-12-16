@@ -96,7 +96,7 @@ function FamilyContent() {
                 </div>
               </CardHeader>
               <CardContent>
-                <FamilyTree />
+                <FamilyTree journeyId={journeyId} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -117,7 +117,7 @@ function FamilyContent() {
                 </div>
               </CardHeader>
               <CardContent>
-                <SharedPods />
+                <SharedPods journeyId={journeyId} />
               </CardContent>
             </Card>
           </TabsContent>
