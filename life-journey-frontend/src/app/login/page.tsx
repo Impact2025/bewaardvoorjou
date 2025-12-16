@@ -48,8 +48,8 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
             <Image
-              src="/Logo.png"
-              alt="Life Journey Logo"
+              src="/heart-logo.svg"
+              alt="Bewaard voor jou Logo"
               width={80}
               height={80}
               className="w-20 h-20"
@@ -58,7 +58,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl text-heading font-serif">Welkom terug</CardTitle>
           <CardDescription className="text-medium">
-            Log in met je e-mailadres en wachtwoord om verder te gaan met je Life Journey.
+            Log in met je e-mailadres en wachtwoord om verder te gaan met je verhaal.
           </CardDescription>
         </CardHeader>
         <CardContent>

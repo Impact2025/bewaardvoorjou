@@ -70,15 +70,15 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/Logo.png"
-              alt="Life Journey Logo"
+              src="/heart-logo.svg"
+              alt="Bewaard voor jou Logo"
               width={40}
               height={40}
               className="w-10 h-10"
               priority
             />
             <span className="text-xl font-serif font-semibold text-slate-900">
-              Life Journey
+              Bewaard voor jou
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700">
@@ -133,7 +133,7 @@ export default function Home() {
 
             {/* Description */}
             <p className="text-xl md:text-2xl text-white/90 leading-relaxed mb-10 drop-shadow-lg">
-              Life Journey helpt je om jouw levensverhaal vast te leggen met video, audio of tekst.
+              Bewaard voor jou helpt je om jouw levensverhaal vast te leggen met video, audio of tekst.
               Een AI-interviewer begeleidt je met warme vragen.
               Jouw verhaal, veilig bewaard voor de volgende generatie.
             </p>
@@ -182,7 +182,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-serif font-semibold text-slate-900 mb-4">
-              Waarom Life Journey?
+              Waarom Bewaard voor jou?
             </h2>
             <p className="text-lg text-slate-700 max-w-2xl mx-auto">
               Bewaar je levensverhaal op jouw manier, met de hulp van AI

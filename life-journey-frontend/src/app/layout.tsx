@@ -34,10 +34,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://life-journey.app"),
+  metadataBase: new URL("https://bewaardvoorjou.nl"),
   title: {
-    template: "%s | Life Journey",
-    default: "Life Journey – Bewaar je verhaal",
+    template: "%s | Bewaard voor jou",
+    default: "Bewaard voor jou – Bewaar je verhaal",
   },
   description:
     "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     "legacy",
     "persoonlijke verhalen",
   ],
-  authors: [{ name: "Life Journey" }],
-  creator: "Life Journey",
-  publisher: "Life Journey",
+  authors: [{ name: "Bewaard voor jou" }],
+  creator: "Bewaard voor jou",
+  publisher: "Bewaard voor jou",
   robots: {
     index: true,
     follow: true,
@@ -68,27 +68,27 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "nl_NL",
-    url: "https://life-journey.app",
-    title: "Life Journey – Bewaar je verhaal",
+    url: "https://bewaardvoorjou.nl",
+    title: "Bewaard voor jou – Bewaar je verhaal",
     description:
       "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
-    siteName: "Life Journey",
+    siteName: "Bewaard voor jou",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Life Journey - Bewaar je levensverhaal",
+        alt: "Bewaard voor jou - Bewaar je levensverhaal",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Life Journey – Bewaar je verhaal",
+    title: "Bewaard voor jou – Bewaar je verhaal",
     description:
       "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
     images: ["/og-image.jpg"],
-    creator: "@lifejourney",
+    creator: "@bewaardvoorjou",
   },
   manifest: "/manifest.json",
   icons: {
@@ -102,7 +102,7 @@ export const metadata: Metadata = {
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Life Journey",
+    "apple-mobile-web-app-title": "Bewaard voor jou",
   },
 };
 

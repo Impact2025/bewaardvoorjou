@@ -1,5 +1,5 @@
 /**
- * Structured logging utility for Life Journey
+ * Structured logging utility for Bewaard voor jou
  * Replaces console.log statements with environment-aware logging
  */
 
