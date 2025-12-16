@@ -16,23 +16,18 @@ def create_app() -> FastAPI:
   app.state.limiter = limiter
   app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-  # CORS - allow Vercel frontend (explicit and permissive for debugging)
+  # CORS - Temporarily allow all origins to debug Railway crash
   app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-      "https://bewaardvoorjou.vercel.app",  # Production
-      "https://www.bewaardvoorjou.vercel.app",  # WWW variant
-      "http://localhost:3000",  # Local development
-      "http://localhost:3001",
-    ],
-    allow_credentials=True,  # Allow cookies/auth headers
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # Explicit methods
+    allow_origin_regex=r"https://.*\.vercel\.app",  # All Vercel apps
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
   )
 
-  # Temporarily disabled SecurityHeadersMiddleware to debug CORS
-  # app.add_middleware(SecurityHeadersMiddleware)
+  # Add security headers middleware AFTER CORS
+  app.add_middleware(SecurityHeadersMiddleware)
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
