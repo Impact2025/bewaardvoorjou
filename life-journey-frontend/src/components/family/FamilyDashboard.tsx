@@ -131,7 +131,7 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
             <AlertCircle className="h-5 w-5" />
             <p>{error}</p>
           </div>
-          <Button onClick={fetchData} variant="outline" className="mt-4">
+          <Button onClick={fetchData} variant="ghost" className="mt-4">
             Opnieuw proberen
           </Button>
         </CardContent>
@@ -185,7 +185,7 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
               </code>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={copyInviteUrl}
               className="border-teal-300 text-teal-700 hover:bg-teal-100 flex-shrink-0"

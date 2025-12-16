@@ -117,7 +117,7 @@ export function JourneyExperience() {
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 className="flex-1"
                 onClick={() => window.history.back()}
               >
@@ -178,7 +178,7 @@ export function JourneyExperience() {
                   {journey.media.filter(m => m.chapterId === journey.activeChapterId).length}
                 </span>
               </div>
-              <Button variant="outline" className="w-full" asChild>
+              <Button variant="ghost" className="w-full" asChild>
                 <a href="/recordings">Bekijk al je opnames</a>
               </Button>
             </CardContent>

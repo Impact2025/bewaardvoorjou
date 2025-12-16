@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
               <UserPlus className="h-4 w-4 mr-2" />
               Create User
             </Button>
-            <Button variant="outline">
+            <Button variant="ghost">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
@@ -396,7 +396,7 @@ export default function AdminUsersPage() {
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => setShowCreateModal(false)}
                   disabled={isCreating}
                 >

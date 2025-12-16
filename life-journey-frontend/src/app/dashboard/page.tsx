@@ -163,7 +163,7 @@ function DashboardContent() {
                       Volg je voortgang door alle levensfasen
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild>
                     <Link href="/chapters">
                       <BookOpen className="h-4 w-4 mr-2" />
                       Alle hoofdstukken
@@ -267,7 +267,7 @@ function DashboardContent() {
                       </p>
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => setShowOnboarding(true)}
                         className="border-amber-300 text-amber-700 hover:bg-amber-100"
                       >
