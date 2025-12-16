@@ -94,8 +94,7 @@ export function FamilyMemberCard({
           {/* Actions menu */}
           <div className="relative">
             <Button
-              variant="outline"
-
+              variant="ghost"
               className="h-8 w-8 p-0"
               onClick={() => setShowActions(!showActions)}
             >
