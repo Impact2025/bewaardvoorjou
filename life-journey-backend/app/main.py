@@ -16,13 +16,17 @@ def create_app() -> FastAPI:
   app.state.limiter = limiter
   app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-  # CORS - Temporarily allow all origins to debug Railway crash
+  # CORS - Allow Vercel frontend with explicit origins
   app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.vercel\.app",  # All Vercel apps
+    allow_origins=[
+      "https://bewaardvoorjou.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],
     expose_headers=["*"],
   )
 
