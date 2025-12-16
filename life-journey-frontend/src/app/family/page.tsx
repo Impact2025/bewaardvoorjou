@@ -9,9 +9,11 @@ import { SharedPods } from "@/components/family/SharedPods";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Heart, TreePine, Share2, Sparkles } from "lucide-react";
+import { useJourneyStore } from "@/store/journey-store";
 
 function FamilyContent() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const journeyId = useJourneyStore((state) => state.journey?.id || "default");
 
   return (
     <AppShell
@@ -75,7 +77,7 @@ function FamilyContent() {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
-            <FamilyDashboard />
+            <FamilyDashboard journeyId={journeyId} />
           </TabsContent>
 
           <TabsContent value="tree" className="space-y-6">
