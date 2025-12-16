@@ -30,8 +30,8 @@ def create_app() -> FastAPI:
     expose_headers=["*"],
   )
 
-  # Add security headers middleware AFTER CORS
-  app.add_middleware(SecurityHeadersMiddleware)
+  # Temporarily disabled SecurityHeadersMiddleware to debug CORS
+  # app.add_middleware(SecurityHeadersMiddleware)
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
