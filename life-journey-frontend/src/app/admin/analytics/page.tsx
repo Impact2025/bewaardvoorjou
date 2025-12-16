@@ -62,7 +62,7 @@ export default function AdminAnalyticsPage() {
             In-depth insights and metrics about your platform
           </p>
         </div>
-        <Button variant="outline">
+        <Button variant="ghost">
           <Download className="h-4 w-4 mr-2" />
           Export Report
         </Button>
@@ -123,7 +123,7 @@ export default function AdminAnalyticsPage() {
                         <span className="text-slate-900 font-bold">{data.users}</span>
                         {idx > 0 && (
                           <Badge
-                            variant="outline"
+                            variant="ghost"
                             className={cn(
                               "text-xs",
                               growth > 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""
@@ -168,7 +168,7 @@ export default function AdminAnalyticsPage() {
                         <span className="text-slate-900 font-bold">€{data.amount.toLocaleString()}</span>
                         {idx > 0 && (
                           <Badge
-                            variant="outline"
+                            variant="ghost"
                             className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200"
                           >
                             +{growth.toFixed(1)}%

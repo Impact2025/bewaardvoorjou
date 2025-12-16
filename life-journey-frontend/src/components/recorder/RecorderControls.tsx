@@ -58,7 +58,7 @@ export function RecorderControls({
               hideNextChapter();
               setTextContent("");
             }}
-            variant="outline"
+            variant="ghost"
             className="border-neutral-sand text-slate-700 hover:bg-neutral-sand"
           >
             Blijf hier
@@ -130,7 +130,7 @@ export function RecorderControls({
               hideNextChapter();
               reset();
             }}
-            variant="outline"
+            variant="ghost"
             className="border-neutral-sand text-slate-700 hover:bg-neutral-sand"
           >
             Blijf hier

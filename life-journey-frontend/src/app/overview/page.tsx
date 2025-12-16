@@ -113,7 +113,7 @@ function OverviewContent() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-slate-900">Jouw Hoofdstukken</h2>
-            <Button variant="outline" asChild>
+            <Button variant="ghost" asChild>
               <Link href="/chapters">Alle hoofdstukken</Link>
             </Button>
           </div>
@@ -158,7 +158,7 @@ function OverviewContent() {
                           </div>
 
                           {chapter.isUnlocked && (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="ghost" size="sm" asChild>
                               <Link href={`/chapter/${chapter.id}`}>
                                 {chapter.mediaCount > 0 ? "Meer toevoegen" : "Start"}
                               </Link>
@@ -214,13 +214,13 @@ function OverviewContent() {
                 Nieuwe opname
               </Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="ghost">
               <Link href="/memos">
                 <FileText className="h-4 w-4 mr-2" />
                 Memo toevoegen
               </Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="ghost">
               <Link href="/recordings">
                 Alle opnames bekijken
               </Link>

@@ -679,7 +679,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
           {/* AI Assistant Help Button */}
           <Button
             onClick={() => setIsAssistantChatOpen(true)}
-            variant="outline"
+            variant="ghost"
             size="sm"
             className="border-orange/30 bg-gradient-to-br from-orange/10 to-gold/10 text-orange-dark hover:from-orange/20 hover:to-gold/20 flex items-center gap-2"
           >
@@ -952,7 +952,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
                         setTextContent("");
                         setWordCount(0);
                       }}
-                      variant="outline"
+                      variant="ghost"
                       className="border-neutral-sand text-slate-700 hover:bg-neutral-sand"
                     >
                       Blijf hier
@@ -1016,7 +1016,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
                         setShowNextChapterPrompt(false);
                         resetRecording();
                       }}
-                      variant="outline"
+                      variant="ghost"
                       className="border-neutral-sand text-slate-700 hover:bg-neutral-sand"
                     >
                       Blijf hier

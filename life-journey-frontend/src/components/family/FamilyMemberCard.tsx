@@ -154,7 +154,7 @@ export function FamilyMemberCard({
           </Badge>
 
           <Badge
-            variant="outline"
+            variant="ghost"
             className={cn(statusColors.bg, statusColors.text, "border-0")}
           >
             <StatusIcon className="h-3 w-3 mr-1" />
@@ -162,7 +162,7 @@ export function FamilyMemberCard({
           </Badge>
 
           {member.invite_status === "accepted" && (
-            <Badge variant="outline" className="border-slate-300">
+            <Badge variant="ghost" className="border-slate-300">
               {ACCESS_LABELS[member.access_level]}
             </Badge>
           )}
