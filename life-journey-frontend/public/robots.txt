@@ -1,5 +1,5 @@
-# robots.txt for Life Journey
-# https://life-journey.app
+# robots.txt for Bewaard voor jou
+# https://bewaardvoorjou.nl
 
 User-agent: *
 Allow: /
@@ -15,7 +15,7 @@ Allow: /login
 Allow: /register
 
 # Sitemap
-Sitemap: https://life-journey.app/sitemap.xml
+Sitemap: https://bewaardvoorjou.nl/sitemap.xml
 
 # Crawl-delay for all bots
 Crawl-delay: 10

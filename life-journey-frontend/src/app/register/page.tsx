@@ -61,15 +61,15 @@ export default function RegisterPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
             <Image
-              src="/Logo.png"
-              alt="Life Journey Logo"
+              src="/heart-logo.svg"
+              alt="Bewaard voor jou Logo"
               width={80}
               height={80}
               className="w-20 h-20"
               priority
             />
           </div>
-          <CardTitle className="text-2xl text-heading font-serif">Maak een Life Journey-account</CardTitle>
+          <CardTitle className="text-2xl text-heading font-serif">Maak een Bewaard voor jou-account</CardTitle>
           <CardDescription className="text-medium">
             Start met opnemen en deel je verhaal wanneer jij dat wil. Je kunt je voorkeuren later altijd aanpassen.
           </CardDescription>

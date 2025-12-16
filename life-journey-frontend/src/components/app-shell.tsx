@@ -64,8 +64,8 @@ export function AppShell({
             <div className="flex items-center space-x-4">
               <Link href="/dashboard" className="flex-shrink-0">
                 <Image
-                  src="/Logo.png"
-                  alt="Life Journey Logo"
+                  src="/heart-logo.svg"
+                  alt="Bewaard voor jou Logo"
                   width={48}
                   height={48}
                   className="w-12 h-12"
