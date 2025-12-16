@@ -280,13 +280,18 @@ export async function fetchJourneyDetail(journeyId: string, token: string): Prom
     shareGrants: response.share_grants.map(mapShareGrant),
     legacyPolicy,
     consentLog: response.consent_log.map(mapConsentLog),
-    chapterStatuses: response.chapter_statuses,
-    journeyProgress: {
+    chapterStatuses: response.chapter_statuses || {},
+    journeyProgress: response.journey_progress ? {
       totalChapters: response.journey_progress.totalChapters,
       completedChapters: response.journey_progress.completedChapters,
       availableChapters: response.journey_progress.availableChapters,
       percentComplete: response.journey_progress.percentComplete,
       nextAvailableChapter: response.journey_progress.nextAvailableChapter,
+    } : {
+      totalChapters: 30,
+      completedChapters: 0,
+      availableChapters: 18,
+      percentComplete: 0,
     },
   };
 
