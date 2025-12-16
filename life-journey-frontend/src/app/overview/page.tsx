@@ -92,8 +92,8 @@ function OverviewContent() {
                 <div className="text-sm text-slate-600">Totaal opnames</div>
               </div>
               <div className="bg-white rounded-lg p-4 text-center">
-                <div className="text-2xl font-semibold text-slate-900">{journey.media.filter(m => m.type === "text").length}</div>
-                <div className="text-sm text-slate-600">Geschreven verhalen</div>
+                <div className="text-2xl font-semibold text-slate-900">{journey.media.filter(m => m.type === "audio").length}</div>
+                <div className="text-sm text-slate-600">Audio opnames</div>
               </div>
             </div>
 
@@ -170,11 +170,7 @@ function OverviewContent() {
                         {chapter.media.length > 0 && (
                           <div className="mt-3 space-y-2">
                             {chapter.media.map((media) => {
-                              const MediaIcon = media.type === "text"
-                                ? FileText
-                                : media.type === "video"
-                                  ? Video
-                                  : Mic;
+                              const MediaIcon = media.type === "video" ? Video : Mic;
 
                               return (
                                 <div
@@ -183,7 +179,7 @@ function OverviewContent() {
                                 >
                                   <MediaIcon className="h-4 w-4 text-slate-600" />
                                   <span className="flex-1 text-slate-700">
-                                    {media.type === "text" ? "Geschreven verhaal" : "Opname"}
+                                    {media.type === "video" ? "Video opname" : "Audio opname"}
                                   </span>
                                   <span className="text-xs text-slate-500">
                                     {formatDate(media.recordedAt)}
