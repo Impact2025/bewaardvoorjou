@@ -323,7 +323,7 @@ function QuickActionButton({ href, icon, label, primary }: QuickActionButtonProp
   return (
     <Button
       asChild
-      variant={primary ? "default" : "ghost"}
+      variant={primary ? "primary" : "ghost"}
       className={cn(
         "w-full justify-start",
         primary
