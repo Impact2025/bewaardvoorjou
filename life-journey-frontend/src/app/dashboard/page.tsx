@@ -75,10 +75,10 @@ function DashboardContent() {
     );
   }
 
-  const progressPercent = journey?.journeyProgress?.percentComplete || 0;
-  const completedChapters = journey?.journeyProgress?.completedChapters || 0;
-  const totalChapters = journey?.journeyProgress?.totalChapters || 18;
-  const nextChapter = journey?.journeyProgress?.nextAvailableChapter;
+  const progressPercent = journey?.journeyProgress?.percentComplete ?? 0;
+  const completedChapters = journey?.journeyProgress?.completedChapters ?? 0;
+  const totalChapters = journey?.journeyProgress?.totalChapters ?? 30;
+  const nextChapter = journey?.journeyProgress?.nextAvailableChapter ?? journey?.activeChapterId;
   const nextChapterTitle = nextChapter
     ? CHAPTERS.find((ch) => ch.id === nextChapter)?.title
     : null;
