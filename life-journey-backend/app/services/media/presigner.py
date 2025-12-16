@@ -48,8 +48,8 @@ def build_presigned_upload(payload: MediaPresignRequest) -> MediaPresignResponse
   # Fallback to local storage for development
   logger.info(f"Using local storage for asset {asset_id}")
 
-  # Generate upload URL with the asset_id included in the path
-  upload_url = f"http://localhost:8000/api/v1/media/local-upload/{object_key}"
+  # Generate upload URL using configured base URL (supports both dev and production)
+  upload_url = f"{settings.api_base_url}/api/v1/media/local-upload/{object_key}"
 
   return MediaPresignResponse(
     upload_url=upload_url,
