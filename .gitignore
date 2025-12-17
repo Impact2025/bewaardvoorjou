@@ -27,3 +27,8 @@ npm-debug.log*
 # Dependencies
 node_modules/
 package-lock.json
+
+# Accidentally downloaded files
+BOX/
+*_files/
+*.download

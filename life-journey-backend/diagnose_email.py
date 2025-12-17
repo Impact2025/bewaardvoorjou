@@ -25,7 +25,7 @@ print()
 # 1. Check environment variables
 print("1. ENVIRONMENT VARIABLES:")
 print("-" * 80)
-print(f"RESEND_API_KEY: {'✓ Set' if settings.resend_api_key else '✗ NOT SET'}")
+print(f"RESEND_API_KEY: {'[OK] Set' if settings.resend_api_key else '[X] NOT SET'}")
 if settings.resend_api_key:
     print(f"   Value: {settings.resend_api_key[:8]}...{settings.resend_api_key[-4:]}")
 print(f"RESEND_FROM_EMAIL: {settings.resend_from_email}")
@@ -40,10 +40,10 @@ print("-" * 80)
 try:
     db = SessionLocal()
     user_count = db.query(UserModel).count()
-    print(f"✓ Database connected")
+    print(f"[OK] Database connected")
     print(f"  Total users: {user_count}")
 except Exception as e:
-    print(f"✗ Database connection failed: {e}")
+    print(f"[X] Database connection failed: {e}")
     sys.exit(1)
 
 print()
@@ -76,7 +76,7 @@ try:
         print("No email events found in database")
 
 except Exception as e:
-    print(f"✗ Failed to query EmailEvents: {e}")
+    print(f"[X] Failed to query EmailEvents: {e}")
 
 print()
 
@@ -103,13 +103,13 @@ try:
                 if welcome_email.error_message:
                     print(f"    Error: {welcome_email.error_message}")
             else:
-                print(f"    Welcome email: NOT SENT ❌")
+                print(f"    Welcome email: NOT SENT [X]")
             print()
     else:
         print("No users found")
 
 except Exception as e:
-    print(f"✗ Failed to query users: {e}")
+    print(f"[X] Failed to query users: {e}")
 
 print()
 
@@ -118,9 +118,9 @@ print("5. RESEND API TEST:")
 print("-" * 80)
 
 if not settings.resend_api_key:
-    print("✗ Cannot test Resend - API key not set")
+    print("[X] Cannot test Resend - API key not set")
 elif not settings.resend_enabled:
-    print("✗ Email sending is disabled (RESEND_ENABLED=false)")
+    print("[X] Email sending is disabled (RESEND_ENABLED=false)")
 else:
     print("Testing Resend API connection...")
     try:
@@ -135,13 +135,13 @@ else:
         )
 
         if response.status_code == 200:
-            print("✓ Resend API connection successful")
+            print("[OK] Resend API connection successful")
         else:
-            print(f"✗ Resend API returned status {response.status_code}")
+            print(f"[X] Resend API returned status {response.status_code}")
             print(f"  Response: {response.text[:200]}")
 
     except Exception as e:
-        print(f"✗ Resend API test failed: {e}")
+        print(f"[X] Resend API test failed: {e}")
 
 print()
 
@@ -179,7 +179,7 @@ if recent_user and settings.resend_api_key and settings.resend_enabled:
                 text=text
             )
 
-            print(f"✓ Test email sent successfully!")
+            print(f"[OK] Test email sent successfully!")
             print(f"  Resend Message ID: {message_id}")
             print(f"  Sent to: {recent_user.email}")
             print()
@@ -187,7 +187,7 @@ if recent_user and settings.resend_api_key and settings.resend_enabled:
             print("registration trigger logic. If not, check Resend dashboard for errors.")
 
         except Exception as e:
-            print(f"✗ Test email failed: {e}")
+            print(f"[X] Test email failed: {e}")
     else:
         print("Test email skipped")
 else:
