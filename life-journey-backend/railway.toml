@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 buildCommand = "pip install --break-system-packages -r requirements.txt"
 
 [deploy]
-startCommand = "alembic upgrade head && gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --keep-alive 5 --workers 2"
+startCommand = "gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --keep-alive 5 --workers 2"
 healthcheckPath = "/healthz"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
