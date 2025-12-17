@@ -93,12 +93,18 @@ def trigger_chapter_complete_email(
         return None
 
     # Check if already sent for this chapter
-    existing = db.query(EmailEventModel).filter(
+    # Simple check: get all chapter_complete emails for this user and check in Python
+    existing_events = db.query(EmailEventModel).filter(
         EmailEventModel.user_id == user_id,
         EmailEventModel.journey_id == journey_id,
         EmailEventModel.email_type == "chapter_complete",
-        EmailEventModel.context_data["chapter_id"].astext == chapter_id,
-    ).first()
+    ).all()
+
+    existing = None
+    for event in existing_events:
+        if event.context_data and event.context_data.get("chapter_id") == chapter_id:
+            existing = event
+            break
 
     if existing:
         logger.info(f"Chapter complete email already sent for {chapter_id} to user {user_id}")
@@ -175,12 +181,18 @@ def trigger_milestone_email(
         return None
 
     # Check if already sent for this milestone
-    existing = db.query(EmailEventModel).filter(
+    # Simple check: get all milestone emails for this user and check in Python
+    existing_events = db.query(EmailEventModel).filter(
         EmailEventModel.user_id == user_id,
         EmailEventModel.journey_id == journey_id,
         EmailEventModel.email_type == "milestone_unlock",
-        EmailEventModel.context_data["milestone_type"].astext == milestone_type,
-    ).first()
+    ).all()
+
+    existing = None
+    for event in existing_events:
+        if event.context_data and event.context_data.get("milestone_type") == milestone_type:
+            existing = event
+            break
 
     if existing:
         logger.info(f"Milestone email already sent for {milestone_type} to user {user_id}")
