@@ -70,7 +70,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/heart-logo.svg"
+              src="/Logo_Bewaardvoorjou.png"
               alt="Bewaard voor jou Logo"
               width={40}
               height={40}

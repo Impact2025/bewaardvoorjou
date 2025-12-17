@@ -61,7 +61,7 @@ export default function RegisterPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
             <Image
-              src="/heart-logo.svg"
+              src="/Logo_Bewaardvoorjou.png"
               alt="Bewaard voor jou Logo"
               width={80}
               height={80}
