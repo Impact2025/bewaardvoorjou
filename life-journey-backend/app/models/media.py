@@ -4,6 +4,7 @@ def utc_now():
     """Returns current UTC time as timezone-aware datetime."""
     return datetime.now(timezone.utc)
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String
+from sqlalchemy.orm import relationship
 
 from app.models.base import Base
 
@@ -19,6 +20,9 @@ class MediaAsset(Base):
   size_bytes = Column(Integer, nullable=False, default=0)
   storage_state = Column(String(32), nullable=False, default="pending")
   recorded_at = Column(DateTime, default=utc_now, nullable=False)
+
+  # Relationships for eager loading
+  transcripts = relationship("TranscriptSegment", backref="media_asset", lazy="select", cascade="all, delete-orphan")
 
 
 class TranscriptSegment(Base):
