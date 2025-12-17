@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Mijlpaal bereikt: {{ milestone_name }}{% endblock %}
+
+{% block content %}
+<h2>🎉 Mijlpaal bereikt, {{ display_name }}!</h2>
+
+<p style="font-size: 18px; color: #2C2416; font-weight: 600;">
+    Je hebt {{ milestone_name }} ontgrendeld!
+</p>
+
+<p>
+    Wat een prestatie! Je toewijding aan het vastleggen van je levensverhaal
+    heeft een nieuwe dimensie geopend.
+</p>
+
+<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center;">
+    <p style="font-size: 20px; font-weight: 600; color: #EA580C; margin: 0 0 12px 0;">
+        {{ milestone_name }}
+    </p>
+    <p style="color: #4A4239; margin: 0; font-size: 15px;">
+        {{ milestone_description }}
+    </p>
+</div>
+
+{% if milestone_type == "bonus" %}
+<p>
+    Deze bonusvragen geven je de kans om je verhaal te verrijken met
+    grappige, onverwachte en culturele herinneringen. Kies de hoofdstukken
+    die je aanspreek en deel wat je hart je ingeeft.
+</p>
+{% else %}
+<p>
+    De Verborgen Dimensies bevatten diepgaande vragen over je dagelijkse
+    rituelen, bizarre toevalligheden, innerlijke wijsheid en onbekende facetten
+    van je persoonlijkheid. Deze vragen helpen een compleet portret te schetsen.
+</p>
+{% endif %}
+
+<div class="divider"></div>
+
+<p style="font-weight: 600; color: #2C2416;">
+    Klaar om verder te gaan?
+</p>
+
+<a href="{{ app_base_url }}/dashboard" class="cta-button">
+    Ontdek je nieuwe hoofdstukken →
+</a>
+
+<div class="divider"></div>
+
+<p style="background-color: #FFF7ED; padding: 16px; border-radius: 8px; border-left: 4px solid #F97316; margin: 24px 0;">
+    <strong style="color: #2C2416;">💡 Tip:</strong><br>
+    Deze hoofdstukken zijn optioneel maar kunnen je verhaal extra diepgang
+    geven. Neem de tijd en geniet van het proces.
+</p>
+{% endblock %}

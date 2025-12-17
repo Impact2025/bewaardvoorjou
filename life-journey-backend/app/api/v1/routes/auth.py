@@ -8,6 +8,8 @@ from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, UserPublic
 from app.services.auth import authenticate_user, create_access_token, register_user
+from app.services.email.events import trigger_welcome_email
+from loguru import logger
 
 
 router = APIRouter()
@@ -26,6 +28,13 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
     birth_year=payload.birth_year,
     privacy_level=payload.privacy_level,
   )
+
+  # Trigger welcome email
+  try:
+    trigger_welcome_email(db, user.id)
+  except Exception as e:
+    logger.warning(f"Failed to trigger welcome email for user {user.id}: {e}")
+    # Don't fail registration if email fails
 
   token = create_access_token(subject=user.id)
   primary_journey = next(iter(user.journeys), None)

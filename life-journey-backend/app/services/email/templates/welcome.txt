@@ -1,0 +1,32 @@
+Welkom bij je levensverhaal, {{ display_name }}!
+
+Wat bijzonder dat je begint aan deze reis. Jouw verhaal verdient het
+om bewaard te worden, en we zijn er om je daarbij te helpen.
+
+Je staat op het punt om iets waardevols te creëren — niet alleen voor
+jezelf, maar voor de mensen die je lief hebt. Elke herinnering die je
+deelt, elk verhaal dat je vertelt, wordt een erfstuk voor toekomstige
+generaties.
+
+---
+
+Je eerste stap: Begin met het hoofdstuk "Kernwoorden van je leven".
+
+Dit helpt je om rustig binnen te komen en na te denken over wat je
+wilt delen.
+
+Start je verhaal: {{ app_base_url }}/dashboard
+
+---
+
+💡 Tip: Je hoeft niet alles in één keer te doen. Neem de tijd, ga op
+je gemak. Elke stap die je zet, brengt je dichter bij een compleet
+verhaal.
+
+---
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+Deze email ontvang je omdat je een account hebt aangemaakt bij Bewaardvoorjou.
+{% if unsubscribe_token %}Emails niet meer ontvangen? {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}{% endif %}
