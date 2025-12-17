@@ -17,4 +17,12 @@ class Journey(Base):
   created_at = Column(DateTime, default=utc_now, nullable=False)
   updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
+  # Relationships for eager loading (performance optimization)
   user = relationship("User", backref="journeys")
+  media_assets = relationship("MediaAsset", backref="journey", lazy="select", cascade="all, delete-orphan")
+  prompt_runs = relationship("PromptRun", backref="journey", lazy="select", cascade="all, delete-orphan")
+  highlights = relationship("Highlight", backref="journey", lazy="select", cascade="all, delete-orphan")
+  share_grants = relationship("ShareGrant", backref="journey", lazy="select", cascade="all, delete-orphan")
+  chapter_preferences = relationship("ChapterPreference", backref="journey", lazy="select", cascade="all, delete-orphan")
+  consent_logs = relationship("ConsentLog", backref="journey", lazy="select", cascade="all, delete-orphan")
+  legacy_policy = relationship("LegacyPolicy", backref="journey", uselist=False, lazy="select", cascade="all, delete-orphan")

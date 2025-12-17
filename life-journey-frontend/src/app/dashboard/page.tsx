@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Timeline } from "@/components/timeline";
 import { CHAPTERS } from "@/lib/chapters";
 import { cn, formatDate } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -29,6 +29,14 @@ import {
   TrendingUp,
   Sparkles,
 } from "lucide-react";
+
+// Lazy load heavy Timeline component (reduces initial bundle)
+const Timeline = dynamic(() => import("@/components/timeline").then(mod => ({ default: mod.Timeline })), {
+  loading: () => (
+    <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
+  ),
+  ssr: false,
+});
 
 function DashboardContent() {
   const router = useRouter();
