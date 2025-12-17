@@ -16,33 +16,39 @@ def create_app() -> FastAPI:
   app.state.limiter = limiter
   app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-  # CORS - Allow Vercel frontend with explicit origins
+  # IMPORTANT: Middleware order matters! Last added = first executed for requests
+  # We want CORS to handle preflight OPTIONS first, so add it LAST
+
+  # Add security headers middleware FIRST (executes after CORS)
+  app.add_middleware(SecurityHeadersMiddleware)
+
+  # CORS - Add LAST so it executes FIRST (handles preflight OPTIONS)
   app.add_middleware(
     CORSMiddleware,
     allow_origins=[
       "https://bewaardvoorjou.vercel.app",
+      "https://bewaardvoorjou.nl",
+      "https://www.bewaardvoorjou.nl",
       "http://localhost:3000",
       "http://localhost:3001",
+      "http://localhost:4005",
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["*"],
   )
 
-  # Add security headers middleware AFTER CORS
-  app.add_middleware(SecurityHeadersMiddleware)
-
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
-    return {"status": "ok", "version": "2025-12-16-v3", "cors_fixed": "true"}
+    return {"status": "ok", "version": "2025-12-17-v1", "cors_fixed": "middleware_order"}
 
   @app.get("/cors-test", tags=["system"], summary="CORS configuration test")
   async def cors_test() -> dict[str, str]:
     return {
       "status": "ok",
       "message": "CORS is working",
-      "timestamp": "2025-12-16T12:00:00Z"
+      "timestamp": "2025-12-17T00:00:00Z"
     }
 
   app.include_router(api_router, prefix=settings.api_v1_prefix)
