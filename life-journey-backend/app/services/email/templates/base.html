@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bewaardvoorjou{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #FAF8F3;
+            color: #2C2416;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #FFFFFF;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #2C2416;
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .content p {
+            margin: 16px 0;
+            color: #4A4239;
+            font-size: 16px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #F97316;
+            color: #FFFFFF !important;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .cta-button:hover {
+            background-color: #EA580C;
+        }
+        .footer {
+            background-color: #FAF8F3;
+            padding: 30px;
+            text-align: center;
+            color: #6B6456;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #F97316;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .divider {
+            height: 1px;
+            background-color: #E9E4DB;
+            margin: 24px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #E9E4DB;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F97316 0%, #EA580C 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bewaardvoorjou</h1>
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer">
+            <p style="margin: 8px 0;">
+                Met warme groet,<br>
+                Het Bewaardvoorjou team
+            </p>
+            <div class="divider"></div>
+            <p style="margin: 8px 0; font-size: 12px;">
+                Deze email ontvang je omdat je een account hebt aangemaakt bij Bewaardvoorjou.<br>
+                {% if unsubscribe_token %}
+                Emails niet meer ontvangen? <a href="{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}">Voorkeuren wijzigen</a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

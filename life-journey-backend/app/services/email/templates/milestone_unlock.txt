@@ -1,0 +1,40 @@
+🎉 Mijlpaal bereikt, {{ display_name }}!
+
+Je hebt {{ milestone_name }} ontgrendeld!
+
+Wat een prestatie! Je toewijding aan het vastleggen van je levensverhaal
+heeft een nieuwe dimensie geopend.
+
+---
+
+{{ milestone_name }}
+{{ milestone_description }}
+
+---
+
+{% if milestone_type == "bonus" %}
+Deze bonusvragen geven je de kans om je verhaal te verrijken met
+grappige, onverwachte en culturele herinneringen. Kies de hoofdstukken
+die je aanspreken en deel wat je hart je ingeeft.
+{% else %}
+De Verborgen Dimensies bevatten diepgaande vragen over je dagelijkse
+rituelen, bizarre toevalligheden, innerlijke wijsheid en onbekende facetten
+van je persoonlijkheid. Deze vragen helpen een compleet portret te schetsen.
+{% endif %}
+
+Klaar om verder te gaan?
+
+Ontdek je nieuwe hoofdstukken: {{ app_base_url }}/dashboard
+
+---
+
+💡 Tip: Deze hoofdstukken zijn optioneel maar kunnen je verhaal extra diepgang
+geven. Neem de tijd en geniet van het proces.
+
+---
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+Deze email ontvang je omdat je een account hebt aangemaakt bij Bewaardvoorjou.
+{% if unsubscribe_token %}Emails niet meer ontvangen? {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}{% endif %}

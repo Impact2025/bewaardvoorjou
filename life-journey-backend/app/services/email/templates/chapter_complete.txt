@@ -1,0 +1,35 @@
+Gefeliciteerd, {{ display_name }}!
+
+Je hebt zojuist het hoofdstuk "{{ chapter_name }}" voltooid.
+Wat een mooie stap!
+
+Elke herinnering die je vastlegt, is een cadeau voor de toekomst.
+Je bent bezig iets waardevols te creëren.
+
+---
+
+Je voortgang: {{ completed_count }} van {{ total_count }} hoofdstukken ({{ progress_percentage }}%)
+
+{% if next_chapter_name %}
+Wat nu?
+
+Je volgende hoofdstuk is "{{ next_chapter_name }}".
+Klaar voor de volgende stap in je verhaal?
+
+Ga verder: {{ app_base_url }}/dashboard
+{% else %}
+🎉 Geweldig!
+
+Je hebt alle hoofdstukken voltooid! Je levensverhaal is compleet.
+Neem de tijd om terug te kijken op alles wat je hebt gedeeld.
+
+Bekijk je tijdlijn: {{ app_base_url }}/timeline
+{% endif %}
+
+---
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+Deze email ontvang je omdat je een account hebt aangemaakt bij Bewaardvoorjou.
+{% if unsubscribe_token %}Emails niet meer ontvangen? {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}{% endif %}

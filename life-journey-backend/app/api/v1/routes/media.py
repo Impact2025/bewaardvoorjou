@@ -14,8 +14,10 @@ from app.services.media.presigner import build_presigned_upload
 from app.services.media.processor import enqueue_transcode_job, enqueue_transcript_job
 from app.services.media.local_storage import local_storage
 from app.services.media.validators import validate_upload_file, validate_object_key
+from app.services.email.events import trigger_chapter_complete_email, trigger_milestone_email
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
+from loguru import logger
 
 
 router = APIRouter()
@@ -146,6 +148,23 @@ def finalize_upload(
 
   enqueue_transcode_job(asset_id)
   enqueue_transcript_job(asset_id)
+
+  # Trigger email notifications
+  try:
+    # Chapter completion email
+    trigger_chapter_complete_email(db, current_user.id, journey.id, asset.chapter_id)
+
+    # Milestone unlock emails
+    if asset.chapter_id == "future-gratitude":
+      # Last chapter of fase 5 → unlocks bonus chapters
+      trigger_milestone_email(db, current_user.id, journey.id, "bonus")
+    elif asset.chapter_id == "bonus-culture":
+      # Last bonus chapter → unlocks deep chapters
+      trigger_milestone_email(db, current_user.id, journey.id, "deep")
+  except Exception as e:
+    logger.warning(f"Failed to trigger email for asset {asset_id}: {e}")
+    # Don't fail the upload if email fails
+
   return {"status": "queued"}
 
 

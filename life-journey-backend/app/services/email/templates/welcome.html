@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Welkom bij je levensverhaal{% endblock %}
+
+{% block content %}
+<h2>Welkom bij je levensverhaal, {{ display_name }}!</h2>
+
+<p>
+    Wat bijzonder dat je begint aan deze reis. Jouw verhaal verdient het
+    om bewaard te worden, en we zijn er om je daarbij te helpen.
+</p>
+
+<p>
+    Je staat op het punt om iets waardevols te creëren — niet alleen voor
+    jezelf, maar voor de mensen die je lief hebt. Elke herinnering die je
+    deelt, elk verhaal dat je vertelt, wordt een erfstuk voor toekomstige
+    generaties.
+</p>
+
+<div class="divider"></div>
+
+<p style="font-weight: 600; color: #2C2416;">
+    Je eerste stap: Begin met het hoofdstuk "Kernwoorden van je leven".
+</p>
+
+<p>
+    Dit helpt je om rustig binnen te komen en na te denken over wat je
+    wilt delen.
+</p>
+
+<a href="{{ app_base_url }}/dashboard" class="cta-button">
+    Start je verhaal →
+</a>
+
+<div class="divider"></div>
+
+<p style="background-color: #FFF7ED; padding: 16px; border-radius: 8px; border-left: 4px solid #F97316; margin: 24px 0;">
+    <strong style="color: #2C2416;">💡 Tip:</strong><br>
+    Je hoeft niet alles in één keer te doen. Neem de tijd, ga op
+    je gemak. Elke stap die je zet, brengt je dichter bij een compleet
+    verhaal.
+</p>
+{% endblock %}

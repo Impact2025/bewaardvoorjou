@@ -54,6 +54,12 @@ class Settings(BaseSettings):
   openrouter_app_name: str = "Life Journey"
   openrouter_app_url: str = ""
 
+  # Email (Resend)
+  resend_api_key: str | None = None
+  resend_from_email: str = "Bewaardvoorjou <noreply@bewaardvoorjou.nl>"
+  resend_enabled: bool = True
+  app_base_url: str = "http://localhost:3000"
+
   # Telemetry
   telemetry_disabled: bool = False
 
