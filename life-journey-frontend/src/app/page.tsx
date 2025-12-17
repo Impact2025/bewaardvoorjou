@@ -218,7 +218,6 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Button
                 asChild
-                size="lg"
                 className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
               >
                 <Link href="/register" className="inline-flex items-center">
@@ -227,8 +226,6 @@ export default function Home() {
               </Button>
               <Button
                 asChild
-                size="lg"
-                variant="outline"
                 className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white text-lg px-10 py-7 rounded-xl border-2 border-white/40 hover:border-white/60 transition-all duration-300"
               >
                 <Link href="#features">
@@ -358,7 +355,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <Button asChild size="lg" className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-6">
+            <Button asChild className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-6">
               <Link href="/register">
                 Begin nu gratis <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
@@ -462,7 +459,6 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Button
               asChild
-              size="lg"
               className="bg-white text-orange hover:bg-neutral-light text-lg px-10 py-7 shadow-2xl font-semibold"
             >
               <Link href="/register">
