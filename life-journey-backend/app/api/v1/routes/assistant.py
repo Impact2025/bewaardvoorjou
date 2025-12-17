@@ -14,6 +14,12 @@ from app.schemas.assistant import (
     AssistantFollowUpResponse,
     TranscriptAnalysisRequest,
     TranscriptAnalysisResponse,
+    StartConversationRequest,
+    StartConversationResponse,
+    ContinueConversationRequest,
+    ContinueConversationResponse,
+    EndConversationRequest,
+    EndConversationResponse,
 )
 from app.services.ai.interviewer import (
     build_prompt,
@@ -24,6 +30,11 @@ from app.services.ai.interviewer import (
 from app.services.ai.conversational_assistant import (
     chat_with_assistant,
     get_help_suggestions,
+)
+from app.services.ai.conversation import (
+    start_conversation_session,
+    add_response_to_conversation,
+    end_conversation_session,
 )
 from app.models.user import User
 from app.services.journey_progress import get_previous_chapters_summary
@@ -193,4 +204,116 @@ def analyze_transcript(
     people=analysis["people"],
     emotions=analysis["emotions"],
     encouragement=encouragement,
+  )
+
+
+# =============================================================================
+# Multi-Turn Conversation Endpoints (World-Class Interviewer)
+# =============================================================================
+
+
+@router.post("/conversation/start", response_model=StartConversationResponse, summary="Start conversation")
+@limiter.limit(RateLimits.AI_PROMPT)
+def start_conversation(
+  request: Request,
+  payload: StartConversationRequest,
+  current_user: User = Depends(get_current_user),
+  db: Session = Depends(get_db),
+) -> StartConversationResponse:
+  """
+  Start a new multi-turn conversation session.
+
+  This is the world-class interviewer experience - instead of single questions,
+  the AI conducts a natural 3-7 turn conversation that:
+  - Asks follow-up questions based on user responses
+  - References specific details the user mentioned
+  - Adapts to emotional tone
+  - Knows when the story feels complete
+  """
+  session_id, opening_question = start_conversation_session(
+    db=db,
+    journey_id=payload.journey_id,
+    chapter_id=payload.chapter_id,
+    asset_id=payload.asset_id,
+  )
+
+  return StartConversationResponse(
+    session_id=session_id,
+    opening_question=opening_question,
+  )
+
+
+@router.post("/conversation/continue", response_model=ContinueConversationResponse, summary="Continue conversation")
+@limiter.limit(RateLimits.AI_PROMPT)
+def continue_conversation(
+  request: Request,
+  payload: ContinueConversationRequest,
+  current_user: User = Depends(get_current_user),
+) -> ContinueConversationResponse:
+  """
+  Continue the conversation with user's response.
+
+  The AI analyzes what the user said using Claude, extracts themes and emotions,
+  and generates an intelligent follow-up question that feels natural and human.
+
+  Returns None for next_question when the conversation feels complete.
+  """
+  from app.services.ai.conversation import _active_conversations
+
+  conversation = _active_conversations.get(payload.session_id)
+  if not conversation:
+    # Session expired or invalid
+    return ContinueConversationResponse(
+      next_question=None,
+      turn_number=0,
+      conversation_complete=True,
+      story_depth=None,
+    )
+
+  next_question = add_response_to_conversation(
+    session_id=payload.session_id,
+    response_text=payload.response_text,
+  )
+
+  conversation_complete = next_question is None
+  turn_number = len(conversation.turns)
+
+  # Get story depth from last turn's analysis
+  story_depth = None
+  if conversation.turns and conversation.turns[-1].analysis:
+    story_depth = conversation.turns[-1].analysis.get("story_depth")
+
+  return ContinueConversationResponse(
+    next_question=next_question,
+    turn_number=turn_number,
+    conversation_complete=conversation_complete,
+    story_depth=story_depth,
+  )
+
+
+@router.post("/conversation/end", response_model=EndConversationResponse, summary="End conversation")
+@limiter.limit(RateLimits.AI_SUGGESTION)
+def end_conversation(
+  request: Request,
+  payload: EndConversationRequest,
+  current_user: User = Depends(get_current_user),
+) -> EndConversationResponse:
+  """
+  End the conversation session and get summary.
+
+  Returns insights about the conversation including:
+  - Total number of turns
+  - Whether story feels complete
+  - Story depth score (1-10)
+  - Key themes discovered
+  - People mentioned
+  """
+  summary = end_conversation_session(payload.session_id)
+
+  return EndConversationResponse(
+    total_turns=summary.get("total_turns", 0),
+    completed=summary.get("completed", False),
+    story_depth=summary.get("story_depth", 0),
+    key_themes=summary.get("key_themes", []),
+    people_mentioned=summary.get("people_mentioned", []),
   )
