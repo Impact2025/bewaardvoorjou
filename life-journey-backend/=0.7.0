@@ -1,0 +1,17 @@
+Collecting jinja2
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting resend
+  Downloading resend-2.19.0-py2.py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: MarkupSafe>=2.0 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from jinja2) (3.0.3)
+Requirement already satisfied: requests>=2.31.0 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from resend) (2.32.5)
+Requirement already satisfied: typing-extensions>=4.4.0 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from resend) (4.15.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from requests>=2.31.0->resend) (3.4.4)
+Requirement already satisfied: idna<4,>=2.5 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from requests>=2.31.0->resend) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from requests>=2.31.0->resend) (2.5.0)
+Requirement already satisfied: certifi>=2017.4.17 in c:\users\v_mun\appdata\local\programs\python\python311\lib\site-packages (from requests>=2.31.0->resend) (2025.10.5)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   -------------------------------------- 134.9/134.9 kB 614.1 kB/s eta 0:00:00
+Downloading resend-2.19.0-py2.py3-none-any.whl (50 kB)
+   ---------------------------------------- 50.9/50.9 kB 1.3 MB/s eta 0:00:00
+Installing collected packages: jinja2, resend
+Successfully installed jinja2-3.1.6 resend-2.19.0
