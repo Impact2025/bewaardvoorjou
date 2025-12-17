@@ -110,6 +110,9 @@ export default function Home() {
             <Link href="#trust" className="hover:text-orange transition-colors font-medium">
               Veiligheid
             </Link>
+            <Link href="/faq" className="hover:text-orange transition-colors font-medium">
+              Veelgestelde vragen
+            </Link>
             <Link href="/login" className="hover:text-orange transition-colors font-medium">
               Inloggen
             </Link>
@@ -145,6 +148,13 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Veiligheid
+              </Link>
+              <Link
+                href="/faq"
+                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Veelgestelde vragen
               </Link>
               <Link
                 href="/login"
