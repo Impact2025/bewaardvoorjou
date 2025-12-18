@@ -78,7 +78,7 @@ def create_app() -> FastAPI:
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
-    return {"status": "ok", "version": "2025-12-17-v4", "cors_fixed": "exception_handler"}
+    return {"status": "ok", "version": "2025-12-17-v5", "cors_fixed": "exception_handler"}
 
   @app.get("/cors-test", tags=["system"], summary="CORS configuration test")
   async def cors_test() -> dict[str, str]:
