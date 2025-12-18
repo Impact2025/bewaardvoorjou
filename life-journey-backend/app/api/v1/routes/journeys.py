@@ -16,7 +16,7 @@ from app.schemas.media import MediaAsset as MediaAssetSchema
 from app.schemas.user import UserProfile as UserProfileSchema, AccessibilitySettings, DeadlineEntry
 from app.api.deps import get_current_user
 from app.models.user import User
-from app.services.journey_progress import get_all_chapter_statuses, get_journey_progress, get_next_available_chapter
+from app.services.journey_progress import get_all_chapter_statuses, CHAPTER_ORDER
 
 
 router = APIRouter()
@@ -193,10 +193,20 @@ def get_journey_detail(
       "trustees": journey.legacy_policy.trustees,
     }
 
-  # Get chapter statuses and progress
+  # Get chapter statuses - OPTIMIZED: single call instead of 3 separate calls
   chapter_statuses_data = get_all_chapter_statuses(db, journey_id)
-  progress_data = get_journey_progress(db, journey_id)
-  next_chapter = get_next_available_chapter(db, journey_id)
+
+  # Compute progress inline from statuses (avoids duplicate call)
+  total_chapters = len(CHAPTER_ORDER)
+  completed_count = sum(1 for s in chapter_statuses_data.values() if s["status"] == "completed")
+  available_count = sum(1 for s in chapter_statuses_data.values() if s["status"] == "available")
+
+  # Find next available chapter inline (avoids duplicate call)
+  next_chapter = None
+  for ch_id in CHAPTER_ORDER:
+    if chapter_statuses_data.get(ch_id, {}).get("status") == "available":
+      next_chapter = ch_id
+      break
 
   # Convert chapter statuses to proper schema objects
   chapter_statuses = {
@@ -210,10 +220,10 @@ def get_journey_detail(
 
   # Create journey progress object
   journey_progress = JourneyProgress(
-    totalChapters=progress_data["totalChapters"],
-    completedChapters=progress_data["completedChapters"],
-    availableChapters=progress_data["availableChapters"],
-    percentComplete=progress_data["percentComplete"],
+    totalChapters=total_chapters,
+    completedChapters=completed_count,
+    availableChapters=available_count,
+    percentComplete=round((completed_count / total_chapters) * 100, 1) if total_chapters > 0 else 0,
     nextAvailableChapter=ChapterId(next_chapter) if next_chapter else None
   )
 
