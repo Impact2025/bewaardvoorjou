@@ -41,7 +41,7 @@ def create_app() -> FastAPI:
     # Get origin from request
     origin = request.headers.get("origin", "")
 
-    # Build response
+    # Build response with full traceback for debugging
     response = JSONResponse(
       status_code=500,
       content={
@@ -78,15 +78,67 @@ def create_app() -> FastAPI:
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
-    return {"status": "ok", "version": "2025-12-17-v5", "cors_fixed": "exception_handler"}
+    return {"status": "ok", "version": "2025-12-17-v6", "cors_fixed": "exception_handler"}
 
-  @app.get("/cors-test", tags=["system"], summary="CORS configuration test")
-  async def cors_test() -> dict[str, str]:
-    return {
-      "status": "ok",
-      "message": "CORS is working",
-      "timestamp": "2025-12-17T00:00:00Z"
-    }
+  @app.get("/debug/journey/{journey_id}", tags=["debug"])
+  def debug_journey(journey_id: str):
+    """Debug endpoint to test journey query without auth - TEMPORARY"""
+    from sqlalchemy.orm import joinedload, selectinload
+    from app.db.session import SessionLocal
+    from app.models.journey import Journey as JourneyModel
+    from app.models.media import MediaAsset as MediaAssetModel
+    
+    try:
+      db = SessionLocal()
+      
+      # Step 1: Basic query
+      journey = db.query(JourneyModel).filter(JourneyModel.id == journey_id).first()
+      if not journey:
+        db.close()
+        return {"error": "Journey not found", "journey_id": journey_id}
+      
+      result = {"step1": "basic query OK", "title": journey.title}
+      
+      # Step 2: Query with eager loading
+      journey = (
+        db.query(JourneyModel)
+        .filter(JourneyModel.id == journey_id)
+        .options(
+          joinedload(JourneyModel.user),
+          selectinload(JourneyModel.media_assets).selectinload(MediaAssetModel.transcripts),
+          selectinload(JourneyModel.prompt_runs),
+          selectinload(JourneyModel.highlights),
+          selectinload(JourneyModel.share_grants),
+          selectinload(JourneyModel.chapter_preferences),
+          selectinload(JourneyModel.consent_logs),
+          joinedload(JourneyModel.legacy_policy),
+        )
+        .first()
+      )
+      
+      result["step2"] = "eager loading OK"
+      result["user"] = journey.user.display_name if journey.user else "NO USER"
+      result["media_count"] = len(journey.media_assets)
+      result["prefs_count"] = len(journey.chapter_preferences)
+      
+      # Step 3: Test services
+      from app.services.journey_progress import get_all_chapter_statuses, get_journey_progress
+      chapter_statuses = get_all_chapter_statuses(db, journey_id)
+      progress = get_journey_progress(db, journey_id)
+      
+      result["step3"] = "services OK"
+      result["chapters"] = len(chapter_statuses)
+      result["progress"] = progress
+      
+      db.close()
+      return {"status": "ALL OK", "result": result}
+      
+    except Exception as e:
+      return {
+        "error": str(e),
+        "type": type(e).__name__,
+        "traceback": traceback.format_exc()
+      }
 
   app.include_router(api_router, prefix=settings.api_v1_prefix)
 
