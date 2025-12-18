@@ -62,7 +62,7 @@ def activate_chapters(
   return [chapter_id.value for chapter_id in payload.chapter_ids]
 
 
-@router.get("/{journey_id}", response_model=JourneyDetail)
+@router.get("/{journey_id}", # response_model=JourneyDetail  # TEMP DISABLED)
 @limiter.limit(RateLimits.READ_HEAVY)
 def get_journey_detail(
   request: Request,

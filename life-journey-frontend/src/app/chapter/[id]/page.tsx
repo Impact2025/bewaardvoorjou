@@ -7,14 +7,17 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useJourneyStore } from "@/store/journey-store";
 
 // Lazy load heavy JourneyExperience component
-const JourneyExperience = dynamic(() => import("@/components/journey/journey-experience").then(mod => ({ default: mod.JourneyExperience })), {
-  loading: () => (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-    </div>
-  ),
-  ssr: false,
-});
+const JourneyExperience = dynamic(
+  () => import("@/components/journey/journey-experience").then((mod) => mod.JourneyExperience),
+  {
+    loading: () => (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 function ChapterContent({ params }: { params: Promise<{ id: string }> }) {
   const [chapterId, setChapterId] = useState<string | null>(null);
