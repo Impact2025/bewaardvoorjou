@@ -23,7 +23,7 @@ function FamilyContent() {
     >
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-purple-500 p-8 text-white">
+        <div className="relative overflow-hidden rounded-2xl bg-orange p-8 text-white">
           <div className="absolute top-0 right-0 opacity-10">
             <Heart className="h-64 w-64 animate-pulse" />
           </div>
@@ -32,7 +32,7 @@ function FamilyContent() {
               <Users className="h-8 w-8" />
               <h2 className="text-3xl font-bold">De Digitale Familiebibliotheek</h2>
             </div>
-            <p className="text-pink-100 text-lg leading-relaxed mb-6">
+            <p className="text-orange-100 text-lg leading-relaxed mb-6">
               Jouw verhalen worden nog waardevoller wanneer ze gedeeld worden. Nodig familieleden uit,
               bouw samen aan jullie stamboom, en creëer een levend archief voor toekomstige generaties.
             </p>
@@ -125,8 +125,8 @@ function FamilyContent() {
 
         {/* Encouragement */}
         <div className="text-center py-8">
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-pink/10 to-purple/10 border border-pink/20">
-            <Heart className="h-5 w-5 text-pink-500 heart-pulse" />
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange/10 border border-orange/20">
+            <Heart className="h-5 w-5 text-orange heart-pulse" />
             <span className="text-slate-700 font-medium">
               Familie is waar verhalen tot leven komen
             </span>
