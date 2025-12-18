@@ -83,7 +83,7 @@ def get_journey_detail(
       selectinload(JourneyModel.share_grants),
       selectinload(JourneyModel.chapter_preferences),
       selectinload(JourneyModel.consent_logs),
-      selectinload(JourneyModel.legacy_policy),
+      joinedload(JourneyModel.legacy_policy),  # 1-to-1 relation
     )
     .first()
   )
