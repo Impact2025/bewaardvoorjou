@@ -62,7 +62,7 @@ def activate_chapters(
   return [chapter_id.value for chapter_id in payload.chapter_ids]
 
 
-@router.get("/{journey_id}", # response_model=JourneyDetail  # TEMP DISABLED)
+@router.get("/{journey_id}", response_model=JourneyDetail)
 @limiter.limit(RateLimits.READ_HEAVY)
 def get_journey_detail(
   request: Request,
@@ -224,7 +224,7 @@ def get_journey_detail(
     updated_at=journey.updated_at,
     media=media_assets,
     active_chapters=active_chapters,
-    progress=journey.progress,
+    progress={k: v for k, v in (journey.progress or {}).items() if k in [c.value for c in ChapterId]},
     prompt_runs=prompt_runs,
     transcripts=transcripts,
     highlights=highlights,
