@@ -58,7 +58,7 @@ export function AppShell({
         className="sticky top-0 z-50 bg-white shadow-sm"
         role="banner"
       >
-        <div className="mx-auto max-w-6xl px-6 sm:px-10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10">
           {/* Top bar with logo/title and account actions */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-4">
@@ -85,7 +85,7 @@ export function AppShell({
                 <div className="relative">
                   <button
                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                    className="rounded-full p-2 text-slate-600 hover:bg-gray-100 hover:text-slate-900 transition-colors"
+                    className="rounded-full p-2.5 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-slate-600 hover:bg-gray-100 hover:text-slate-900 transition-colors"
                     aria-label="Instellingen"
                   >
                     <Settings className="h-5 w-5" />
@@ -151,7 +151,7 @@ export function AppShell({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "rounded-full px-4 py-2 transition-colors whitespace-nowrap",
+                      "rounded-full px-3 sm:px-4 py-2.5 sm:py-2 transition-colors whitespace-nowrap min-h-[44px] sm:min-h-0 flex items-center",
                       "focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2",
                       activeHref === item.href
                         ? "bg-orange/20 text-orange font-medium"
@@ -171,7 +171,7 @@ export function AppShell({
       
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 py-8 sm:px-10 sm:py-12"
+        className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-12"
         role="main"
         aria-label="Hoofdinhoud"
       >

@@ -22,6 +22,7 @@ CORS_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:4005",
+  "http://localhost:6001",
 ]
 
 

@@ -103,16 +103,16 @@ function DashboardContent() {
         activeHref="/dashboard"
         onShowHandleiding={() => setShowOnboarding(true)}
       >
-        <div className="space-y-8 max-w-full overflow-hidden">
+        <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-full overflow-hidden">
           {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 p-6 sm:p-8 text-white">
-            <div className="absolute top-0 right-0 opacity-10">
-              <Sparkles className="h-48 w-48" />
+          <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 p-4 sm:p-6 md:p-8 text-white">
+            <div className="hidden sm:block absolute top-0 right-0 opacity-10">
+              <Sparkles className="h-32 md:h-48 w-32 md:w-48" />
             </div>
             <div className="relative z-10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-2xl font-bold mb-2">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">
                     {progressPercent === 0
                       ? "Begin je reis"
                       : progressPercent < 50
@@ -160,7 +160,7 @@ function DashboardContent() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
             {/* Timeline Section */}
             <div className="space-y-6">
               <Card className="bg-white border border-gray-200">
@@ -336,7 +336,7 @@ function QuickActionButton({ href, icon, label, primary }: QuickActionButtonProp
       asChild
       variant={primary ? "primary" : "ghost"}
       className={cn(
-        "w-full justify-start",
+        "w-full justify-start min-h-[44px] py-3 sm:py-2",
         primary
           ? "bg-teal-600 hover:bg-teal-700 text-white"
           : "text-slate-700 hover:bg-slate-100",
@@ -357,7 +357,7 @@ function DashboardSkeleton() {
       <div className="h-48 rounded-2xl bg-slate-100 animate-pulse" />
 
       {/* Content grid skeleton */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
         <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
         <div className="space-y-6">
           <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />

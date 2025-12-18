@@ -22,16 +22,16 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
   const isLocked = !chapter.is_unlocked;
 
   const statusIcon = useMemo(() => {
-    if (isLocked) return <Lock className="h-4 w-4 text-slate-400" />;
-    if (isCompleted) return <Check className="h-4 w-4 text-emerald-500" />;
+    if (isLocked) return <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />;
+    if (isCompleted) return <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" />;
     return null;
   }, [isLocked, isCompleted]);
 
   const mediaIcons = useMemo(() => {
     const icons = [];
-    if (chapter.has_video) icons.push(<Video key="video" className="h-3.5 w-3.5" />);
-    if (chapter.has_audio) icons.push(<Mic key="audio" className="h-3.5 w-3.5" />);
-    if (chapter.has_text) icons.push(<FileText key="text" className="h-3.5 w-3.5" />);
+    if (chapter.has_video) icons.push(<Video key="video" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />);
+    if (chapter.has_audio) icons.push(<Mic key="audio" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />);
+    if (chapter.has_text) icons.push(<FileText key="text" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />);
     return icons;
   }, [chapter.has_video, chapter.has_audio, chapter.has_text]);
 
@@ -40,8 +40,10 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
       onClick={onClick}
       disabled={isLocked}
       className={cn(
-        "group relative flex flex-col items-start p-4 rounded-xl border-2 transition-all duration-200",
-        "min-w-[180px] max-w-[200px] text-left",
+        "group relative flex flex-col items-start p-3 sm:p-4 rounded-xl border-2 transition-all duration-200",
+        "w-[140px] sm:w-[160px] md:w-[180px] text-left",
+        "min-h-[100px] sm:min-h-[120px]",
+        "active:scale-[0.98]",
         isLocked && "opacity-50 cursor-not-allowed",
         !isLocked && "hover:shadow-md hover:scale-[1.02] cursor-pointer",
         isSelected && "ring-2 ring-offset-2 ring-teal-500",
@@ -56,12 +58,12 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
       </div>
 
       {/* Chapter label */}
-      <h4 className={cn("font-medium text-sm mb-1", colors.text)}>
+      <h4 className={cn("font-medium text-xs sm:text-sm mb-1 pr-5", colors.text)}>
         {chapter.label}
       </h4>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5 bg-white/50 rounded-full overflow-hidden mb-2">
+      <div className="w-full h-1 sm:h-1.5 bg-white/50 rounded-full overflow-hidden mb-2">
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",
@@ -72,9 +74,9 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
         />
       </div>
 
-      {/* Photo preview */}
+      {/* Photo preview - hidden on mobile for space */}
       {chapterDetail?.media_assets.some(asset => asset.modality === 'image') && (
-        <div className="mb-2">
+        <div className="hidden sm:block mb-2">
           <div className="flex items-center gap-1 text-xs text-slate-600 mb-1">
             <Image className="h-3 w-3" />
             <span>Foto's</span>
@@ -101,30 +103,30 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
         </div>
       )}
 
-      {/* Audio preview */}
+      {/* Audio preview - simplified on mobile */}
       {chapterDetail?.media_assets.some(asset => asset.modality === 'audio') && (
-        <div className="mb-2">
+        <div className="mb-2 w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 text-xs text-slate-600">
               <Mic className="h-3 w-3" />
-              <span>Audio</span>
+              <span className="hidden sm:inline">Audio</span>
             </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onAudioToggle?.(chapter.id, 'preview-url'); // In real implementation, use actual audio URL
+                onAudioToggle?.(chapter.id, 'preview-url');
               }}
-              className="p-1 rounded bg-white/50 hover:bg-white/70 transition-colors"
+              className="p-1.5 sm:p-1 rounded bg-white/50 hover:bg-white/70 transition-colors min-w-[28px] min-h-[28px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
             >
               {playingAudio === chapter.id ? (
-                <Pause className="h-3 w-3 text-slate-700" />
+                <Pause className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-slate-700" />
               ) : (
-                <Play className="h-3 w-3 text-slate-700" />
+                <Play className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-slate-700" />
               )}
             </button>
           </div>
           {chapterDetail.transcripts_preview && (
-            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+            <p className="hidden sm:block text-xs text-slate-500 mt-1 line-clamp-2">
               "{chapterDetail.transcripts_preview}"
             </p>
           )}
@@ -132,7 +134,7 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
       )}
 
       {/* Stats row */}
-      <div className="flex items-center justify-between w-full text-xs text-slate-600">
+      <div className="flex items-center justify-between w-full text-xs text-slate-600 mt-auto">
         <div className="flex items-center gap-1">
           {mediaIcons.length > 0 ? (
             <>
@@ -140,18 +142,18 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
               <span className="ml-1">{chapter.media_count}</span>
             </>
           ) : (
-            <span className="text-slate-400">Nog geen opnames</span>
+            <span className="text-slate-400 text-[10px] sm:text-xs">Geen opnames</span>
           )}
         </div>
 
         {!isLocked && (
-          <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+          <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
         )}
       </div>
 
       {/* Duration if available */}
       {chapter.duration_total_seconds > 0 && (
-        <div className="mt-1 text-xs text-slate-500">
+        <div className="mt-1 text-[10px] sm:text-xs text-slate-500">
           {formatDuration(chapter.duration_total_seconds)}
         </div>
       )}
