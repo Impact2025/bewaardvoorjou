@@ -100,6 +100,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   other: {
+    "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
     "apple-mobile-web-app-title": "Bewaard voor jou",

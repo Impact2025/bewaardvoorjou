@@ -31,12 +31,15 @@ import {
 } from "lucide-react";
 
 // Lazy load heavy Timeline component (reduces initial bundle)
-const Timeline = dynamic(() => import("@/components/timeline").then(mod => ({ default: mod.Timeline })), {
-  loading: () => (
-    <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
-  ),
-  ssr: false,
-});
+const Timeline = dynamic(
+  () => import("@/components/timeline/Timeline").then((mod) => mod.Timeline),
+  {
+    loading: () => (
+      <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
+    ),
+    ssr: false,
+  }
+);
 
 function DashboardContent() {
   const router = useRouter();
