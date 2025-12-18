@@ -61,7 +61,7 @@ function TimelineContent() {
     >
       <div className="space-y-8">
         {/* Hero Section with Memory Lane feel */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-white">
+        <div className="relative overflow-hidden rounded-2xl bg-orange p-8 text-white">
           <div className="absolute top-0 right-0 opacity-10">
             <Sparkles className="h-64 w-64" />
           </div>
@@ -70,17 +70,17 @@ function TimelineContent() {
               <TrendingUp className="h-8 w-8" />
               <h2 className="text-3xl font-bold">Je Memory Lane</h2>
             </div>
-            <p className="text-purple-100 text-lg leading-relaxed mb-6">
+            <p className="text-orange-100 text-lg leading-relaxed mb-6">
               Elke fase van je leven is een hoofdstuk in je verhaal. Wandel door je herinneringen
               en ontdek waar je al bent geweest en wat nog op je wacht.
             </p>
             <div className="flex items-center gap-6">
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                <div className="text-sm text-purple-100">Voortgang</div>
+                <div className="text-sm text-orange-100">Voortgang</div>
                 <div className="text-2xl font-bold">{progressPercent}%</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                <div className="text-sm text-purple-100">Hoofdstukken</div>
+                <div className="text-sm text-orange-100">Hoofdstukken</div>
                 <div className="text-2xl font-bold">{completedChapters}/{totalChapters}</div>
               </div>
             </div>
