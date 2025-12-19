@@ -16,7 +16,7 @@ class Settings(BaseSettings):
   api_v1_prefix: str = "/api/v1"
 
   # Public API base URL (used for generating upload URLs)
-  api_base_url: str = "http://localhost:8000"
+  api_base_url: str = "http://localhost:8001"
 
   # CORS configuration - customize for your production domain
   cors_origins: list[str] = [

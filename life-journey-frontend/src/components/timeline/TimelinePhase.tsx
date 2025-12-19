@@ -100,7 +100,7 @@ export function TimelinePhaseSection({
           "border-2",
         )}
         aria-expanded={isExpanded}
-        aria-controls={}
+        aria-controls={`phase-${phase.metadata.id}-chapters`}
       >
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className={cn("p-1.5 sm:p-2 rounded-lg flex-shrink-0", colors.text, "bg-white/50")}>
@@ -123,7 +123,7 @@ export function TimelinePhaseSection({
           </div>
           <div className="hidden sm:flex items-center gap-2">
             <div className="w-24 h-2 bg-white/50 rounded-full overflow-hidden">
-              <div className={cn("h-full rounded-full", colors.text, "bg-current")} style={{ width:  }} />
+              <div className={cn("h-full rounded-full", colors.text, "bg-current")} style={{ width: `${progressPercent}%` }} />
             </div>
             <span className={cn("text-sm font-medium", colors.text)}>{completedCount}/{phase.chapters.length}</span>
           </div>
@@ -133,7 +133,7 @@ export function TimelinePhaseSection({
         </div>
       </button>
       <div
-        id={}
+        id={`phase-${phase.metadata.id}-chapters`}
         className={cn("overflow-hidden transition-all duration-300", isExpanded ? "max-h-[600px] opacity-100 mt-3" : "max-h-0 opacity-0")}
       >
         <div className="relative">

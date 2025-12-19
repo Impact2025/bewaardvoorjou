@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -8,47 +8,36 @@ import { CHAPTERS } from "@/lib/chapters";
 import { useRouter } from "next/navigation";
 import { AIAssistantChat } from "@/components/journey/ai-assistant-chat";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
+import { useAuth } from "@/store/auth-context";
+import { fetchAssistantPrompt } from "@/lib/assistant";
 
 import { RecorderProvider, useRecorder, RecordingMode } from "./RecorderContext";
 import { ModeSelector } from "./ModeSelector";
-import { StatusIndicator } from "./StatusIndicator";
 import { RecorderTimer } from "./RecorderTimer";
 import { RecorderControls } from "./RecorderControls";
 import { RecorderPreview } from "./RecorderPreview";
 import { TextEditor } from "./TextEditor";
 import { UploadStatus } from "./UploadStatus";
 import { PermissionError } from "./PermissionError";
+import { ConversationProgress } from "./ConversationProgress";
 import { useRecorderActions } from "./useRecorderActions";
-
-const frameThemes = [
-  { id: "modern", label: "Modern", accent: "from-teal/40" },
-  { id: "warm", label: "Warm", accent: "from-orange/40" },
-  { id: "light", label: "Light", accent: "from-highlight/40" },
-];
 
 // Helper function to get default mode for a chapter
 function getDefaultModeForChapter(chapterId?: string): RecordingMode {
   if (!chapterId) return "text";
-
   const chapter = CHAPTERS.find(ch => ch.id === chapterId);
   if (!chapter) return "text";
-
   if (chapter.defaultModalities.includes("text")) return "text";
   if (chapter.defaultModalities.includes("audio")) return "audio";
   if (chapter.defaultModalities.includes("video")) return "video";
-
   return "text";
 }
 
 // Helper function to get next chapter ID
 function getNextChapterId(currentChapterId?: string): string | null {
   if (!currentChapterId) return null;
-
   const currentIndex = CHAPTERS.findIndex(ch => ch.id === currentChapterId);
-  if (currentIndex === -1 || currentIndex === CHAPTERS.length - 1) {
-    return null;
-  }
-
+  if (currentIndex === -1 || currentIndex === CHAPTERS.length - 1) return null;
   return CHAPTERS[currentIndex + 1].id;
 }
 
@@ -60,13 +49,34 @@ interface RecorderFrameProps {
 // Inner component that uses the context
 function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   const router = useRouter();
+  const { session } = useAuth();
   const { journey } = useJourneyBootstrap();
-  const { state, refs, setAssistantChatOpen } = useRecorder();
-  const { mode, state: recordingState, isAssistantChatOpen } = state;
-
-  const [theme, setTheme] = React.useState(frameThemes[0]);
+  const { state, refs, setAssistantChatOpen, dispatch } = useRecorder();
+  const {
+    mode,
+    state: recordingState,
+    isAssistantChatOpen,
+    conversationSessionId,
+    conversationTurnNumber,
+    conversationStoryDepth,
+    conversationComplete,
+    currentQuestion,
+  } = state;
 
   const actions = useRecorderActions({ chapterId });
+
+  // Fetch initial AI question when component mounts
+  useEffect(() => {
+    if (!currentQuestion && chapterId && session?.token && conversationTurnNumber === 0) {
+      fetchAssistantPrompt(chapterId as any, [], session.token, journey?.id)
+        .then((prompt) => {
+          dispatch({ type: "SET_CURRENT_QUESTION", payload: prompt });
+        })
+        .catch((err) => {
+          console.error("Failed to fetch initial question:", err);
+        });
+    }
+  }, [chapterId, session?.token, journey?.id, currentQuestion, conversationTurnNumber, dispatch]);
 
   const isRecording = recordingState === "recording";
   const isPreviewing = recordingState === "previewing";
@@ -102,130 +112,81 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   const isRecordingDisabled = isRecording || isPreviewing;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <StatusIndicator />
+    <div className="space-y-4">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <ModeSelector disabled={isRecordingDisabled} />
+          <RecorderTimer />
+        </div>
         <div className="flex items-center gap-2">
-          {/* AI Assistant Help Button */}
+          <UploadStatus />
           <Button
             onClick={() => setAssistantChatOpen(true)}
             variant="ghost"
-
-            className="border-orange/30 bg-gradient-to-br from-orange/10 to-gold/10 text-orange-dark hover:from-orange/20 hover:to-gold/20 flex items-center gap-2"
-            aria-label="Open AI assistent voor hulp"
+            size="sm"
+            className="text-orange hover:text-orange-dark"
+            aria-label="Open AI assistent"
           >
-            <MessageCircle className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Hulp nodig?</span>
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline ml-1.5">Hulp</span>
           </Button>
-
-          <ModeSelector disabled={isRecordingDisabled} />
         </div>
       </div>
 
-      {/* Main Recording Frame */}
-      <div className="relative overflow-hidden rounded-[42px] border border-teal/30 bg-cream p-6 shadow-2xl">
+      {/* Main Content Area */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Editor/Preview Area */}
         <div
           className={cn(
-            "absolute inset-0 -z-10 bg-gradient-to-br via-transparent to-transparent",
-            theme.accent,
+            "relative w-full",
+            mode === "text" ? "min-h-[400px]" : "aspect-video max-w-2xl mx-auto"
           )}
-          aria-hidden="true"
-        />
-        <div className="flex flex-col gap-6">
-          {/* Channel info */}
-          <div className="flex items-center justify-between text-xs text-slate-600">
-            <span>Kanaal · {CHAPTERS.find(ch => ch.id === chapterId)?.title || chapterId}</span>
-            <div className="flex items-center gap-2">
-              <button
-                className="rounded-full border border-neutral-sand bg-cream px-3 py-1 text-[11px] uppercase tracking-wide text-slate-700"
-                aria-label="Toggle veiligheidsmodus"
-              >
-                Veiligheidsmodus
-              </button>
-              <button
-                className="rounded-full border border-neutral-sand bg-cream px-3 py-1 text-[11px] uppercase tracking-wide text-slate-700"
-                aria-label="Toggle camera vervagen"
-              >
-                Camera vervagen
-              </button>
-            </div>
+        >
+          {mode === "text" ? (
+            <TextEditor onGetAISuggestion={actions.getAISuggestion} />
+          ) : (
+            <RecorderPreview
+              ref={videoRef}
+              onStartPreview={actions.startPreview}
+            />
+          )}
+        </div>
+
+        {/* AI Conversation Progress - shows during multi-turn conversation */}
+        {!!conversationSessionId && !conversationComplete && (
+          <div className="border-t border-slate-100 px-4 py-3">
+            <ConversationProgress
+              turnNumber={conversationTurnNumber}
+              storyDepth={conversationStoryDepth}
+              currentQuestion={currentQuestion}
+              isActive={true}
+            />
           </div>
+        )}
 
-          {/* Preview/Recording Area */}
-          <div
-            className={cn(
-              "relative mx-auto flex w-full items-center justify-center rounded-[32px] border border-neutral-sand bg-cream overflow-hidden text-center text-sm text-slate-700",
-              mode === "text" ? "max-w-6xl min-h-[850px]" : "aspect-[4/3] max-w-[540px]"
-            )}
-            role="region"
-            aria-label={mode === "text" ? "Tekst invoer" : "Opname preview"}
-          >
-            {mode === "text" ? (
-              <TextEditor onGetAISuggestion={actions.getAISuggestion} />
-            ) : (
-              <RecorderPreview
-                ref={videoRef}
-                onStartPreview={actions.startPreview}
-              />
-            )}
-          </div>
-
-          {/* Timer Bar */}
-          <div className="flex items-center justify-between rounded-3xl border border-neutral-sand bg-cream px-4 py-3 text-xs text-slate-600">
-            <span>Tempo · Zacht & nieuwsgierig</span>
-            <RecorderTimer />
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Theme selector */}
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span id="theme-label">Thema:</span>
-              <div role="radiogroup" aria-labelledby="theme-label" className="flex gap-2">
-                {frameThemes.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={theme.id === option.id}
-                    onClick={() => setTheme(option)}
-                    className={cn(
-                      "rounded-full border px-3 py-1 transition-colors",
-                      "focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-1",
-                      theme.id === option.id
-                        ? "border-teal text-teal"
-                        : "border-neutral-sand text-slate-500 hover:text-slate-700",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex items-center gap-2">
-              <UploadStatus />
-              <RecorderControls
-                onStartPreview={actions.startPreview}
-                onStopPreview={actions.stopPreview}
-                onStartRecording={actions.startRecording}
-                onStopRecording={actions.stopRecording}
-                onTogglePause={actions.togglePause}
-                onUpload={actions.uploadRecording}
-                onReset={actions.resetRecording}
-                onSaveText={actions.saveTextContent}
-                onNavigateNext={handleNavigateNext}
-                hasNextChapter={hasNextChapter}
-              />
-            </div>
-          </div>
-
-          {/* Permission Error */}
-          <PermissionError />
+        {/* Controls Bar */}
+        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 bg-slate-50">
+          <span className="text-xs text-slate-500">
+            {CHAPTERS.find(ch => ch.id === chapterId)?.title || "Hoofdstuk"}
+          </span>
+          <RecorderControls
+            onStartPreview={actions.startPreview}
+            onStopPreview={actions.stopPreview}
+            onStartRecording={actions.startRecording}
+            onStopRecording={actions.stopRecording}
+            onTogglePause={actions.togglePause}
+            onUpload={actions.uploadRecording}
+            onReset={actions.resetRecording}
+            onSaveText={actions.saveTextContent}
+            onNavigateNext={handleNavigateNext}
+            hasNextChapter={hasNextChapter}
+          />
         </div>
       </div>
+
+      {/* Permission Error */}
+      <PermissionError />
 
       {/* AI Assistant Chat Modal */}
       {chapterId && (
@@ -239,9 +200,6 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     </div>
   );
 }
-
-// Import React for useState
-import React from "react";
 
 // Main exported component with provider
 export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFrameProps) {
@@ -257,13 +215,13 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
 // Re-export components for direct use
 export { RecorderProvider, useRecorder } from "./RecorderContext";
 export { ModeSelector } from "./ModeSelector";
-export { StatusIndicator } from "./StatusIndicator";
 export { RecorderTimer } from "./RecorderTimer";
 export { RecorderControls } from "./RecorderControls";
 export { RecorderPreview } from "./RecorderPreview";
 export { TextEditor } from "./TextEditor";
 export { UploadStatus } from "./UploadStatus";
 export { PermissionError } from "./PermissionError";
+export { ConversationProgress } from "./ConversationProgress";
 export { useRecorderActions } from "./useRecorderActions";
 
 export default RecorderFrame;

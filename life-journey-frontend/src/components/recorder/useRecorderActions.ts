@@ -7,6 +7,8 @@ import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/store/auth-context";
 import { CHAPTERS } from "@/lib/chapters";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
+import { startConversationSession, continueConversation, endConversationSession } from "@/lib/conversation-client";
+import { useConfetti } from "@/components/Confetti";
 
 const log = logger.forComponent("useRecorderActions");
 
@@ -17,6 +19,7 @@ interface UseRecorderActionsProps {
 export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
   const { session } = useAuth();
   const { journey } = useJourneyBootstrap();
+  const { triggerConfetti } = useConfetti();
   const {
     state,
     refs,
@@ -31,7 +34,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
     dispatch,
   } = useRecorder();
 
-  const { mode } = state;
+  const { mode, conversationSessionId, conversationComplete } = state;
 
   // Handle media errors
   const handleMediaError = useCallback((error: Error) => {
@@ -138,18 +141,30 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
 
       // Create media recorder with supported options
       let options: MediaRecorderOptions = {};
-      const mimeTypes = [
-        'video/webm;codecs=vp9,opus',
-        'video/webm;codecs=vp8,opus',
-        'video/webm;codecs=h264,opus',
-        'video/webm',
-        'video/mp4',
-      ];
 
+      // Use different MIME types for video vs audio-only recording
+      const mimeTypes = mode === "video"
+        ? [
+            'video/webm;codecs=vp9,opus',
+            'video/webm;codecs=vp8,opus',
+            'video/webm;codecs=h264,opus',
+            'video/webm',
+            'video/mp4',
+          ]
+        : [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/ogg;codecs=opus',
+            'audio/mp4',
+          ];
+
+      log.info("Checking MIME types for mode", { mode, availableTypes: mimeTypes });
       for (const mimeType of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(mimeType)) {
+        const supported = MediaRecorder.isTypeSupported(mimeType);
+        log.debug("MIME type support check", { mimeType, supported });
+        if (supported) {
           options.mimeType = mimeType;
-          log.debug("Using MIME type", { mimeType });
+          log.info("Selected MIME type", { mimeType, mode });
           break;
         }
       }
@@ -165,23 +180,68 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       };
 
       mediaRecorder.onstop = () => {
-        log.debug("MediaRecorder stopped", { chunks: refs.chunks.current.length });
+        const chunkCount = refs.chunks.current.length;
+        log.info("MediaRecorder stopped", { chunks: chunkCount });
+
+        if (chunkCount === 0) {
+          log.warn("No audio data recorded - chunks array is empty");
+          setRecordingState("idle");
+          return;
+        }
+
         const mimeType = mediaRecorder.mimeType || (mode === "video" ? 'video/webm' : 'audio/webm');
         const blob = new Blob(refs.chunks.current, { type: mimeType });
-        log.debug("Created blob", { size: blob.size, type: blob.type });
+        log.info("Created blob", { size: blob.size, type: blob.type, mimeType });
+
+        // Minimum 1KB for audio, 10KB for video - anything smaller is just headers
+        const minSize = mode === "video" ? 10000 : 1000;
+        if (blob.size < minSize) {
+          log.warn("Recording too short - blob is too small to contain valid media", {
+            size: blob.size,
+            minSize,
+            mode,
+          });
+          setRecordingState("idle");
+          setPermissionError("Opname te kort. Neem minimaal 1 seconde op.");
+          return;
+        }
+
         setMediaBlob(blob);
         setRecordingState("completed");
-
-        // Set playback source
-        setTimeout(() => {
-          if (refs.playback.current) {
-            const blobUrl = URL.createObjectURL(blob);
-            log.debug("Setting blob URL for playback");
-            refs.playback.current.src = blobUrl;
-            (refs.playback.current as HTMLMediaElement).load();
-          }
-        }, 100);
+        // Note: blob URL is now created in RecorderPreview via useMemo
       };
+
+      // Add error handler to detect issues
+      mediaRecorder.onerror = (event) => {
+        log.error("MediaRecorder error", new Error("MediaRecorder error"), {
+          error: (event as ErrorEvent).error,
+          type: event.type,
+        });
+      };
+
+      // Log state changes for debugging
+      mediaRecorder.onstart = () => {
+        log.info("MediaRecorder started", { state: mediaRecorder.state });
+      };
+
+      // Monitor audio track state
+      const audioTrack = refs.stream.current.getAudioTracks()[0];
+      if (audioTrack) {
+        log.info("Audio track state", {
+          enabled: audioTrack.enabled,
+          muted: audioTrack.muted,
+          readyState: audioTrack.readyState,
+          label: audioTrack.label,
+        });
+        audioTrack.onended = () => {
+          log.warn("Audio track ended unexpectedly");
+        };
+        audioTrack.onmute = () => {
+          log.warn("Audio track muted");
+        };
+      } else {
+        log.error("No audio track found in stream!");
+      }
 
       mediaRecorder.start();
       setRecordingState("recording");
@@ -295,11 +355,13 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       let uploadOk = false;
 
       if (presignResponse.upload_url.includes("/media/local-upload/")) {
-        const formData = new FormData();
-        formData.append("file", state.mediaBlob, `recording-${Date.now()}.webm`);
+        // Upload raw binary data for local storage
         const uploadResponse = await fetch(presignResponse.upload_url, {
           method: "PUT",
-          body: formData,
+          body: state.mediaBlob,
+          headers: {
+            "Content-Type": state.mediaBlob.type || "application/octet-stream",
+          },
         });
         uploadOk = uploadResponse.ok;
       } else if (presignResponse.upload_method === "POST" && presignResponse.fields) {
@@ -343,13 +405,130 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       }, 2000);
 
       log.debug("Upload completed successfully");
+
+      // AI Interviewer 2.0: Start or continue conversation
+      if (!conversationSessionId) {
+        // First recording - initialize conversation
+        await initializeConversation(presignResponse.asset_id);
+      } else if (!conversationComplete) {
+        // Subsequent recording - continue conversation
+        await handleConversationAfterUpload(presignResponse.asset_id);
+      }
     } catch (error) {
       log.error("Upload error", error);
       const message = error instanceof Error ? error.message : "Upload mislukt. Probeer opnieuw.";
       setUploadStatus(message);
       setRecordingState("completed");
     }
-  }, [state.mediaBlob, session, chapterId, mode, setRecordingState, setUploadStatus, showNextChapter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.mediaBlob, session, chapterId, mode, setRecordingState, setUploadStatus, showNextChapter, conversationSessionId, conversationComplete]);
+
+  // AI Interviewer 2.0: Initialize conversation session
+  const initializeConversation = useCallback(async (assetId: string) => {
+    if (!session?.token || !session.primaryJourneyId || !chapterId) {
+      log.warn("Cannot start conversation - missing required data");
+      return;
+    }
+
+    try {
+      log.debug("Starting conversation session", { assetId, chapterId });
+
+      const conversationSession = await startConversationSession(
+        session.token,
+        session.primaryJourneyId,
+        chapterId as any,
+        assetId
+      );
+
+      dispatch({
+        type: "START_CONVERSATION",
+        payload: {
+          sessionId: conversationSession.sessionId,
+          question: conversationSession.openingQuestion,
+        },
+      });
+
+      log.debug("Conversation session started", {
+        sessionId: conversationSession.sessionId,
+        question: conversationSession.openingQuestion
+      });
+    } catch (error) {
+      log.error("Failed to start conversation", error);
+      // Fallback to old flow if conversation fails
+    }
+  }, [session, chapterId, dispatch]);
+
+  // AI Interviewer 2.0: Handle conversation continuation after upload
+  const handleConversationAfterUpload = useCallback(async (assetId: string) => {
+    if (!session?.token || !conversationSessionId) return;
+
+    try {
+      log.debug("Waiting for transcription...");
+      setUploadStatus("Transcriptie wordt gemaakt...");
+
+      // Poll for transcription (simplified - in production you'd use websockets)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Get transcription
+      const transcriptResponse = await apiFetch<{ text: string }>(
+        `/media/${assetId}/transcript`,
+        {},
+        { token: session.token }
+      );
+
+      if (!transcriptResponse.text) {
+        log.warn("No transcription available yet");
+        return;
+      }
+
+      log.debug("Got transcription, continuing conversation");
+      setUploadStatus("AI denkt na...");
+
+      // Continue conversation with transcription
+      const response = await continueConversation(
+        session.token,
+        conversationSessionId,
+        transcriptResponse.text
+      );
+
+      dispatch({
+        type: "UPDATE_CONVERSATION",
+        payload: {
+          question: response.nextQuestion,
+          turnNumber: response.turnNumber,
+          depth: response.storyDepth,
+          complete: response.conversationComplete,
+        },
+      });
+
+      if (response.conversationComplete) {
+        // Conversation complete! 🎉
+        log.debug("Conversation completed!", { turns: response.turnNumber, depth: response.storyDepth });
+
+        const summary = await endConversationSession(session.token, conversationSessionId);
+
+        setUploadStatus(`Gesprek compleet! ${summary.totalTurns} verhalen verteld ✨`);
+        triggerConfetti(5000, 150);
+
+        setTimeout(() => {
+          showNextChapter();
+          setUploadStatus(null);
+        }, 3000);
+      } else {
+        // More questions to ask
+        setUploadStatus(`Vraag ${response.turnNumber} volgt...`);
+        log.debug("Next question", { question: response.nextQuestion, depth: response.storyDepth });
+
+        setTimeout(() => {
+          setUploadStatus(null);
+        }, 2000);
+      }
+    } catch (error) {
+      log.error("Conversation continuation failed", error);
+      setUploadStatus("Volgende vraag laden...");
+      setTimeout(() => setUploadStatus(null), 2000);
+    }
+  }, [session, conversationSessionId, dispatch, triggerConfetti, showNextChapter, setUploadStatus]);
 
   // Save text content
   const saveTextContent = useCallback(async () => {
@@ -435,21 +614,146 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       );
 
       setUploadStatus("Tekst opgeslagen!");
-      showNextChapter();
       setRecordingState("idle");
 
-      setTimeout(() => {
-        setUploadStatus(null);
-      }, 2000);
+      log.debug("Text saved successfully, starting AI conversation flow");
 
-      log.debug("Text saved successfully");
+      // AI Interviewer 2.0: Handle conversation for text mode
+      // For text, we don't need transcription - the text IS the transcript
+      const savedText = state.textContent;
+
+      if (!conversationSessionId) {
+        // First text entry - start conversation
+        try {
+          // Use journey.id from bootstrap, which is more reliable than session.primaryJourneyId
+          const journeyId = journey?.id || session.primaryJourneyId;
+
+          log.debug("Starting conversation session for text", {
+            assetId: presignResponse.asset_id,
+            journeyId,
+            chapterId,
+          });
+
+          if (!journeyId) {
+            log.warn("No journey ID available, skipping conversation");
+            showNextChapter();
+            return;
+          }
+
+          const conversationSession = await startConversationSession(
+            session.token,
+            journeyId,
+            chapterId as any,
+            presignResponse.asset_id
+          );
+
+          log.debug("Conversation session started", { sessionId: conversationSession.sessionId });
+
+          dispatch({
+            type: "START_CONVERSATION",
+            payload: {
+              sessionId: conversationSession.sessionId,
+              question: conversationSession.openingQuestion,
+            },
+          });
+
+          // Now continue with the text they just saved
+          setUploadStatus("AI analyseert je verhaal...");
+
+          const response = await continueConversation(
+            session.token,
+            conversationSession.sessionId,
+            savedText
+          );
+
+          dispatch({
+            type: "UPDATE_CONVERSATION",
+            payload: {
+              question: response.nextQuestion,
+              turnNumber: response.turnNumber,
+              depth: response.storyDepth,
+              complete: response.conversationComplete,
+            },
+          });
+
+          if (response.conversationComplete) {
+            setUploadStatus(`Mooi verhaal! ${response.turnNumber} delen gedeeld`);
+            triggerConfetti(3000, 100);
+            setTimeout(() => {
+              showNextChapter();
+              setUploadStatus(null);
+            }, 2500);
+          } else {
+            setUploadStatus("Vervolgvraag klaar!");
+            // Clear text for next response
+            dispatch({ type: "SET_TEXT_CONTENT", payload: "" });
+            setTimeout(() => setUploadStatus(null), 1500);
+          }
+        } catch (error: any) {
+          log.error("Failed to start text conversation", error, {
+            message: error?.message,
+            status: error?.status,
+          });
+          setUploadStatus(null);
+          showNextChapter();
+        }
+      } else if (!conversationComplete) {
+        // Continuing conversation with text
+        try {
+          setUploadStatus("AI denkt na over je antwoord...");
+
+          const response = await continueConversation(
+            session.token,
+            conversationSessionId,
+            savedText
+          );
+
+          dispatch({
+            type: "UPDATE_CONVERSATION",
+            payload: {
+              question: response.nextQuestion,
+              turnNumber: response.turnNumber,
+              depth: response.storyDepth,
+              complete: response.conversationComplete,
+            },
+          });
+
+          if (response.conversationComplete) {
+            setUploadStatus(`Gesprek compleet! ${response.turnNumber} verhalen verteld`);
+            triggerConfetti(5000, 150);
+
+            const summary = await endConversationSession(session.token, conversationSessionId);
+            log.debug("Conversation ended", summary);
+
+            setTimeout(() => {
+              showNextChapter();
+              setUploadStatus(null);
+            }, 3000);
+          } else {
+            setUploadStatus(`Vraag ${response.turnNumber} - ga verder!`);
+            // Clear text for next response
+            dispatch({ type: "SET_TEXT_CONTENT", payload: "" });
+            setTimeout(() => setUploadStatus(null), 1500);
+          }
+        } catch (error) {
+          log.error("Failed to continue text conversation", error);
+          setUploadStatus(null);
+          showNextChapter();
+        }
+      } else {
+        // Conversation already complete, just show success
+        setTimeout(() => {
+          setUploadStatus(null);
+          showNextChapter();
+        }, 2000);
+      }
     } catch (error) {
       log.error("Save error", error);
       const message = error instanceof Error ? error.message : "Opslaan mislukt. Probeer opnieuw.";
       setUploadStatus(message);
       setRecordingState("idle");
     }
-  }, [state.textContent, session, chapterId, setRecordingState, setUploadStatus, showNextChapter]);
+  }, [state.textContent, session, chapterId, setRecordingState, setUploadStatus, showNextChapter, conversationSessionId, conversationComplete, dispatch, triggerConfetti]);
 
   // Get AI suggestion
   const getAISuggestion = useCallback(async () => {
@@ -524,6 +828,9 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
     uploadRecording,
     saveTextContent,
     getAISuggestion,
+    // AI Interviewer 2.0
+    initializeConversation,
+    handleConversationAfterUpload,
   };
 }
 

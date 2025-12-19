@@ -13,6 +13,7 @@ from app.api.v1.routes import (
     timeline,
     family,
     admin,
+    admin_enhanced,
     emails,
 )
 
@@ -30,4 +31,5 @@ api_router.include_router(memos.router, prefix="/memos", tags=["memos"])
 api_router.include_router(timeline.router, prefix="/timeline", tags=["timeline"])
 api_router.include_router(family.router, prefix="/family", tags=["family"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(admin_enhanced.router, prefix="/admin", tags=["admin-enhanced"])
 api_router.include_router(emails.router, prefix="/emails", tags=["emails"])

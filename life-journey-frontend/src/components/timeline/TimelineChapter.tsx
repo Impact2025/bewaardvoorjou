@@ -40,12 +40,13 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
       onClick={onClick}
       disabled={isLocked}
       className={cn(
-        "group relative flex flex-col items-start p-3 sm:p-4 rounded-xl border-2 transition-all duration-200",
+        "group relative flex flex-col items-start p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ease-out",
         "w-[140px] sm:w-[160px] md:w-[180px] text-left",
         "min-h-[100px] sm:min-h-[120px]",
-        "active:scale-[0.98]",
+        "active:scale-95",
         isLocked && "opacity-50 cursor-not-allowed",
-        !isLocked && "hover:shadow-md hover:scale-[1.02] cursor-pointer",
+        !isLocked && "hover:shadow-lg hover:scale-105 hover:-translate-y-1 cursor-pointer",
+        isCompleted && "ring-2 ring-green-400 animate-pulse-once",
         isSelected && "ring-2 ring-offset-2 ring-teal-500",
         colors.bg,
         colors.border,

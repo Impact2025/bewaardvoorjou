@@ -260,59 +260,55 @@ export function useStoryReactions(storyId: string) {
 
     try {
       setIsLoading(true);
-      // Mock data - replace with actual API call
-      setReactions([
-        {
-          id: "1",
-          user_id: "user1",
-          user_name: "Marie",
-          emoji: "❤️",
-          created_at: "2025-01-20T10:00:00Z",
-        },
-        {
-          id: "2",
-          user_id: "user2",
-          user_name: "Jan Jr.",
-          emoji: "😂",
-          created_at: "2025-01-20T10:15:00Z",
-        },
-      ]);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+      const headers = { Authorization: `Bearer ${session.token}` };
 
-      setComments([
-        {
-          id: "1",
-          user_id: "user1",
-          user_name: "Marie",
-          content: "Wat een mooie herinnering! Dit doet me denken aan onze eigen vakanties.",
-          created_at: "2025-01-20T10:30:00Z",
-          reactions: [],
-        },
-      ]);
+      const response = await fetch(`${apiUrl}/sharing/reactions/${storyId}`, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        setReactions(data.reactions || []);
+        setComments(data.comments || []);
+      } else {
+        setReactions([]);
+        setComments([]);
+      }
     } catch (err) {
       logger.error("Failed to fetch reactions", err);
+      setReactions([]);
+      setComments([]);
     } finally {
       setIsLoading(false);
     }
-  }, [session?.token]);
+  }, [session?.token, storyId]);
 
   const addReaction = useCallback(async (emoji: string) => {
     if (!session?.token) return;
 
     try {
-      // Mock API call - replace with actual implementation
-      const newReaction: StoryReaction = {
-        id: Date.now().toString(),
-        user_id: session.user.id,
-        user_name: "Jij",
-        emoji,
-        created_at: new Date().toISOString(),
-      };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+      const response = await fetch(`${apiUrl}/sharing/reactions/${storyId}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
 
-      setReactions(prev => [...prev, newReaction]);
+      if (response.ok) {
+        const newReaction = await response.json();
+        setReactions(prev => [...prev, newReaction]);
+      } else {
+        const newReaction: StoryReaction = {
+          id: Date.now().toString(),
+          user_id: session.user.id,
+          user_name: session.user.displayName || "Jij",
+          emoji,
+          created_at: new Date().toISOString(),
+        };
+        setReactions(prev => [...prev, newReaction]);
+      }
     } catch (err) {
       logger.error("Failed to add reaction", err);
     }
-  }, [session]);
+  }, [session, storyId]);
 
   const removeReaction = useCallback(async (reactionId: string) => {
     try {

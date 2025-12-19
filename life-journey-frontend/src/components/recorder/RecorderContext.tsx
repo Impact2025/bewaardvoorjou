@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useRef, useCallback, ReactNode } from "react";
+import { createContext, useContext, useReducer, useRef, useCallback, useMemo, ReactNode } from "react";
 import { logger } from "@/lib/logger";
 
 const log = logger.forComponent("RecorderContext");
@@ -24,6 +24,12 @@ export interface RecorderState {
   isGettingAISuggestion: boolean;
   // AI Chat
   isAssistantChatOpen: boolean;
+  // Multi-turn Conversation (AI Interviewer 2.0)
+  conversationSessionId: string | null;
+  conversationTurnNumber: number;
+  conversationStoryDepth: number | null;
+  conversationComplete: boolean;
+  currentQuestion: string | null;
 }
 
 type RecorderAction =
@@ -39,6 +45,10 @@ type RecorderAction =
   | { type: "SET_AI_SUGGESTION"; payload: string | null }
   | { type: "SET_IS_GETTING_AI_SUGGESTION"; payload: boolean }
   | { type: "SET_ASSISTANT_CHAT_OPEN"; payload: boolean }
+  | { type: "START_CONVERSATION"; payload: { sessionId: string; question: string } }
+  | { type: "UPDATE_CONVERSATION"; payload: { question: string | null; turnNumber: number; depth: number | null; complete: boolean } }
+  | { type: "END_CONVERSATION" }
+  | { type: "SET_CURRENT_QUESTION"; payload: string | null }
   | { type: "RESET" };
 
 const initialState: RecorderState = {
@@ -54,12 +64,19 @@ const initialState: RecorderState = {
   aiSuggestion: null,
   isGettingAISuggestion: false,
   isAssistantChatOpen: false,
+  conversationSessionId: null,
+  conversationTurnNumber: 0,
+  conversationStoryDepth: null,
+  conversationComplete: false,
+  currentQuestion: null,
 };
 
 function recorderReducer(state: RecorderState, action: RecorderAction): RecorderState {
   switch (action.type) {
     case "SET_MODE":
-      return { ...state, mode: action.payload };
+      // Clear mediaBlob and reset state when switching modes to prevent
+      // trying to play a video blob in audio mode or vice versa
+      return { ...state, mode: action.payload, mediaBlob: null, state: "idle", recordingTime: 0 };
     case "SET_STATE":
       return { ...state, state: action.payload };
     case "SET_RECORDING_TIME":
@@ -84,6 +101,34 @@ function recorderReducer(state: RecorderState, action: RecorderAction): Recorder
       return { ...state, isGettingAISuggestion: action.payload };
     case "SET_ASSISTANT_CHAT_OPEN":
       return { ...state, isAssistantChatOpen: action.payload };
+    case "START_CONVERSATION":
+      return {
+        ...state,
+        conversationSessionId: action.payload.sessionId,
+        currentQuestion: action.payload.question,
+        conversationTurnNumber: 1,
+        conversationStoryDepth: null,
+        conversationComplete: false,
+      };
+    case "UPDATE_CONVERSATION":
+      return {
+        ...state,
+        currentQuestion: action.payload.question,
+        conversationTurnNumber: action.payload.turnNumber,
+        conversationStoryDepth: action.payload.depth,
+        conversationComplete: action.payload.complete,
+      };
+    case "END_CONVERSATION":
+      return {
+        ...state,
+        conversationSessionId: null,
+        currentQuestion: null,
+        conversationTurnNumber: 0,
+        conversationStoryDepth: null,
+        conversationComplete: false,
+      };
+    case "SET_CURRENT_QUESTION":
+      return { ...state, currentQuestion: action.payload };
     case "RESET":
       return {
         ...initialState,
@@ -137,14 +182,24 @@ export function RecorderProvider({ children, initialMode = "text" }: RecorderPro
   });
 
   // Refs for media handling (don't trigger re-renders)
-  const refs: RecorderRefs = {
-    mediaRecorder: useRef<MediaRecorder | null>(null),
-    stream: useRef<MediaStream | null>(null),
-    chunks: useRef<Blob[]>([]),
-    recordingTimer: useRef<NodeJS.Timeout | null>(null),
-    videoPreview: useRef<HTMLVideoElement | null>(null),
-    playback: useRef<HTMLVideoElement | HTMLAudioElement | null>(null),
-  };
+  // IMPORTANT: Each useRef must be called at the top level, then collected into a stable object
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+  const playbackRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+
+  // Memoize the refs object so it doesn't change on every render
+  // This is critical - changing refs triggers cleanup effects that stop recording!
+  const refs: RecorderRefs = useMemo(() => ({
+    mediaRecorder: mediaRecorderRef,
+    stream: streamRef,
+    chunks: chunksRef,
+    recordingTimer: recordingTimerRef,
+    videoPreview: videoPreviewRef,
+    playback: playbackRef,
+  }), []);
 
   // Helper actions
   const setMode = useCallback((mode: RecordingMode) => {

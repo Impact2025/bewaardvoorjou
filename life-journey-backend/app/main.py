@@ -21,6 +21,9 @@ CORS_ORIGINS = [
   "https://www.bewaardvoorjou.nl",
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+  "http://localhost:3004",
   "http://localhost:4005",
   "http://localhost:6001",
 ]

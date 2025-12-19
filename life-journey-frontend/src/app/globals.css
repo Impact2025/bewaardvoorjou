@@ -406,3 +406,13 @@ body {
 .warm-breath {
   animation: warm-breath 4s ease-in-out infinite;
 }
+
+/* Pulse-once animation for completed chapters */
+@keyframes pulse-once {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.95; }
+}
+
+.animate-pulse-once {
+  animation: pulse-once 0.8s ease-in-out;
+}
