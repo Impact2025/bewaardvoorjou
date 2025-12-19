@@ -124,8 +124,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
           <Button
             onClick={() => setAssistantChatOpen(true)}
             variant="ghost"
-            size="sm"
-            className="text-orange hover:text-orange-dark"
+            className="text-orange hover:text-orange-dark h-9 px-3 py-2"
             aria-label="Open AI assistent"
           >
             <MessageCircle className="h-4 w-4" />

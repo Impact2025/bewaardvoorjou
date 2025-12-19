@@ -115,6 +115,7 @@ export async function endConversationSession(
     story_depth: number;
     key_themes: string[];
     people_mentioned: string[];
+    places_mentioned?: string[];
   }>(
     '/assistant/conversation/end',
     {
@@ -133,5 +134,6 @@ export async function endConversationSession(
     storyDepth: response.story_depth,
     keyThemes: response.key_themes,
     peopleMentioned: response.people_mentioned,
+    placesMentioned: response.places_mentioned || [],
   };
 }
