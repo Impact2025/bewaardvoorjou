@@ -54,8 +54,7 @@ export function TextEditor({ onGetAISuggestion }: TextEditorProps) {
               onClick={onGetAISuggestion}
               disabled={isGettingAISuggestion}
               variant="ghost"
-              size="sm"
-              className="text-xs text-orange hover:text-orange-dark h-7"
+              className="text-xs text-orange hover:text-orange-dark h-7 px-3"
               aria-busy={isGettingAISuggestion}
             >
               <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />

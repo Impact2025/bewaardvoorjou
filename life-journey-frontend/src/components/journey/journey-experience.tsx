@@ -70,8 +70,7 @@ export function JourneyExperience() {
         </div>
         <Button
           variant="ghost"
-          size="sm"
-          className="text-slate-500 hover:text-slate-700 flex-shrink-0"
+          className="text-slate-500 hover:text-slate-700 flex-shrink-0 h-9 px-3 py-2"
           onClick={() => window.history.back()}
         >
           <Info className="h-4 w-4 mr-1" />
@@ -88,7 +87,7 @@ export function JourneyExperience() {
           <span className="text-slate-600">
             {journey.media.filter(m => m.chapterId === journey.activeChapterId).length} opnames in dit hoofdstuk
           </span>
-          <Button variant="link" size="sm" className="text-orange p-0 h-auto" asChild>
+          <Button variant="ghost" className="text-orange p-0 h-auto" asChild>
             <a href="/recordings">Bekijk alle opnames</a>
           </Button>
         </div>

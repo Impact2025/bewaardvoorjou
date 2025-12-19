@@ -118,7 +118,7 @@ export function InterviewConsole({
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <Button
-              variant="outline"
+              variant="secondary"
               className="flex-1 border-green-300 text-green-700 hover:bg-green-50"
               onClick={handleNewQuestion}
             >
@@ -164,8 +164,7 @@ export function InterviewConsole({
 
           <Button
             variant="ghost"
-            size="sm"
-            className="text-orange-600 hover:text-orange-700 hover:bg-orange-100"
+            className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 h-8 w-8 p-0"
             onClick={handleNewQuestion}
             disabled={isPending}
           >

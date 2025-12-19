@@ -723,7 +723,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
             triggerConfetti(5000, 150);
 
             const summary = await endConversationSession(session.token, conversationSessionId);
-            log.debug("Conversation ended", summary);
+            log.debug("Conversation ended", { summary: JSON.stringify(summary) });
 
             setTimeout(() => {
               showNextChapter();
