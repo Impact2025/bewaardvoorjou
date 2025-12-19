@@ -58,57 +58,37 @@ export function SharedPods({ journeyId, className }: SharedPodsProps) {
   const [newPodTitle, setNewPodTitle] = useState("");
   const [newPodDescription, setNewPodDescription] = useState("");
 
-  // Mock data for demonstration
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setPods([
-        {
-          id: "1",
-          title: "Familieverhalen",
-          description: "Deel herinneringen over onze familiegeschiedenis",
-          created_by: "owner",
-          created_at: "2025-01-15T10:00:00Z",
-          members: ["owner", "spouse", "child1"],
-          is_active: true,
-          last_activity: "2025-01-20T14:30:00Z",
-        },
-        {
-          id: "2",
-          title: "Vakantie Herinneringen",
-          description: "Onze mooiste vakanties en reizen samen",
-          created_by: "spouse",
-          created_at: "2025-01-18T09:15:00Z",
-          members: ["owner", "spouse"],
-          is_active: true,
-          last_activity: "2025-01-19T16:45:00Z",
-        },
-      ]);
-
-      setMessages([
-        {
-          id: "1",
-          pod_id: "1",
-          author_id: "owner",
-          author_name: "Jan",
-          content: "Herinneren jullie je nog die keer dat we allemaal gingen kamperen in de Ardennen?",
-          created_at: "2025-01-20T10:00:00Z",
-          reactions: { "❤️": ["spouse", "child1"], "👍": ["child1"] },
-        },
-        {
-          id: "2",
-          pod_id: "1",
-          author_id: "spouse",
-          author_name: "Marie",
-          content: "Ja! Dat was zo leuk. Weet je nog dat het de hele nacht regende?",
-          created_at: "2025-01-20T10:15:00Z",
-          reactions: { "😄": ["owner", "child1"] },
-        },
-      ]);
-
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    const fetchPods = async () => {
+      if (!session?.token) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+        const headers = { Authorization: `Bearer ${session.token}` };
+        
+        const response = await fetch(`${apiUrl}/family/pods/${journeyId}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          setPods(data.pods || []);
+          setMessages(data.messages || []);
+        } else {
+          setPods([]);
+          setMessages([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch pods", err);
+        setPods([]);
+        setMessages([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPods();
+  }, [session?.token, journeyId]);
 
   const handleCreatePod = () => {
     if (!newPodTitle.trim()) return;

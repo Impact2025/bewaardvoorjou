@@ -40,7 +40,6 @@ async def get_admin_stats(
     - Active users
     - New users today
     - Total journeys
-    - Total subscriptions (mock data for now)
     """
     # Total users
     total_users = db.query(func.count(User.id)).scalar()
@@ -60,14 +59,11 @@ async def get_admin_stats(
     # Total journeys
     total_journeys = db.query(func.count(Journey.id)).scalar()
 
-    # Mock subscription data (to be replaced with real subscription model)
     return {
         "total_users": total_users or 0,
         "active_users": active_users or 0,
         "new_users_today": new_users_today or 0,
         "total_journeys": total_journeys or 0,
-        "total_revenue": 15420,  # Mock data
-        "monthly_recurring": 8940,  # Mock data
     }
 
 

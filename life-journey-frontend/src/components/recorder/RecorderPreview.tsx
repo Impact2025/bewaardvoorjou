@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useMemo, useEffect } from "react";
 import { Video, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecorder } from "./RecorderContext";
@@ -20,12 +20,30 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
     const isRecording = recordingState === "recording";
     const isPreviewing = recordingState === "previewing";
 
+    // Create blob URL for playback - memoized to avoid recreating on every render
+    const blobUrl = useMemo(() => {
+      if (mediaBlob) {
+        return URL.createObjectURL(mediaBlob);
+      }
+      return null;
+    }, [mediaBlob]);
+
+    // Cleanup blob URL when component unmounts or blob changes
+    useEffect(() => {
+      return () => {
+        if (blobUrl) {
+          URL.revokeObjectURL(blobUrl);
+        }
+      };
+    }, [blobUrl]);
+
     // Video mode with blob - show playback
     if (mode === "video" && mediaBlob) {
       return (
         <div className="w-full h-full relative bg-black">
           <video
             ref={ref}
+            src={blobUrl || undefined}
             controls
             playsInline
             className="w-full h-full object-contain rounded-[24px]"
@@ -129,10 +147,20 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
           <div className="w-full max-w-md">
             <audio
               ref={ref as React.Ref<HTMLAudioElement>}
+              src={blobUrl || undefined}
               controls
               className="w-full"
               onLoadedMetadata={() => log.debug("Audio metadata loaded")}
-              onError={(e) => log.error("Audio playback error", e)}
+              onError={(e) => {
+                const audio = e.currentTarget;
+                log.error("Audio playback error", audio.error ? new Error(audio.error.message) : new Error("Unknown audio error"), {
+                  code: audio.error?.code,
+                  networkState: audio.networkState,
+                  readyState: audio.readyState,
+                  src: audio.src ? audio.src.substring(0, 100) : "no src",
+                  currentSrc: audio.currentSrc ? audio.currentSrc.substring(0, 100) : "no currentSrc",
+                });
+              }}
               aria-label="Afspelen van opname"
             />
           </div>

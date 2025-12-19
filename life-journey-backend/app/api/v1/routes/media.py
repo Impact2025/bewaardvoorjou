@@ -13,7 +13,7 @@ from app.schemas.media import MediaAsset, MediaPresignRequest, MediaPresignRespo
 from app.services.media.presigner import build_presigned_upload
 from app.services.media.processor import enqueue_transcode_job, enqueue_transcript_job
 from app.services.media.local_storage import local_storage
-from app.services.media.validators import validate_upload_file, validate_object_key
+from app.services.media.validators import validate_upload_file, validate_object_key, validate_file_extension
 from app.services.email.events import trigger_chapter_complete_email, trigger_milestone_email
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
@@ -173,7 +173,6 @@ def finalize_upload(
 async def local_upload(
   request: Request,
   object_key: str,
-  file: UploadFile = File(...),
   db: Session = Depends(get_db),
 ) -> dict[str, str]:
   """
@@ -181,20 +180,34 @@ async def local_upload(
 
   Security features:
   - File type validation (only allowed extensions)
-  - MIME type verification
   - File size limits (500MB video, 100MB audio, 10MB text)
   - Filename sanitization
   - Path traversal protection
   """
+  import logging
+  import io
+  logger = logging.getLogger(__name__)
+
   try:
-    # Validate uploaded file (extension, MIME type, size)
-    safe_filename, extension = validate_upload_file(file)
+    logger.info(f"Local upload attempt - object_key: {object_key}")
+
+    # Read raw body
+    body = await request.body()
+    logger.info(f"Received {len(body)} bytes")
+
+    # Extract filename from object_key (last part of path)
+    filename = object_key.split("/")[-1]
+    logger.info(f"Extracted filename: {filename}")
+
+    # Validate extension
+    extension = validate_file_extension(filename)
 
     # Validate and sanitize object key (prevent path traversal)
     safe_object_key = validate_object_key(object_key)
 
-    # Save file to local storage
-    stored_key = local_storage.save_file(safe_object_key, file.file)
+    # Save file to local storage (wrap bytes in BytesIO for compatibility)
+    file_like = io.BytesIO(body)
+    stored_key = local_storage.save_file(safe_object_key, file_like)
 
     # Update asset status
     # Extract asset_id from object_key (format: journey_id/chapter_id/asset_id/filename)
@@ -208,10 +221,12 @@ async def local_upload(
         db.commit()
 
     return {"status": "uploaded", "object_key": stored_key}
-  except HTTPException:
-    # Re-raise validation errors
+  except HTTPException as e:
+    # Log and re-raise validation errors
+    logger.error(f"Validation error in local_upload: {e.detail}")
     raise
   except Exception as e:
+    logger.error(f"Unexpected error in local_upload: {str(e)}")
     raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 

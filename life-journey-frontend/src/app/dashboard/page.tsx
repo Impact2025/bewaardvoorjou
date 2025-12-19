@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { useConfetti } from "@/components/Confetti";
 import {
   Card,
   CardContent,
@@ -45,6 +46,7 @@ function DashboardContent() {
   const router = useRouter();
   const { journey, profile, isLoading, error } = useJourneyBootstrap();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { triggerConfetti, ConfettiComponent } = useConfetti();
 
   // Auto-show onboarding for first-time users
   useEffect(() => {
@@ -52,6 +54,24 @@ function DashboardContent() {
       setShowOnboarding(true);
     }
   }, []);
+
+  // Celebrate milestones with confetti
+  useEffect(() => {
+    const completedChapters = journey?.journeyProgress?.completedChapters ?? 0;
+    if (completedChapters === 0) return;
+
+    const milestones = [1, 5, 10, 15, 30];
+    const lastCelebrated = Number(localStorage.getItem('last_milestone') || '0');
+
+    if (milestones.includes(completedChapters) && completedChapters > lastCelebrated) {
+      // Trigger confetti - bigger celebration for bigger milestones
+      const duration = completedChapters === 30 ? 8000 : completedChapters >= 10 ? 5000 : 3000;
+      const particleCount = completedChapters === 30 ? 200 : completedChapters >= 10 ? 150 : 100;
+
+      triggerConfetti(duration, particleCount);
+      localStorage.setItem('last_milestone', String(completedChapters));
+    }
+  }, [journey?.journeyProgress?.completedChapters, triggerConfetti]);
 
   const handleChapterSelect = (chapterId: ChapterId) => {
     router.push(`/chapter/${chapterId}`);
@@ -94,11 +114,81 @@ function DashboardContent() {
     ? CHAPTERS.find((ch) => ch.id === nextChapter)?.title
     : null;
 
+  // Time-aware personalized greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = profile?.displayName || 'daar';
+
+    if (completedChapters === 0) {
+      return hour < 12
+        ? `Goedemorgen ${name}, klaar om te beginnen?`
+        : hour < 18
+        ? `Goedemiddag ${name}, welkom bij je levensverhaal`
+        : `Goedenavond ${name}, tijd voor herinneringen`;
+    }
+
+    if (completedChapters === 1) {
+      return `Fantastisch ${name}! Je eerste verhaal staat 🎉`;
+    }
+
+    if (completedChapters < 10) {
+      return `Welkom terug, ${name}`;
+    }
+
+    if (completedChapters < 20) {
+      return `Je doet het geweldig, ${name}`;
+    }
+
+    if (progressPercent >= 80) {
+      return `Je bent er bijna, ${name}!`;
+    }
+
+    return `Hallo ${name}`;
+  };
+
+  // Emotional, meaningful progress messages
+  const getProgressMessage = () => {
+    if (completedChapters === 0) {
+      return "Elk verhaal begint met één woord. Wat is jouw vroegste herinnering?";
+    }
+
+    if (completedChapters === 1) {
+      return "Je eerste verhaal staat! 🎉 Hoe voelt dat? Zullen we doorgaan?";
+    }
+
+    if (completedChapters === 3) {
+      return "3 hoofdstukken! Je bent op weg. Je kleinkinderen zullen dit koesteren.";
+    }
+
+    if (completedChapters === 5) {
+      return "5 verhalen vol herinneringen. Dit wordt echt mooi.";
+    }
+
+    if (completedChapters === 10) {
+      return "10 hoofdstukken! Je bouwt aan iets bijzonders hier.";
+    }
+
+    if (completedChapters === 15) {
+      return "Halverwege! Elke herinnering die je deelt is een cadeau.";
+    }
+
+    if (progressPercent === 100) {
+      return "Je hebt het gedaan. Je levensverhaal is compleet. ❤️";
+    }
+
+    if (progressPercent < 100) {
+      return `${completedChapters} hoofdstukken verteld. Blijf zo doorgaan!`;
+    }
+
+    return "Je hebt alle hoofdstukken voltooid. Je levensverhaal is compleet.";
+  };
+
   return (
     <>
       <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
+      <ConfettiComponent />
       <AppShell
-        title={`Welkom${profile?.displayName ? `, ${profile.displayName}` : ''}`}
+        title={getGreeting()}
         description={`Je levensverhaal · ${completedChapters}/${totalChapters} hoofdstukken voltooid`}
         activeHref="/dashboard"
         onShowHandleiding={() => setShowOnboarding(true)}
@@ -122,11 +212,7 @@ function DashboardContent() {
                       : "Gefeliciteerd! 🎉"}
                   </h2>
                   <p className="text-teal-100 max-w-md">
-                    {progressPercent === 0
-                      ? "Neem je eerste opname en begin met het vastleggen van je levensverhaal."
-                      : progressPercent < 100
-                      ? `Je hebt al ${completedChapters} hoofdstukken voltooid. Blijf zo doorgaan!`
-                      : "Je hebt alle hoofdstukken voltooid. Je levensverhaal is compleet."}
+                    {getProgressMessage()}
                   </p>
                 </div>
                 {nextChapter && (
