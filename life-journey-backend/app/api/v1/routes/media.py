@@ -17,6 +17,7 @@ from app.services.media.validators import validate_upload_file, validate_object_
 from app.services.email.events import trigger_chapter_complete_email, trigger_milestone_email
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
+from app.core.config import settings
 from loguru import logger
 
 import boto3
