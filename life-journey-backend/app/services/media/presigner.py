@@ -18,7 +18,7 @@ def build_presigned_upload(payload: MediaPresignRequest) -> MediaPresignResponse
   object_key = f"{payload.journey_id}/{chapter_id_value}/{asset_id}/{payload.filename}"
 
   # Try S3 first if configured
-  if settings.s3_bucket:
+  if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
     try:
       # Use explicit endpoint URL for the region, or construct it from region
       endpoint_url = settings.s3_endpoint_url
@@ -29,6 +29,8 @@ def build_presigned_upload(payload: MediaPresignRequest) -> MediaPresignResponse
         "s3",
         region_name=settings.s3_region,
         endpoint_url=endpoint_url,
+        aws_access_key_id=settings.aws_access_key_id,
+        aws_secret_access_key=settings.aws_secret_access_key,
       )
       presigned = client.generate_presigned_post(
         Bucket=settings.s3_bucket,

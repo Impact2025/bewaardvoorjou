@@ -40,8 +40,10 @@ class Settings(BaseSettings):
 
   # S3/Storage configuration
   s3_endpoint_url: str | None = None
-  s3_bucket: str = "life-journey-media"
+  s3_bucket: str | None = None
   s3_region: str = "eu-central-1"
+  aws_access_key_id: str | None = None
+  aws_secret_access_key: str | None = None
   media_encryption_kms_key: str | None = None
 
   # AI/Whisper configuration
