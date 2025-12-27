@@ -282,7 +282,7 @@ async def serve_local_file(request: Request, object_key: str) -> FileResponse:
 async def serve_file(request: Request, object_key: str):
   """
   Serve files from S3 (production) or local storage (development).
-  For S3, redirects to a presigned URL for direct download.
+  Returns presigned URL as JSON for S3, or serves file directly for local.
   """
   # Try S3 first if configured
   if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
@@ -310,8 +310,9 @@ async def serve_file(request: Request, object_key: str):
         ExpiresIn=3600,
       )
 
-      logger.info(f"Redirecting to S3 presigned URL for {object_key}")
-      return RedirectResponse(url=presigned_url, status_code=302)
+      logger.info(f"Generated S3 presigned URL for {object_key}")
+      # Return presigned URL as JSON instead of redirect (avoids CORS issues)
+      return {"url": presigned_url, "type": "s3"}
 
     except (BotoCoreError, NoCredentialsError) as exc:
       logger.warning(f"S3 not available, trying local storage: {exc}")
@@ -324,15 +325,20 @@ async def serve_file(request: Request, object_key: str):
   if not file_path.exists():
     raise HTTPException(status_code=404, detail="File not found")
 
-  # Determine media type based on file extension
+  # For text files, return content as JSON
   suffix = file_path.suffix.lower()
+  if suffix == ".txt":
+    with open(file_path, "r", encoding="utf-8") as f:
+      content = f.read()
+    return {"content": content, "type": "local"}
+
+  # For other files, return FileResponse
   media_type_map = {
     ".webm": "video/webm",
     ".mp4": "video/mp4",
     ".mp3": "audio/mpeg",
     ".wav": "audio/wav",
     ".m4a": "audio/mp4",
-    ".txt": "text/plain",
   }
   media_type = media_type_map.get(suffix, "application/octet-stream")
 
