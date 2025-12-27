@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import BinaryIO
 
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -18,6 +18,9 @@ from app.services.email.events import trigger_chapter_complete_email, trigger_mi
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
 from loguru import logger
+
+import boto3
+from botocore.exceptions import BotoCoreError, NoCredentialsError
 
 
 router = APIRouter()
@@ -236,6 +239,65 @@ async def serve_local_file(request: Request, object_key: str) -> FileResponse:
   """
   Serve files from local storage (for development without S3)
   """
+  file_path = local_storage.get_file_path(object_key)
+
+  if not file_path.exists():
+    raise HTTPException(status_code=404, detail="File not found")
+
+  # Determine media type based on file extension
+  suffix = file_path.suffix.lower()
+  media_type_map = {
+    ".webm": "video/webm",
+    ".mp4": "video/mp4",
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".m4a": "audio/mp4",
+    ".txt": "text/plain",
+  }
+  media_type = media_type_map.get(suffix, "application/octet-stream")
+
+  return FileResponse(
+    path=str(file_path),
+    media_type=media_type,
+    filename=file_path.name,
+  )
+
+
+@router.get("/file/{object_key:path}")
+@limiter.limit(RateLimits.MEDIA_READ)
+async def serve_file(request: Request, object_key: str):
+  """
+  Serve files from S3 (production) or local storage (development).
+  For S3, redirects to a presigned URL for direct download.
+  """
+  # Try S3 first if configured
+  if settings.s3_bucket:
+    try:
+      client = boto3.client(
+        "s3",
+        region_name=settings.s3_region,
+        endpoint_url=settings.s3_endpoint_url,
+      )
+
+      # Generate presigned GET URL (valid for 1 hour)
+      presigned_url = client.generate_presigned_url(
+        "get_object",
+        Params={
+          "Bucket": settings.s3_bucket,
+          "Key": object_key,
+        },
+        ExpiresIn=3600,
+      )
+
+      logger.info(f"Redirecting to S3 presigned URL for {object_key}")
+      return RedirectResponse(url=presigned_url, status_code=302)
+
+    except (BotoCoreError, NoCredentialsError) as exc:
+      logger.warning(f"S3 not available, trying local storage: {exc}")
+    except Exception as exc:
+      logger.warning(f"Error generating S3 presigned URL: {exc}")
+
+  # Fallback to local storage
   file_path = local_storage.get_file_path(object_key)
 
   if not file_path.exists():

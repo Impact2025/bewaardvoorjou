@@ -78,9 +78,9 @@ function RecordingsContent() {
   };
 
   const getMediaUrl = (recording: Recording) => {
-    // For local storage, use object_key
+    // Use object_key for both S3 and local storage
     const objectKey = recording.object_key || `${journey?.id}/${recording.chapter_id}/${recording.id}/${recording.filename}`;
-    return `${API_BASE_URL}/media/local-file/${objectKey}`;
+    return `${API_BASE_URL}/media/file/${objectKey}`;
   };
 
   const handleDownload = (recording: Recording) => {
