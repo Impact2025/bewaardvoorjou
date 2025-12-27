@@ -10,6 +10,12 @@ from uuid import uuid4
 from app.core.config import settings
 
 
+def get_api_base_url() -> str:
+    """Get the API base URL from settings"""
+    base_url = settings.api_base_url.rstrip('/')
+    return f"{base_url}{settings.api_v1_prefix}"
+
+
 class LocalStorageService:
     """Local file storage for development"""
 
@@ -39,7 +45,7 @@ class LocalStorageService:
 
         # Return a "mock" upload URL (in real usage, this would be a presigned S3 URL)
         # For local storage, we'll use a special endpoint
-        upload_url = f"http://localhost:8000/api/v1/media/local-upload/{object_key}"
+        upload_url = f"{get_api_base_url()}/media/local-upload/{object_key}"
 
         return upload_url, object_key
 
@@ -65,7 +71,7 @@ class LocalStorageService:
         Returns:
             str: URL to access the file
         """
-        return f"http://localhost:8000/api/v1/media/local-file/{object_key}"
+        return f"{get_api_base_url()}/media/local-file/{object_key}"
 
     def get_file_path(self, object_key: str) -> Path:
         """Get the local file path for an object key"""
