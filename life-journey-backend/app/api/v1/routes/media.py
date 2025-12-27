@@ -273,10 +273,15 @@ async def serve_file(request: Request, object_key: str):
   # Try S3 first if configured
   if settings.s3_bucket:
     try:
+      # Use explicit endpoint URL for the region, or construct it from region
+      endpoint_url = settings.s3_endpoint_url
+      if not endpoint_url and settings.s3_region:
+        endpoint_url = f"https://s3.{settings.s3_region}.amazonaws.com"
+
       client = boto3.client(
         "s3",
         region_name=settings.s3_region,
-        endpoint_url=settings.s3_endpoint_url,
+        endpoint_url=endpoint_url,
       )
 
       # Generate presigned GET URL (valid for 1 hour)
