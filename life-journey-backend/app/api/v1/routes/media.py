@@ -195,8 +195,21 @@ async def local_upload(
   try:
     logger.info(f"Local upload attempt - object_key: {object_key}")
 
-    # Read raw body
-    body = await request.body()
+    # Check if this is a multipart form upload
+    content_type = request.headers.get("content-type", "")
+
+    if "multipart/form-data" in content_type:
+      # Parse FormData and extract the file
+      form = await request.form()
+      file = form.get("file")
+      if file and hasattr(file, "read"):
+        body = await file.read()
+      else:
+        raise HTTPException(status_code=400, detail="No file in form data")
+    else:
+      # Read raw body
+      body = await request.body()
+
     logger.info(f"Received {len(body)} bytes")
 
     # Extract filename from object_key (last part of path)
