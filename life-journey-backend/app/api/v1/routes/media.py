@@ -285,7 +285,7 @@ async def serve_file(request: Request, object_key: str):
   For S3, redirects to a presigned URL for direct download.
   """
   # Try S3 first if configured
-  if settings.s3_bucket:
+  if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
     try:
       # Use explicit endpoint URL for the region, or construct it from region
       endpoint_url = settings.s3_endpoint_url
@@ -296,6 +296,8 @@ async def serve_file(request: Request, object_key: str):
         "s3",
         region_name=settings.s3_region,
         endpoint_url=endpoint_url,
+        aws_access_key_id=settings.aws_access_key_id,
+        aws_secret_access_key=settings.aws_secret_access_key,
       )
 
       # Generate presigned GET URL (valid for 1 hour)
