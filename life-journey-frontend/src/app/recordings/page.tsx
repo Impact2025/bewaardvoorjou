@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2 } from "lucide-react";
 import { CHAPTERS } from "@/lib/chapters";
 import { isApiError } from "@/lib/api-client";
+import { API_BASE_URL } from "@/lib/config";
 
 interface Recording {
   id: string;
@@ -79,7 +80,7 @@ function RecordingsContent() {
   const getMediaUrl = (recording: Recording) => {
     // For local storage, use object_key
     const objectKey = recording.object_key || `${journey?.id}/${recording.chapter_id}/${recording.id}/${recording.filename}`;
-    return `http://localhost:8000/api/v1/media/local-file/${objectKey}`;
+    return `${API_BASE_URL}/media/local-file/${objectKey}`;
   };
 
   const handleDownload = (recording: Recording) => {
