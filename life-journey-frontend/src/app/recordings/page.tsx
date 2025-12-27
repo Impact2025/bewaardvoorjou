@@ -97,8 +97,21 @@ function RecordingsContent() {
     try {
       const url = getMediaUrl(recording);
       const response = await fetch(url);
-      const text = await response.text();
-      setViewingText({ recording, content: text });
+      const data = await response.json();
+
+      // If S3, fetch from the presigned URL
+      if (data.type === "s3" && data.url) {
+        const s3Response = await fetch(data.url);
+        const text = await s3Response.text();
+        setViewingText({ recording, content: text });
+      } else if (data.type === "local" && data.content) {
+        // Local storage returns content directly
+        setViewingText({ recording, content: data.content });
+      } else {
+        // Fallback: try to get text directly
+        const text = typeof data === "string" ? data : JSON.stringify(data);
+        setViewingText({ recording, content: text });
+      }
     } catch (err) {
       console.error("Failed to load text:", err);
       alert("Kon tekst niet laden");
@@ -109,8 +122,21 @@ function RecordingsContent() {
     try {
       const url = getMediaUrl(recording);
       const response = await fetch(url);
-      const text = await response.text();
-      setEditingText({ recording, content: text });
+      const data = await response.json();
+
+      // If S3, fetch from the presigned URL
+      if (data.type === "s3" && data.url) {
+        const s3Response = await fetch(data.url);
+        const text = await s3Response.text();
+        setEditingText({ recording, content: text });
+      } else if (data.type === "local" && data.content) {
+        // Local storage returns content directly
+        setEditingText({ recording, content: data.content });
+      } else {
+        // Fallback: try to get text directly
+        const text = typeof data === "string" ? data : JSON.stringify(data);
+        setEditingText({ recording, content: text });
+      }
     } catch (err) {
       console.error("Failed to load text:", err);
       alert("Kon tekst niet laden");
