@@ -19,6 +19,8 @@ import {
   Send,
   MoreVertical,
   Trash2,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 
 interface SharedPod {
@@ -59,35 +61,11 @@ export function SharedPods({ journeyId, className }: SharedPodsProps) {
   const [newPodDescription, setNewPodDescription] = useState("");
 
   useEffect(() => {
-    const fetchPods = async () => {
-      if (!session?.token) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
-        const headers = { Authorization: `Bearer ${session.token}` };
-        
-        const response = await fetch(`${apiUrl}/family/pods/${journeyId}`, { headers });
-        if (response.ok) {
-          const data = await response.json();
-          setPods(data.pods || []);
-          setMessages(data.messages || []);
-        } else {
-          setPods([]);
-          setMessages([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch pods", err);
-        setPods([]);
-        setMessages([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchPods();
+    // TODO: Backend implementation pending (v2.0 - Fase 2)
+    // Temporary: Use empty state until /family/pods endpoint is implemented
+    setIsLoading(false);
+    setPods([]);
+    setMessages([]);
   }, [session?.token, journeyId]);
 
   const handleCreatePod = () => {
@@ -151,6 +129,31 @@ export function SharedPods({ journeyId, className }: SharedPodsProps) {
 
   return (
     <div className={cn("space-y-6", className)}>
+      {/* Coming Soon Banner */}
+      <div className="p-6 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-white rounded-lg shadow-sm">
+            <Sparkles className="h-6 w-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold text-slate-900">Binnenkort beschikbaar</h4>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                v2.0
+              </span>
+            </div>
+            <p className="text-slate-700 text-sm mb-2">
+              Gedeelde familiepods zijn onderdeel van onze roadmap voor Fase 2.
+              Hiermee kun je samen met familieleden werken aan jullie verhalen in realtime.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-slate-600">
+              <Clock className="h-3 w-3" />
+              <span>Gepland voor Q1 2026</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -159,7 +162,7 @@ export function SharedPods({ journeyId, className }: SharedPodsProps) {
             Samenwerken aan jullie familiegeschiedenis
           </p>
         </div>
-        <Button onClick={() => setShowCreatePod(true)}>
+        <Button onClick={() => setShowCreatePod(true)} disabled>
           <Plus className="h-4 w-4 mr-2" />
           Nieuwe Ruimte
         </Button>
