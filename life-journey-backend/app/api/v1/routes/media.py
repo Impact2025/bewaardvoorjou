@@ -301,12 +301,21 @@ async def serve_file(request: Request, object_key: str):
       )
 
       # Generate presigned GET URL (valid for 1 hour)
+      # Add ResponseContentType to ensure proper audio/video playback
+      params = {
+        "Bucket": settings.s3_bucket,
+        "Key": object_key,
+      }
+
+      # Set Content-Type based on file extension for proper playback
+      if object_key.endswith(('.webm', '.mp4', '.m4a')):
+        params["ResponseContentType"] = "video/webm" if object_key.endswith('.webm') else "audio/mp4"
+      elif object_key.endswith(('.mp3', '.wav', '.ogg')):
+        params["ResponseContentType"] = "audio/mpeg" if object_key.endswith('.mp3') else f"audio/{object_key.split('.')[-1]}"
+
       presigned_url = client.generate_presigned_url(
         "get_object",
-        Params={
-          "Bucket": settings.s3_bucket,
-          "Key": object_key,
-        },
+        Params=params,
         ExpiresIn=3600,
       )
 
