@@ -392,7 +392,67 @@ Gebruik deze context om je vragen te personaliseren. Verwijs subtiel naar genoem
 **Voorbeelden van sterke vragen voor dit hoofdstuk:**
 {chr(10).join('- ' + p for p in ctx['example_prompts'])}
 
-Genereer nu één nieuwe, unieke vraag die authentieke verhalen oproept en past bij de context en stemming van dit hoofdstuk."""
+**BELANGRIJK:**
+Genereer ALLEEN de vraag zelf, zonder uitleg, zonder context, zonder motivatie.
+Geen zinnen zoals "Deze vraag is gekozen omdat..." of andere meta-commentaar.
+Alleen de directe vraag aan de gebruiker."""
+
+
+def clean_ai_question(raw_question: str) -> str:
+    """
+    Clean up AI-generated question by removing meta-commentary.
+
+    Sometimes Claude adds explanations like:
+    "Deze vraag is zorgvuldig gekozen omdat: - De poëtische..."
+
+    We only want the actual question.
+
+    Args:
+        raw_question: The raw response from Claude
+
+    Returns:
+        Clean question without meta-commentary
+    """
+    # Strip whitespace and quotes
+    question = raw_question.strip().strip('"').strip("'").strip()
+
+    # Split on common meta-commentary markers
+    stop_phrases = [
+        "Deze vraag is",
+        "Deze vraag werd",
+        "Ik koos deze vraag",
+        "Deze formulering",
+        "Het woord ",
+        "De poëtische",
+        "omdat:",
+        "Uitleg:",
+        "Toelichting:",
+        "Motivatie:",
+    ]
+
+    # Find the earliest occurrence of any stop phrase
+    earliest_pos = len(question)
+    for phrase in stop_phrases:
+        pos = question.find(phrase)
+        if pos > 0 and pos < earliest_pos:
+            earliest_pos = pos
+
+    # If we found meta-commentary, cut it off
+    if earliest_pos < len(question):
+        question = question[:earliest_pos].strip()
+
+    # If the question spans multiple lines, take only the first paragraph
+    # (the actual question is usually on the first line/paragraph)
+    lines = question.split('\n')
+    if len(lines) > 1:
+        # Find first non-empty line that looks like a question
+        for line in lines:
+            line = line.strip()
+            if line and (line.endswith('?') or len(line) > 20):
+                question = line
+                break
+
+    return question
 
 
 def build_prompt_with_ai(
@@ -473,10 +533,10 @@ def build_prompt_with_ai(
             }
         )
 
-        prompt = response.choices[0].message.content.strip()
+        raw_prompt = response.choices[0].message.content.strip()
 
-        # Clean up the prompt (remove quotes, extra whitespace)
-        prompt = prompt.strip('"').strip("'").strip()
+        # Clean up the prompt - remove meta-commentary and quotes
+        prompt = clean_ai_question(raw_prompt)
 
         logger.info(f"Generated AI prompt for chapter {chapter}: {prompt[:50]}...")
         return prompt
@@ -627,8 +687,10 @@ Analyseer wat de gebruiker heeft gezegd en genereer ÉÉN diepgaande vervolgvraa
             }
         )
 
-        prompt = response.choices[0].message.content.strip()
-        prompt = prompt.strip('"').strip("'").strip()
+        raw_prompt = response.choices[0].message.content.strip()
+
+        # Clean up the prompt - remove meta-commentary and quotes
+        prompt = clean_ai_question(raw_prompt)
 
         logger.info(f"Generated follow-up for chapter {chapter}: {prompt[:50]}...")
         return prompt
