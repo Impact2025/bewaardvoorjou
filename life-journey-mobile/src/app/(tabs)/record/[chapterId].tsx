@@ -111,9 +111,10 @@ export default function RecordScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Chapter Info */}
-      <Card style={styles.chapterCard}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+        {/* Chapter Info */}
+        <Card style={styles.chapterCard}>
         <Card.Content>
           <Text variant="headlineSmall" style={styles.chapterTitle}>
             {chapter.title}
@@ -240,17 +241,18 @@ export default function RecordScreen() {
         Terug naar hoofdstukken
       </Button>
 
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        duration={toast.duration}
-        onDismiss={hideToast}
-      />
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onDismiss={hideToast}
+        />
+      </ScrollView>
 
-      {/* AI Assistant */}
+      {/* AI Assistant - Floating over content */}
       <AIFloatingButton chapterId={chapterId} position="bottom-left" />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -259,9 +261,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: lightTheme.colors.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
     padding: 16,
     gap: 16,
+    paddingBottom: 80, // Extra ruimte voor floating button
   },
   chapterCard: {
     backgroundColor: lightTheme.colors.surface,
