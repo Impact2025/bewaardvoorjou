@@ -107,7 +107,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     } else if (mode === "audio" && state.mediaBlob) {
       refs.playback.current = videoRef.current;
     }
-  }, [mode, state.mediaBlob, refs]);
+  }, [mode, state.mediaBlob, recordingState, refs]);
 
   const isRecordingDisabled = isRecording || isPreviewing;
 
