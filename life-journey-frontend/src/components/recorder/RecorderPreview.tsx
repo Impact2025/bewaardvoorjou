@@ -15,7 +15,7 @@ interface RecorderPreviewProps {
 export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps>(
   function RecorderPreview({ onStartPreview }, ref) {
     const { state } = useRecorder();
-    const { mode, state: recordingState, mediaBlob } = state;
+    const { mode, state: recordingState, mediaBlob, currentQuestion } = state;
 
     const isRecording = recordingState === "recording";
     const isPreviewing = recordingState === "previewing";
@@ -98,6 +98,13 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
               Camera preview
             </div>
           )}
+          {currentQuestion && (
+            <div className="absolute bottom-4 left-4 right-4 p-3 bg-black/70 backdrop-blur-sm rounded-lg border border-orange-400/50">
+              <p className="text-sm font-medium text-white leading-relaxed">
+                {currentQuestion}
+              </p>
+            </div>
+          )}
         </div>
       );
     }
@@ -107,9 +114,13 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
       return (
         <div className="space-y-4 p-6 text-center">
           <Video className="h-16 w-16 mx-auto text-teal" aria-hidden="true" />
-          <p className="text-balance text-base font-medium">
-            "Hoe zou je de sfeer van je ouderlijk huis omschrijven? Welke geluiden of geuren herinner je je?"
-          </p>
+          {currentQuestion && (
+            <div className="mb-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-400 rounded-r-lg">
+              <p className="text-sm font-medium text-slate-700 leading-relaxed">
+                {currentQuestion}
+              </p>
+            </div>
+          )}
           <p className="text-xs text-slate-500">
             Klik op "Camera preview" om jezelf te zien voordat je begint.
           </p>
@@ -133,6 +144,13 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
       return (
         <div className="flex flex-col items-center gap-4 p-6">
           <Waves className="h-16 w-16 text-teal animate-pulse" aria-hidden="true" />
+          {currentQuestion && (
+            <div className="w-full max-w-md mb-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-400 rounded-r-lg">
+              <p className="text-sm font-medium text-slate-700 leading-relaxed">
+                {currentQuestion}
+              </p>
+            </div>
+          )}
           <p className="max-w-sm text-pretty text-base" role="status" aria-live="polite">
             Audio-opname bezig... Je stem wordt vol en warm opgenomen.
           </p>
@@ -176,6 +194,13 @@ export const RecorderPreview = forwardRef<HTMLVideoElement, RecorderPreviewProps
     return (
       <div className="flex flex-col items-center gap-4 p-6">
         <Waves className="h-16 w-16 text-teal" aria-hidden="true" />
+        {currentQuestion && (
+          <div className="w-full max-w-md mb-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-400 rounded-r-lg">
+            <p className="text-sm font-medium text-slate-700 leading-relaxed">
+              {currentQuestion}
+            </p>
+          </div>
+        )}
         <p className="max-w-sm text-pretty text-base">
           Audio-modus actief. Je stem wordt vol en warm opgenomen, zonder video.
         </p>
