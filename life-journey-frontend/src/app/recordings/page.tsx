@@ -8,8 +8,8 @@ import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api-client";
-import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2, ArrowUpDown } from "lucide-react";
+import { Select } from "@/components/ui/select";
 import { CHAPTERS } from "@/lib/chapters";
 import { isApiError } from "@/lib/api-client";
 import { API_BASE_URL } from "@/lib/config";
@@ -56,6 +56,27 @@ function RecordingsContent() {
   const [textSort, setTextSort] = useState<string>("date-desc");
   const [videoSort, setVideoSort] = useState<string>("date-desc");
   const [audioSort, setAudioSort] = useState<string>("date-desc");
+
+  // Sort options
+  const textSortOptions = [
+    { value: "date-desc", label: "Nieuwste eerst" },
+    { value: "date-asc", label: "Oudste eerst" },
+    { value: "chapter-asc", label: "Vraag (A-Z)" },
+    { value: "chapter-desc", label: "Vraag (Z-A)" },
+    { value: "size-desc", label: "Grootste eerst" },
+    { value: "size-asc", label: "Kleinste eerst" },
+  ];
+
+  const mediaSortOptions = [
+    { value: "date-desc", label: "Nieuwste eerst" },
+    { value: "date-asc", label: "Oudste eerst" },
+    { value: "chapter-asc", label: "Vraag (A-Z)" },
+    { value: "chapter-desc", label: "Vraag (Z-A)" },
+    { value: "duration-desc", label: "Langste eerst" },
+    { value: "duration-asc", label: "Kortste eerst" },
+    { value: "size-desc", label: "Grootste eerst" },
+    { value: "size-asc", label: "Kleinste eerst" },
+  ];
 
   useEffect(() => {
     if (!journey?.id || !session?.token) return;
@@ -464,19 +485,12 @@ function RecordingsContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <ArrowUpDown className="h-4 w-4 text-slate-500" />
-                      <Select value={textSort} onValueChange={setTextSort}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sorteer op..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
-                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
-                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
-                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
-                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
-                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Select
+                        options={textSortOptions}
+                        value={textSort}
+                        onChange={setTextSort}
+                        className="w-[180px]"
+                      />
                     </div>
                   </div>
                 </CardHeader>
@@ -564,21 +578,12 @@ function RecordingsContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <ArrowUpDown className="h-4 w-4 text-slate-500" />
-                      <Select value={videoSort} onValueChange={setVideoSort}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sorteer op..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
-                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
-                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
-                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
-                          <SelectItem value="duration-desc">Langste eerst</SelectItem>
-                          <SelectItem value="duration-asc">Kortste eerst</SelectItem>
-                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
-                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Select
+                        options={mediaSortOptions}
+                        value={videoSort}
+                        onChange={setVideoSort}
+                        className="w-[180px]"
+                      />
                     </div>
                   </div>
                 </CardHeader>
@@ -657,21 +662,12 @@ function RecordingsContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <ArrowUpDown className="h-4 w-4 text-slate-500" />
-                      <Select value={audioSort} onValueChange={setAudioSort}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sorteer op..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
-                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
-                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
-                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
-                          <SelectItem value="duration-desc">Langste eerst</SelectItem>
-                          <SelectItem value="duration-asc">Kortste eerst</SelectItem>
-                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
-                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Select
+                        options={mediaSortOptions}
+                        value={audioSort}
+                        onChange={setAudioSort}
+                        className="w-[180px]"
+                      />
                     </div>
                   </div>
                 </CardHeader>
