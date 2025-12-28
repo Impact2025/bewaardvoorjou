@@ -8,7 +8,8 @@ import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api-client";
-import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2 } from "lucide-react";
+import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CHAPTERS } from "@/lib/chapters";
 import { isApiError } from "@/lib/api-client";
 import { API_BASE_URL } from "@/lib/config";
@@ -51,6 +52,11 @@ function RecordingsContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Sorting state
+  const [textSort, setTextSort] = useState<string>("date-desc");
+  const [videoSort, setVideoSort] = useState<string>("date-desc");
+  const [audioSort, setAudioSort] = useState<string>("date-desc");
+
   useEffect(() => {
     if (!journey?.id || !session?.token) return;
 
@@ -92,6 +98,39 @@ function RecordingsContent() {
 
   const getChapterInfo = (chapterId: string) => {
     return CHAPTERS.find((ch) => ch.id === chapterId);
+  };
+
+  const sortRecordings = (recs: Recording[], sortBy: string): Recording[] => {
+    const sorted = [...recs];
+
+    switch (sortBy) {
+      case "date-desc":
+        return sorted.sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
+      case "date-asc":
+        return sorted.sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+      case "chapter-asc":
+        return sorted.sort((a, b) => {
+          const chapterA = getChapterInfo(a.chapter_id)?.title || a.chapter_id;
+          const chapterB = getChapterInfo(b.chapter_id)?.title || b.chapter_id;
+          return chapterA.localeCompare(chapterB);
+        });
+      case "chapter-desc":
+        return sorted.sort((a, b) => {
+          const chapterA = getChapterInfo(a.chapter_id)?.title || a.chapter_id;
+          const chapterB = getChapterInfo(b.chapter_id)?.title || b.chapter_id;
+          return chapterB.localeCompare(chapterA);
+        });
+      case "size-desc":
+        return sorted.sort((a, b) => b.size_bytes - a.size_bytes);
+      case "size-asc":
+        return sorted.sort((a, b) => a.size_bytes - b.size_bytes);
+      case "duration-desc":
+        return sorted.sort((a, b) => (b.duration_seconds || 0) - (a.duration_seconds || 0));
+      case "duration-asc":
+        return sorted.sort((a, b) => (a.duration_seconds || 0) - (b.duration_seconds || 0));
+      default:
+        return sorted;
+    }
   };
 
   const getMediaUrl = (recording: Recording) => {
@@ -335,9 +374,18 @@ function RecordingsContent() {
     );
   }
 
-  const videoRecordings = recordings.filter((r) => r.modality === "video");
-  const audioRecordings = recordings.filter((r) => r.modality === "audio");
-  const textRecordings = recordings.filter((r) => r.modality === "text");
+  const videoRecordings = sortRecordings(
+    recordings.filter((r) => r.modality === "video"),
+    videoSort
+  );
+  const audioRecordings = sortRecordings(
+    recordings.filter((r) => r.modality === "audio"),
+    audioSort
+  );
+  const textRecordings = sortRecordings(
+    recordings.filter((r) => r.modality === "text"),
+    textSort
+  );
 
   return (
     <AppShell
@@ -406,11 +454,31 @@ function RecordingsContent() {
             {textRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-warm-amber" />
-                    <CardTitle>Tekst Opnames</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-warm-amber" />
+                        <CardTitle>Tekst Opnames</CardTitle>
+                      </div>
+                      <CardDescription>{textRecordings.length} teksten</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <Select value={textSort} onValueChange={setTextSort}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sorteer op..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
+                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
+                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
+                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
+                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
+                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <CardDescription>{textRecordings.length} teksten</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -486,11 +554,33 @@ function RecordingsContent() {
             {videoRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Video className="h-5 w-5 text-teal" />
-                    <CardTitle>Video Opnames</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Video className="h-5 w-5 text-teal" />
+                        <CardTitle>Video Opnames</CardTitle>
+                      </div>
+                      <CardDescription>{videoRecordings.length} video's</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <Select value={videoSort} onValueChange={setVideoSort}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sorteer op..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
+                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
+                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
+                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
+                          <SelectItem value="duration-desc">Langste eerst</SelectItem>
+                          <SelectItem value="duration-asc">Kortste eerst</SelectItem>
+                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
+                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <CardDescription>{videoRecordings.length} video's</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -557,11 +647,33 @@ function RecordingsContent() {
             {audioRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Mic className="h-5 w-5 text-orange" />
-                    <CardTitle>Audio Opnames</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Mic className="h-5 w-5 text-orange" />
+                        <CardTitle>Audio Opnames</CardTitle>
+                      </div>
+                      <CardDescription>{audioRecordings.length} audio fragmenten</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <Select value={audioSort} onValueChange={setAudioSort}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sorteer op..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date-desc">Nieuwste eerst</SelectItem>
+                          <SelectItem value="date-asc">Oudste eerst</SelectItem>
+                          <SelectItem value="chapter-asc">Vraag (A-Z)</SelectItem>
+                          <SelectItem value="chapter-desc">Vraag (Z-A)</SelectItem>
+                          <SelectItem value="duration-desc">Langste eerst</SelectItem>
+                          <SelectItem value="duration-asc">Kortste eerst</SelectItem>
+                          <SelectItem value="size-desc">Grootste eerst</SelectItem>
+                          <SelectItem value="size-asc">Kleinste eerst</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <CardDescription>{audioRecordings.length} audio fragmenten</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
