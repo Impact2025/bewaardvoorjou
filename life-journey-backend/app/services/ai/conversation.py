@@ -25,7 +25,7 @@ from app.core.config import settings
 from app.models.media import TranscriptSegment, PromptRun
 from app.models.journey import Journey
 from app.schemas.common import ChapterId
-from app.services.ai.interviewer import CHAPTER_CONTEXTS, get_system_prompt
+from app.services.ai.interviewer import CHAPTER_CONTEXTS, get_system_prompt, clean_ai_question
 from app.services.ai.memory import get_personalized_prompt_context
 
 
@@ -224,8 +224,8 @@ class ConversationSession:
                 }
             )
 
-            question = response.choices[0].message.content.strip()
-            return question.strip('"').strip("'").strip()
+            raw_question = response.choices[0].message.content.strip()
+            return clean_ai_question(raw_question)
 
         except Exception as e:
             logger.error(f"Failed to generate opening question: {e}")
@@ -400,8 +400,8 @@ Genereer nu één vervolgvraag:"""
                 }
             )
 
-            question = response.choices[0].message.content.strip()
-            question = question.strip('"').strip("'").strip()
+            raw_question = response.choices[0].message.content.strip()
+            question = clean_ai_question(raw_question)
 
             logger.info(f"Generated intelligent follow-up: {question[:50]}...")
             return question
