@@ -45,6 +45,7 @@ function RecordingsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [playingRecording, setPlayingRecording] = useState<Recording | null>(null);
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const [viewingText, setViewingText] = useState<{ recording: Recording; content: string } | null>(null);
   const [editingText, setEditingText] = useState<{ recording: Recording; content: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,6 +74,22 @@ function RecordingsContent() {
     fetchRecordings();
   }, [journey?.id, session?.token]);
 
+  // Fetch actual media URL when starting playback
+  useEffect(() => {
+    if (!playingRecording) {
+      setPlayingUrl(null);
+      return;
+    }
+
+    const fetchUrl = async () => {
+      const url = await getActualMediaUrl(playingRecording);
+      setPlayingUrl(url);
+    };
+
+    fetchUrl();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playingRecording]);
+
   const getChapterInfo = (chapterId: string) => {
     return CHAPTERS.find((ch) => ch.id === chapterId);
   };
@@ -83,8 +100,36 @@ function RecordingsContent() {
     return `${API_BASE_URL}/media/file/${objectKey}`;
   };
 
-  const handleDownload = (recording: Recording) => {
+  const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
+
+  const getActualMediaUrl = async (recording: Recording): Promise<string> => {
+    // Check cache first
+    if (mediaUrls[recording.id]) {
+      return mediaUrls[recording.id];
+    }
+
     const url = getMediaUrl(recording);
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      // If S3, use the presigned URL
+      if (data.type === "s3" && data.url) {
+        setMediaUrls(prev => ({ ...prev, [recording.id]: data.url }));
+        return data.url;
+      }
+    } catch (err) {
+      // If JSON parsing fails, it's probably a direct FileResponse (local storage)
+      // Just use the original URL
+    }
+
+    // Fallback to original URL for local storage FileResponse
+    return url;
+  };
+
+  const handleDownload = async (recording: Recording) => {
+    const url = await getActualMediaUrl(recording);
     const link = document.createElement("a");
     link.href = url;
     link.download = recording.filename;
@@ -611,27 +656,37 @@ function RecordingsContent() {
               </div>
 
               {playingRecording.modality === "video" ? (
-                <video
-                  controls
-                  autoPlay
-                  className="w-full rounded-lg bg-black"
-                  src={getMediaUrl(playingRecording)}
-                >
-                  Je browser ondersteunt geen video playback.
-                </video>
+                playingUrl ? (
+                  <video
+                    controls
+                    autoPlay
+                    className="w-full rounded-lg bg-black"
+                    src={playingUrl}
+                  >
+                    Je browser ondersteunt geen video playback.
+                  </video>
+                ) : (
+                  <div className="w-full aspect-video rounded-lg bg-black flex items-center justify-center">
+                    <p className="text-white">Laden...</p>
+                  </div>
+                )
               ) : (
                 <div className="bg-cream p-8 rounded-lg">
                   <div className="flex items-center justify-center mb-6">
                     <Mic className="h-16 w-16 text-orange" />
                   </div>
-                  <audio
-                    controls
-                    autoPlay
-                    className="w-full"
-                    src={getMediaUrl(playingRecording)}
-                  >
-                    Je browser ondersteunt geen audio playback.
-                  </audio>
+                  {playingUrl ? (
+                    <audio
+                      controls
+                      autoPlay
+                      className="w-full"
+                      src={playingUrl}
+                    >
+                      Je browser ondersteunt geen audio playback.
+                    </audio>
+                  ) : (
+                    <p className="text-center text-medium">Laden...</p>
+                  )}
                 </div>
               )}
             </div>
