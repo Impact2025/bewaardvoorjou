@@ -681,6 +681,18 @@ function RecordingsContent() {
                       autoPlay
                       className="w-full"
                       src={playingUrl}
+                      onError={(e) => {
+                        const audio = e.currentTarget;
+                        console.error("Audio playback error:", {
+                          error: audio.error,
+                          src: playingUrl,
+                          networkState: audio.networkState,
+                          readyState: audio.readyState,
+                        });
+                      }}
+                      onLoadedMetadata={() => {
+                        console.log("Audio metadata loaded successfully");
+                      }}
                     >
                       Je browser ondersteunt geen audio playback.
                     </audio>
