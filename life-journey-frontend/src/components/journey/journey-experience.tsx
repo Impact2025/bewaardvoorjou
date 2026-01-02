@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RecorderFrame } from "@/components/recorder";
+import { ThoughtsForChapter, QuickThoughtFAB } from "@/components/quick-thoughts";
 import { CHAPTERS } from "@/lib/chapters";
 import type { Highlight } from "@/lib/types";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
@@ -78,6 +79,14 @@ export function JourneyExperience() {
         </Button>
       </div>
 
+      {/* Quick Thoughts Context - Shows user's previous thoughts for this chapter */}
+      <ThoughtsForChapter
+        chapterId={journey.activeChapterId}
+        onThoughtUsed={(thought) => {
+          console.log("Thought used in interview:", thought.id);
+        }}
+      />
+
       {/* Recording Interface */}
       <RecorderFrame mode="text" chapterId={journey.activeChapterId} />
 
@@ -97,6 +106,9 @@ export function JourneyExperience() {
       {journey.highlights.length > 0 && (
         <HighlightsPanel highlights={journey.highlights} />
       )}
+
+      {/* Quick Thought FAB */}
+      <QuickThoughtFAB chapterId={journey.activeChapterId} />
     </div>
   );
 }

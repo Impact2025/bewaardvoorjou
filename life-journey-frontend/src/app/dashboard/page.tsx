@@ -29,7 +29,9 @@ import {
   Mic,
   TrendingUp,
   Sparkles,
+  Lightbulb,
 } from "lucide-react";
+import { QuickThoughtFAB } from "@/components/quick-thoughts";
 
 // Lazy load heavy Timeline component (reduces initial bundle)
 const Timeline = dynamic(
@@ -377,6 +379,13 @@ function DashboardContent() {
             </div>
           </div>
         </div>
+
+        {/* Quick Thought FAB */}
+        <QuickThoughtFAB
+          onThoughtCreated={(thoughtId) => {
+            console.log("Quick thought created:", thoughtId);
+          }}
+        />
       </AppShell>
     </>
   );

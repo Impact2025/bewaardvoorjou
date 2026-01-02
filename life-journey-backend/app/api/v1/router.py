@@ -15,6 +15,7 @@ from app.api.v1.routes import (
     admin,
     admin_enhanced,
     emails,
+    quick_thoughts,
 )
 
 
@@ -33,3 +34,4 @@ api_router.include_router(family.router, prefix="/family", tags=["family"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(admin_enhanced.router, prefix="/admin", tags=["admin-enhanced"])
 api_router.include_router(emails.router, prefix="/emails", tags=["emails"])
+api_router.include_router(quick_thoughts.router, prefix="/quick-thoughts", tags=["quick-thoughts"])
