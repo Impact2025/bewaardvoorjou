@@ -16,7 +16,7 @@ Key Features:
 from __future__ import annotations
 
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from openai import OpenAI
 from loguru import logger
 from sqlalchemy.orm import Session
@@ -24,9 +24,14 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.media import TranscriptSegment, PromptRun
 from app.models.journey import Journey
+from app.models.quick_thought import QuickThought
 from app.schemas.common import ChapterId
 from app.services.ai.interviewer import CHAPTER_CONTEXTS, get_system_prompt, clean_ai_question
 from app.services.ai.memory import get_personalized_prompt_context
+from app.services.quick_thoughts.analyzer import (
+    build_interview_context_from_thoughts,
+    generate_thought_based_question,
+)
 
 
 class ConversationTurn:
@@ -78,6 +83,10 @@ class ConversationSession:
         """
         Start the conversation with an opening question.
 
+        Uses any relevant quick thoughts to personalize the opening question,
+        making the conversation feel more connected to what the user has
+        already shared.
+
         Returns:
             The opening question
         """
@@ -90,8 +99,34 @@ class ConversationSession:
         except Exception as e:
             logger.warning(f"Could not get personal context: {e}")
 
-        # Generate opening question
-        opening_question = self._generate_opening_question(personal_context)
+        # Fetch relevant quick thoughts for this chapter
+        thoughts_context = None
+        thoughts_for_question = None
+        used_thoughts = []
+        try:
+            thoughts = self._fetch_relevant_quick_thoughts()
+            if thoughts:
+                # Build context string for the AI prompt
+                thoughts_context = build_interview_context_from_thoughts(
+                    [t.to_dict() for t in thoughts],
+                    self.chapter_id
+                )
+                thoughts_for_question = [t.to_dict() for t in thoughts]
+                used_thoughts = thoughts  # Keep reference for marking as used
+                logger.info(f"Found {len(thoughts)} relevant quick thoughts for chapter {self.chapter_id}")
+        except Exception as e:
+            logger.warning(f"Could not fetch quick thoughts: {e}")
+
+        # Generate opening question (with thoughts context if available)
+        opening_question = self._generate_opening_question(
+            personal_context,
+            thoughts_context=thoughts_context,
+            thoughts_for_question=thoughts_for_question
+        )
+
+        # Mark thoughts as used if they were incorporated in the question
+        if used_thoughts and thoughts_context:
+            self._mark_thoughts_as_used(used_thoughts)
 
         # Record turn
         turn = ConversationTurn(
@@ -102,6 +137,94 @@ class ConversationSession:
 
         logger.info(f"Started conversation for chapter {self.chapter_id}, turn 1")
         return opening_question
+
+    def _fetch_relevant_quick_thoughts(self) -> list[QuickThought]:
+        """
+        Fetch quick thoughts relevant to this chapter.
+
+        Returns thoughts that are either:
+        - Directly linked to this chapter
+        - Suggested for this chapter by AI analysis
+        - Recent and unassigned (may be relevant)
+
+        Only returns unused thoughts (not yet used in an interview).
+        """
+        from sqlalchemy import or_, and_, cast, String
+        from sqlalchemy.dialects.postgresql import JSONB
+
+        # First query: direct matches and unassigned recent thoughts
+        thoughts = (
+            self.db.query(QuickThought)
+            .filter(
+                QuickThought.journey_id == self.journey_id,
+                QuickThought.is_used_in_interview == False,
+                QuickThought.archived_at == None,
+                QuickThought.processing_status == "completed",
+                or_(
+                    # Direct match: thought is for this chapter
+                    QuickThought.chapter_id == self.chapter_id,
+                    # Unassigned but recent (within last 7 days)
+                    and_(
+                        QuickThought.chapter_id == None,
+                        QuickThought.created_at >= datetime.now(timezone.utc) - timedelta(days=7)
+                    )
+                )
+            )
+            .order_by(QuickThought.created_at.desc())
+            .limit(5)
+            .all()
+        )
+
+        # If we have enough direct matches, return them
+        if len(thoughts) >= 3:
+            return thoughts
+
+        # Also check for AI-suggested matches by searching in suggested_chapters JSON
+        # This uses a text search since JSON containment can be complex
+        try:
+            suggested_thoughts = (
+                self.db.query(QuickThought)
+                .filter(
+                    QuickThought.journey_id == self.journey_id,
+                    QuickThought.is_used_in_interview == False,
+                    QuickThought.archived_at == None,
+                    QuickThought.processing_status == "completed",
+                    QuickThought.chapter_id != self.chapter_id,  # Not already direct match
+                    QuickThought.suggested_chapters.isnot(None),
+                    cast(QuickThought.suggested_chapters, String).contains(self.chapter_id)
+                )
+                .order_by(QuickThought.created_at.desc())
+                .limit(5 - len(thoughts))
+                .all()
+            )
+
+            # Merge and deduplicate
+            existing_ids = {t.id for t in thoughts}
+            for t in suggested_thoughts:
+                if t.id not in existing_ids:
+                    thoughts.append(t)
+
+        except Exception as e:
+            logger.warning(f"Error fetching suggested thoughts: {e}")
+
+        return thoughts[:5]
+
+    def _mark_thoughts_as_used(self, thoughts: list[QuickThought]) -> None:
+        """
+        Mark quick thoughts as used in an interview.
+
+        This prevents them from being suggested again in future interviews.
+        """
+        for thought in thoughts:
+            thought.is_used_in_interview = True
+            thought.used_in_interview_at = datetime.now(timezone.utc)
+
+        try:
+            self.db.commit()
+            logger.info(f"Marked {len(thoughts)} thoughts as used in interview")
+        except Exception as e:
+            logger.error(f"Failed to mark thoughts as used: {e}")
+            self.db.rollback()
 
     def add_user_response(self, response_text: str) -> None:
         """Add user's response to the last question."""
@@ -197,10 +320,40 @@ class ConversationSession:
 
         return False
 
-    def _generate_opening_question(self, personal_context: str | None) -> str:
-        """Generate the opening question for the chapter."""
+    def _generate_opening_question(
+        self,
+        personal_context: str | None,
+        thoughts_context: str | None = None,
+        thoughts_for_question: list[dict] | None = None,
+    ) -> str:
+        """
+        Generate the opening question for the chapter.
+
+        If the user has shared quick thoughts relevant to this chapter,
+        we'll generate a personalized question that references their thoughts.
+        This makes the interview feel more connected and personal.
+
+        Args:
+            personal_context: General personal context from journey
+            thoughts_context: Formatted context from quick thoughts
+            thoughts_for_question: Raw thought data for specialized generation
+        """
         if not settings.openai_api_key:
             return self._fallback_opening_question()
+
+        # If we have relevant quick thoughts, try to generate a thought-based question
+        if thoughts_for_question:
+            try:
+                thought_question = generate_thought_based_question(
+                    thoughts_for_question,
+                    self.chapter_id
+                )
+                if thought_question:
+                    logger.info("Using thought-based opening question")
+                    return thought_question
+            except Exception as e:
+                logger.warning(f"Failed to generate thought-based question: {e}")
+                # Fall through to standard question generation
 
         try:
             client = OpenAI(
@@ -210,11 +363,27 @@ class ConversationSession:
 
             system_prompt = get_system_prompt(self.chapter_id, personal_context)
 
+            # Enhance user prompt with thoughts context if available
+            user_prompt = "Genereer een warme, uitnodigende openingsvraag voor dit hoofdstuk."
+
+            if thoughts_context:
+                user_prompt = f"""De gebruiker heeft eerder deze gedachten gedeeld die relevant zijn voor dit hoofdstuk:
+
+{thoughts_context}
+
+Genereer een warme, uitnodigende openingsvraag die:
+1. Subtiel refereert aan iets dat ze eerder deelden (als relevant)
+2. Uitnodigt om dieper in te gaan op dit thema
+3. Niet letterlijk hun woorden herhaalt, maar laat merken dat je ze 'gehoord' hebt
+4. Maximaal 1-2 zinnen is
+
+Als de gedachten niet direct relevant zijn voor dit hoofdstuk, genereer dan gewoon een normale openingsvraag."""
+
             response = client.chat.completions.create(
                 model=settings.openai_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": "Genereer een warme, uitnodigende openingsvraag voor dit hoofdstuk."}
+                    {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.8,
                 max_tokens=100,
