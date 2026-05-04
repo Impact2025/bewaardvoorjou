@@ -159,7 +159,7 @@ export function QuickThoughtCard({
 
             {/* Category */}
             {thought.auto_category && isReady && (
-              <Badge variant="secondary" className="text-xs py-0 h-5">
+              <Badge variant="outline" className="text-xs py-0 h-5">
                 {getCategoryEmoji(thought.auto_category)}
                 <span className="ml-1">{getCategoryDisplayName(thought.auto_category)}</span>
               </Badge>
@@ -175,7 +175,7 @@ export function QuickThoughtCard({
 
             {/* Used in interview */}
             {thought.is_used_in_interview && (
-              <Badge variant="secondary" className="text-xs py-0 h-5 bg-green-100 text-green-700">
+              <Badge variant="outline" className="text-xs py-0 h-5 bg-green-100 text-green-700">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Gebruikt
               </Badge>
