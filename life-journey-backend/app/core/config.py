@@ -18,8 +18,11 @@ class Settings(BaseSettings):
   # Public API base URL (used for generating upload URLs)
   api_base_url: str = "http://localhost:8001"
 
-  # CORS configuration - customize for your production domain
+  # CORS configuration - override via CORS_ORIGINS env var (comma-separated)
   cors_origins: list[str] = [
+    "https://bewaardvoorjou.vercel.app",
+    "https://bewaardvoorjou.nl",
+    "https://www.bewaardvoorjou.nl",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:3002",
@@ -29,9 +32,6 @@ class Settings(BaseSettings):
     "http://localhost:3006",
     "http://localhost:3007",
     "http://localhost:3011",
-    # Add your production domains here:
-    # "https://life-journey.app",
-    # "https://www.life-journey.app",
   ]
 
   # Database configuration
