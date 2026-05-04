@@ -80,12 +80,14 @@ export function JourneyExperience() {
       </div>
 
       {/* Quick Thoughts Context - Shows user's previous thoughts for this chapter */}
-      <ThoughtsForChapter
-        chapterId={journey.activeChapterId}
-        onThoughtUsed={(thought) => {
-          console.log("Thought used in interview:", thought.id);
-        }}
-      />
+      {journey.activeChapterId && (
+        <ThoughtsForChapter
+          chapterId={journey.activeChapterId}
+          onThoughtUsed={(thought) => {
+            console.log("Thought used in interview:", thought.id);
+          }}
+        />
+      )}
 
       {/* Recording Interface */}
       <RecorderFrame mode="text" chapterId={journey.activeChapterId} />
