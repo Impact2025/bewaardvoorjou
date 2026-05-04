@@ -14,19 +14,8 @@ from app.core.security_headers import SecurityHeadersMiddleware
 
 logger = logging.getLogger(__name__)
 
-# CORS origins - centralized for reuse in exception handler
-CORS_ORIGINS = [
-  "https://bewaardvoorjou.vercel.app",
-  "https://bewaardvoorjou.nl",
-  "https://www.bewaardvoorjou.nl",
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://localhost:3002",
-  "http://localhost:3003",
-  "http://localhost:3004",
-  "http://localhost:4005",
-  "http://localhost:6001",
-]
+# CORS origins - loaded from settings (configurable via CORS_ORIGINS env var)
+CORS_ORIGINS = settings.cors_origins
 
 
 def create_app() -> FastAPI:
