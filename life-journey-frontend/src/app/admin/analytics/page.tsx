@@ -44,7 +44,7 @@ export default function AdminAnalyticsPage() {
       try {
         setIsLoading(true);
         const headers = { Authorization: "Bearer " + session.token };
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001/api/v1";
         const [analyticsRes, engagementRes, statsRes] = await Promise.all([
           fetch(apiUrl + "/admin/analytics/overview?days=30", { headers }),
           fetch(apiUrl + "/admin/analytics/engagement", { headers }),
