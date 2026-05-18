@@ -207,7 +207,6 @@ export function QuickThoughtCard({
               {!thought.chapter_id && onLinkToChapter && (
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => onLinkToChapter(thought.id)}
                   className="h-7 text-xs text-stone-500 hover:text-amber-600"
                 >
@@ -219,7 +218,6 @@ export function QuickThoughtCard({
               {onDelete && (
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => onDelete(thought.id)}
                   className="h-7 text-xs text-stone-400 hover:text-red-600"
                 >
