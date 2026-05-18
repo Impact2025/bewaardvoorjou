@@ -122,8 +122,7 @@ export function ThoughtsForChapter({
                 <div className="text-center py-4">
                   <p className="text-sm text-stone-500 mb-2">{error}</p>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="ghost"
                     onClick={fetchThoughts}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />

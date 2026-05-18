@@ -220,9 +220,8 @@ export function QuickThoughtRecorder({
         {onCancel && (
           <Button
             variant="ghost"
-            size="icon"
             onClick={onCancel}
-            className="text-stone-400 hover:text-stone-600"
+            className="text-stone-400 hover:text-stone-600 h-8 w-8 p-0"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -238,8 +237,7 @@ export function QuickThoughtRecorder({
         ].map(({ m, icon: Icon, label }) => (
           <Button
             key={m}
-            variant={mode === m ? "default" : "outline"}
-            size="sm"
+            variant={mode === m ? "primary" : "ghost"}
             onClick={() => handleModeChange(m)}
             disabled={recordingState !== "idle"}
             className={cn(
@@ -330,8 +328,7 @@ export function QuickThoughtRecorder({
                     {formatTime(recordingTime)} opgenomen
                   </div>
                   <Button
-                    variant="link"
-                    size="sm"
+                    variant="ghost"
                     onClick={resetRecording}
                     className="text-stone-500 hover:text-stone-700"
                   >
@@ -374,7 +371,7 @@ export function QuickThoughtRecorder({
         {mode !== "text" && recordingState === "recording" && (
           <Button
             onClick={stopRecording}
-            variant="destructive"
+            variant="danger"
             className="flex-1"
           >
             <Square className="w-4 h-4 mr-2" />
@@ -385,17 +382,10 @@ export function QuickThoughtRecorder({
         {canSubmit && (
           <Button
             onClick={handleSubmit}
-            disabled={recordingState === "uploading"}
             className="flex-1 bg-amber-600 hover:bg-amber-700"
           >
-            {recordingState === "uploading" ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Bewaar gedachte
-              </>
-            )}
+            <Send className="w-4 h-4 mr-2" />
+            Bewaar gedachte
           </Button>
         )}
       </div>

@@ -50,7 +50,6 @@ export function QuickThoughtFAB({
         >
           <Button
             onClick={() => setIsOpen(true)}
-            size="lg"
             className={cn(
               "rounded-full w-14 h-14 shadow-lg p-0",
               "bg-gradient-to-br from-amber-500 to-orange-600",
