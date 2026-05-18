@@ -4,6 +4,7 @@ Share invite generator service.
 Creates share grants and generates magic links for sharing journey content.
 """
 
+import secrets
 from uuid import uuid4
 from datetime import datetime, timezone
 from typing import Optional
@@ -11,14 +12,15 @@ from typing import Optional
 from loguru import logger
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.sharing import ShareGrant as ShareGrantModel
 from app.schemas.sharing import ShareInviteRequest, ShareInviteResponse
 from app.schemas.common import ShareGrant as ShareGrantSchema
 
 
 def generate_magic_token() -> str:
-    """Generate a secure magic token for share links."""
-    return str(uuid4())
+    """Generate a cryptographically secure magic token for share links."""
+    return secrets.token_urlsafe(32)
 
 
 def create_share_invite(
@@ -69,8 +71,7 @@ def create_share_invite(
         status="pending",
     )
 
-    # Generate magic link
-    magic_link = f"https://life-journey.app/share/{magic_token}"
+    magic_link = f"{settings.app_base_url}/share/{magic_token}"
 
     return ShareInviteResponse(grant=grant_schema, magic_link=magic_link)
 

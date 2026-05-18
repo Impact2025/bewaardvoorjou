@@ -65,6 +65,9 @@ class Settings(BaseSettings):
   # Telemetry
   telemetry_disabled: bool = False
 
+  # Sentry error tracking (optional — leave empty to disable)
+  sentry_dsn: str | None = None
+
   # JWT Security - CRITICAL: Must be set via environment variable
   # For development, if not set, a random key will be generated (sessions won't persist across restarts)
   # For production, this MUST be set to a secure, persistent value
