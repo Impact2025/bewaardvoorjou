@@ -1,11 +1,13 @@
+import secrets
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+
+from app.core.config import settings
 
 
 def generate_export_bundle(journey_id: str) -> dict[str, str]:
-  bundle_id = str(uuid4())
+  bundle_id = secrets.token_urlsafe(16)
   expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-  download_url = f"https://life-journey.app/exports/{bundle_id}.zip"
+  download_url = f"{settings.app_base_url}/exports/{bundle_id}.zip"
   return {
     "bundle_id": bundle_id,
     "download_url": download_url,

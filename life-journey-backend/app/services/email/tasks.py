@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+from datetime import datetime, timezone
+
 from celery import Celery
 from loguru import logger
 from sqlalchemy.orm import Session
@@ -62,9 +66,11 @@ def send_email_task(email_event_id: str) -> None:
             db.commit()
             return
 
-        # Generate unsubscribe token (simple token based on user ID)
-        # TODO: Use proper JWT token for production
-        unsubscribe_token = f"{user.id}:{email_event.id}"
+        unsubscribe_token = hmac.new(
+            settings.jwt_secret_key.encode(),
+            f"{user.id}:{email_event.id}".encode(),
+            hashlib.sha256,
+        ).hexdigest()
 
         # Build email based on type
         try:
@@ -134,12 +140,9 @@ def send_email_task(email_event_id: str) -> None:
                 text=text,
             )
 
-            # Update event status
             email_event.status = "sent"
             email_event.resend_id = message_id
-            email_event.sent_at = db.query(EmailEventModel).filter(
-                EmailEventModel.id == email_event_id
-            ).first().created_at  # Use current time
+            email_event.sent_at = datetime.now(timezone.utc)
 
             logger.info(f"Email sent successfully for event {email_event_id}, Resend ID: {message_id}")
 

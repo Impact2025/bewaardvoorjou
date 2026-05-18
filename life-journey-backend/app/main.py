@@ -1,6 +1,7 @@
 import logging
 import traceback
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -13,6 +14,14 @@ from app.core.rate_limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
 
 logger = logging.getLogger(__name__)
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=0.1,
+        environment=settings.environment,
+        send_default_pii=False,
+    )
 
 # CORS origins - loaded from settings (configurable via CORS_ORIGINS env var)
 CORS_ORIGINS = settings.cors_origins
@@ -31,25 +40,18 @@ def create_app() -> FastAPI:
     """Handle all unhandled exceptions and ensure CORS headers are present."""
     logger.error(f"Unhandled exception: {exc}\n{traceback.format_exc()}")
 
-    # Get origin from request
     origin = request.headers.get("origin", "")
 
-    # Build response with full traceback for debugging
-    response = JSONResponse(
-      status_code=500,
-      content={
-        "detail": str(exc),
-        "type": type(exc).__name__,
-        "traceback": traceback.format_exc(),
-      },
-    )
+    content: dict = {"detail": "Internal server error"}
+    if settings.environment == "development":
+      content["type"] = type(exc).__name__
+      content["traceback"] = traceback.format_exc()
 
-    # Add CORS headers if origin is allowed
+    response = JSONResponse(status_code=500, content=content)
+
     if origin in CORS_ORIGINS:
       response.headers["Access-Control-Allow-Origin"] = origin
       response.headers["Access-Control-Allow-Credentials"] = "true"
-      response.headers["Access-Control-Allow-Methods"] = "*"
-      response.headers["Access-Control-Allow-Headers"] = "*"
 
     return response
 
@@ -64,74 +66,14 @@ def create_app() -> FastAPI:
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+    expose_headers=["X-Request-ID"],
   )
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
     return {"status": "ok", "version": "2025-12-17-v6", "cors_fixed": "exception_handler"}
-
-  @app.get("/debug/journey/{journey_id}", tags=["debug"])
-  def debug_journey(journey_id: str):
-    """Debug endpoint to test journey query without auth - TEMPORARY"""
-    from sqlalchemy.orm import joinedload, selectinload
-    from app.db.session import SessionLocal
-    from app.models.journey import Journey as JourneyModel
-    from app.models.media import MediaAsset as MediaAssetModel
-    
-    try:
-      db = SessionLocal()
-      
-      # Step 1: Basic query
-      journey = db.query(JourneyModel).filter(JourneyModel.id == journey_id).first()
-      if not journey:
-        db.close()
-        return {"error": "Journey not found", "journey_id": journey_id}
-      
-      result = {"step1": "basic query OK", "title": journey.title}
-      
-      # Step 2: Query with eager loading
-      journey = (
-        db.query(JourneyModel)
-        .filter(JourneyModel.id == journey_id)
-        .options(
-          joinedload(JourneyModel.user),
-          selectinload(JourneyModel.media_assets).selectinload(MediaAssetModel.transcripts),
-          selectinload(JourneyModel.prompt_runs),
-          selectinload(JourneyModel.highlights),
-          selectinload(JourneyModel.share_grants),
-          selectinload(JourneyModel.chapter_preferences),
-          selectinload(JourneyModel.consent_logs),
-          joinedload(JourneyModel.legacy_policy),
-        )
-        .first()
-      )
-      
-      result["step2"] = "eager loading OK"
-      result["user"] = journey.user.display_name if journey.user else "NO USER"
-      result["media_count"] = len(journey.media_assets)
-      result["prefs_count"] = len(journey.chapter_preferences)
-      
-      # Step 3: Test services
-      from app.services.journey_progress import get_all_chapter_statuses, get_journey_progress
-      chapter_statuses = get_all_chapter_statuses(db, journey_id)
-      progress = get_journey_progress(db, journey_id)
-      
-      result["step3"] = "services OK"
-      result["chapters"] = len(chapter_statuses)
-      result["progress"] = progress
-      
-      db.close()
-      return {"status": "ALL OK", "result": result}
-      
-    except Exception as e:
-      return {
-        "error": str(e),
-        "type": type(e).__name__,
-        "traceback": traceback.format_exc()
-      }
 
   app.include_router(api_router, prefix=settings.api_v1_prefix)
 
