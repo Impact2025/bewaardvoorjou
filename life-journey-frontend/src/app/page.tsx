@@ -113,6 +113,9 @@ export default function Home() {
             <Link href="/faq" className="hover:text-orange transition-colors font-medium">
               Veelgestelde vragen
             </Link>
+            <Link href="/about" className="hover:text-orange transition-colors font-medium">
+              Over ons
+            </Link>
             <Link href="/login" className="hover:text-orange transition-colors font-medium">
               Inloggen
             </Link>
@@ -155,6 +158,13 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Veelgestelde vragen
+              </Link>
+              <Link
+                href="/about"
+                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Over ons
               </Link>
               <Link
                 href="/login"
@@ -525,7 +535,8 @@ export default function Home() {
               <h3 className="font-semibold text-slate-900 mb-3">Support</h3>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li><a href="mailto:info@bewaardvoorjou.nl" className="hover:text-orange transition-colors">Contact</a></li>
-                <li><Link href="#features" className="hover:text-orange transition-colors">Veelgestelde vragen</Link></li>
+                <li><Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen</Link></li>
+                <li><Link href="/about" className="hover:text-orange transition-colors">Over ons</Link></li>
               </ul>
             </div>
 
