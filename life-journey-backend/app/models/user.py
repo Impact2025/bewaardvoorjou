@@ -34,6 +34,10 @@ class User(Base):
   created_at = Column(DateTime, default=utc_now, nullable=False)
   updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
+  # Password reset
+  password_reset_token = Column(String(128), nullable=True, index=True)
+  password_reset_token_expires_at = Column(DateTime, nullable=True)
+
   # Onboarding 2.0 fields
   onboarding_progress = Column(Text, nullable=True)  # JSON string of progress
   onboarding_completed_at = Column(DateTime, nullable=True)

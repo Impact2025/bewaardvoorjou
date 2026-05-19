@@ -170,3 +170,20 @@ def build_milestone_unlock_email(
 
     logger.info(f"Built milestone unlock email for {milestone_name}")
     return subject, html, text
+
+
+def build_password_reset_email(
+    user_display_name: str,
+    reset_url: str,
+) -> tuple[str, str, str]:
+    subject = "Wachtwoord opnieuw instellen – Bewaard voor jou"
+
+    context = {
+        "display_name": user_display_name,
+        "reset_url": reset_url,
+    }
+
+    html, text = render_email("password_reset", context)
+
+    logger.info(f"Built password reset email for {user_display_name}")
+    return subject, html, text
