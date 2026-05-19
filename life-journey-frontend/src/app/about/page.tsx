@@ -11,6 +11,8 @@ import {
   Lock
 } from "lucide-react";
 import Link from "next/link";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata = {
   title: "Over ons | BewaardVoorJou.nl",
@@ -42,6 +44,8 @@ export default function OverOnsPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <PublicHeader />
+
       {/* Hero */}
       <section className="py-20 px-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -209,6 +213,8 @@ export default function OverOnsPage() {
           </div>
         </div>
       </section>
+
+      <PublicFooter />
     </div>
   );
 }
