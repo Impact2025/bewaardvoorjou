@@ -201,7 +201,7 @@ export default function OverOnsPage() {
             </Button>
             <Button
               asChild
-              variant="outline"
+              variant="ghost"
               className="border-2 border-slate-300 text-slate-700 hover:border-orange hover:text-orange text-lg px-8 py-6"
             >
               <Link href="/contact">Neem contact op</Link>
