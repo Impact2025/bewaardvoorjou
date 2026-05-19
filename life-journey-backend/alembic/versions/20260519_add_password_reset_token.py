@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = '20260519_password_reset'
-down_revision = '20260519_extend_blog_posts'
+down_revision = '20260519_extend_blog'
 branch_labels = None
 depends_on = None
 
