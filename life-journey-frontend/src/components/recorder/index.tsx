@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CHAPTERS } from "@/lib/chapters";
@@ -22,7 +22,6 @@ import { PermissionError } from "./PermissionError";
 import { ConversationProgress } from "./ConversationProgress";
 import { useRecorderActions } from "./useRecorderActions";
 
-// Helper function to get default mode for a chapter
 function getDefaultModeForChapter(chapterId?: string): RecordingMode {
   if (!chapterId) return "text";
   const chapter = CHAPTERS.find(ch => ch.id === chapterId);
@@ -33,7 +32,6 @@ function getDefaultModeForChapter(chapterId?: string): RecordingMode {
   return "text";
 }
 
-// Helper function to get next chapter ID
 function getNextChapterId(currentChapterId?: string): string | null {
   if (!currentChapterId) return null;
   const currentIndex = CHAPTERS.findIndex(ch => ch.id === currentChapterId);
@@ -46,7 +44,6 @@ interface RecorderFrameProps {
   mode?: RecordingMode;
 }
 
-// Inner component that uses the context
 function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   const router = useRouter();
   const { session } = useAuth();
@@ -65,7 +62,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
 
   const actions = useRecorderActions({ chapterId });
 
-  // Fetch initial AI question when component mounts
+  // Haal de eerste AI-vraag op bij het laden
   useEffect(() => {
     if (!currentQuestion && chapterId && session?.token && conversationTurnNumber === 0) {
       fetchAssistantPrompt(chapterId as any, [], session.token, journey?.id)
@@ -80,8 +77,8 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
 
   const isRecording = recordingState === "recording";
   const isPreviewing = recordingState === "previewing";
+  const isIdle = recordingState === "idle";
 
-  // Navigation
   const nextChapterId = getNextChapterId(chapterId);
   const hasNextChapter = !!nextChapterId;
 
@@ -93,10 +90,8 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     }
   };
 
-  // Set ref for video preview/playback
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Sync refs
   useEffect(() => {
     if (mode === "video") {
       if (state.mediaBlob) {
@@ -110,36 +105,58 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   }, [mode, state.mediaBlob, recordingState, refs]);
 
   const isRecordingDisabled = isRecording || isPreviewing;
+  const chapterTitle = CHAPTERS.find(ch => ch.id === chapterId)?.title || "Hoofdstuk";
 
   return (
     <div className="space-y-4">
-      {/* Compact Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <ModeSelector disabled={isRecordingDisabled} />
-          <RecorderTimer />
-        </div>
-        <div className="flex items-center gap-2">
-          <UploadStatus />
-          <Button
-            onClick={() => setAssistantChatOpen(true)}
-            variant="ghost"
-            className="text-orange hover:text-orange-dark h-9 px-3 py-2"
-            aria-label="Open AI assistent"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1.5">Hulp</span>
-          </Button>
-        </div>
-      </div>
 
-      {/* Main Content Area */}
+      {/* AI-vraag — prominent bovenaan, altijd zichtbaar */}
+      {currentQuestion && (
+        <div className="rounded-xl border border-warm-amber/30 bg-warm-amber/5 px-5 py-4">
+          <p className="text-xs font-medium text-warm-amber uppercase tracking-wide mb-1">
+            Jouw vraag voor dit hoofdstuk
+          </p>
+          <p className="text-base text-slate-800 leading-relaxed font-medium">
+            {currentQuestion}
+          </p>
+        </div>
+      )}
+
+      {/* Modus kiezen — grote kaarten als nog niet gestart, compact tijdens opname */}
+      {isIdle ? (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-slate-600">
+            Hoe wil je dit verhaal vertellen?
+          </p>
+          <ModeSelector disabled={false} compact={false} />
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ModeSelector disabled={isRecordingDisabled} compact={true} />
+            <RecorderTimer />
+          </div>
+          <div className="flex items-center gap-2">
+            <UploadStatus />
+            <Button
+              onClick={() => setAssistantChatOpen(true)}
+              variant="ghost"
+              className="text-orange hover:text-orange-dark h-9 px-3 py-2 flex items-center gap-1.5"
+              aria-label="Open AI assistent voor hulp"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span className="text-sm">Hulp nodig?</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Opname-interface */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Editor/Preview Area */}
         <div
           className={cn(
             "relative w-full",
-            mode === "text" ? "min-h-[400px]" : "aspect-video max-w-2xl mx-auto"
+            mode === "text" ? "min-h-[360px]" : "aspect-video max-w-2xl mx-auto"
           )}
         >
           {mode === "text" ? (
@@ -152,7 +169,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
           )}
         </div>
 
-        {/* AI Conversation Progress - shows during multi-turn conversation */}
+        {/* AI-gesprekvoortgang tijdens multi-turn */}
         {!!conversationSessionId && !conversationComplete && (
           <div className="border-t border-slate-100 px-4 py-3">
             <ConversationProgress
@@ -164,30 +181,40 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
           </div>
         )}
 
-        {/* Controls Bar */}
-        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 bg-slate-50">
-          <span className="text-xs text-slate-500">
-            {CHAPTERS.find(ch => ch.id === chapterId)?.title || "Hoofdstuk"}
-          </span>
-          <RecorderControls
-            onStartPreview={actions.startPreview}
-            onStopPreview={actions.stopPreview}
-            onStartRecording={actions.startRecording}
-            onStopRecording={actions.stopRecording}
-            onTogglePause={actions.togglePause}
-            onUpload={actions.uploadRecording}
-            onReset={actions.resetRecording}
-            onSaveText={actions.saveTextContent}
-            onNavigateNext={handleNavigateNext}
-            hasNextChapter={hasNextChapter}
-          />
+        {/* Knoppen-balk */}
+        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
+          <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
+          <div className="flex items-center gap-2">
+            {/* Hulp-knop ook zichtbaar tijdens idle */}
+            {isIdle && (
+              <Button
+                onClick={() => setAssistantChatOpen(true)}
+                variant="ghost"
+                className="text-orange hover:text-orange-dark h-9 px-3 flex items-center gap-1.5"
+                aria-label="Open AI assistent"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span className="text-sm hidden sm:inline">Hulp nodig?</span>
+              </Button>
+            )}
+            <RecorderControls
+              onStartPreview={actions.startPreview}
+              onStopPreview={actions.stopPreview}
+              onStartRecording={actions.startRecording}
+              onStopRecording={actions.stopRecording}
+              onTogglePause={actions.togglePause}
+              onUpload={actions.uploadRecording}
+              onReset={actions.resetRecording}
+              onSaveText={actions.saveTextContent}
+              onNavigateNext={handleNavigateNext}
+              hasNextChapter={hasNextChapter}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Permission Error */}
       <PermissionError />
 
-      {/* AI Assistant Chat Modal */}
       {chapterId && (
         <AIAssistantChat
           chapterId={chapterId as any}
@@ -200,7 +227,6 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   );
 }
 
-// Main exported component with provider
 export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFrameProps) {
   const defaultMode = initialMode || getDefaultModeForChapter(chapterId);
 
@@ -211,7 +237,6 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
   );
 }
 
-// Re-export components for direct use
 export { RecorderProvider, useRecorder } from "./RecorderContext";
 export { ModeSelector } from "./ModeSelector";
 export { RecorderTimer } from "./RecorderTimer";

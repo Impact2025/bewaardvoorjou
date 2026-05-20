@@ -267,6 +267,47 @@ body {
   border-radius: 12px;
 }
 
+/* ===== ACCESSIBILITY MODES ===== */
+
+/* Grote tekst modus (+20% schaal) */
+[data-large-text="true"] {
+  font-size: 112.5%; /* 18px base in plaats van 16px */
+}
+
+[data-large-text="true"] input,
+[data-large-text="true"] textarea,
+[data-large-text="true"] select,
+[data-large-text="true"] button {
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+[data-large-text="true"] label {
+  font-size: 1rem;
+}
+
+/* Hoog contrast modus */
+[data-high-contrast="true"] {
+  --text-label: #111111;
+  --text-medium: #222222;
+  --text-dark: #000000;
+  --input-border: #333333;
+  --card-border: #555555;
+}
+
+[data-high-contrast="true"] .text-slate-500,
+[data-high-contrast="true"] .text-slate-600 {
+  color: #333333 !important;
+}
+
+[data-high-contrast="true"] input,
+[data-high-contrast="true"] textarea,
+[data-high-contrast="true"] select {
+  border-width: 2px;
+}
+
+/* ================================= */
+
 /* Dark mode transition */
 @media (prefers-reduced-motion: no-preference) {
   :root {

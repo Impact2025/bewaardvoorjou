@@ -6,25 +6,88 @@ import { useRecorder, RecordingMode } from "./RecorderContext";
 
 interface ModeSelectorProps {
   disabled?: boolean;
+  compact?: boolean;
 }
 
-export function ModeSelector({ disabled = false }: ModeSelectorProps) {
+const MODES: {
+  id: RecordingMode;
+  label: string;
+  sublabel: string;
+  icon: typeof Video;
+  color: string;
+  activeColor: string;
+}[] = [
+  {
+    id: "audio",
+    label: "Praten",
+    sublabel: "Vertel gewoon, wij luisteren",
+    icon: Mic,
+    color: "text-orange",
+    activeColor: "bg-orange/10 border-orange/40 text-orange",
+  },
+  {
+    id: "video",
+    label: "Filmen",
+    sublabel: "Kijk in de camera en begin",
+    icon: Video,
+    color: "text-teal",
+    activeColor: "bg-teal/10 border-teal/40 text-teal",
+  },
+  {
+    id: "text",
+    label: "Schrijven",
+    sublabel: "Type je herinneringen op",
+    icon: FileText,
+    color: "text-slate-600",
+    activeColor: "bg-slate-100 border-slate-300 text-slate-700",
+  },
+];
+
+export function ModeSelector({ disabled = false, compact = false }: ModeSelectorProps) {
   const { state, setMode } = useRecorder();
   const { mode } = state;
 
-  const modes: { id: RecordingMode; label: string; icon: typeof Video }[] = [
-    { id: "video", label: "Video", icon: Video },
-    { id: "audio", label: "Audio", icon: Mic },
-    { id: "text", label: "Tekst", icon: FileText },
-  ];
+  // Compact variant: kleine pills voor tijdens het opnemen
+  if (compact) {
+    return (
+      <div
+        className="flex items-center gap-1 rounded-full border border-neutral-sand bg-cream p-1 text-xs"
+        role="radiogroup"
+        aria-label="Opnamemodus"
+      >
+        {MODES.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={mode === id}
+            disabled={disabled}
+            onClick={() => setMode(id)}
+            className={cn(
+              "flex items-center gap-1 rounded-full px-3 py-1.5 transition-colors text-xs",
+              "focus:outline-none focus:ring-2 focus:ring-warm-amber/40 focus:ring-offset-1",
+              mode === id
+                ? "bg-orange/15 text-orange font-medium"
+                : "text-slate-500 hover:text-slate-700",
+              disabled && "opacity-50 cursor-not-allowed pointer-events-none"
+            )}
+          >
+            <Icon className="h-3 w-3" aria-hidden="true" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
+  // Groot visueel kaartformaat voor beginners
   return (
     <div
-      className="flex items-center gap-2 rounded-full border border-neutral-sand bg-cream p-1 text-xs"
+      className="grid grid-cols-3 gap-3"
       role="radiogroup"
-      aria-label="Opnamemodus selecteren"
+      aria-label="Hoe wil je vertellen?"
     >
-      {modes.map(({ id, label, icon: Icon }) => (
+      {MODES.map(({ id, label, sublabel, icon: Icon, activeColor }) => (
         <button
           key={id}
           type="button"
@@ -33,16 +96,22 @@ export function ModeSelector({ disabled = false }: ModeSelectorProps) {
           disabled={disabled}
           onClick={() => setMode(id)}
           className={cn(
-            "flex items-center gap-1 rounded-full px-3 py-2 transition-colors",
-            "focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-1",
+            "flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-5 transition-all text-center",
+            "focus:outline-none focus:ring-2 focus:ring-warm-amber/40 focus:ring-offset-2",
             mode === id
-              ? "bg-teal/20 text-teal"
-              : "text-slate-500 hover:text-slate-700",
-            disabled && "opacity-50 cursor-not-allowed"
+              ? activeColor
+              : "border-neutral-sand bg-white text-slate-500 hover:border-warm-amber/30 hover:text-slate-700",
+            disabled && "opacity-40 cursor-not-allowed pointer-events-none"
           )}
         >
-          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>{label}</span>
+          <Icon
+            className={cn("h-7 w-7 sm:h-8 sm:w-8", mode === id ? "" : "text-slate-400")}
+            aria-hidden="true"
+          />
+          <div>
+            <p className="font-semibold text-sm sm:text-base leading-tight">{label}</p>
+            <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">{sublabel}</p>
+          </div>
         </button>
       ))}
     </div>
