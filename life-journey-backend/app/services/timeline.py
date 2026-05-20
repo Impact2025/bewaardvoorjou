@@ -15,11 +15,13 @@ from app.models.journey import Journey
 from app.models.media import MediaAsset
 from app.models.preferences import ChapterPreference
 from app.schemas.common import ChapterId
+from app.core.config import settings
 from app.schemas.timeline import (
     CHAPTER_LABELS,
     CHAPTER_TO_PHASE,
     PHASE_METADATA,
     LifePhase,
+    MediaAssetInfo,
     PhaseMetadata,
     TimelineChapter,
     TimelineChapterDetail,
@@ -276,14 +278,16 @@ def get_chapter_detail(
         .all()
     )
 
+    api_base = getattr(settings, "api_base_url", "").rstrip("/")
     media_assets = [
-        {
-            "id": a.id,
-            "modality": a.modality,
-            "filename": a.original_filename,
-            "duration_seconds": a.duration_seconds,
-            "recorded_at": a.recorded_at.isoformat() if a.recorded_at else None,
-        }
+        MediaAssetInfo(
+            id=a.id,
+            modality=a.modality,
+            filename=a.original_filename,
+            duration_seconds=a.duration_seconds or 0,
+            recorded_at=a.recorded_at,
+            url=f"{api_base}/api/v1/media/file/{a.object_key}" if a.object_key else None,
+        )
         for a in assets
     ]
 

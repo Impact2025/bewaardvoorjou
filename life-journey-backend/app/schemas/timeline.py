@@ -209,10 +209,20 @@ class TimelineResponse(BaseModel):
     last_activity_at: Optional[datetime] = None
 
 
+class MediaAssetInfo(BaseModel):
+    """Media asset info for timeline detail."""
+    id: str
+    modality: str
+    filename: str
+    duration_seconds: int
+    recorded_at: Optional[datetime] = None
+    url: Optional[str] = None  # Playback URL (presigned S3 or local)
+
+
 class TimelineChapterDetail(BaseModel):
     """Detailed chapter info for timeline modal/detail view."""
     chapter: TimelineChapter
     phase: PhaseMetadata
     prompt_hint: str
-    media_assets: list[dict]  # Simplified media info
+    media_assets: list[MediaAssetInfo]
     transcripts_preview: Optional[str] = None

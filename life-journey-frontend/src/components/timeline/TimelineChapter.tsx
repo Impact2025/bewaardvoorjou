@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 import { PHASE_COLORS, type TimelineChapter as TimelineChapterType, type TimelineChapterDetail } from "@/lib/timeline-types";
-import { Video, Mic, FileText, Lock, Check, ChevronRight, Play, Pause, Image } from "lucide-react";
+import { Video, Mic, FileText, Lock, Check, ChevronRight, Play, Pause, ImageIcon } from "lucide-react";
 
 interface TimelineChapterProps {
    chapter: TimelineChapterType;
@@ -79,24 +80,35 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
       {chapterDetail?.media_assets.some(asset => asset.modality === 'image') && (
         <div className="hidden sm:block mb-2">
           <div className="flex items-center gap-1 text-xs text-slate-600 mb-1">
-            <Image className="h-3 w-3" />
+            <ImageIcon className="h-3 w-3" />
             <span>Foto's</span>
           </div>
           <div className="flex gap-1 overflow-hidden">
             {chapterDetail.media_assets
               .filter(asset => asset.modality === 'image')
               .slice(0, 3)
-              .map((asset, index) => (
+              .map((asset) => (
                 <div
                   key={asset.id}
-                  className="w-6 h-6 rounded bg-slate-200 flex items-center justify-center text-xs"
+                  className="relative w-8 h-8 rounded overflow-hidden bg-slate-200 flex-shrink-0"
                   title={asset.filename}
                 >
-                  📷
+                  {asset.url ? (
+                    <NextImage
+                      src={asset.url}
+                      alt={asset.filename}
+                      fill
+                      className="object-cover"
+                      sizes="32px"
+                      unoptimized
+                    />
+                  ) : (
+                    <ImageIcon className="h-4 w-4 m-auto text-slate-400 absolute inset-0 m-auto" />
+                  )}
                 </div>
               ))}
             {chapterDetail.media_assets.filter(asset => asset.modality === 'image').length > 3 && (
-              <div className="w-6 h-6 rounded bg-slate-200 flex items-center justify-center text-xs text-slate-500">
+              <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center text-xs text-slate-500 flex-shrink-0">
                 +{chapterDetail.media_assets.filter(asset => asset.modality === 'image').length - 3}
               </div>
             )}
@@ -115,7 +127,8 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onAudioToggle?.(chapter.id, 'preview-url');
+                const audioAsset = chapterDetail.media_assets.find(a => a.modality === 'audio');
+                if (audioAsset?.url) onAudioToggle?.(chapter.id, audioAsset.url);
               }}
               className="p-1.5 sm:p-1 rounded bg-white/50 hover:bg-white/70 transition-colors min-w-[28px] min-h-[28px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
             >

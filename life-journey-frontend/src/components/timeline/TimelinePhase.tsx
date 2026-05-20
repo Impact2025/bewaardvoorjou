@@ -88,7 +88,21 @@ export function TimelinePhaseSection({
   };
 
   return (
-    <div className="mb-4 sm:mb-6">
+    <div className="mb-0 relative">
+      {/* Vertical timeline line */}
+      <div className="absolute left-[22px] sm:left-[26px] top-0 bottom-0 w-0.5 bg-slate-200 -z-10" aria-hidden="true" />
+
+      <div className="mb-4 sm:mb-6 pl-10 sm:pl-14 relative">
+        {/* Phase dot on the timeline */}
+        <div
+          className={cn(
+            "absolute left-0 top-[20px] sm:top-[22px] flex items-center justify-center",
+            "w-[44px] sm:w-[52px]",
+          )}
+        >
+          <div className={cn("w-5 h-5 rounded-full border-2 border-white shadow-sm flex-shrink-0", colors.bg, colors.border, "border-2")} />
+        </div>
+
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
@@ -169,6 +183,7 @@ export function TimelinePhaseSection({
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
