@@ -1,23 +1,73 @@
 export type ChapterId =
+  // Fase 1: Intro
   | "intro-reflection"
   | "intro-intention"
   | "intro-uniqueness"
+  // Fase 2: Wortels & Familie
+  | "roots-first-memory"
+  | "roots-father"
+  | "roots-mother"
+  | "roots-grandparents"
+  | "roots-siblings"
+  | "roots-home"
+  | "roots-neighborhood"
+  | "roots-faith"
+  | "roots-finances"
+  | "roots-hardship"
+  // Fase 3: Jeugd & School
   | "youth-favorite-place"
   | "youth-sounds"
   | "youth-hero"
-  | "love-connection"
-  | "love-lessons"
-  | "love-symbol"
+  | "youth-primary-school"
+  | "youth-friends"
+  | "youth-secondary-school"
+  | "youth-history"
+  | "youth-ambition"
+  // Fase 4: Jong Volwassen
   | "work-dream-job"
   | "work-passion"
   | "work-challenge"
+  | "young-adult-first-job"
+  | "young-adult-independence"
+  | "young-adult-first-home"
+  | "young-adult-career-path"
+  | "young-adult-pivotal-choice"
+  | "young-adult-finances"
+  | "young-adult-world-events"
+  // Fase 5: Liefde & Gezin
+  | "love-connection"
+  | "love-lessons"
+  | "love-symbol"
+  | "family-partner-story"
+  | "family-early-years"
+  | "family-wedding"
+  | "family-children"
+  | "family-typical-week"
+  | "family-hardship"
+  | "family-pride"
+  // Fase 6: Midden Leven & Verlies
+  | "midlife-grief"
+  | "midlife-aging"
+  | "midlife-regret"
+  | "midlife-resilience"
+  | "midlife-parents-retrospect"
+  | "midlife-formative-decade"
+  | "midlife-social-change"
+  | "midlife-faith-evolution"
+  // Fase 7: Nu & Nalatenschap
   | "future-message"
   | "future-dream"
   | "future-gratitude"
+  | "legacy-daily-joy"
+  | "legacy-faith-now"
+  | "legacy-remembered"
+  | "legacy-verdict"
+  | "legacy-unsaid"
+  | "legacy-letter"
+  // Optioneel
   | "bonus-funny"
   | "bonus-relive"
   | "bonus-culture"
-  // De Verborgen Dimensies
   | "deep-daily-ritual"
   | "deep-favorite-time"
   | "deep-ugly-object"
@@ -29,13 +79,18 @@ export type ChapterId =
   | "deep-money-impact"
   | "deep-shadow-side"
   | "deep-life-meal"
-  | "deep-statue";
+  | "deep-statue"
+  | "optional-childhood-game"
+  | "optional-alter-ego"
+  | "optional-superpower"
+  | "optional-bucket-list"
+  | "optional-final-chapter";
 
 export interface ChapterDefinition {
   id: ChapterId;
   title: string;
   description: string;
-  phase: "intro" | "youth" | "love" | "work" | "future" | "bonus" | "deep";
+  phase: "intro" | "roots" | "youth" | "young-adult" | "family" | "midlife" | "legacy" | "optional";
   phaseTitle: string;
   question: string;
   mood: "gentle" | "celebratory" | "reflective" | "playful";
@@ -137,6 +192,8 @@ export interface JourneyProgress {
   availableChapters: number;
   percentComplete: number;
   nextAvailableChapter?: ChapterId;
+  currentPhase?: ChapterDefinition["phase"];
+  phaseProgress: Partial<Record<ChapterDefinition["phase"], { total: number; completed: number }>>;
 }
 
 export interface Journey {
