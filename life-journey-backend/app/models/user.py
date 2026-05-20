@@ -34,6 +34,15 @@ class User(Base):
   created_at = Column(DateTime, default=utc_now, nullable=False)
   updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
+  # Email verification
+  email_verified = Column(Boolean, nullable=False, default=False)
+  email_verification_token = Column(String(128), nullable=True, index=True)
+  email_verification_token_expires_at = Column(DateTime, nullable=True)
+
+  # Email deliverability
+  email_bounced = Column(Boolean, nullable=False, default=False)
+  email_bounced_at = Column(DateTime, nullable=True)
+
   # Password reset
   password_reset_token = Column(String(128), nullable=True, index=True)
   password_reset_token_expires_at = Column(DateTime, nullable=True)

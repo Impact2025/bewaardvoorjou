@@ -10,6 +10,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.exceptions import AppError
 from app.core.rate_limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
 
@@ -33,6 +34,18 @@ def create_app() -> FastAPI:
   # Add rate limiter to app state
   app.state.limiter = limiter
   app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+  @app.exception_handler(AppError)
+  async def app_error_handler(request: Request, exc: AppError):
+    origin = request.headers.get("origin", "")
+    response = JSONResponse(
+      status_code=exc.status_code,
+      content={"detail": exc.detail, "code": exc.code},
+    )
+    if origin in CORS_ORIGINS:
+      response.headers["Access-Control-Allow-Origin"] = origin
+      response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
   # Global exception handler to ensure CORS headers on errors
   @app.exception_handler(Exception)

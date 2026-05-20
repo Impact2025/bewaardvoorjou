@@ -1,0 +1,8 @@
+Welkom bij Bewaard voor jou, {{ display_name }}!
+
+Bedankt voor het aanmaken van je account. Gebruik de link hieronder om je e-mailadres te bevestigen.
+Deze link is 24 uur geldig.
+
+{{ verification_url }}
+
+Heb jij dit account niet aangemaakt? Dan hoef je niets te doen.

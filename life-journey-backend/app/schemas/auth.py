@@ -28,6 +28,11 @@ class RegisterRequest(BaseModel):
   privacy_level: str = Field(default="private")
 
 
+class RegisterResponse(BaseModel):
+  message: str
+  email: str
+
+
 class LoginRequest(BaseModel):
   email: EmailStr
   password: str
@@ -47,6 +52,14 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
   token: str
   new_password: str = Field(min_length=8)
+
+
+class VerifyEmailRequest(BaseModel):
+  token: str
+
+
+class ResendVerificationRequest(BaseModel):
+  email: EmailStr
 
 
 class MessageResponse(BaseModel):

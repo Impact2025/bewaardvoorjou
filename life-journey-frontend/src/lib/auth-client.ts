@@ -19,6 +19,11 @@ interface AuthResponseDto {
   primary_journey_id?: string | null;
 }
 
+interface RegisterResponseDto {
+  message: string;
+  email: string;
+}
+
 export interface RegisterPayload {
   displayName: string;
   email: string;
@@ -32,6 +37,11 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface RegisterResult {
+  message: string;
+  email: string;
 }
 
 function mapAuthResponse(payload: AuthResponseDto): AuthSession {
@@ -54,7 +64,7 @@ function mapAuthResponse(payload: AuthResponseDto): AuthSession {
   };
 }
 
-export async function registerUser(payload: RegisterPayload): Promise<AuthSession> {
+export async function registerUser(payload: RegisterPayload): Promise<RegisterResult> {
   const body: Record<string, unknown> = {
     display_name: payload.displayName,
     email: payload.email,
@@ -68,12 +78,28 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthSessio
     body.birth_year = payload.birthYear;
   }
 
-  const response = await apiFetch<AuthResponseDto>("/auth/register", {
+  const response = await apiFetch<RegisterResponseDto>("/auth/register", {
     method: "POST",
     body: JSON.stringify(body),
   });
 
+  return { message: response.message, email: response.email };
+}
+
+export async function verifyEmail(token: string): Promise<AuthSession> {
+  const response = await apiFetch<AuthResponseDto>("/auth/verify-email", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+
   return mapAuthResponse(response);
+}
+
+export async function resendVerification(email: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>("/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
 export async function loginUser(payload: LoginPayload): Promise<AuthSession> {

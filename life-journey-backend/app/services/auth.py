@@ -11,6 +11,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.exceptions import EMAIL_NOT_VERIFIED
 from app.models.user import User
 from app.models.journey import Journey
 
@@ -66,7 +67,16 @@ def register_user(db: Session, *, email: str, password: str, **user_kwargs) -> U
     user_kwargs["target_recipients"] = list(target_recipients)
   if "is_active" not in user_kwargs:
     user_kwargs["is_active"] = True
-  user = User(email=normalized_email, password_hash=hash_password(password), **user_kwargs)
+
+  verification_token = secrets.token_urlsafe(32)
+  user = User(
+    email=normalized_email,
+    password_hash=hash_password(password),
+    email_verified=False,
+    email_verification_token=verification_token,
+    email_verification_token_expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+    **user_kwargs,
+  )
   journey_title = user.display_name if getattr(user, "display_name", None) else "Mijn levensverhaal"
   journey = Journey(
     id=str(uuid4()),
@@ -79,6 +89,46 @@ def register_user(db: Session, *, email: str, password: str, **user_kwargs) -> U
   db.commit()
   db.refresh(user)
   return user
+
+
+def verify_email_token(db: Session, *, token: str) -> User:
+  """Verify email verification token and activate the user's email."""
+  user = db.query(User).filter_by(email_verification_token=token).first()
+  if not user:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ongeldige of verlopen verificatielink")
+
+  expires_at = user.email_verification_token_expires_at
+  if expires_at is None:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ongeldige of verlopen verificatielink")
+
+  if expires_at.tzinfo is None:
+    expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+  if datetime.now(timezone.utc) > expires_at:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verificatielink is verlopen. Vraag een nieuwe aan.")
+
+  user.email_verified = True
+  user.email_verification_token = None
+  user.email_verification_token_expires_at = None
+  db.add(user)
+  db.commit()
+  db.refresh(user)
+  return user
+
+
+def generate_email_verification_token(db: Session, *, email: str) -> str | None:
+  """Generate a new email verification token. Returns None if user not found or already verified."""
+  normalized_email = email.lower()
+  user = db.query(User).filter_by(email=normalized_email).first()
+  if not user or not user.is_active or user.email_verified:
+    return None
+
+  token = secrets.token_urlsafe(32)
+  user.email_verification_token = token
+  user.email_verification_token_expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+  db.add(user)
+  db.commit()
+  return token
 
 
 def generate_password_reset_token(db: Session, *, email: str) -> str | None:
@@ -130,6 +180,9 @@ def authenticate_user(db: Session, *, email: str, password: str) -> User:
 
   if not user.is_active:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is gedeactiveerd")
+
+  if not user.email_verified:
+    raise EMAIL_NOT_VERIFIED
 
   if password_hasher.check_needs_rehash(user.password_hash):
     user.password_hash = hash_password(password)

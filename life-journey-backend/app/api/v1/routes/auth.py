@@ -6,20 +6,27 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
-from app.schemas.auth import AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse, RegisterRequest, ResetPasswordRequest, UserPublic
-from app.services.auth import authenticate_user, create_access_token, generate_password_reset_token, register_user, reset_password
-from app.services.email.client import send_email
-from app.services.email.events import trigger_welcome_email
-from app.services.email.renderer import build_password_reset_email
+from app.schemas.auth import (
+    AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse,
+    RegisterRequest, RegisterResponse, ResendVerificationRequest,
+    ResetPasswordRequest, UserPublic, VerifyEmailRequest,
+)
+from app.services.auth import (
+    authenticate_user, create_access_token, generate_email_verification_token,
+    generate_password_reset_token, register_user, reset_password, verify_email_token,
+)
+from app.services.email.events import (
+    trigger_email_verification, trigger_password_reset_email, trigger_welcome_email,
+)
 from loguru import logger
 
 
 router = APIRouter()
 
 
-@router.post("/register", response_model=AuthResponse, status_code=201, tags=["auth"])
+@router.post("/register", response_model=RegisterResponse, status_code=201, tags=["auth"])
 @limiter.limit(RateLimits.AUTH_REGISTER)
-def register(request: Request, payload: RegisterRequest, db: Session = Depends(get_db)) -> AuthResponse:
+def register(request: Request, payload: RegisterRequest, db: Session = Depends(get_db)) -> RegisterResponse:
   user = register_user(
     db,
     email=payload.email,
@@ -31,12 +38,27 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
     privacy_level=payload.privacy_level,
   )
 
-  # Trigger welcome email
+  try:
+    verification_url = f"{settings.app_base_url}/email-bevestigen?token={user.email_verification_token}"
+    trigger_email_verification(db, user.id, verification_url)
+  except Exception as e:
+    logger.warning(f"Failed to queue verification email for user {user.id}: {e}")
+
+  return RegisterResponse(
+    message="Account aangemaakt. Controleer je inbox om je e-mailadres te bevestigen.",
+    email=user.email,
+  )
+
+
+@router.post("/verify-email", response_model=AuthResponse, tags=["auth"])
+@limiter.limit(RateLimits.AUTH_LOGIN)
+def verify_email(request: Request, payload: VerifyEmailRequest, db: Session = Depends(get_db)) -> AuthResponse:
+  user = verify_email_token(db, token=payload.token)
+
   try:
     trigger_welcome_email(db, user.id)
   except Exception as e:
-    logger.warning(f"Failed to trigger welcome email for user {user.id}: {e}")
-    # Don't fail registration if email fails
+    logger.warning(f"Failed to queue welcome email for user {user.id}: {e}")
 
   token = create_access_token(subject=user.id)
   primary_journey = next(iter(user.journeys), None)
@@ -47,23 +69,39 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
   )
 
 
+@router.post("/resend-verification", response_model=MessageResponse, tags=["auth"])
+@limiter.limit(RateLimits.AUTH_LOGIN)
+def resend_verification(request: Request, payload: ResendVerificationRequest, db: Session = Depends(get_db)) -> MessageResponse:
+  from app.models.user import User as UserModel
+  new_token = generate_email_verification_token(db, email=payload.email)
+  if new_token:
+    user = db.query(UserModel).filter_by(email=payload.email.lower()).first()
+    if user:
+      try:
+        verification_url = f"{settings.app_base_url}/email-bevestigen?token={new_token}"
+        trigger_email_verification(db, user.id, verification_url)
+      except Exception as e:
+        logger.warning(f"Failed to queue resend verification for {user.email}: {e}")
+
+  return MessageResponse(
+    message="Als dit e-mailadres bij ons bekend is en nog niet bevestigd, ontvang je binnen enkele minuten een nieuwe verificatielink."
+  )
+
+
 @router.post("/forgot-password", response_model=MessageResponse, tags=["auth"])
 @limiter.limit(RateLimits.AUTH_LOGIN)
 def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Session = Depends(get_db)) -> MessageResponse:
+  from app.models.user import User as UserModel
   token = generate_password_reset_token(db, email=payload.email)
-
   if token:
-    from app.models.user import User as UserModel
     user = db.query(UserModel).filter_by(email=payload.email.lower()).first()
     if user:
-      reset_url = f"{settings.app_base_url}/wachtwoord-resetten?token={token}"
-      subject, html, text = build_password_reset_email(user.display_name, reset_url)
       try:
-        send_email(to=user.email, subject=subject, html=html, text=text)
+        reset_url = f"{settings.app_base_url}/wachtwoord-resetten?token={token}"
+        trigger_password_reset_email(db, user.id, reset_url)
       except Exception as e:
-        logger.warning(f"Failed to send password reset email to {user.email}: {e}")
+        logger.warning(f"Failed to queue password reset email for {user.email}: {e}")
 
-  # Always return the same message to prevent user enumeration
   return MessageResponse(message="Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een resetlink.")
 
 

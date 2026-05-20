@@ -31,8 +31,17 @@ beforeEach(() => {
   });
 });
 
+const mockRegisterResponse = {
+  message: "Account aangemaakt. Controleer je inbox om je e-mailadres te bevestigen.",
+  email: "t@t.nl",
+};
+
 describe("registerUser", () => {
   it("calls /auth/register with POST", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify(mockRegisterResponse),
+    });
     await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL" });
     expect(mockFetch).toHaveBeenCalledWith(
       "http://localhost:8001/api/v1/auth/register",
@@ -40,11 +49,14 @@ describe("registerUser", () => {
     );
   });
 
-  it("maps response to AuthSession", async () => {
-    const session = await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL" });
-    expect(session.token).toBe("test-token-123");
-    expect(session.user.displayName).toBe("Test User");
-    expect(session.primaryJourneyId).toBe("journey-1");
+  it("returns message and email", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify(mockRegisterResponse),
+    });
+    const result = await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL" });
+    expect(result.message).toContain("inbox");
+    expect(result.email).toBe("t@t.nl");
   });
 });
 
