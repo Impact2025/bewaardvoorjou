@@ -4,15 +4,40 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { registerUser } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PRIVACY_OPTIONS = [
-  { value: "private", label: "Alleen voor mij" },
-  { value: "trusted", label: "Gedeeld met vertrouwde personen" },
-  { value: "legacy", label: "Bewaar voor nalatenschap" },
+  {
+    value: "private",
+    label: "Alleen voor mij",
+    description: "Jouw verhaal blijft privé — alleen jij kunt het bekijken.",
+  },
+  {
+    value: "trusted",
+    label: "Gedeeld met familie",
+    description: "Je kunt specifieke familieleden uitnodigen om mee te kijken.",
+  },
+  {
+    value: "legacy",
+    label: "Bewaard voor later",
+    description: "Je verhaal wordt bewaard voor je kinderen en kleinkinderen.",
+  },
 ];
+
+const BIRTH_YEARS = Array.from({ length: 86 }, (_, i) => 2005 - i); // 2005 → 1920
+
+function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
+  if (pw.length < 4) return 0;
+  if (pw.length < 8) return 1;
+  if (pw.length < 12 && !/[0-9]/.test(pw)) return 2;
+  return pw.length >= 12 && /[0-9]/.test(pw) ? 3 : 2;
+}
+
+const STRENGTH_LABELS = ["Te kort", "Matig", "Goed", "Sterk"] as const;
+const STRENGTH_COLORS = ["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-500"] as const;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,6 +49,7 @@ export default function RegisterPage() {
   const [birthYear, setBirthYear] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,7 +107,7 @@ export default function RegisterPage() {
                 required
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               />
             </div>
 
@@ -95,7 +121,7 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               />
             </div>
 
@@ -103,15 +129,44 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium text-label" htmlFor="password">
                 Wachtwoord (minimaal 8 tekens)
               </label>
-              <input
-                id="password"
-                type="password"
-                minLength={8}
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  minLength={8}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 pr-12 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-warm-amber/40 rounded"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              {password.length > 0 && (
+                <div className="space-y-1">
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1.5 flex-1 rounded-full transition-colors ${
+                          getPasswordStrength(password) > level
+                            ? STRENGTH_COLORS[getPasswordStrength(password)]
+                            : "bg-slate-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Wachtwoord: <span className="font-medium">{STRENGTH_LABELS[getPasswordStrength(password)]}</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -123,7 +178,7 @@ export default function RegisterPage() {
                 required
                 value={country}
                 onChange={(event) => setCountry(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               />
             </div>
 
@@ -131,33 +186,48 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium text-label" htmlFor="birthYear">
                 Geboortejaar (optioneel)
               </label>
-              <input
+              <select
                 id="birthYear"
-                type="number"
-                min="1900"
-                max={new Date().getFullYear()}
                 value={birthYear}
                 onChange={(event) => setBirthYear(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="block text-sm font-medium text-label" htmlFor="privacyLevel">
-                Privacy-niveau
-              </label>
-              <select
-                id="privacyLevel"
-                value={privacyLevel}
-                onChange={(event) => setPrivacyLevel(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               >
-                {PRIVACY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                <option value="">— Kies een jaar —</option>
+                {BIRTH_YEARS.map((year) => (
+                  <option key={year} value={year}>{year}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <span className="block text-sm font-medium text-label">
+                Voor wie bewaar je je verhaal?
+              </span>
+              <div className="space-y-2">
+                {PRIVACY_OPTIONS.map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
+                      privacyLevel === option.value
+                        ? "border-warm-amber bg-warm-amber/5"
+                        : "border-input-border hover:border-warm-amber/40"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="privacyLevel"
+                      value={option.value}
+                      checked={privacyLevel === option.value}
+                      onChange={() => setPrivacyLevel(option.value)}
+                      className="mt-0.5 accent-warm-amber"
+                    />
+                    <div>
+                      <p className="font-medium text-slate-900">{option.label}</p>
+                      <p className="text-sm text-medium mt-0.5">{option.description}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
               <p className="text-sm text-medium">
                 Je kunt dit later in je instellingen veranderen.
               </p>

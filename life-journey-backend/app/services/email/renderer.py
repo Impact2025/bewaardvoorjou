@@ -25,7 +25,10 @@ jinja_env = Environment(
 def _inline_css(html: str) -> str:
     """Inline CSS for Outlook and legacy email client compatibility."""
     try:
+        import logging
         import premailer
+        # cssutils emits spurious warnings for CSS3 values (gradients, transitions)
+        logging.getLogger("cssutils").setLevel(logging.CRITICAL)
         return premailer.transform(
             html,
             remove_classes=False,

@@ -18,7 +18,7 @@
   --text-medium: #555555; /* Middelste grijs voor secundaire tekst */
   --text-light: #E0E0E0; /* Lichtere tekst voor donkere modus */
   --text-input: #2A2A2A; /* Donkere tekst voor inputvelden */
-  --text-label: #444444; /* Zachtere labels */
+  --text-label: #333333; /* Labels met voldoende contrast (WCAG AA) */
   
   /* Neutral colors */
   --neutral: #E6E2DD;
@@ -237,7 +237,16 @@ body {
 /* Focus states - Orange theme */
 .focus-teal {
   border-color: var(--input-focus);
-  box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.40);
+}
+
+/* Prefers-reduced-motion: schakel animaties uit */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Card shadows - MyStoryBox style */
