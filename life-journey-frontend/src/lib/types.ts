@@ -193,7 +193,7 @@ export interface JourneyProgress {
   percentComplete: number;
   nextAvailableChapter?: ChapterId;
   currentPhase?: ChapterDefinition["phase"];
-  phaseProgress: Partial<Record<ChapterDefinition["phase"], { total: number; completed: number }>>;
+  phaseProgress?: Partial<Record<ChapterDefinition["phase"], { total: number; completed: number }>>;
 }
 
 export interface Journey {
