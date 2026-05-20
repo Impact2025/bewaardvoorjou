@@ -196,15 +196,29 @@ function DashboardContent() {
         onShowHandleiding={() => setShowOnboarding(true)}
       >
         <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-full overflow-hidden">
+          {/* Mobile-only greeting (desktop sees greeting in AppShell header) */}
+          <div className="sm:hidden">
+            <p className="text-sm font-medium text-gray-400">
+              {new Date().getHours() < 12
+                ? "Goedemorgen"
+                : new Date().getHours() < 18
+                ? "Goedemiddag"
+                : "Goedenavond"}
+            </p>
+            <h2 className="text-2xl font-bold text-slate-900 font-serif leading-tight">
+              {profile?.displayName?.split(" ")[0] || "Welkom"}
+            </h2>
+          </div>
+
           {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 p-4 sm:p-6 md:p-8 text-white">
-            <div className="hidden sm:block absolute top-0 right-0 opacity-10">
-              <Sparkles className="h-32 md:h-48 w-32 md:w-48" />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-[#E06828] p-5 sm:p-6 md:p-8 text-white shadow-[0_4px_24px_rgba(255,140,66,0.25)]">
+            <div className="absolute -right-6 -top-6 opacity-10">
+              <Sparkles className="h-32 w-32" />
             </div>
             <div className="relative z-10">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">
+                  <h3 className="text-lg sm:text-2xl font-bold mb-1">
                     {progressPercent === 0
                       ? "Begin je reis"
                       : progressPercent < 50
@@ -212,19 +226,18 @@ function DashboardContent() {
                       : progressPercent < 100
                       ? "Bijna daar!"
                       : "Gefeliciteerd! 🎉"}
-                  </h2>
-                  <p className="text-teal-100 max-w-md">
+                  </h3>
+                  <p className="text-white/80 text-sm sm:text-base max-w-md leading-relaxed">
                     {getProgressMessage()}
                   </p>
                 </div>
                 {nextChapter && (
                   <Button
                     asChild
-
-                    className="bg-white text-teal-700 hover:bg-teal-50 shadow-lg whitespace-nowrap"
+                    className="w-full sm:w-auto bg-white text-orange font-semibold hover:bg-white/90 shadow-md whitespace-nowrap"
                   >
                     <Link href={`/chapter/${nextChapter}`}>
-                      <Play className="h-5 w-5 mr-2" />
+                      <Play className="h-4 w-4" />
                       {nextChapterTitle || "Start volgende"}
                     </Link>
                   </Button>
@@ -232,30 +245,30 @@ function DashboardContent() {
               </div>
 
               {/* Progress bar */}
-              <div className="mt-6">
+              <div className="mt-5">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span>Voortgang</span>
-                  <span className="font-semibold">{progressPercent}%</span>
+                  <span className="text-white/90">Voortgang</span>
+                  <span className="font-bold">{progressPercent}%</span>
                 </div>
-                <div className="h-3 bg-teal-500/30 rounded-full overflow-hidden">
+                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-white rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
+                    className="h-full bg-white rounded-full transition-all duration-700"
+                    style={{ width: `${Math.max(progressPercent, 2)}%` }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Content Grid */}
+          {/* Main Content Grid — sidebar first on mobile via CSS order */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
-            {/* Timeline Section */}
-            <div className="space-y-6">
+            {/* Timeline — order-2 on mobile (shows after sidebar) */}
+            <div className="order-2 md:order-1 space-y-6">
               <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-teal-600" />
+                      <TrendingUp className="h-5 w-5 text-orange" />
                       Je Levensreis
                     </CardTitle>
                     <CardDescription>
@@ -284,32 +297,34 @@ function DashboardContent() {
               </Card>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Quick Stats */}
+            {/* Sidebar — order-1 on mobile (shows before timeline) */}
+            <div className="order-1 md:order-2 space-y-4 sm:space-y-6">
+              {/* Quick Stats — horizontal row on mobile */}
               <Card className="bg-white border border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-base">Snel overzicht</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <QuickStat
-                    icon={<BookOpen className="h-4 w-4" />}
-                    label="Voltooid"
-                    value={`${completedChapters}/${totalChapters}`}
-                    color="emerald"
-                  />
-                  <QuickStat
-                    icon={<Mic className="h-4 w-4" />}
-                    label="Opnames"
-                    value={String(journey?.media?.length || 0)}
-                    color="blue"
-                  />
-                  <QuickStat
-                    icon={<Clock className="h-4 w-4" />}
-                    label="Laatste update"
-                    value={journey ? formatDate(journey.updatedAt) : "-"}
-                    color="violet"
-                  />
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-3 sm:block sm:space-y-4">
+                    <QuickStat
+                      icon={<BookOpen className="h-4 w-4" />}
+                      label="Voltooid"
+                      value={`${completedChapters}/${totalChapters}`}
+                      color="emerald"
+                    />
+                    <QuickStat
+                      icon={<Mic className="h-4 w-4" />}
+                      label="Opnames"
+                      value={String(journey?.media?.length || 0)}
+                      color="blue"
+                    />
+                    <QuickStat
+                      icon={<Clock className="h-4 w-4" />}
+                      label="Bijgewerkt"
+                      value={journey ? formatDate(journey.updatedAt) : "-"}
+                      color="violet"
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
@@ -365,7 +380,6 @@ function DashboardContent() {
                         Bekijk de handleiding voor tips en uitleg.
                       </p>
                       <Button
-
                         variant="ghost"
                         onClick={() => setShowOnboarding(true)}
                         className="border-amber-300 text-amber-700 hover:bg-amber-100"
@@ -380,8 +394,9 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Quick Thought FAB */}
+        {/* Quick Thought FAB — raised above mobile bottom nav */}
         <QuickThoughtFAB
+          className="bottom-24 sm:bottom-6"
           onThoughtCreated={(thoughtId) => {
             console.log("Quick thought created:", thoughtId);
           }}
@@ -406,13 +421,13 @@ const statColors = {
 
 function QuickStat({ icon, label, value, color }: QuickStatProps) {
   return (
-    <div className="flex items-center gap-3">
-      <div className={cn("p-2 rounded-lg", statColors[color])}>
+    <div className="flex flex-col items-center gap-1 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
+      <div className={cn("p-2 rounded-lg flex-shrink-0", statColors[color])}>
         {icon}
       </div>
-      <div className="flex-1">
-        <p className="text-xs text-slate-500">{label}</p>
-        <p className="font-semibold text-slate-900">{value}</p>
+      <div className="min-w-0">
+        <p className="text-[10px] sm:text-xs text-slate-500">{label}</p>
+        <p className="text-sm font-semibold text-slate-900 truncate">{value}</p>
       </div>
     </div>
   );
