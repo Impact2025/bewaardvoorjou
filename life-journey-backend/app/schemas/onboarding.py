@@ -25,6 +25,8 @@ class IntakeRequest(BaseModel):
   target_recipients: list[str]
   deadline: Deadline | None = None
   accessibility: AccessibilityPrefs = AccessibilityPrefs()
+  recording_method: Literal["video", "audio", "text", "mixed"] | None = None
+  ai_assistance: Literal["full", "minimal", "none"] | None = None
 
 
 class IntakeResponse(BaseModel):

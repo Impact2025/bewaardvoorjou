@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpen, Layers, Mic, AlignJustify } from "lucide-react";
+import { House, BookOpen, Layers, Mic, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { href: "/chapters", label: "Verhalen", icon: BookOpen },
   { href: "/timeline", label: "Tijdlijn", icon: Layers },
   { href: "/recordings", label: "Opnames", icon: Mic },
-  { href: "/overview", label: "Meer", icon: AlignJustify },
+  { href: "/family", label: "Familie", icon: Users },
 ] as const;
 
 export function MobileBottomNav() {
@@ -25,7 +25,7 @@ export function MobileBottomNav() {
         className="border-t border-gray-100 bg-white/95 backdrop-blur-xl"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}
       >
-        <div className="flex h-16 items-center justify-around px-2">
+        <div className="flex h-[68px] items-center justify-around px-1">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive =
               pathname === href ||
@@ -34,12 +34,12 @@ export function MobileBottomNav() {
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-1 px-3 transition-transform active:scale-90"
+                className="flex flex-col items-center justify-center gap-1 flex-1 py-2 transition-transform active:scale-90 min-w-0"
                 aria-current={isActive ? "page" : undefined}
               >
                 <div
                   className={cn(
-                    "flex h-8 w-10 items-center justify-center rounded-full transition-all duration-200",
+                    "flex h-9 w-11 items-center justify-center rounded-full transition-all duration-200",
                     isActive && "bg-orange/10"
                   )}
                 >
@@ -47,7 +47,7 @@ export function MobileBottomNav() {
                     className={cn(
                       "transition-all duration-200",
                       isActive
-                        ? "h-[22px] w-[22px] text-orange"
+                        ? "h-6 w-6 text-orange"
                         : "h-5 w-5 text-gray-400"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
@@ -55,7 +55,7 @@ export function MobileBottomNav() {
                 </div>
                 <span
                   className={cn(
-                    "text-[10px] font-semibold leading-none",
+                    "text-xs font-semibold leading-none truncate",
                     isActive ? "text-orange" : "text-gray-400"
                   )}
                 >

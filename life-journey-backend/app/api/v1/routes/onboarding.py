@@ -80,6 +80,10 @@ def submit_intake(
   user.captions = payload.accessibility.captions
   user.high_contrast = payload.accessibility.high_contrast
   user.large_text = payload.accessibility.large_text
+  if payload.recording_method:
+    user.preferred_recording_method = payload.recording_method
+  if payload.ai_assistance:
+    user.ai_assistance_level = payload.ai_assistance
 
   journey = (
     db.query(Journey)
