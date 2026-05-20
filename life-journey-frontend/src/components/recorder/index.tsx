@@ -11,6 +11,7 @@ import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
 import { fetchAssistantPrompt } from "@/lib/assistant";
 
+import { ContextHelp } from "@/components/ui/context-help";
 import { RecorderProvider, useRecorder, RecordingMode } from "./RecorderContext";
 import { ModeSelector } from "./ModeSelector";
 import { RecorderTimer } from "./RecorderTimer";
@@ -125,9 +126,15 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
       {/* Modus kiezen — grote kaarten als nog niet gestart, compact tijdens opname */}
       {isIdle ? (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-600">
-            Hoe wil je dit verhaal vertellen?
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-slate-600">
+              Hoe wil je dit verhaal vertellen?
+            </p>
+            <ContextHelp
+              title="Welk medium kies je?"
+              description="Praten: neem alleen je stem op. Filmen: je ziet jezelf terwijl je vertelt. Schrijven: typ je herinneringen op in je eigen tempo."
+            />
+          </div>
           <ModeSelector disabled={false} compact={false} />
         </div>
       ) : (

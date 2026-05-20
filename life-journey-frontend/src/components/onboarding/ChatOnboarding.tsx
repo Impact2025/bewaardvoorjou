@@ -20,7 +20,6 @@ interface ChatMessage {
 interface ChipOption {
   value: string;
   label: string;
-  emoji?: string;
   description?: string;
 }
 
@@ -227,6 +226,18 @@ const PHASE_ORDER: Phase[] = [
   "summary",
 ];
 
+// Map phase → onboarding step name (for backend progress save)
+const PHASE_TO_STEP: Partial<Record<Phase, string>> = {
+  name: "personal_info",
+  birth_year: "personal_info",
+  purpose: "story_purpose",
+  recording_method: "recording_preferences",
+  privacy: "privacy_settings",
+  tempo: "privacy_settings",
+  ai_assistance: "recording_preferences",
+  summary: "complete",
+};
+
 function getDeadlineDate(challenge: string): string {
   const d = new Date();
   if (challenge === "30 dagen") d.setDate(d.getDate() + 30);
@@ -269,6 +280,42 @@ export function ChatOnboarding() {
     [addMessage],
   );
 
+  // Save progress to backend after each phase transition
+  const saveProgress = useCallback(
+    async (currentPhase: Phase, currentData: Partial<CollectedData>) => {
+      if (!session?.token) return;
+      const step = PHASE_TO_STEP[currentPhase];
+      if (!step || step === "complete") return;
+      try {
+        await apiFetch(
+          "/onboarding/progress",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              current_step: step,
+              personal_info: currentData.displayName
+                ? { display_name: currentData.displayName, birth_year: currentData.birthYear ?? null }
+                : null,
+              story_purpose: currentData.recipients?.length
+                ? { purpose: "legacy", recipients: currentData.recipients }
+                : null,
+              recording_prefs: currentData.recordingMethod
+                ? { preferred_method: currentData.recordingMethod, ai_assistance: currentData.aiAssistance ?? "full" }
+                : null,
+              privacy_settings: currentData.privacyLevel
+                ? { privacy_level: currentData.privacyLevel }
+                : null,
+            }),
+          },
+          { token: session.token },
+        );
+      } catch {
+        // Progress save is best-effort; don't block the user
+      }
+    },
+    [session?.token],
+  );
+
   // Scroll to bottom on updates
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -282,7 +329,7 @@ export function ChatOnboarding() {
     }
   }, [phase]);
 
-  // Kick off the conversation once
+  // Kick off the conversation once — check for saved progress first
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -293,6 +340,38 @@ export function ChatOnboarding() {
     }
 
     const run = async () => {
+      // Try to resume saved progress
+      if (session?.token) {
+        try {
+          const saved = await apiFetch<{ has_progress: boolean; progress?: { personal_info?: { display_name?: string; birth_year?: number }; current_step?: string } }>(
+            "/onboarding/progress",
+            { method: "GET" },
+            { token: session.token },
+          );
+
+          if (saved.has_progress && saved.progress?.personal_info?.display_name) {
+            const name = saved.progress.personal_info.display_name;
+            await showGuideMessages(
+              [
+                `Welkom terug, ${name}!`,
+                "Je was al bezig met je instellingen. Ik ga verder waar je gebleven was.",
+              ],
+              600,
+            );
+            setData({
+              displayName: name,
+              birthYear: saved.progress.personal_info.birth_year,
+            });
+            // Jump to purpose step (first after name + birth_year)
+            await showGuideMessages(["Voor wie maak je dit verhaal eigenlijk?"], 500);
+            setPhase("purpose");
+            return;
+          }
+        } catch {
+          // No saved progress or fetch failed — start fresh
+        }
+      }
+
       await showGuideMessages(
         [
           "Hoi! Welkom bij Bewaard voor jou.",
@@ -314,22 +393,26 @@ export function ChatOnboarding() {
     if (!name) return;
     addMessage("user", name);
     setTextInput("");
-    setData((prev) => ({ ...prev, displayName: name }));
+    const next = { displayName: name };
+    setData((prev) => ({ ...prev, ...next }));
 
     await showGuideMessages([
       `Fijn om je te ontmoeten, ${name}.`,
       "In welk jaar ben je geboren? (Optioneel — je kunt dit overslaan)",
     ]);
     setPhase("birth_year");
+    await saveProgress("birth_year", next);
   };
 
   const handleBirthYear = async (skip = false) => {
+    let updatedData: Partial<CollectedData> = {};
     if (!skip) {
       const year = parseInt(textInput.trim(), 10);
       const valid = year >= 1900 && year <= new Date().getFullYear();
       if (textInput.trim() && valid) {
         addMessage("user", textInput.trim());
-        setData((prev) => ({ ...prev, birthYear: year }));
+        updatedData = { birthYear: year };
+        setData((prev) => ({ ...prev, ...updatedData }));
       } else {
         addMessage("user", "Sla over");
       }
@@ -340,12 +423,21 @@ export function ChatOnboarding() {
 
     await showGuideMessages(["Voor wie maak je dit verhaal eigenlijk?"]);
     setPhase("purpose");
+    setData((prev) => {
+      const merged = { ...prev, ...updatedData };
+      saveProgress("purpose", merged);
+      return merged;
+    });
   };
 
   const handlePurpose = async (_values: string, labels: string) => {
     addMessage("user", labels);
     const recipients = _values.split(",").map((v) => v.trim()).filter(Boolean);
-    setData((prev) => ({ ...prev, recipients }));
+    setData((prev) => {
+      const merged = { ...prev, recipients };
+      saveProgress("recording_method", merged);
+      return merged;
+    });
 
     await showGuideMessages([
       "Wat een mooi gebaar.",
@@ -356,7 +448,11 @@ export function ChatOnboarding() {
 
   const handleRecording = async (value: string, label: string) => {
     addMessage("user", label);
-    setData((prev) => ({ ...prev, recordingMethod: value }));
+    setData((prev) => {
+      const merged = { ...prev, recordingMethod: value };
+      saveProgress("privacy", merged);
+      return merged;
+    });
 
     await showGuideMessages(["Goed. Wie mag jouw verhaal lezen?"]);
     setPhase("privacy");
@@ -364,7 +460,11 @@ export function ChatOnboarding() {
 
   const handlePrivacy = async (value: string, label: string) => {
     addMessage("user", label);
-    setData((prev) => ({ ...prev, privacyLevel: value as CollectedData["privacyLevel"] }));
+    setData((prev) => {
+      const merged = { ...prev, privacyLevel: value as CollectedData["privacyLevel"] };
+      saveProgress("tempo", merged);
+      return merged;
+    });
 
     await showGuideMessages([
       "Begrepen, jouw verhaal blijft veilig.",
@@ -383,7 +483,11 @@ export function ChatOnboarding() {
 
   const handleAI = async (value: string, label: string) => {
     addMessage("user", label);
-    setData((prev) => ({ ...prev, aiAssistance: value as CollectedData["aiAssistance"] }));
+    setData((prev) => {
+      const merged = { ...prev, aiAssistance: value as CollectedData["aiAssistance"] };
+      saveProgress("ai_assistance", merged);
+      return merged;
+    });
 
     await showGuideMessages([
       "Dan zetten we alles klaar voor je.",
@@ -411,6 +515,8 @@ export function ChatOnboarding() {
             ? { label: data.challenge, due_date: getDeadlineDate(data.challenge) }
             : undefined,
         accessibility: { captions: false, high_contrast: false, large_text: false },
+        recording_method: data.recordingMethod,
+        ai_assistance: data.aiAssistance,
       };
 
       const response = await apiFetch<{
@@ -422,6 +528,13 @@ export function ChatOnboarding() {
 
       if (response.journey_id && session) {
         setSession({ ...session, primaryJourneyId: response.journey_id });
+      }
+
+      // Clear saved progress now that onboarding is complete
+      try {
+        await apiFetch("/onboarding/progress", { method: "DELETE" }, { token: session.token });
+      } catch {
+        // Best-effort
       }
 
       setPhase("done");

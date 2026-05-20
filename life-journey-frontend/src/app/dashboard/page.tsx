@@ -30,6 +30,10 @@ import {
   TrendingUp,
   Sparkles,
   Lightbulb,
+  Mic2,
+  Video,
+  FileText,
+  ArrowRight,
 } from "lucide-react";
 import { QuickThoughtFAB } from "@/components/quick-thoughts";
 
@@ -67,8 +71,8 @@ function DashboardContent() {
 
     if (milestones.includes(completedChapters) && completedChapters > lastCelebrated) {
       // Trigger confetti - bigger celebration for bigger milestones
-      const duration = completedChapters === 30 ? 8000 : completedChapters >= 10 ? 5000 : 3000;
-      const particleCount = completedChapters === 30 ? 200 : completedChapters >= 10 ? 150 : 100;
+      const duration = completedChapters === 30 ? 6000 : completedChapters >= 10 ? 4000 : 2500;
+      const particleCount = completedChapters === 30 ? 80 : completedChapters >= 10 ? 60 : 40;
 
       triggerConfetti(duration, particleCount);
       localStorage.setItem('last_milestone', String(completedChapters));
@@ -115,6 +119,7 @@ function DashboardContent() {
   const nextChapterTitle = nextChapter
     ? CHAPTERS.find((ch) => ch.id === nextChapter)?.title
     : null;
+  const isNewUser = completedChapters === 0;
 
   // Time-aware personalized greeting
   const getGreeting = () => {
@@ -260,9 +265,70 @@ function DashboardContent() {
             </div>
           </div>
 
+          {/* Nieuwe gebruiker: uitgebreide welkomst-sectie */}
+          {isNewUser && (
+            <Card className="bg-white border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-xl font-serif">Zo werkt Bewaard voor jou</CardTitle>
+                <CardDescription className="text-base">
+                  In drie eenvoudige stappen leg je jouw levensverhaal vast.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {[
+                    {
+                      icon: <Mic2 className="h-6 w-6 text-orange" />,
+                      step: "1",
+                      title: "Kies een hoofdstuk",
+                      desc: "Je begint bij het begin — jouw vroegste herinneringen.",
+                    },
+                    {
+                      icon: <Video className="h-6 w-6 text-orange" />,
+                      step: "2",
+                      title: "Vertel je verhaal",
+                      desc: "Praat, film of schrijf — jij kiest hoe je het liefst vertelt.",
+                    },
+                    {
+                      icon: <FileText className="h-6 w-6 text-orange" />,
+                      step: "3",
+                      title: "Bewaar voor altijd",
+                      desc: "Je verhaal wordt veilig opgeslagen en klaar voor je dierbaren.",
+                    },
+                  ].map(({ icon, step, title, desc }) => (
+                    <div key={step} className="flex flex-col items-start gap-3 p-4 rounded-xl bg-cream">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-orange/15 text-orange text-xs font-bold flex items-center justify-center flex-shrink-0">
+                          {step}
+                        </span>
+                        {icon}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">{title}</p>
+                        <p className="text-sm text-slate-500 mt-0.5">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {nextChapter && (
+                  <div className="mt-5">
+                    <Button asChild className="btn-primary w-full sm:w-auto flex items-center gap-2 py-4 text-base">
+                      <Link href={`/chapter/${nextChapter}`}>
+                        <Play className="h-4 w-4" />
+                        Begin met mijn eerste verhaal
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Main Content Grid — sidebar first on mobile via CSS order */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
-            {/* Timeline — order-2 on mobile (shows after sidebar) */}
+            {/* Timeline — verborgen voor nieuwe gebruikers */}
+            {!isNewUser && (
             <div className="order-2 md:order-1 space-y-6">
               <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -296,10 +362,12 @@ function DashboardContent() {
                 </CardContent>
               </Card>
             </div>
+            )}
 
-            {/* Sidebar — order-1 on mobile (shows before timeline) */}
-            <div className="order-1 md:order-2 space-y-4 sm:space-y-6">
-              {/* Quick Stats — horizontal row on mobile */}
+            {/* Sidebar — order-1 op mobile */}
+            <div className={`order-1 md:order-2 space-y-4 sm:space-y-6 ${isNewUser ? "md:col-span-2 md:grid md:grid-cols-2 md:gap-4 md:space-y-0" : ""}`}>
+              {/* Quick Stats — verborgen voor nieuwe gebruikers */}
+              {!isNewUser && (
               <Card className="bg-white border border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-base">Snel overzicht</CardTitle>
@@ -327,6 +395,7 @@ function DashboardContent() {
                   </div>
                 </CardContent>
               </Card>
+              )}
 
               {/* Quick Actions */}
               <Card className="bg-white border border-gray-200">
@@ -369,22 +438,22 @@ function DashboardContent() {
               <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-100 rounded-lg">
+                    <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
                       <Sparkles className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
                       <h3 className="font-medium text-amber-900 mb-1">
-                        Hulp nodig?
+                        Vragen? Wij helpen je.
                       </h3>
                       <p className="text-sm text-amber-700 mb-3">
-                        Bekijk de handleiding voor tips en uitleg.
+                        Bekijk een korte uitleg over hoe de app werkt.
                       </p>
                       <Button
                         variant="ghost"
                         onClick={() => setShowOnboarding(true)}
-                        className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                        className="border-amber-300 text-amber-700 hover:bg-amber-100 text-sm"
                       >
-                        Open handleiding
+                        Uitleg bekijken
                       </Button>
                     </div>
                   </div>
