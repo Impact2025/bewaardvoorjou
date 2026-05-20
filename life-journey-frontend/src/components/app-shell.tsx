@@ -8,6 +8,7 @@ import { AccountActions } from "@/components/account-actions";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/store/auth-context";
+import { useAccessibility } from "@/lib/accessibility-context";
 import { Settings } from "lucide-react";
 
 const navItems = [
@@ -50,6 +51,7 @@ export function AppShell({
   onShowHandleiding,
 }: AppShellProps) {
   const { session } = useAuth();
+  const { largeText, highContrast, toggleLargeText, toggleHighContrast } = useAccessibility();
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
 
   const userInitial =
@@ -113,6 +115,42 @@ export function AppShell({
                         onClick={() => setShowSettingsDropdown(false)}
                       />
                       <div className="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
+                        {/* Toegankelijkheid toggles bovenaan */}
+                        <div className="px-4 py-2 border-b border-gray-100">
+                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Toegankelijkheid</p>
+                          <button
+                            type="button"
+                            onClick={toggleLargeText}
+                            className="flex w-full items-center justify-between py-1.5 text-base text-slate-700 hover:text-slate-900"
+                          >
+                            <span>Grote tekst</span>
+                            <span className={cn(
+                              "w-9 h-5 rounded-full transition-colors relative flex-shrink-0",
+                              largeText ? "bg-orange" : "bg-slate-200"
+                            )}>
+                              <span className={cn(
+                                "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform",
+                                largeText ? "translate-x-4" : "translate-x-0.5"
+                              )} />
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={toggleHighContrast}
+                            className="flex w-full items-center justify-between py-1.5 text-base text-slate-700 hover:text-slate-900"
+                          >
+                            <span>Hoog contrast</span>
+                            <span className={cn(
+                              "w-9 h-5 rounded-full transition-colors relative flex-shrink-0",
+                              highContrast ? "bg-orange" : "bg-slate-200"
+                            )}>
+                              <span className={cn(
+                                "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform",
+                                highContrast ? "translate-x-4" : "translate-x-0.5"
+                              )} />
+                            </span>
+                          </button>
+                        </div>
                         {settingsItems.map((item) => {
                           if (item.href === "/admin" && !session?.user?.isAdmin) {
                             return null;
