@@ -1,4 +1,4 @@
-"""Email queue processor with Celery and sync fallback."""
+"""Email queue processor — Celery with synchronous fallback."""
 
 from __future__ import annotations
 
@@ -10,46 +10,43 @@ from app.core.config import settings
 
 
 def _is_celery_available() -> bool:
-    """Check if Celery broker is configured and available."""
-    return bool(settings.redis_url) and settings.redis_url != "redis://localhost:6379/0"
+    """Ping Redis to confirm Celery broker is actually reachable."""
+    if not settings.redis_url:
+        return False
+    try:
+        import redis as redis_lib
+        client = redis_lib.from_url(settings.redis_url, socket_connect_timeout=1)
+        client.ping()
+        return True
+    except Exception:
+        return False
 
 
 def enqueue_email_job(email_event_id: str) -> Optional[str]:
     """
     Enqueue email sending job.
 
-    In production with Redis, this queues the job for async processing.
-    In development without Redis, processes synchronously.
-
-    Args:
-        email_event_id: ID of the EmailEvent to send
+    Uses Celery when Redis is available; falls back to synchronous send in
+    development or when the broker is unreachable.
 
     Returns:
-        Task ID if queued, "sync" if processed synchronously, None if failed
+        Task ID, "sync" if processed inline, or None on failure.
     """
-    if not _is_celery_available():
-        logger.info(f"Celery not available, processing email synchronously for event {email_event_id}")
-        # Process synchronously in development
+    if _is_celery_available():
         try:
-            from app.services.email.tasks import send_email_task
-            send_email_task(email_event_id)
-            return "sync"
+            from app.services.email.tasks import celery_app
+            result = celery_app.send_task("email.send", args=[email_event_id])
+            logger.info(f"Queued email job for event {email_event_id}, task_id={result.id}")
+            return result.id
         except Exception as e:
-            logger.error(f"Synchronous email send failed for event {email_event_id}: {e}")
-            return None
+            logger.warning(f"Celery enqueue failed for event {email_event_id}: {e}, falling back to sync")
 
+    # Synchronous fallback
+    logger.info(f"Processing email synchronously for event {email_event_id}")
     try:
-        from app.services.email.tasks import celery_app
-        result = celery_app.send_task("email.send", args=[email_event_id])
-        logger.info(f"Queued email job for event {email_event_id}, task_id={result.id}")
-        return result.id
+        from app.services.email.tasks import send_email_task
+        send_email_task(email_event_id)
+        return "sync"
     except Exception as e:
-        logger.warning(f"Failed to queue email job for event {email_event_id}, falling back to sync: {e}")
-        # Fallback: process synchronously
-        try:
-            from app.services.email.tasks import send_email_task
-            send_email_task(email_event_id)
-            return "sync"
-        except Exception as e2:
-            logger.error(f"Synchronous fallback also failed for event {email_event_id}: {e2}")
-            return None
+        logger.error(f"Synchronous email send failed for event {email_event_id}: {e}")
+        return None

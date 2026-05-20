@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { AccountActions } from "@/components/account-actions";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/store/auth-context";
 import { Settings } from "lucide-react";
@@ -51,41 +52,56 @@ export function AppShell({
   const { session } = useAuth();
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
 
+  const userInitial =
+    session?.user?.displayName?.[0]?.toUpperCase() ||
+    session?.user?.email?.[0]?.toUpperCase() ||
+    "U";
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Professional Header */}
       <header
-        className="sticky top-0 z-50 bg-white shadow-sm"
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-[0_1px_0_0_#f3f4f6]"
         role="banner"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10">
-          {/* Top bar with logo/title and account actions */}
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between py-3 sm:py-4">
+            {/* Left: logo + title */}
+            <div className="flex items-center gap-3">
               <Link href="/dashboard" className="flex-shrink-0">
                 <Image
                   src="/Logo_Bewaardvoorjou.png"
                   alt="Bewaard voor jou Logo"
                   width={48}
                   height={48}
-                  className="w-12 h-12"
+                  className="h-9 w-9 sm:h-12 sm:w-12"
                   priority
                 />
               </Link>
-              <div>
-                <h1 className="text-xl font-semibold text-slate-900 font-serif">{title}</h1>
-                {description ? (
-                  <p className="text-sm text-slate-600 hidden sm:block">{description}</p>
-                ) : null}
+              {/* Mobile: compact brand name */}
+              <span className="sm:hidden text-base font-semibold text-slate-900 font-serif">
+                Bewaard voor jou
+              </span>
+              {/* Desktop: full page title + description */}
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-semibold text-slate-900 font-serif">
+                  {title}
+                </h1>
+                {description && (
+                  <p className="text-sm text-slate-600">{description}</p>
+                )}
               </div>
+              {/* Accessible h1 for mobile screen readers */}
+              <h1 className="sr-only">{title}</h1>
             </div>
-            <div className="flex items-center gap-3">
+
+            {/* Right: icon actions */}
+            <div className="flex items-center gap-2">
               {actions}
               {session && (
                 <div className="relative">
                   <button
                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                    className="rounded-full p-2.5 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-slate-600 hover:bg-gray-100 hover:text-slate-900 transition-colors"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-gray-100 hover:text-slate-900"
                     aria-label="Instellingen"
                   >
                     <Settings className="h-5 w-5" />
@@ -96,13 +112,11 @@ export function AppShell({
                         className="fixed inset-0 z-10"
                         onClick={() => setShowSettingsDropdown(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+                      <div className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
                         {settingsItems.map((item) => {
-                          // Hide admin dashboard if user is not admin
                           if (item.href === "/admin" && !session?.user?.isAdmin) {
                             return null;
                           }
-
                           if (item.href === "#handleiding") {
                             return (
                               <button
@@ -111,7 +125,7 @@ export function AppShell({
                                   setShowSettingsDropdown(false);
                                   onShowHandleiding?.();
                                 }}
-                                className="w-full text-left block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors"
+                                className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-gray-50"
                               >
                                 {item.label}
                               </button>
@@ -121,7 +135,7 @@ export function AppShell({
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-100 transition-colors"
+                              className="block px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-gray-50"
                               onClick={() => setShowSettingsDropdown(false)}
                             >
                               {item.label}
@@ -133,15 +147,24 @@ export function AppShell({
                   )}
                 </div>
               )}
-              <AccountActions />
+              {/* Desktop: full logout/login actions */}
+              <div className="hidden sm:flex">
+                <AccountActions />
+              </div>
+              {/* Mobile: user initial avatar */}
+              {session && (
+                <div className="sm:hidden flex h-9 w-9 select-none items-center justify-center rounded-full bg-orange/15 text-sm font-bold text-orange">
+                  {userInitial}
+                </div>
+              )}
             </div>
           </div>
-          
-          {/* Navigation bar - only show when user is authenticated */}
+
+          {/* Desktop-only horizontal nav */}
           {session && (
             <nav
               id="main-navigation"
-              className="border-t border-gray-200 py-3 -mx-6 sm:-mx-10 px-6 sm:px-10"
+              className="hidden sm:block border-t border-gray-100 py-3 -mx-6 sm:-mx-10 px-6 sm:px-10"
               role="navigation"
               aria-label="Hoofdnavigatie"
             >
@@ -151,10 +174,10 @@ export function AppShell({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "rounded-full px-3 sm:px-4 py-2.5 sm:py-2 transition-colors whitespace-nowrap min-h-[44px] sm:min-h-0 flex items-center",
-                      "focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2",
+                      "flex items-center rounded-full px-4 py-2 transition-colors whitespace-nowrap",
+                      "focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2",
                       activeHref === item.href
-                        ? "bg-orange/20 text-orange font-medium"
+                        ? "bg-orange/10 text-orange font-medium"
                         : "hover:bg-gray-100 hover:text-slate-900",
                     )}
                     aria-current={activeHref === item.href ? "page" : undefined}
@@ -167,16 +190,17 @@ export function AppShell({
           )}
         </div>
       </header>
-      
-      
+
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-12"
+        className="mx-auto max-w-6xl px-4 pt-6 pb-28 sm:px-6 sm:py-8 md:px-10 md:py-12"
         role="main"
         aria-label="Hoofdinhoud"
       >
         {children}
       </main>
+
+      <MobileBottomNav />
     </div>
   );
 }

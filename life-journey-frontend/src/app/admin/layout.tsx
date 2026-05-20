@@ -16,6 +16,8 @@ import {
   LogOut,
   Menu,
   X,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +26,8 @@ const adminNavItems = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
+  { href: "/admin/blog", label: "Blog", icon: BookOpen },
+  { href: "/admin/kennisbank", label: "Kennisbank", icon: GraduationCap },
   { href: "/admin/content", label: "Content", icon: FileText },
   { href: "/admin/security", label: "Security", icon: Shield },
   { href: "/admin/settings", label: "Settings", icon: Settings },

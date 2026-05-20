@@ -16,6 +16,8 @@ from app.api.v1.routes import (
     admin_enhanced,
     emails,
     quick_thoughts,
+    blog,
+    webhooks,
 )
 
 
@@ -35,3 +37,5 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(admin_enhanced.router, prefix="/admin", tags=["admin-enhanced"])
 api_router.include_router(emails.router, prefix="/emails", tags=["emails"])
 api_router.include_router(quick_thoughts.router, prefix="/quick-thoughts", tags=["quick-thoughts"])
+api_router.include_router(blog.router, prefix="/blog", tags=["blog"])
+api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])

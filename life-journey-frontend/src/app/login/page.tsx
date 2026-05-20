@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { loginUser } from "@/lib/auth-client";
+import { isApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
@@ -15,28 +16,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setEmailNotVerified(false);
     setIsSubmitting(true);
 
     try {
       const session = await loginUser({ email, password });
       setSession(session);
-      // Redirect to onboarding if no journey exists yet
       if (!session.primaryJourneyId) {
         router.push("/onboarding");
       } else {
         router.push("/dashboard");
       }
     } catch (cause) {
-      const message =
-        typeof cause === "object" && cause && "message" in cause
-          ? String(cause.message)
-          : "Inloggen is mislukt. Controleer je gegevens.";
-      setError(message);
+      if (isApiError(cause) && cause.code === "EMAIL_NOT_VERIFIED") {
+        setEmailNotVerified(true);
+      } else {
+        const message =
+          typeof cause === "object" && cause && "message" in cause
+            ? String((cause as { message: string }).message)
+            : "Inloggen is mislukt. Controleer je gegevens.";
+        setError(message);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -102,6 +108,21 @@ export default function LoginPage() {
             </div>
 
             {error ? <p className="text-sm text-coral">{error}</p> : null}
+
+            {emailNotVerified ? (
+              <div className="rounded-xl border border-warm-amber/40 bg-warm-amber/10 p-4 text-sm">
+                <p className="font-medium text-heading mb-1">E-mailadres nog niet bevestigd</p>
+                <p className="text-medium mb-3">
+                  Check je inbox voor de verificatielink. Geen e-mail ontvangen?
+                </p>
+                <Link
+                  href={`/email-verificeren?email=${encodeURIComponent(email)}`}
+                  className="font-medium text-warm-amber hover:text-warm-amber/80"
+                >
+                  Stuur verificatielink opnieuw →
+                </Link>
+              </div>
+            ) : null}
 
             <Button
               type="submit"

@@ -52,13 +52,15 @@ class Settings(BaseSettings):
   whisper_backend: str = "openrouter"
   openai_api_base: str = "https://openrouter.ai/api/v1"
   openai_api_key: str | None = None
-  openai_model: str = "anthropic/claude-3.5-sonnet"
+  openai_model: str = "anthropic/claude-sonnet-4-6"
   openrouter_app_name: str = "Life Journey"
   openrouter_app_url: str = ""
 
   # Email (Resend)
   resend_api_key: str | None = None
   resend_from_email: str = "Bewaardvoorjou <noreply@bewaardvoorjou.nl>"
+  resend_reply_to_email: str = "support@bewaardvoorjou.nl"
+  resend_webhook_signing_secret: str | None = None
   resend_enabled: bool = True
   app_base_url: str = "http://localhost:3000"
 
@@ -67,6 +69,11 @@ class Settings(BaseSettings):
 
   # Sentry error tracking (optional — leave empty to disable)
   sentry_dsn: str | None = None
+
+  # SEO Indexing
+  site_url: str = "https://bewaardvoorjou.nl"
+  indexnow_key: str | None = None
+  google_service_account_json: str | None = None
 
   # JWT Security - CRITICAL: Must be set via environment variable
   # For development, if not set, a random key will be generated (sessions won't persist across restarts)

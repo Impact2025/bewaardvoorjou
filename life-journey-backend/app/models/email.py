@@ -24,13 +24,13 @@ class EmailEvent(Base):
     user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
     journey_id = Column(String, ForeignKey("journey.id", ondelete="CASCADE"), nullable=True, index=True)
 
-    # Email type: "welcome", "chapter_complete", "milestone_unlock"
+    # Email type: "welcome", "chapter_complete", "milestone_unlock", "email_verification", "password_reset"
     email_type = Column(String(64), nullable=False, index=True)
 
-    # Context data (JSON met chapter_id, progress, milestone_type, etc.)
+    # Context data (JSON met chapter_id, progress, milestone_type, verification_url, reset_url, etc.)
     context_data = Column(JSON, nullable=True)
 
-    # Status: "pending", "sent", "failed", "bounced"
+    # Status: "pending", "sent", "failed", "bounced", "complained"
     status = Column(String(32), nullable=False, default="pending", index=True)
 
     # Email recipient (stored for audit trail)
@@ -39,12 +39,17 @@ class EmailEvent(Base):
     # Resend message ID voor tracking
     resend_id = Column(String(255), nullable=True, index=True)
 
+    # Unsubscribe token — random, stored per email, used for one-click unsubscribe
+    unsubscribe_token = Column(String(128), nullable=True, unique=True, index=True)
+
     # Error message indien gefaald
     error_message = Column(Text, nullable=True)
 
     # Timestamps
     created_at = Column(DateTime, default=utc_now, nullable=False, index=True)
     sent_at = Column(DateTime, nullable=True)
+    bounced_at = Column(DateTime, nullable=True)
+    complained_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 

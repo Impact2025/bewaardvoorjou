@@ -7,7 +7,6 @@ import { useState } from "react";
 import { registerUser } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/store/auth-context";
 
 const PRIVACY_OPTIONS = [
   { value: "private", label: "Alleen voor mij" },
@@ -17,7 +16,6 @@ const PRIVACY_OPTIONS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setSession } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +31,7 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const session = await registerUser({
+      const result = await registerUser({
         displayName,
         email,
         password,
@@ -41,9 +39,7 @@ export default function RegisterPage() {
         privacyLevel,
         birthYear: birthYear ? Number(birthYear) : undefined,
       });
-      setSession(session);
-      // New users always need to go through onboarding first
-      router.push("/onboarding");
+      router.push(`/email-verificeren?email=${encodeURIComponent(result.email)}`);
     } catch (cause) {
       const message =
         typeof cause === "object" && cause && "message" in cause

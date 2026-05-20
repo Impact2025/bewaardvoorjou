@@ -11,28 +11,29 @@ def should_send_email(db: Session, user_id: str, email_type: str) -> bool:
     """
     Check if user wants to receive emails of this type.
 
-    Args:
-        db: Database session
-        user_id: User ID
-        email_type: Email type ("welcome", "chapter_complete", "milestone_unlock")
+    Transactional emails (email_verification, password_reset) always bypass
+    this check and should be sent regardless of preferences.
 
     Returns:
         True if email should be sent, False otherwise
     """
-    # Get or create email preferences
+    from app.models.user import User as UserModel
+
+    # Hard-bounced addresses never receive marketing/trigger emails
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if user and getattr(user, "email_bounced", False):
+        return False
+
     prefs = db.query(EmailPreferenceModel).filter(
         EmailPreferenceModel.user_id == user_id
     ).first()
 
     if not prefs:
-        # No preferences set = all emails enabled by default
         return True
 
-    # Check global unsubscribe
     if prefs.unsubscribed_all:
         return False
 
-    # Check specific email type
     if email_type == "welcome":
         return prefs.welcome_emails
     elif email_type == "chapter_complete":
@@ -40,7 +41,6 @@ def should_send_email(db: Session, user_id: str, email_type: str) -> bool:
     elif email_type == "milestone_unlock":
         return prefs.milestone_emails
 
-    # Unknown email type = don't send
     return False
 
 
