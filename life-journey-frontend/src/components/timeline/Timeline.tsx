@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/store/auth-context";
 import { getTimeline, getChapterDetail } from "@/lib/timeline-client";
@@ -9,8 +9,6 @@ import type { ChapterId } from "@/lib/types";
 import { TimelinePhaseSection } from "./TimelinePhase";
 import { TimelineStats } from "./TimelineStats";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, Image, Mic } from "lucide-react";
 import { logger } from "@/lib/logger";
 
 interface TimelineProps {
@@ -33,6 +31,7 @@ export function Timeline({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSeason, setCurrentSeason] = useState<'spring' | 'summer' | 'autumn' | 'winter'>('spring');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const fetchTimeline = useCallback(async () => {
     if (!session?.token || !journeyId) return;
@@ -76,15 +75,25 @@ export function Timeline({
 
   const toggleAudioPlayback = useCallback((chapterId: string, audioUrl: string) => {
     if (playingAudio === chapterId) {
-      // Stop current playback
+      audioRef.current?.pause();
       setPlayingAudio(null);
-    } else {
-      // Start new playback
-      setPlayingAudio(chapterId);
-      // In a real implementation, you would play the audio here
-      // For now, just simulate playback
-      setTimeout(() => setPlayingAudio(null), 3000);
+      return;
     }
+
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+
+    if (!audioUrl) return;
+
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    audio.play().catch((err) => logger.warn("Audio playback failed", err));
+    audio.onended = () => setPlayingAudio(null);
+    audio.onerror = () => setPlayingAudio(null);
+    setPlayingAudio(chapterId);
   }, [playingAudio]);
 
   useEffect(() => {

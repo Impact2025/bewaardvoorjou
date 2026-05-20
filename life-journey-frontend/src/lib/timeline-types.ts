@@ -48,17 +48,20 @@ export interface TimelineResponse {
   last_activity_at: string | null;
 }
 
+export interface MediaAssetInfo {
+  id: string;
+  modality: string;
+  filename: string;
+  duration_seconds: number;
+  recorded_at: string | null;
+  url: string | null;
+}
+
 export interface TimelineChapterDetail {
   chapter: TimelineChapter;
   phase: PhaseMetadata;
   prompt_hint: string;
-  media_assets: Array<{
-    id: string;
-    modality: string;
-    filename: string;
-    duration_seconds: number;
-    recorded_at: string | null;
-  }>;
+  media_assets: MediaAssetInfo[];
   transcripts_preview: string | null;
 }
 
