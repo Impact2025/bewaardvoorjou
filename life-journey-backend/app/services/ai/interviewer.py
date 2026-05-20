@@ -17,9 +17,9 @@ from app.core.config import settings
 from app.services.ai.memory import get_personalized_prompt_context, build_journey_memory
 
 
-# Chapter-specific context and themes - Updated for new 5-phase structure
+# Chapter-specific context and themes - v2.0: 7 fasen, 78 vragen
 CHAPTER_CONTEXTS = {
-    # Fase 1: Voorbereiding & Introductie
+    # Fase 1: Wie ben jij?
     ChapterId.intro_reflection: {
         "title": "Kernwoorden van je leven",
         "theme": "Als je jouw leven tot nu toe zou moeten beschrijven in één alinea, welke kernwoorden en gevoelens zouden daarin dan centraal staan?",
@@ -51,7 +51,109 @@ CHAPTER_CONTEXTS = {
         ]
     },
 
-    # Fase 2: De Vroege Jaren & Jeugd
+    # Fase 2: Je Wortels
+    ChapterId.roots_first_memory: {
+        "title": "Je vroegste herinnering",
+        "theme": "Wat is het vroegste dat jij je herinnert — een beeld, een gevoel, een geur?",
+        "mood": "zacht en uitnodigend",
+        "example_prompts": [
+            "Wat is het allereerste dat je je kunt herinneren?",
+            "Welk beeld of gevoel brengt je terug naar je vroegste kindertijd?",
+            "Hoe oud was je bij je vroegste herinnering, en wat zag je om je heen?"
+        ]
+    },
+    ChapterId.roots_father: {
+        "title": "Je vader",
+        "theme": "Wie was je vader als mens — zijn werk, zijn humor, zijn manier van zijn?",
+        "mood": "warm en nieuwsgierig",
+        "example_prompts": [
+            "Hoe zou je je vader beschrijven aan iemand die hem nooit heeft gekend?",
+            "Wat is het eerste wat je aan je vader denkt?",
+            "Welk moment met je vader herinner je je het levendigst?"
+        ]
+    },
+    ChapterId.roots_mother: {
+        "title": "Je moeder",
+        "theme": "Wie was je moeder als mens — haar stem, haar geur, haar bijzonderheden?",
+        "mood": "teder en zintuiglijk",
+        "example_prompts": [
+            "Hoe zou je je moeder beschrijven in drie woorden?",
+            "Welke uitdrukking of gewoonte van je moeder herinner je je nog goed?",
+            "Wat deed je moeder dat alleen zij deed?"
+        ]
+    },
+    ChapterId.roots_grandparents: {
+        "title": "Je grootouders",
+        "theme": "Wie waren je grootouders en wat weet je over hun leven vóór jou?",
+        "mood": "historisch en persoonlijk",
+        "example_prompts": [
+            "Welke grootouder kende je het best, en hoe was hij of zij?",
+            "Wat weet je over het leven van je grootouders voor jij werd geboren?",
+            "Is er een verhaal over je grootouders dat in de familie altijd wordt verteld?"
+        ]
+    },
+    ChapterId.roots_siblings: {
+        "title": "Broers, zussen en het gezinsleven",
+        "theme": "Hoe was de sfeer thuis — rond de tafel, op vrije zaterdagen, in de vakanties?",
+        "mood": "levendig en anekdotisch",
+        "example_prompts": [
+            "Hoe was jouw plek in het gezin — oudste, jongste, of middelste?",
+            "Wat was een typische zondagmiddag bij jullie thuis?",
+            "Welke gewoonte of traditie uit je gezin mis je nog?"
+        ]
+    },
+    ChapterId.roots_home: {
+        "title": "Het ouderlijk huis",
+        "theme": "Beschrijf het huis waar je opgroeide — kamers, geuren, de sfeer",
+        "mood": "nostalgisch en ruimtelijk",
+        "example_prompts": [
+            "Welke kamer in je ouderlijk huis herinner je je het best?",
+            "Welke geur hoort voor jou bij het huis van je jeugd?",
+            "Hoe zag de keuken of de woonkamer eruit?"
+        ]
+    },
+    ChapterId.roots_neighborhood: {
+        "title": "Je buurt of dorp",
+        "theme": "Hoe was de buurt of het dorp — buren, buitenspelen, het dagelijkse leven",
+        "mood": "levendig en gemeenschappelijk",
+        "example_prompts": [
+            "Hoe was de buurt waar je opgroeide — stad of platteland?",
+            "Wie was de bekendste buurman of buurvrouw en waarom?",
+            "Wat speelde je buiten met de andere kinderen?"
+        ]
+    },
+    ChapterId.roots_faith: {
+        "title": "Geloof en levensbeschouwing",
+        "theme": "Welke rol speelde geloof of levensbeschouwing in je gezin en opvoeding?",
+        "mood": "respectvol en open",
+        "example_prompts": [
+            "Groeide je op in een gelovig gezin of juist niet?",
+            "Welke rol speelde de kerk, de moskee, of een andere plek van geloof in je jeugd?",
+            "Hoe kijk je nu terug op de levensbeschouwing waarmee je opgroeide?"
+        ]
+    },
+    ChapterId.roots_finances: {
+        "title": "Het financiële klimaat thuis",
+        "theme": "Had je het krap of ruim, en hoe merkte je dat als kind?",
+        "mood": "eerlijk en zonder oordeel",
+        "example_prompts": [
+            "Hoe was het financieel bij jullie thuis toen je opgroeide?",
+            "Is er een moment waarop je merkte hoe het er financieel voor stond?",
+            "Wat leerde je over geld van je ouders?"
+        ]
+    },
+    ChapterId.roots_hardship: {
+        "title": "Wat je meedroeg",
+        "theme": "Iets moeilijks uit je vroege jeugd — alleen wat je wilt delen",
+        "mood": "voorzichtig en veilig",
+        "example_prompts": [
+            "Was er iets moeilijks in je jeugd dat je lang hebt meegedragen?",
+            "Is er een periode uit je kindertijd die je liever zou vergeten?",
+            "Je hoeft niet alles te vertellen — maar is er iets wat je nooit hebt uitgesproken?"
+        ]
+    },
+
+    # Fase 3: Jeugd & School
     ChapterId.youth_favorite_place: {
         "title": "Je favoriete plek",
         "theme": "Neem ons mee naar je favoriete plek uit je kindertijd. Beschrijf wat je daar zag, hoorde, rook en voelde.",
@@ -83,7 +185,130 @@ CHAPTER_CONTEXTS = {
         ]
     },
 
-    # Fase 3: Liefde, Relaties & Vriendschappen
+    ChapterId.youth_primary_school: {
+        "title": "De lagere school",
+        "theme": "Een leraar die je nooit vergat en waarom",
+        "mood": "warm en anekdotisch",
+        "example_prompts": [
+            "Welke leraar van de basisschool herinner je je het best?",
+            "Wat maakte een bepaalde juf of meester zo bijzonder?",
+            "Welk moment in de klas heb je nooit vergeten?"
+        ]
+    },
+    ChapterId.youth_friends: {
+        "title": "Je vrienden",
+        "theme": "Je beste vriend of vriendin als kind — wat deden jullie samen?",
+        "mood": "vrolijk en levendig",
+        "example_prompts": [
+            "Wie was je beste vriend of vriendin als kind?",
+            "Wat deden jullie samen in de weekenden of vakanties?",
+            "Is er een avontuur met een vriend dat je nooit vergeet?"
+        ]
+    },
+    ChapterId.youth_secondary_school: {
+        "title": "De middelbare school",
+        "theme": "Hoe jij was als tiener — het beste, het moeilijkste",
+        "mood": "reflectief en eerlijk",
+        "example_prompts": [
+            "Hoe was jij op de middelbare school — populair, stil, rebel?",
+            "Wat vond je het moeilijkste aan de middelbare schooltijd?",
+            "Welk schoolvak of activiteit boeit je nog steeds?"
+        ]
+    },
+    ChapterId.youth_history: {
+        "title": "De tijdgeest van jouw jeugd",
+        "theme": "Nederland of de wereld zoals jij die beleefde als kind of tiener",
+        "mood": "historisch en persoonlijk",
+        "example_prompts": [
+            "Welk nieuws of welke gebeurtenis van vroeger herinner je je nog levendig?",
+            "Hoe merkte je thuis of op school wat er in de wereld speelde?",
+            "Welke tijd of periode was het meest bepalend voor jouw generatie?"
+        ]
+    },
+    ChapterId.youth_ambition: {
+        "title": "Wat je wilde worden",
+        "theme": "Dromen als tiener over de toekomst",
+        "mood": "luchtig en reflectief",
+        "example_prompts": [
+            "Wat wilde je worden toen je een tiener was?",
+            "Had je een groot plan voor je toekomst als je jong was?",
+            "Wat dachten je ouders dat je zou worden?"
+        ]
+    },
+
+    # Fase 4: Jong Volwassen
+    ChapterId.young_adult_first_job: {
+        "title": "Je eerste baan",
+        "theme": "Je eerste echte baan — leeftijd, loon, hoe het voelde",
+        "mood": "energiek en anekdotisch",
+        "example_prompts": [
+            "Wat was je allereerste betaalde baan?",
+            "Hoe was het om voor het eerst je eigen geld te verdienen?",
+            "Wat herinner je je van je eerste werkdag?"
+        ]
+    },
+    ChapterId.young_adult_independence: {
+        "title": "Zelfstandig worden",
+        "theme": "De eerste stappen op eigen benen — opwinding en verrassingen",
+        "mood": "avontuurlijk en eerlijk",
+        "example_prompts": [
+            "Hoe was het toen je voor het eerst op jezelf woonde?",
+            "Wat was de eerste grote uitdaging van zelfstandig leven?",
+            "Wat was het eerste wat je deed nadat je echt op jezelf was?"
+        ]
+    },
+    ChapterId.young_adult_first_home: {
+        "title": "Je eerste eigen plek",
+        "theme": "De eerste kamer of het eerste huis — hoe het eruitzag en voelde",
+        "mood": "nostalgisch en concreet",
+        "example_prompts": [
+            "Hoe zag je eerste kamer of appartement eruit?",
+            "Wat was het eerste dat je in je eigen huis kookte?",
+            "Wat betekende die eerste eigen plek voor je?"
+        ]
+    },
+    ChapterId.young_adult_career_path: {
+        "title": "Hoe je loopbaan zich ontvouwde",
+        "theme": "Het traject van je werkzame leven — wendingen en sleutelmomenten",
+        "mood": "reflectief en chronologisch",
+        "example_prompts": [
+            "Hoe heeft je werk zich door de jaren heen ontwikkeld?",
+            "Was er een moment waarop je loopbaan een onverwachte wending nam?",
+            "Welke baan gaf je de meeste voldoening en waarom?"
+        ]
+    },
+    ChapterId.young_adult_pivotal_choice: {
+        "title": "De keuze die alles veranderde",
+        "theme": "Een beslissing in je twintiger of dertiger jaren die je leven vormde",
+        "mood": "diepgaand en reflectief",
+        "example_prompts": [
+            "Welke beslissing in je twintiger jaren heeft je leven het meest veranderd?",
+            "Was er een moment waarop je voor twee paden stond — welk koos je?",
+            "Hoe kijk je nu terug op die keuze?"
+        ]
+    },
+    ChapterId.young_adult_finances: {
+        "title": "Jouw relatie met geld",
+        "theme": "Hoe het financieel was als jonge volwassene en wat je leerde",
+        "mood": "eerlijk en zonder oordeel",
+        "example_prompts": [
+            "Hoe was het financieel in je twintig of dertig jaar?",
+            "Heb je ooit echt krap gezeten — hoe ging je daarmee om?",
+            "Wat leerde je over geld in die jaren?"
+        ]
+    },
+    ChapterId.young_adult_world_events: {
+        "title": "De wereld toen je jong volwassen was",
+        "theme": "Een grote gebeurtenis die jou persoonlijk raakte als jonge volwassene",
+        "mood": "reflectief en historisch",
+        "example_prompts": [
+            "Welke nieuwsgebeurtenis raakte jou het diepst in je twintig of dertig jaar?",
+            "Hoe veranderde een wereldgebeurtenis jouw kijk of jouw plannen?",
+            "Waar was je en wat deed je toen je hoorde van [grote gebeurtenis]?"
+        ]
+    },
+
+    # Fase 5: Liefde & Gezin
     ChapterId.love_connection: {
         "title": "Het moment van verbinding",
         "theme": "Beschrijf het moment waarop je wist dat je verliefd was, of een heel speciale connectie voelde met iemand.",
@@ -115,7 +340,78 @@ CHAPTER_CONTEXTS = {
         ]
     },
 
-    # Fase 4: Werk, Carrière & Passies
+    ChapterId.family_partner_story: {
+        "title": "Hoe jullie verhaal begon",
+        "theme": "Het hele verhaal van hoe jullie elkaar leerden kennen",
+        "mood": "romantisch en levendig",
+        "example_prompts": [
+            "Hoe leerde je je partner kennen — vertel het hele verhaal?",
+            "Wat was je eerste indruk van je partner?",
+            "Wanneer wist je dat dit iemand bijzonders was?"
+        ]
+    },
+    ChapterId.family_early_years: {
+        "title": "De eerste jaren samen",
+        "theme": "Hoogte- en dieptepunten van het begin van jullie relatie",
+        "mood": "eerlijk en warm",
+        "example_prompts": [
+            "Hoe was het in de eerste jaren van jullie relatie of huwelijk?",
+            "Wat was het eerste grote meningsverschil dat jullie hadden?",
+            "Hoe groeide jullie band in die begintijd?"
+        ]
+    },
+    ChapterId.family_wedding: {
+        "title": "De trouwdag of het beginpunt",
+        "theme": "De dag dat jullie officieel samen begonnen",
+        "mood": "feestelijk en persoonlijk",
+        "example_prompts": [
+            "Vertel over je trouwdag — wat herinner je je het meest?",
+            "Wat ging er anders dan gepland op jullie trouwdag?",
+            "Welk moment van die dag zul je nooit vergeten?"
+        ]
+    },
+    ChapterId.family_children: {
+        "title": "Het ouderschap",
+        "theme": "Kinderen krijgen en opvoeden — het beste, het moeilijkste, de trots",
+        "mood": "warm en eerlijk",
+        "example_prompts": [
+            "Hoe was het om voor het eerst ouder te worden?",
+            "Wat was het moeilijkste aan het opvoeden van je kinderen?",
+            "Waar ben je het meest trots op als het gaat om je kinderen?"
+        ]
+    },
+    ChapterId.family_typical_week: {
+        "title": "Een gewone week met kinderen",
+        "theme": "Het dagelijkse leven als gezin — wie deed wat, hoe waren de maaltijden",
+        "mood": "concreet en nostalgisch",
+        "example_prompts": [
+            "Hoe zag een gewone werkweek eruit toen je kinderen nog thuis waren?",
+            "Wie kookte er, wie bracht de kinderen naar school?",
+            "Wat mis je het meest van die drukke gezinsjaren?"
+        ]
+    },
+    ChapterId.family_hardship: {
+        "title": "Moeilijke tijden als gezin",
+        "theme": "Verlies, ziekte of conflict — en hoe jullie het samen doorstonden",
+        "mood": "kwetsbaar en hoopvol",
+        "example_prompts": [
+            "Heeft je gezin ooit een zware periode doorgemaakt?",
+            "Hoe hielden jullie als gezin stand bij tegenslag?",
+            "Wat leerde een moeilijke periode jou over je gezin?"
+        ]
+    },
+    ChapterId.family_pride: {
+        "title": "Waar je het meest trots op bent",
+        "theme": "De trots van een leven opgebouwd met anderen",
+        "mood": "warm en celebratief",
+        "example_prompts": [
+            "Wat maakt je het meest trots op je gezin of relaties?",
+            "Wat wil je dat je kinderen of kleinkinderen weten over dit?",
+            "Welk moment in je gezinsleven was het hoogtepunt?"
+        ]
+    },
+
+    # Fase 4 (voortgezet): Werk, Carrière & Passies
     ChapterId.work_dream_job: {
         "title": "Droom versus realiteit",
         "theme": "Wat was je droombaan als kind en hoe verhoudt zich dat tot wat je uiteindelijk bent gaan doen?",
@@ -179,7 +475,203 @@ CHAPTER_CONTEXTS = {
         ]
     },
 
-    # Bonus: Aanvullende Vragen
+    # Fase 6: Midden Leven & Verlies
+    ChapterId.midlife_grief: {
+        "title": "Het verlies dat je draagt",
+        "theme": "Iemand die je hebt verloren wiens afwezigheid je nog voelt",
+        "mood": "zacht en ruimtegevend",
+        "example_prompts": [
+            "Is er iemand die je hebt verloren die je nog elke dag mist?",
+            "Hoe denk je aan hen?",
+            "Wat zou je hen willen zeggen als je kon?"
+        ]
+    },
+    ChapterId.midlife_aging: {
+        "title": "Ouder worden",
+        "theme": "Het moment waarop je voor het eerst echt voelde dat je ouder werd",
+        "mood": "eerlijk en introspectief",
+        "example_prompts": [
+            "Op welk moment merkte je voor het eerst dat je ouder werd?",
+            "Wat veranderde er in je lichaam of je kijk op het leven?",
+            "Wat is het verrassendste aan ouder worden?"
+        ]
+    },
+    ChapterId.midlife_regret: {
+        "title": "Wat je anders zou doen",
+        "theme": "Eerlijk terugkijken op gemiste kansen of andere wegen",
+        "mood": "eerlijk en mild",
+        "example_prompts": [
+            "Is er iets in je leven dat je anders had willen doen?",
+            "Welke keuze spijt je het meest, en waarom?",
+            "Wat zou je je jongere zelf aanraden te vermijden?"
+        ]
+    },
+    ChapterId.midlife_resilience: {
+        "title": "Wat je leerde van tegenslag",
+        "theme": "Een moeilijke periode die je sterker of anders maakte",
+        "mood": "krachtig en reflectief",
+        "example_prompts": [
+            "Wat heeft de moeilijkste periode in je leven je geleerd?",
+            "Hoe ben je veranderd door iets dat je eigenlijk liever niet had meegemaakt?",
+            "Waar put je kracht uit als het moeilijk is?"
+        ]
+    },
+    ChapterId.midlife_parents_retrospect: {
+        "title": "Je ouders nu je ouder bent",
+        "theme": "Terugkijken op je ouders met de ogen van nu",
+        "mood": "begripvol en diep",
+        "example_prompts": [
+            "Begrijp je je ouders nu beter dan vroeger?",
+            "Wat zag je als kind niet dat je nu wel ziet?",
+            "Wat zou je je ouders nu willen zeggen?"
+        ]
+    },
+    ChapterId.midlife_formative_decade: {
+        "title": "Je rijkste decennium",
+        "theme": "Het tijdvak van je leven dat het meest bepalend was",
+        "mood": "reflectief en historisch",
+        "example_prompts": [
+            "Welk decennium van je leven was het rijkst of bepalendst?",
+            "Wat maakte de jaren '70, '80, of '90 zo bijzonder voor jou?",
+            "In welke periode groeide je het meest als mens?"
+        ]
+    },
+    ChapterId.midlife_social_change: {
+        "title": "Hoe Nederland veranderde rond jou",
+        "theme": "Maatschappelijke veranderingen die jouw leven direct raakten",
+        "mood": "maatschappelijk en persoonlijk",
+        "example_prompts": [
+            "Welke grote verandering in Nederland raakte jou persoonlijk het meest?",
+            "Hoe beleefde jij de ontzuiling, de vrouwenbeweging, of de digitalisering?",
+            "Wat was er fundamenteel anders in Nederland toen jij jong was?"
+        ]
+    },
+    ChapterId.midlife_faith_evolution: {
+        "title": "Hoe je kijk op het leven veranderde",
+        "theme": "Wijsheid die alleen de tijd brengt — wat je nu weet dat je vroeger niet wist",
+        "mood": "wijs en reflectief",
+        "example_prompts": [
+            "Wat weet je nu over het leven dat je in je twintiger jaren niet wist?",
+            "Hoe is je kijk op geluk veranderd door de jaren heen?",
+            "Wat telt voor jou nu, dat vroeger niet telde?"
+        ]
+    },
+
+    # Fase 7: Nu & Nalatenschap
+    ChapterId.legacy_daily_joy: {
+        "title": "Wat jou nu vreugde geeft",
+        "theme": "Geluk in het gewone leven van nu",
+        "mood": "warm en aanwezig",
+        "example_prompts": [
+            "Wat brengt je vandaag de dag het meeste vreugde?",
+            "Hoe ziet een goede dag eruit voor jou nu?",
+            "Wat heb je geleerd over wat geluk echt is?"
+        ]
+    },
+    ChapterId.legacy_faith_now: {
+        "title": "Geloof en zingeving vandaag",
+        "theme": "Hoe jij nu betekenis vindt in het leven",
+        "mood": "diep en persoonlijk",
+        "example_prompts": [
+            "Wat geeft jou zingeving op dit punt in je leven?",
+            "Is geloof of spiritualiteit voor jou veranderd door de jaren heen?",
+            "Waar vind je troost of rust?"
+        ]
+    },
+    ChapterId.legacy_remembered: {
+        "title": "Hoe je herinnerd wilt worden",
+        "theme": "De ene zin die jou het beste samenvat",
+        "mood": "diep en authentiek",
+        "example_prompts": [
+            "Hoe wil je herinnerd worden?",
+            "Welke zin zou je op je grafsteen willen?",
+            "Wat is het belangrijkste dat mensen over jou weten?"
+        ]
+    },
+    ChapterId.legacy_verdict: {
+        "title": "Je oordeel over je eigen leven",
+        "theme": "Was dit het leven dat je wilde leiden?",
+        "mood": "eerlijk en vredig",
+        "example_prompts": [
+            "Als je terugkijkt — was dit het leven dat je wilde leiden?",
+            "Ben je tevreden met de keuzes die je hebt gemaakt?",
+            "Wat heeft jouw leven de moeite waard gemaakt?"
+        ]
+    },
+    ChapterId.legacy_unsaid: {
+        "title": "Wat je nooit hardop hebt gezegd",
+        "theme": "Een gevoel, dankbaarheid of verontschuldiging die nog niet is uitgesproken",
+        "mood": "kwetsbaar en bevrijdend",
+        "example_prompts": [
+            "Is er iets wat je altijd hebt willen zeggen maar nooit hebt gedaan?",
+            "Aan wie zou je iets willen uitspreken dat je lang voor je hebt gehouden?",
+            "Wat wil je nu hardop zeggen, voor het eerst?"
+        ]
+    },
+    ChapterId.legacy_letter: {
+        "title": "Een brief aan de volgende generatie",
+        "theme": "Wat jij wil dat de generaties na jou weten",
+        "mood": "hartelijk en tijdloos",
+        "example_prompts": [
+            "Als je één brief mocht schrijven aan je kleinkinderen, wat zou je zeggen?",
+            "Welk advies wil je doorgeven aan de mensen die na jou komen?",
+            "Wat hoop je dat de volgende generatie van jou leert?"
+        ]
+    },
+
+    # Optioneel
+    ChapterId.optional_childhood_game: {
+        "title": "Spel van vroeger",
+        "theme": "Een spel of tijdverdrijf uit je kindertijd dat je nooit vergat",
+        "mood": "speels en nostalgisch",
+        "example_prompts": [
+            "Welk spel speelde je het liefst als kind?",
+            "Wie speelde er altijd mee en hoe was dat?",
+            "Wat zou je nu nog weleens willen spelen?"
+        ]
+    },
+    ChapterId.optional_alter_ego: {
+        "title": "Je alter ego",
+        "theme": "Wie je geworden zou zijn met andere keuzes of in een andere tijd",
+        "mood": "speculatief en creatief",
+        "example_prompts": [
+            "Als je een heel ander leven had geleid, wie zou je dan zijn?",
+            "Stel je leefde in een ander land of een andere tijd — hoe zou dat zijn?",
+            "Welk leven heb je weleens jaloers bekeken en waarom?"
+        ]
+    },
+    ChapterId.optional_superpower: {
+        "title": "Je bijzondere eigenschap",
+        "theme": "De kracht van jou die anderen misschien niet zien",
+        "mood": "celebratief en eerlijk",
+        "example_prompts": [
+            "Welke eigenschap van jezelf heeft je het meest geholpen in het leven?",
+            "Wat kunnen anderen van jou leren dat jij vanzelfsprekend vindt?",
+            "Wat is jouw sterkste kant, en hoe heb je die ontwikkeld?"
+        ]
+    },
+    ChapterId.optional_bucket_list: {
+        "title": "Wat je nog wilt",
+        "theme": "Het verlanglijstje voor de rest van je leven",
+        "mood": "hoopvol en luchtig",
+        "example_prompts": [
+            "Wat wil je nog doen, zien, of meemaken in je leven?",
+            "Is er een droom die je nog niet hebt gerealiseerd?",
+            "Wat weerhoudt je er nog van om dat te doen?"
+        ]
+    },
+    ChapterId.optional_final_chapter: {
+        "title": "Het laatste hoofdstuk schrijven",
+        "theme": "Hoe jij wil dat de jaren die nog komen eruit zien",
+        "mood": "hoopvol en betekenisvol",
+        "example_prompts": [
+            "Hoe wil je de jaren die nog komen doorbrengen?",
+            "Wat hoop je dat er in het laatste hoofdstuk van je leven staat?",
+            "Wat wil je nog bereiken of meemaken?"
+        ]
+    },
+
+    # Optioneel (voortgezet): Bonus & Verborgen Dimensies
     ChapterId.bonus_funny: {
         "title": "Het grappigste moment",
         "theme": "Wat is het grappigste of meest onverwachte moment in je leven geweest?",
