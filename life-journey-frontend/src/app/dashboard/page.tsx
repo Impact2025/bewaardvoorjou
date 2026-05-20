@@ -36,6 +36,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { QuickThoughtFAB } from "@/components/quick-thoughts";
+import { MemoryLaneNavigation } from "@/components/MemoryLaneNavigation";
 
 // Lazy load heavy Timeline component (reduces initial bundle)
 const Timeline = dynamic(
@@ -48,11 +49,30 @@ const Timeline = dynamic(
   }
 );
 
+type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+
+function getCurrentSeason(): Season {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'autumn';
+  return 'winter';
+}
+
+const SEASON_GRADIENTS: Record<Season, string> = {
+  spring: 'from-[#FF8C42] to-[#FFB84D]',
+  summer: 'from-[#F5A623] to-[#FF8C42]',
+  autumn: 'from-[#E06828] to-[#C0392B]',
+  winter: 'from-[#5C6BC0] to-[#7986CB]',
+};
+
 function DashboardContent() {
   const router = useRouter();
   const { journey, profile, isLoading, error } = useJourneyBootstrap();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [milestonePulse, setMilestonePulse] = useState(false);
   const { triggerConfetti, ConfettiComponent } = useConfetti();
+  const season = getCurrentSeason();
 
   // Auto-show onboarding for first-time users
   useEffect(() => {
@@ -70,11 +90,12 @@ function DashboardContent() {
     const lastCelebrated = Number(localStorage.getItem('last_milestone') || '0');
 
     if (milestones.includes(completedChapters) && completedChapters > lastCelebrated) {
-      // Trigger confetti - bigger celebration for bigger milestones
       const duration = completedChapters === 30 ? 6000 : completedChapters >= 10 ? 4000 : 2500;
       const particleCount = completedChapters === 30 ? 80 : completedChapters >= 10 ? 60 : 40;
 
       triggerConfetti(duration, particleCount);
+      setMilestonePulse(true);
+      setTimeout(() => setMilestonePulse(false), 2000);
       localStorage.setItem('last_milestone', String(completedChapters));
     }
   }, [journey?.journeyProgress?.completedChapters, triggerConfetti]);
@@ -215,8 +236,11 @@ function DashboardContent() {
             </h2>
           </div>
 
-          {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-[#E06828] p-5 sm:p-6 md:p-8 text-white shadow-[0_4px_24px_rgba(255,140,66,0.25)]">
+          {/* Hero Section — seizoensgebonden gradient */}
+          <div className={cn(
+            "relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 sm:p-6 md:p-8 text-white shadow-[0_4px_24px_rgba(255,140,66,0.25)]",
+            SEASON_GRADIENTS[season]
+          )}>
             <div className="absolute -right-6 -top-6 opacity-10">
               <Sparkles className="h-32 w-32" />
             </div>
@@ -253,7 +277,9 @@ function DashboardContent() {
               <div className="mt-5">
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span className="text-white/90">Voortgang</span>
-                  <span className="font-bold">{progressPercent}%</span>
+                  <span className={cn("font-bold", milestonePulse && "heart-pulse inline-block")}>
+                    {progressPercent}%
+                  </span>
                 </div>
                 <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                   <div
@@ -397,42 +423,44 @@ function DashboardContent() {
               </Card>
               )}
 
-              {/* Quick Actions */}
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-base">Snelle acties</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {nextChapter && (
+              {/* Memory Lane navigatie voor bestaande gebruikers */}
+              {!isNewUser ? (
+                <Card className="bg-white border border-gray-200 overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Memory Lane</CardTitle>
+                    <CardDescription>Navigeer door je levensverhaal</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0 pb-2">
+                    <MemoryLaneNavigation compact />
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-white border border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="text-base">Snelle acties</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {nextChapter && (
+                      <QuickActionButton
+                        href={`/chapter/${nextChapter}`}
+                        icon={<Play className="h-4 w-4" />}
+                        label="Begin met mijn verhaal"
+                        primary
+                      />
+                    )}
                     <QuickActionButton
-                      href={`/chapter/${nextChapter}`}
-                      icon={<Play className="h-4 w-4" />}
-                      label="Verder met opnemen"
-                      primary
+                      href="/recordings"
+                      icon={<Mic className="h-4 w-4" />}
+                      label="Mijn opnames"
                     />
-                  )}
-                  <QuickActionButton
-                    href="/recordings"
-                    icon={<Mic className="h-4 w-4" />}
-                    label="Mijn opnames"
-                  />
-                  <QuickActionButton
-                    href="/memos"
-                    icon={<BookOpen className="h-4 w-4" />}
-                    label="Mijn memo's"
-                  />
-                  <QuickActionButton
-                    href="/privacy"
-                    icon={<Share2 className="h-4 w-4" />}
-                    label="Delen & privacy"
-                  />
-                  <QuickActionButton
-                    href="/onboarding"
-                    icon={<Settings className="h-4 w-4" />}
-                    label="Instellingen"
-                  />
-                </CardContent>
-              </Card>
+                    <QuickActionButton
+                      href="/memos"
+                      icon={<BookOpen className="h-4 w-4" />}
+                      label="Mijn memo's"
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Help Card */}
               <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">

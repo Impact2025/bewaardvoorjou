@@ -20,6 +20,7 @@ import {
 
 interface MemoryLaneNavigationProps {
   className?: string;
+  compact?: boolean;
 }
 
 interface MemoryStop {
@@ -33,7 +34,7 @@ interface MemoryStop {
   progress?: number;
 }
 
-export function MemoryLaneNavigation({ className }: MemoryLaneNavigationProps) {
+export function MemoryLaneNavigation({ className, compact = false }: MemoryLaneNavigationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [currentSeason, setCurrentSeason] = useState<'spring' | 'summer' | 'autumn' | 'winter'>('spring');
@@ -131,6 +132,62 @@ export function MemoryLaneNavigation({ className }: MemoryLaneNavigationProps) {
   };
 
   const SeasonIcon = getSeasonIcon();
+
+  if (compact) {
+    return (
+      <nav className={cn("relative", className)}>
+        <div className="px-4 py-3 space-y-1">
+          {/* Seizoen-badge compact */}
+          <div className="flex items-center gap-1.5 mb-3">
+            <SeasonIcon className="h-3.5 w-3.5 text-orange" />
+            <span className="text-xs font-medium text-slate-500 capitalize">{currentSeason}</span>
+          </div>
+          {memoryStops.map((stop) => {
+            const Icon = stop.icon;
+            return (
+              <button
+                key={stop.id}
+                onClick={() => handleNavigation(stop)}
+                className={cn(
+                  "group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                  stop.isActive
+                    ? "bg-orange/10 text-orange"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                )}
+              >
+                {showRipple && stop.isActive && (
+                  <div className="absolute inset-0 rounded-lg emotional-ripple" />
+                )}
+                <div className={cn(
+                  "flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 transition-all",
+                  stop.emotionalColor
+                )}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <p className={cn(
+                    "text-sm font-medium truncate",
+                    stop.isActive ? "text-orange" : "text-slate-700 group-hover:text-slate-900"
+                  )}>
+                    {stop.label}
+                  </p>
+                  <p className="text-xs text-slate-400 truncate">{stop.description}</p>
+                </div>
+                <ChevronRight className={cn(
+                  "h-4 w-4 flex-shrink-0 transition-colors",
+                  stop.isActive ? "text-orange" : "text-slate-300 group-hover:text-slate-500"
+                )} />
+              </button>
+            );
+          })}
+          <div className="pt-3 flex items-center gap-1.5 justify-center">
+            <Heart className="h-3.5 w-3.5 text-orange heart-pulse" />
+            <span className="text-xs text-slate-400">Elke stap is een herinnering waard</span>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className={cn("relative", className)}>
