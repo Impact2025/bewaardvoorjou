@@ -466,20 +466,33 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       log.debug("Waiting for transcription...");
       setUploadStatus("Transcriptie wordt gemaakt...");
 
-      // Poll for transcription (simplified - in production you'd use websockets)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Poll for transcript — retry up to ~45s (2s, 4s, 6s, 8s, 10s, 10s, 10s delays)
+      const delays = [2000, 2000, 4000, 6000, 8000, 10000, 10000];
+      let transcriptText: string | null = null;
 
-      // Get transcription
-      const transcriptResponse = await apiFetch<{ text: string }>(
-        `/media/${assetId}/transcript`,
-        {},
-        { token: session.token }
-      );
+      for (const delay of delays) {
+        await new Promise(resolve => setTimeout(resolve, delay));
 
-      if (!transcriptResponse.text) {
-        log.warn("No transcription available yet");
+        const transcriptResponse = await apiFetch<{ ready: boolean; text: string | null }>(
+          `/media/${assetId}/transcript`,
+          {},
+          { token: session.token }
+        );
+
+        if (transcriptResponse.ready && transcriptResponse.text) {
+          transcriptText = transcriptResponse.text;
+          break;
+        }
+        log.debug("Transcript not ready yet, retrying...");
+      }
+
+      if (!transcriptText) {
+        log.warn("Transcript unavailable after polling");
+        setUploadStatus(null);
         return;
       }
+
+      const transcriptResponse = { text: transcriptText };
 
       log.debug("Got transcription, continuing conversation");
       setUploadStatus("AI denkt na...");
@@ -488,7 +501,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       const response = await continueConversation(
         session.token,
         conversationSessionId,
-        transcriptResponse.text
+        transcriptResponse.text!
       );
 
       dispatch({

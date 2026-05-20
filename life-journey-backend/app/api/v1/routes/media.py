@@ -172,6 +172,45 @@ def finalize_upload(
   return {"status": "queued"}
 
 
+@router.get("/{asset_id}/transcript")
+@limiter.limit(RateLimits.READ_STANDARD)
+def get_transcript(
+  request: Request,
+  asset_id: str,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> dict:
+  """
+  Get transcript text for a media asset.
+
+  Returns the joined transcript if available, or a 202 with ready=False
+  when transcription is still in progress.
+  """
+  from app.models.media import TranscriptSegment
+
+  asset = db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id).first()
+  if asset is None:
+    raise HTTPException(status_code=404, detail="Media-item niet gevonden")
+
+  journey = db.query(JourneyModel).filter(JourneyModel.id == asset.journey_id).first()
+  if journey is None or journey.user_id != current_user.id:
+    raise HTTPException(status_code=403, detail="Geen toegang tot dit media-item")
+
+  segments = (
+    db.query(TranscriptSegment)
+    .filter(TranscriptSegment.media_asset_id == asset_id)
+    .order_by(TranscriptSegment.start_ms.asc())
+    .all()
+  )
+
+  if not segments:
+    # Still processing
+    return {"ready": False, "text": None, "storage_state": asset.storage_state}
+
+  text = " ".join(s.text for s in segments)
+  return {"ready": True, "text": text, "segment_count": len(segments)}
+
+
 @router.put("/local-upload/{object_key:path}")
 @limiter.limit(RateLimits.MEDIA_UPLOAD)
 async def local_upload(
