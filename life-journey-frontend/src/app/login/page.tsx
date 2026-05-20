@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { loginUser } from "@/lib/auth-client";
 import { isApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,7 +82,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               />
             </div>
 
@@ -96,15 +98,25 @@ export default function LoginPage() {
                   Wachtwoord vergeten?
                 </Link>
               </div>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/30"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 pr-12 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-warm-amber/40 rounded"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
 
             {error ? <p className="text-sm text-coral">{error}</p> : null}
@@ -137,6 +149,12 @@ export default function LoginPage() {
             Nog geen account?{" "}
             <Link href="/register" className="text-warm-amber hover:text-warm-amber/80 font-medium">
               Maak er één aan
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-medium">
+            Hulp nodig?{" "}
+            <Link href="/contact" className="text-warm-amber hover:text-warm-amber/80 font-medium">
+              Neem contact op
             </Link>
           </p>
         </CardContent>

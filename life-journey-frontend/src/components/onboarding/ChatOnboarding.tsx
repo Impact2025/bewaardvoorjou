@@ -50,36 +50,36 @@ interface CollectedData {
 // ─── Script data ──────────────────────────────────────────────────────────────
 
 const PURPOSE_OPTIONS: ChipOption[] = [
-  { value: "Mijn kinderen", label: "Mijn kinderen", emoji: "👧" },
-  { value: "Mijn kleinkinderen", label: "Mijn kleinkinderen", emoji: "👴" },
-  { value: "Mijn partner", label: "Mijn partner", emoji: "💑" },
-  { value: "De hele familie", label: "De hele familie", emoji: "👨‍👩‍👧" },
-  { value: "Voornamelijk voor mezelf", label: "Voor mezelf", emoji: "🙏" },
+  { value: "Mijn kinderen", label: "Mijn kinderen" },
+  { value: "Mijn kleinkinderen", label: "Mijn kleinkinderen" },
+  { value: "Mijn partner", label: "Mijn partner" },
+  { value: "De hele familie", label: "De hele familie" },
+  { value: "Voornamelijk voor mezelf", label: "Voor mezelf" },
 ];
 
 const RECORDING_OPTIONS: ChipOption[] = [
-  { value: "video", label: "Video", emoji: "🎥", description: "Neem jezelf op" },
-  { value: "audio", label: "Audio", emoji: "🎙️", description: "Spreek je verhaal in" },
-  { value: "text", label: "Tekst", emoji: "✍️", description: "Schrijf je gedachten" },
-  { value: "mixed", label: "Gemengd", emoji: "🎨", description: "Combineer methoden" },
+  { value: "video", label: "Video", description: "Neem jezelf op" },
+  { value: "audio", label: "Audio", description: "Spreek je verhaal in" },
+  { value: "text", label: "Tekst", description: "Schrijf je gedachten" },
+  { value: "mixed", label: "Gemengd", description: "Combineer methoden" },
 ];
 
 const PRIVACY_OPTIONS: ChipOption[] = [
-  { value: "private", label: "Alleen ik", emoji: "🔒", description: "Volledig privé" },
-  { value: "trusted", label: "Familie & vrienden", emoji: "👨‍👩‍👧", description: "Geselecteerde mensen" },
-  { value: "legacy", label: "Na mijn overlijden", emoji: "🕊️", description: "Als nalatenschap" },
+  { value: "private", label: "Alleen ik", description: "Volledig privé" },
+  { value: "trusted", label: "Familie & vrienden", description: "Geselecteerde mensen" },
+  { value: "legacy", label: "Na mijn overlijden", description: "Als nalatenschap" },
 ];
 
 const TEMPO_OPTIONS: ChipOption[] = [
-  { value: "30 dagen", label: "30 dagen challenge", emoji: "⚡" },
-  { value: "6 weken", label: "6 weken", emoji: "🌱" },
-  { value: "Eigen tempo", label: "Eigen tempo", emoji: "🐢" },
+  { value: "30 dagen", label: "30 dagen" },
+  { value: "6 weken", label: "6 weken" },
+  { value: "Eigen tempo", label: "Eigen tempo" },
 ];
 
 const AI_OPTIONS: ChipOption[] = [
-  { value: "full", label: "Volledige begeleiding", emoji: "🤖", description: "AI stelt vervolgvragen" },
-  { value: "minimal", label: "Minimale hints", emoji: "💬", description: "Alleen startvragen" },
-  { value: "none", label: "Helemaal zelf", emoji: "🦋", description: "Op eigen wijze" },
+  { value: "full", label: "Volledige begeleiding", description: "AI stelt vervolgvragen" },
+  { value: "minimal", label: "Minimale hints", description: "Alleen startvragen" },
+  { value: "none", label: "Helemaal zelf", description: "Op eigen wijze" },
 ];
 
 const PRIVACY_LABELS: Record<string, string> = {
@@ -192,7 +192,6 @@ function QuickReplyChips({ options, onSelect, multiSelect = false }: ChipsProps)
                   : "border-neutral-sand bg-white text-foreground hover:border-warm-amber/60 hover:bg-warm-amber/5",
               )}
             >
-              {opt.emoji && <span aria-hidden="true">{opt.emoji}</span>}
               <span>{opt.label}</span>
               {opt.description && (
                 <span className="text-foreground/50 text-xs hidden sm:inline">— {opt.description}</span>
@@ -296,7 +295,7 @@ export function ChatOnboarding() {
     const run = async () => {
       await showGuideMessages(
         [
-          "Hoi! Welkom bij Bewaard voor jou. 🌟",
+          "Hoi! Welkom bij Bewaard voor jou.",
           "Ik ga je in een paar vragen helpen je reis te starten. Het duurt maar twee minuten.",
           "Hoe mag ik je noemen?",
         ],
@@ -318,7 +317,7 @@ export function ChatOnboarding() {
     setData((prev) => ({ ...prev, displayName: name }));
 
     await showGuideMessages([
-      `Fijn om je te ontmoeten, ${name}! 😊`,
+      `Fijn om je te ontmoeten, ${name}.`,
       "In welk jaar ben je geboren? (Optioneel — je kunt dit overslaan)",
     ]);
     setPhase("birth_year");
@@ -349,7 +348,7 @@ export function ChatOnboarding() {
     setData((prev) => ({ ...prev, recipients }));
 
     await showGuideMessages([
-      "Wat een mooi gebaar. ❤️",
+      "Wat een mooi gebaar.",
       "Hoe vertel je het liefst je verhaal?",
     ]);
     setPhase("recording_method");
@@ -359,7 +358,7 @@ export function ChatOnboarding() {
     addMessage("user", label);
     setData((prev) => ({ ...prev, recordingMethod: value }));
 
-    await showGuideMessages(["Goede keuze! 👍", "Wie mag jouw verhaal lezen?"]);
+    await showGuideMessages(["Goed. Wie mag jouw verhaal lezen?"]);
     setPhase("privacy");
   };
 
@@ -368,7 +367,7 @@ export function ChatOnboarding() {
     setData((prev) => ({ ...prev, privacyLevel: value as CollectedData["privacyLevel"] }));
 
     await showGuideMessages([
-      "Begrepen, jouw verhaal blijft veilig. 🔐",
+      "Begrepen, jouw verhaal blijft veilig.",
       "Op welk tempo wil je werken?",
     ]);
     setPhase("tempo");
@@ -387,7 +386,7 @@ export function ChatOnboarding() {
     setData((prev) => ({ ...prev, aiAssistance: value as CollectedData["aiAssistance"] }));
 
     await showGuideMessages([
-      "Perfect. Dan zetten we alles klaar voor je! 🎉",
+      "Dan zetten we alles klaar voor je.",
       "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
     ]);
     setPhase("summary");
@@ -561,7 +560,7 @@ export function ChatOnboarding() {
                 onClick={handleSubmit}
                 className="w-full py-3.5 bg-warm-amber text-slate-900 rounded-full font-semibold text-base hover:bg-warm-amber/90 transition-colors shadow-md"
               >
-                Start mijn reis 🚀
+                Start mijn reis
               </button>
             </div>
           )}

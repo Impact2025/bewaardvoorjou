@@ -77,10 +77,12 @@ export function AppShell({
                   priority
                 />
               </Link>
-              {/* Mobile: compact brand name */}
-              <span className="sm:hidden text-base font-semibold text-slate-900 font-serif">
-                Bewaard voor jou
-              </span>
+              {/* Mobile: show page title */}
+              <div className="sm:hidden">
+                <h1 className="text-base font-semibold text-slate-900 font-serif leading-tight">
+                  {title}
+                </h1>
+              </div>
               {/* Desktop: full page title + description */}
               <div className="hidden sm:block">
                 <h1 className="text-xl font-semibold text-slate-900 font-serif">
@@ -90,8 +92,6 @@ export function AppShell({
                   <p className="text-sm text-slate-600">{description}</p>
                 )}
               </div>
-              {/* Accessible h1 for mobile screen readers */}
-              <h1 className="sr-only">{title}</h1>
             </div>
 
             {/* Right: icon actions */}
@@ -112,7 +112,7 @@ export function AppShell({
                         className="fixed inset-0 z-10"
                         onClick={() => setShowSettingsDropdown(false)}
                       />
-                      <div className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
+                      <div className="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
                         {settingsItems.map((item) => {
                           if (item.href === "/admin" && !session?.user?.isAdmin) {
                             return null;
@@ -125,7 +125,7 @@ export function AppShell({
                                   setShowSettingsDropdown(false);
                                   onShowHandleiding?.();
                                 }}
-                                className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-gray-50"
+                                className="w-full text-left block px-4 py-3 text-base text-slate-700 transition-colors hover:bg-gray-50"
                               >
                                 {item.label}
                               </button>
@@ -135,7 +135,7 @@ export function AppShell({
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="block px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-gray-50"
+                              className="block px-4 py-3 text-base text-slate-700 transition-colors hover:bg-gray-50"
                               onClick={() => setShowSettingsDropdown(false)}
                             >
                               {item.label}
