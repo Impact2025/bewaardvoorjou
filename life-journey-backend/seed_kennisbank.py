@@ -17,7 +17,7 @@ import requests
 def login(base_url: str, email: str, password: str) -> str:
     resp = requests.post(
         f"{base_url}/auth/login",
-        data={"username": email, "password": password},
+        json={"email": email, "password": password},
     )
     if resp.status_code != 200:
         print(f"Inloggen mislukt: {resp.text}")
@@ -256,7 +256,7 @@ ARTICLES = [
         "header_color": "#EDE0D0",
         "header_text_color": "#5C3D2E",
         "published_at": "2026-02-02T09:00:00+00:00",
-        "meta_title": "Tips om herinneringen op te halen voor je biografie | BewaardVoorJou.nl",
+        "meta_title": "Tips om herinneringen op te halen voor je biografie",
         "meta_description": "Lukt het niet om herinneringen boven te halen voor je levensverhaal? Deze bewezen tips helpen je om vergeten momenten weer tot leven te wekken.",
         "keywords": "herinneringen ophalen, biografie schrijven tips, geheugen activeren, herinneringen terughalen, autobiografie hulp, levensverhaal herinneringen",
         "tags": "herinneringen, tips, biografie, geheugen, levensverhaal",
@@ -492,7 +492,7 @@ ARTICLES = [
         "header_text_color": "#1E3A5F",
         "published_at": "2026-03-16T09:00:00+00:00",
         "meta_title": "Wat doet de AI interviewer? | BewaardVoorJou.nl",
-        "meta_description": "De AI interviewer van BewaardVoorJou.nl stelt warme, gerichte vragen om jouw levensverhaal boven te halen. Geen koude vragenlijst, maar een gesprek aan de keukentafel.",
+        "meta_description": "De AI interviewer stelt warme, gerichte vragen om jouw levensverhaal boven te halen. Geen koude vragenlijst, maar een gesprek aan de keukentafel.",
         "keywords": "AI interviewer levensverhaal, kunstmatige intelligentie biografie, AI vragen stellen, digitale interviewer ouderen, AI levensverhaal schrijven",
         "tags": "AI interviewer, kunstmatige intelligentie, vragen stellen, technologie, levensverhaal",
         "excerpt": "De AI interviewer van BewaardVoorJou.nl is geen koude vragenlijst maar een warme, intelligente gesprekspartner. Hij stelt gerichte vragen, luistert naar jouw antwoorden en vraagt door op de momenten die ertoe doen.",
@@ -790,7 +790,7 @@ ARTICLES = [
         "header_text_color": "#4A3A1A",
         "published_at": "2026-04-20T09:00:00+00:00",
         "meta_title": "Tijdgestuurde vrijgave voor familie | BewaardVoorJou.nl",
-        "meta_description": "Bij BewaardVoorJou.nl kun je instellen dat jouw levensverhaal automatisch vrijgegeven wordt voor familie na een bepaalde datum. Bewaar je verhaal voor de toekomst.",
+        "meta_description": "Stel in dat jouw levensverhaal automatisch vrijgegeven wordt voor familie na een bepaalde datum. Jij bepaalt wanneer en voor wie.",
         "keywords": "tijdgestuurde vrijgave levensverhaal, erfenis digitaal bewaren, levensverhaal doorgeven na overlijden, digitale erfenis familie, levensverhaal toekomst",
         "tags": "tijdgestuurde vrijgave, erfenis, familie, toekomst, legacy",
         "excerpt": "De tijdgestuurde vrijgave van BewaardVoorJou.nl laat jou bepalen wanneer jouw familie toegang krijgt tot jouw levensverhaal. Op een verjaardag, bij een bijzondere gelegenheid of na jouw overlijden: jij stelt de datum in.",
@@ -1068,7 +1068,7 @@ ARTICLES = [
         "header_text_color": "#4A3A0A",
         "published_at": "2026-05-15T09:00:00+00:00",
         "meta_title": "Is BewaardVoorJou.nl gratis? | Alles over de gratis versie",
-        "meta_description": "Ja, BewaardVoorJou.nl is echt gratis te proberen. Geen creditcard, geen verborgen kosten. Ontdek wat de gratis versie inhoudt en wanneer een betaald abonnement interessant is.",
+        "meta_description": "BewaardVoorJou.nl is gratis te proberen — geen creditcard nodig. Ontdek wat de gratis versie inhoudt en wanneer een betaald abonnement interessant is.",
         "keywords": "BewaardVoorJou gratis, levensverhaal app gratis, gratis biografie app, BewaardVoorJou kosten, levensverhaal gratis beginnen",
         "tags": "gratis, kosten, abonnement, proberen, prijzen",
         "excerpt": "Ja, BewaardVoorJou.nl is echt gratis te proberen. Geen creditcard nodig, geen proefperiode die automatisch overgaat in een betaald abonnement. De gratis versie is ruim genoeg om jouw eerste herinneringen vast te leggen.",
