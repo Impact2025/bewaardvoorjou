@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import PricingContent from "./PricingContent";
 
 export const metadata: Metadata = {
-  title: "Prijzen & Abonnementen",
+  title: "Pakketten & Prijzen — Bewaardvoorjou",
   description:
-    "Start gratis en bewaar je levensverhaal voor altijd. Kies het plan dat bij jou past — van gratis tot een eenmalige Eeuwig-licentie voor generaties na je.",
+    "Eenmalige betaling. Geen abonnement. Kies het pakket dat past bij jouw moment: Het Begin (€89), De Erfgoed Box (€249) of Voor Altijd (€399).",
   openGraph: {
-    title: "Prijzen & Abonnementen | BewaardVoorJou.nl",
+    title: "Pakketten & Prijzen | BewaardVoorJou.nl",
     description:
-      "Start gratis en bewaar je levensverhaal voor altijd. Kies het plan dat bij jou past — van gratis tot een eenmalige Eeuwig-licentie voor generaties na je.",
+      "Eenmalige betaling. Geen abonnement. Kies het pakket dat past bij jouw moment: Het Begin (€89), De Erfgoed Box (€249) of Voor Altijd (€399).",
     url: "https://bewaardvoorjou.nl/pricing",
   },
   alternates: {
@@ -19,18 +19,18 @@ export const metadata: Metadata = {
 const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "BewaardVoorJou.nl Abonnementen",
+  name: "BewaardVoorJou.nl Pakketten",
   itemListElement: [
     {
       "@type": "ListItem",
       position: 1,
       item: {
         "@type": "Product",
-        name: "Basis",
-        description: "Start gratis met 3 hoofdstukken, 30 minuten opname per maand en basis AI-interviewer.",
+        name: "Het Begin",
+        description: "Voor wie voorzichtig wil beginnen. 3 levensfasen, 30 AI-interviews, 50 foto's, 3 jaar cloud-opslag.",
         offers: {
           "@type": "Offer",
-          price: "0",
+          price: "89",
           priceCurrency: "EUR",
           availability: "https://schema.org/InStock",
         },
@@ -41,19 +41,13 @@ const pricingJsonLd = {
       position: 2,
       item: {
         "@type": "Product",
-        name: "Familie",
-        description: "Alle 19 hoofdstukken, 10 uur opname per maand, familiestamboom en gedeelde pods.",
+        name: "De Erfgoed Box",
+        description: "De complete ervaring om samen te beleven. Premium magneetdoos, onbeperkte AI-interviews, 10 jaar cloud-opslag.",
         offers: {
           "@type": "Offer",
-          price: "9.99",
+          price: "249",
           priceCurrency: "EUR",
           availability: "https://schema.org/InStock",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: "9.99",
-            priceCurrency: "EUR",
-            unitCode: "MON",
-          },
         },
       },
     },
@@ -62,32 +56,11 @@ const pricingJsonLd = {
       position: 3,
       item: {
         "@type": "Product",
-        name: "Legacy",
-        description: "Onbeperkte opnames, voice cloning, fysiek boek per jaar en VIP support.",
+        name: "Voor Altijd",
+        description: "Het ultieme erfstuk voor generaties. Levenslange cloud-opslag, 60 min biografie video-consult, testament-integratie.",
         offers: {
           "@type": "Offer",
-          price: "19.99",
-          priceCurrency: "EUR",
-          availability: "https://schema.org/InStock",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: "19.99",
-            priceCurrency: "EUR",
-            unitCode: "MON",
-          },
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 4,
-      item: {
-        "@type": "Product",
-        name: "Eeuwig",
-        description: "Eenmalige betaling voor levenslange toegang en 50 jaar bewaargarantie. Overdraagbaar aan nakomelingen.",
-        offers: {
-          "@type": "Offer",
-          price: "499",
+          price: "399",
           priceCurrency: "EUR",
           availability: "https://schema.org/InStock",
         },
