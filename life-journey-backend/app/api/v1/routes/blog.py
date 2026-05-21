@@ -354,3 +354,37 @@ async def unpublish_blog_post(
     db.commit()
     db.refresh(post)
     return post
+
+
+# ---------------------------------------------------------------------------
+# Publieke endpoints (geen authenticatie vereist)
+# ---------------------------------------------------------------------------
+
+@router.get("/public/list", response_model=List[BlogPostListItem])
+async def list_public_posts(
+    section: Optional[str] = Query(None),
+    limit: int = Query(50, le=200),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Geeft gepubliceerde artikelen terug — geen authenticatie vereist."""
+    q = db.query(BlogPost).filter(BlogPost.status == "published")
+    if section:
+        q = q.filter(BlogPost.section == section)
+    return q.order_by(BlogPost.published_at.desc()).offset(offset).limit(limit).all()
+
+
+@router.get("/public/slug/{slug}", response_model=BlogPostResponse)
+async def get_public_post_by_slug(
+    slug: str,
+    db: Session = Depends(get_db),
+):
+    """Geeft één gepubliceerd artikel op basis van slug — geen authenticatie vereist."""
+    post = (
+        db.query(BlogPost)
+        .filter(BlogPost.slug == slug, BlogPost.status == "published")
+        .first()
+    )
+    if not post:
+        raise HTTPException(status_code=404, detail="Artikel niet gevonden")
+    return post

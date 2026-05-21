@@ -33,7 +33,6 @@ interface AppShellProps {
 const settingsItems = [
   { href: "/pricing", label: "Upgrade Plan" },
   { href: "/admin", label: "Admin Dashboard" },
-  { href: "/onboarding-wizard", label: "Nieuwe Onboarding" },
   { href: "/onboarding", label: "Instellingen" },
   { href: "#handleiding", label: "Handleiding" },
   { href: "/about", label: "Over" },

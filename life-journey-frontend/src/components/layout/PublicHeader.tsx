@@ -12,6 +12,7 @@ export function PublicHeader() {
   const navLinks = [
     { href: "/#features", label: "Hoe werkt het" },
     { href: "/#trust", label: "Veiligheid" },
+    { href: "/kennisbank", label: "Kennisbank" },
     { href: "/faq", label: "Veelgestelde vragen" },
     { href: "/about", label: "Over ons" },
   ];

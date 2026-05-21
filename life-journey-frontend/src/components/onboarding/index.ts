@@ -12,5 +12,3 @@ export { OnboardingSlideComponent } from "./onboarding-slide";
 export { onboardingSlides } from "./onboarding-data";
 export type { OnboardingSlide } from "./onboarding-data";
 
-// New wizard for new users
-export { OnboardingWizard } from "./OnboardingWizard";
