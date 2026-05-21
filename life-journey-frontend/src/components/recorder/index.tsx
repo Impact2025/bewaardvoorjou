@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { MessageCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CHAPTERS } from "@/lib/chapters";
 import { useRouter } from "next/navigation";
-import { AIAssistantChat } from "@/components/journey/ai-assistant-chat";
+
+const AIAssistantChat = dynamic(
+  () => import("@/components/journey/ai-assistant-chat").then((m) => m.AIAssistantChat),
+  { ssr: false }
+);
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
 import { fetchAssistantPrompt } from "@/lib/assistant";
