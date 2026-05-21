@@ -12,6 +12,8 @@ class UserPublic(BaseModel):
   birth_year: int | None = None
   privacy_level: str
   is_admin: bool = Field(default=False)
+  package_tier: str = Field(default="NONE")
+  package_activated_at: datetime | None = None
   created_at: datetime
   updated_at: datetime | None = None
 

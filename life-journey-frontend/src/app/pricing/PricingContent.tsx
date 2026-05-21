@@ -2,339 +2,444 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppShell } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Crown, Heart, Infinity, Sparkles, Zap } from "lucide-react";
+import { Check, X, Star, Phone, Shield, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const pricingTiers = [
+// ─── Pakket definities ───────────────────────────────────────────────────────
+
+const packages = [
   {
-    id: "basis",
-    name: "Basis",
-    price: "Gratis",
-    priceAmount: 0,
-    billing: "altijd",
-    icon: Sparkles,
-    color: "from-slate-500 to-slate-600",
-    popular: false,
+    id: "BEGIN",
+    name: "Het Begin",
+    price: 89,
+    priceDisplay: "€89",
+    subtitle: "Voor wie voorzichtig wil beginnen",
+    hero: false,
+    badge: null,
+    ctaLabel: "Bestel Het Begin",
+    perfectFor: ["Verjaardagscadeau (60-75 jaar)", '"Ik wil het eerst proberen"', "Budget €50-100"],
+    socialProof: "234 families begonnen hier",
     features: [
-      "3 hoofdstukken",
-      "30 minuten opname per maand",
-      "Basis AI interviewer",
-      "Audio & video opname",
-      "Teksttranscriptie",
-      "Delen met 1 persoon",
+      "Elegante matzwarte geschenkdoos",
+      "USB-stick 16GB",
+      "Welkomstkaart met persoonlijke boodschap",
+      "3 levensfasen vastleggen",
+      "30 AI-gestuurde interviews in het Nederlands",
+      "50 foto's uploaden en bewaren",
+      "Audio-opnames van je stem",
+      "3 jaar veilige cloud-opslag (NL servers)",
+      "Mooi vormgegeven PDF-boek",
+      "Delen met 2 familieleden",
+      "Email support",
     ],
-    limitations: [
-      "Beperkte AI vragen",
-      "Geen familie features",
-      "Standaard support",
+    missingHighlights: [
+      "Geen geurkaars (ritueel ervaring)",
+      "Geen telefoonhouder (comfort)",
+      "Geen onbeperkte verhalen",
+      "Slechts 3 jaar opslag (vs 10 jaar)",
     ],
   },
   {
-    id: "familie",
-    name: "Familie",
-    price: "€9,99",
-    priceAmount: 9.99,
-    billing: "per maand",
-    icon: Heart,
-    color: "from-pink-500 to-rose-600",
-    popular: true,
+    id: "ERFGOED",
+    name: "De Erfgoed Box",
+    price: 249,
+    priceDisplay: "€249",
+    subtitle: "De complete ervaring om samen te beleven",
+    hero: true,
+    badge: "MEEST GEKOZEN",
+    ctaLabel: "Bestel De Erfgoed Box",
+    perfectFor: ["70e verjaardag, jubileum, pensioen", '"Dit is een bijzonder moment"', "Budget €150-300"],
+    socialProof: "862 families kozen deze",
     features: [
-      "Alle hoofdstukken (19 totaal)",
-      "10 uur opname per maand",
-      "Geavanceerde AI interviewer",
-      "Onbeperkte transcripties",
-      "Emotionele highlights",
-      "Deel met 5 familieleden",
-      "Familiestamboom",
-      "Gedeelde pods",
+      // Ritueel
+      "Premium magneetdoos met goudfolie",
+      "Houten telefoonhouder (gegraveerd)",
+      'Geurkaars "Warm Memory"',
+      'Premium thee "Reflection Blend"',
+      "Houten zandloper (20 minuten ritueel)",
+      'Notitieboekje "Voor Later"',
+      // Digitaal
+      "5 fase-kaarten met QR-code (luxe, goudfolie)",
+      "Onbeperkte levensfasen vastleggen",
+      "Onbeperkte AI-interviews (empathisch, NL)",
+      "Onbeperkt foto's en video's",
+      "Automatische transcriptie",
+      "Tijdlijn-weergave door je leven",
+      "Simpele stamboom (3 generaties)",
+      // Opslag
+      "USB-stick 64GB metaal",
+      "10 jaar gegarandeerde cloud-opslag",
+      "Premium PDF + ePub boek",
+      "5 familieleden kunnen meekijken",
+      "Automatische backup",
+      // Support
+      "Telefonische hulp (Nederlands, geen chatbot)",
       "Prioriteit support",
+      "Video-tutorials",
     ],
-    limitations: [],
+    missingHighlights: [],
   },
   {
-    id: "legacy",
-    name: "Legacy",
-    price: "€19,99",
-    priceAmount: 19.99,
-    billing: "per maand",
-    icon: Crown,
-    color: "from-amber-500 to-orange-600",
-    popular: false,
+    id: "VOOR_ALTIJD",
+    name: "Voor Altijd",
+    price: 399,
+    priceDisplay: "€399",
+    originalPrice: "€449",
+    priceNote: "launch aanbieding",
+    subtitle: "Het ultieme erfstuk voor generaties",
+    hero: false,
+    badge: null,
+    ctaLabel: "Bestel Voor Altijd",
+    perfectFor: ['"Once in a lifetime" moment', "Pensioen, ernstige ziekte", "Estate planning"],
+    socialProof: "138 families investeerden in levenslang",
     features: [
-      "Alles van Familie, plus:",
-      "Onbeperkte opnames",
-      "Voice cloning (beta)",
-      "AI documentaire generatie",
-      "Fysiek boek (1x per jaar)",
-      "Onbeperkte familieleden",
-      "Dead man's switch",
-      "Tijdcapsule features",
-      "Premium AI persona's",
-      "VIP support (24/7)",
+      "Alles van De Erfgoed Box, plus:",
+      "XL premium doos (family tree gravering)",
+      "Premium houten houder (custom gravering naam)",
+      "USB 128GB + extra backup USB-stick",
+      "LEVENSLANGE cloud-opslag (geen vervaldatum)",
+      "USB wordt elk jaar ververst (10 jaar garantie)",
+      "Overdracht aan erfgenamen automatisch geregeld",
+      "Testament-integratie",
+      "60 minuten biografie video-consult",
+      "White-glove onboarding (persoonlijk intake call)",
+      "Premium phone support (altijd voorrang)",
+      "Technische hulp bij installatie (video call)",
+      "Toegang voor rouwverwerkers na overlijden",
+      '"Memorial space" waar familie kan toevoegen',
+      "Jaarlijkse herinnering (verjaardag updates)",
+      "10 familieleden kunnen meekijken",
     ],
-    limitations: [],
+    missingHighlights: [],
+  },
+] as const;
+
+// ─── Vergelijkingstabel ──────────────────────────────────────────────────────
+
+const compareRows = [
+  { label: "Prijs", values: ["€89", "€249", "€399"] },
+  { label: "Luxe verpakking", values: ["Basis", "Premium ✓", "XL Premium ✓"] },
+  { label: "Telefoonhouder", values: [false, "Hout ✓", "Custom gegrav. ✓"] },
+  { label: "Geurkaars", values: [false, true, true] },
+  { label: "Premium thee", values: [false, true, true] },
+  { label: "Zandloper", values: [false, true, true] },
+  { label: "Levensfasen", values: ["3", "Onbeperkt", "Onbeperkt"] },
+  { label: "AI-interviews", values: ["30", "Onbeperkt", "Onbeperkt"] },
+  { label: "Foto's", values: ["50", "Onbeperkt", "Onbeperkt"] },
+  { label: "Video's", values: [false, true, true] },
+  { label: "Familieleden", values: ["2", "5", "10"] },
+  { label: "Stamboom", values: [false, true, true] },
+  { label: "Cloud bewaring", values: ["3 jaar", "10 jaar", "LEVENSLANG"] },
+  { label: "USB-stick", values: ["16GB", "64GB", "128GB + backup"] },
+  { label: "Jaarlijkse refresh", values: [false, false, "✓ (10 jaar)"] },
+  { label: "Email support", values: [true, true, true] },
+  { label: "Telefonische hulp", values: [false, true, "Priority ✓"] },
+  { label: "Biografie consult", values: [false, false, "60 min ✓"] },
+  { label: "PDF boek", values: ["Basis", "Premium ✓", "Premium ✓"] },
+  { label: "Testament integratie", values: [false, false, true] },
+  { label: "Memorial space", values: [false, false, true] },
+];
+
+// ─── FAQ ─────────────────────────────────────────────────────────────────────
+
+const faqs = [
+  {
+    q: "Is dit niet te moeilijk voor mijn ouders?",
+    a: "Nee! We hebben het speciaal ontworpen voor mensen die niet tech-savvy zijn. De QR-codes starten alles automatisch. En we hebben Nederlandse telefoonsupport als ze vast zitten.",
   },
   {
-    id: "eeuwig",
-    name: "Eeuwig",
-    price: "€499",
-    priceAmount: 499,
-    billing: "eenmalig",
-    icon: Infinity,
-    color: "from-purple-500 to-indigo-600",
-    popular: false,
-    features: [
-      "Alles van Legacy, plus:",
-      "Levenslange toegang",
-      "50 jaar bewaargranantie",
-      "Geen maandelijkse kosten",
-      "Overdraagbaar naar nakomelingen",
-      "Premium fysieke boeken",
-      "VR experience toegang",
-      "Dedicated success manager",
-    ],
-    limitations: [],
-    badge: "Beste Waarde",
+    q: "Wat gebeurt er na 10 jaar? (Erfgoed Box)",
+    a: "Je kunt verlengen (€29/jaar) of alles downloaden. Je USB-stick bevat altijd een volledige backup.",
+  },
+  {
+    q: "Kunnen meerdere mensen tegelijk verhalen toevoegen?",
+    a: "Ja! Tot 5 familieleden kunnen inloggen en verhalen toevoegen, reacties plaatsen, of oude foto's uploaden.",
+  },
+  {
+    q: "Wat als mijn ouder overlijdt?",
+    a: "De toegang gaat automatisch over naar jou als erfgenaam. Alle verhalen blijven toegankelijk.",
+  },
+  {
+    q: "Is mijn data veilig?",
+    a: "Ja. Opgeslagen op Nederlandse servers, volledig GDPR-compliant, en encrypted. Wij verkopen nooit je data aan derden.",
   },
 ];
 
+// ─── Component ───────────────────────────────────────────────────────────────
+
 export default function PricingContent() {
   const router = useRouter();
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
 
-  const handleSelectPlan = (tierId: string) => {
-    router.push(`/checkout?plan=${tierId}`);
+  const handleSelectPackage = (packageId: string) => {
+    router.push(`/checkout?package=${packageId}`);
   };
 
   return (
-    <AppShell
-      title="Kies je Plan"
-      description="Bewaar je levensverhaal op jouw manier"
-      activeHref="/pricing"
-    >
-      <div className="space-y-12 pb-20">
-        {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange/10 to-gold/10 border border-orange/20">
-            <Zap className="h-4 w-4 text-orange" />
-            <span className="text-sm font-medium text-slate-700">
-              Speciaal introductieaanbod - 30% korting eerste 3 maanden
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
-            Kies het plan dat bij je past
-          </h1>
-          <p className="text-lg text-slate-600">
-            Start gratis en upgrade wanneer je klaar bent om meer te delen
-          </p>
+    <div className="min-h-screen bg-[#f8f6f2]">
+      {/* ── Pricing hero ── */}
+      <section className="py-16 px-4 text-center max-w-4xl mx-auto">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-4">
+          Kies jouw pakket
+        </h1>
+        <p className="text-lg text-[#555] mb-2">
+          Eenmalige betaling. Geen abonnement. Altijd van jou.
+        </p>
+        <div className="flex items-center justify-center gap-6 text-sm text-[#555] mt-4">
+          <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> Gratis verzending</span>
+          <span className="flex items-center gap-1"><Shield className="h-4 w-4" /> 14 dagen bedenktijd</span>
+          <span className="flex items-center gap-1"><Phone className="h-4 w-4" /> NL telefoonsupport</span>
+        </div>
+      </section>
+
+      {/* ── Pakket kaarten ── */}
+      <section className="px-4 pb-16 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 items-start">
+          {packages.map((pkg) => (
+            <PackageCard
+              key={pkg.id}
+              pkg={pkg}
+              onSelect={handleSelectPackage}
+            />
+          ))}
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
-          {pricingTiers.map((tier) => {
-            const Icon = tier.icon;
-            return (
-              <Card
-                key={tier.id}
-                className={cn(
-                  "relative overflow-hidden transition-all duration-300 hover:shadow-xl",
-                  tier.popular ? "ring-2 ring-orange border-orange scale-105" : "border-slate-200"
-                )}
-              >
-                {tier.popular && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-br from-orange to-gold text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    POPULAIRST
-                  </div>
-                )}
-                {tier.badge && (
-                  <div className="absolute top-0 left-0 bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-br-lg">
-                    {tier.badge}
-                  </div>
-                )}
-
-                <CardHeader className="text-center pb-8 pt-8">
-                  <div
-                    className={cn(
-                      "mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-4",
-                      tier.color
-                    )}
-                  >
-                    <Icon className="h-8 w-8 text-white" />
-                  </div>
-                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                  <CardDescription className="text-slate-600 mt-2">
-                    <div className="text-3xl font-bold text-slate-900">{tier.price}</div>
-                    <div className="text-sm">{tier.billing}</div>
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {tier.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm">
-                        <Check className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    onClick={() => handleSelectPlan(tier.id)}
-                    className={cn(
-                      "w-full",
-                      tier.popular
-                        ? "bg-gradient-to-r from-orange to-gold hover:from-orange-dark hover:to-orange text-white"
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-900"
-                    )}
-                  >
-                    {tier.id === "basis" ? "Start Gratis" : "Kies dit Plan"}
-                  </Button>
-
-                  {tier.id === "basis" && (
-                    <p className="text-xs text-center text-slate-500">
-                      Geen creditcard nodig
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Features Comparison */}
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Vergelijk alle features</h2>
-          <Card>
-            <CardContent className="p-6">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="text-left py-3 px-4 font-semibold text-slate-700">Feature</th>
-                      <th className="text-center py-3 px-4 font-semibold text-slate-700">Basis</th>
-                      <th className="text-center py-3 px-4 font-semibold text-slate-700 bg-orange/5">
-                        Familie
-                      </th>
-                      <th className="text-center py-3 px-4 font-semibold text-slate-700">Legacy</th>
-                      <th className="text-center py-3 px-4 font-semibold text-slate-700">Eeuwig</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <ComparisonRow feature="Hoofdstukken" values={["3", "19", "19", "19"]} highlight={1} />
-                    <ComparisonRow feature="Opnametijd per maand" values={["30 min", "10 uur", "Onbeperkt", "Onbeperkt"]} highlight={1} />
-                    <ComparisonRow feature="Familieleden" values={["1", "5", "Onbeperkt", "Onbeperkt"]} highlight={1} />
-                    <ComparisonRow feature="AI Interviewer" values={[true, true, true, true]} highlight={1} />
-                    <ComparisonRow feature="Familiestamboom" values={[false, true, true, true]} highlight={1} />
-                    <ComparisonRow feature="Voice Cloning" values={[false, false, true, true]} highlight={1} />
-                    <ComparisonRow feature="Fysiek Boek" values={[false, false, "1x/jaar", "Premium"]} highlight={1} />
-                    <ComparisonRow feature="VR Experience" values={[false, false, false, true]} highlight={1} />
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-2xl font-bold text-center">Veelgestelde Vragen</h2>
-          <div className="space-y-4">
-            <FAQItem
-              question="Kan ik later upgraden?"
-              answer="Ja, je kunt op elk moment upgraden. Je betaalt alleen het verschil naar rato."
-            />
-            <FAQItem
-              question="Wat gebeurt er als ik mijn abonnement stopzet?"
-              answer="Je kunt tot het einde van je betaalde periode nog toegang tot je verhalen. Daarna blijven ze bewaard maar kan je ze niet meer bewerken."
-            />
-            <FAQItem
-              question="Is mijn data veilig?"
-              answer="Absoluut. We gebruiken end-to-end encryptie en slaan alles op in beveiligde datacenters in de EU."
-            />
-            <FAQItem
-              question="Kan ik mijn Eeuwig-plan overdragen?"
-              answer="Ja, het Eeuwig-plan is overdraagbaar aan je kinderen of kleinkinderen."
-            />
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center space-y-4 bg-gradient-to-br from-orange/10 to-gold/10 rounded-2xl p-12 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900">
-            Klaar om je verhaal te bewaren?
-          </h2>
-          <p className="text-lg text-slate-600">
-            Start vandaag nog gratis, geen creditcard nodig
-          </p>
-          <Button
-            className="bg-gradient-to-r from-orange to-gold hover:from-orange-dark hover:to-orange text-white px-8"
-            onClick={() => router.push("/register")}
+        {/* Vergelijkingstabel toggle */}
+        <div className="text-center mt-10">
+          <button
+            onClick={() => setShowCompare(!showCompare)}
+            className="text-[#1a1a1a] underline underline-offset-4 text-sm hover:text-[#d4af37] transition-colors"
           >
-            Begin Nu Gratis
-          </Button>
+            {showCompare ? "Verberg vergelijking" : "Bekijk alle features vergelijking →"}
+          </button>
         </div>
-      </div>
-    </AppShell>
+
+        {showCompare && <ComparisonTable />}
+      </section>
+
+      {/* ── Testimoniaal ── */}
+      <section className="bg-[#1a1a1a] text-white py-16 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-[#d4af37] text-2xl mb-4">⭐⭐⭐⭐⭐</div>
+          <blockquote className="font-serif text-xl md:text-2xl leading-relaxed mb-6">
+            "Mijn moeder was 78 en had kanker. Dit gaf ons de tijd om rustig te praten over haar
+            leven. Drie maanden later overleed ze. Ik ben zo dankbaar dat we dit hebben."
+          </blockquote>
+          <p className="text-[#d4af37] font-medium">— Robert, Amsterdam</p>
+        </div>
+      </section>
+
+      {/* ── Trust badges ── */}
+      <section className="py-10 px-4 bg-[#f8f6f2]">
+        <div className="max-w-3xl mx-auto flex flex-wrap justify-center gap-6 text-sm text-[#555]">
+          {[
+            "🇳🇱 100% Nederlands product",
+            "🔒 Data opgeslagen in Nederland",
+            "✓ GDPR-compliant",
+            "↩️ 14 dagen niet-goed-geld-terug",
+            "📞 Telefonische support in het Nederlands",
+          ].map((item) => (
+            <span key={item} className="flex items-center gap-1">{item}</span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="py-16 px-4 max-w-2xl mx-auto">
+        <h2 className="font-serif text-3xl font-bold text-center text-[#1a1a1a] mb-10">
+          Veelgestelde vragen
+        </h2>
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <div
+              key={i}
+              className="bg-white border border-[#e5e0d8] rounded-xl overflow-hidden"
+            >
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full text-left px-6 py-4 flex justify-between items-center hover:bg-[#f8f6f2] transition-colors"
+              >
+                <span className="font-medium text-[#1a1a1a]">{faq.q}</span>
+                <span className={cn("text-[#d4af37] transition-transform text-lg", openFaq === i && "rotate-45")}>+</span>
+              </button>
+              {openFaq === i && (
+                <div className="px-6 pb-4 text-[#555] text-sm leading-relaxed">{faq.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="bg-[#1a1a1a] py-20 px-4 text-center">
+        <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
+          Hun verhaal verdient het om verteld te worden
+        </h2>
+        <p className="text-[#aaa] mb-8 text-lg">
+          Wacht niet tot "later." Later wordt vaak nooit.
+        </p>
+        <button
+          onClick={() => handleSelectPackage("ERFGOED")}
+          className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-10 py-4 rounded-xl text-lg transition-colors"
+        >
+          Start Nu — Kies Je Pakket
+        </button>
+        <p className="text-[#666] text-sm mt-4">Gratis verzending · 14 dagen bedenktijd</p>
+      </section>
+    </div>
   );
 }
 
-interface ComparisonRowProps {
-  feature: string;
-  values: (string | boolean)[];
-  highlight?: number;
-}
+// ─── Pakket kaart ─────────────────────────────────────────────────────────────
 
-function ComparisonRow({ feature, values, highlight }: ComparisonRowProps) {
+function PackageCard({
+  pkg,
+  onSelect,
+}: {
+  pkg: (typeof packages)[number];
+  onSelect: (id: string) => void;
+}) {
+  const [showMissing, setShowMissing] = useState(false);
+
   return (
-    <tr className="border-b border-slate-100">
-      <td className="py-3 px-4 text-sm text-slate-700">{feature}</td>
-      {values.map((value, idx) => (
-        <td
-          key={idx}
+    <div
+      className={cn(
+        "relative bg-white rounded-2xl overflow-hidden border transition-shadow",
+        pkg.hero
+          ? "border-[#d4af37] shadow-2xl md:scale-105 ring-2 ring-[#d4af37]/30"
+          : "border-[#e5e0d8] shadow-md hover:shadow-lg"
+      )}
+    >
+      {/* Hero badge */}
+      {pkg.hero && (
+        <div className="bg-[#d4af37] text-[#1a1a1a] text-xs font-bold text-center py-2 tracking-widest">
+          ⭐ MEEST GEKOZEN · BESTE PRIJS-KWALITEIT ⭐
+        </div>
+      )}
+
+      <div className="p-6 md:p-8">
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">{pkg.name}</h3>
+          <p className="text-[#888] text-sm mb-4">{pkg.subtitle}</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold text-[#1a1a1a]">{pkg.priceDisplay}</span>
+            {"originalPrice" in pkg && pkg.originalPrice && (
+              <span className="text-[#aaa] line-through text-lg">{pkg.originalPrice}</span>
+            )}
+          </div>
+          {"priceNote" in pkg && pkg.priceNote && (
+            <p className="text-xs text-[#d4af37] font-medium mt-1">{pkg.priceNote}</p>
+          )}
+          <p className="text-xs text-[#888] mt-1">(eenmalig)</p>
+        </div>
+
+        {/* Social proof */}
+        <p className="text-xs text-[#888] mb-4 flex items-center gap-1">
+          <Star className="h-3 w-3 fill-[#d4af37] text-[#d4af37]" />
+          {pkg.socialProof}
+        </p>
+
+        {/* CTA knop */}
+        <button
+          onClick={() => onSelect(pkg.id)}
           className={cn(
-            "py-3 px-4 text-center text-sm",
-            highlight === idx && "bg-orange/5"
+            "w-full py-3 rounded-xl font-bold text-sm transition-colors mb-6",
+            pkg.hero
+              ? "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"
+              : "bg-[#1a1a1a] hover:bg-[#333] text-white"
           )}
         >
-          {typeof value === "boolean" ? (
-            value ? (
-              <Check className="h-5 w-5 text-emerald-500 mx-auto" />
-            ) : (
-              <span className="text-slate-300">-</span>
-            )
-          ) : (
-            <span className="text-slate-700">{value}</span>
-          )}
-        </td>
-      ))}
-    </tr>
+          {pkg.ctaLabel} →
+        </button>
+
+        {/* Feature lijst */}
+        <ul className="space-y-2 mb-6">
+          {pkg.features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm">
+              <Check className="h-4 w-4 text-[#2d5016] flex-shrink-0 mt-0.5" />
+              <span className="text-[#333]">{f}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* "Wat je mist" voor BEGIN pakket */}
+        {"missingHighlights" in pkg && pkg.missingHighlights.length > 0 && (
+          <div className="border-t border-[#f0ece6] pt-4">
+            <button
+              onClick={() => setShowMissing(!showMissing)}
+              className="text-xs text-[#aaa] hover:text-[#888] underline underline-offset-2"
+            >
+              {showMissing ? "Verberg" : "Wat mis je in dit pakket?"}
+            </button>
+            {showMissing && (
+              <ul className="mt-3 space-y-1">
+                {pkg.missingHighlights.map((m, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-[#aaa]">
+                    <X className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                    <span>{m}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* Perfect voor */}
+        <div className="mt-4 bg-[#f8f6f2] rounded-xl p-4">
+          <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2">Perfect voor</p>
+          <ul className="space-y-1">
+            {pkg.perfectFor.map((p, i) => (
+              <li key={i} className="text-xs text-[#555]">→ {p}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 
-interface FAQItemProps {
-  question: string;
-  answer: string;
-}
+// ─── Vergelijkingstabel ───────────────────────────────────────────────────────
 
-function FAQItem({ question, answer }: FAQItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
+function ComparisonTable() {
   return (
-    <Card className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center justify-between">
-          {question}
-          <span className={cn("transition-transform", isOpen && "rotate-180")}>▼</span>
-        </CardTitle>
-      </CardHeader>
-      {isOpen && (
-        <CardContent>
-          <p className="text-slate-600">{answer}</p>
-        </CardContent>
-      )}
-    </Card>
+    <div className="mt-10 bg-white rounded-2xl border border-[#e5e0d8] overflow-hidden shadow-md">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[#e5e0d8]">
+              <th className="text-left py-4 px-4 font-medium text-[#888] w-40">Feature</th>
+              <th className="text-center py-4 px-4 font-medium text-[#1a1a1a]">Het Begin<br /><span className="font-bold">€89</span></th>
+              <th className="text-center py-4 px-4 font-medium text-[#1a1a1a] bg-[#d4af37]/10">
+                Erfgoed Box ⭐<br /><span className="font-bold">€249</span>
+              </th>
+              <th className="text-center py-4 px-4 font-medium text-[#1a1a1a]">Voor Altijd<br /><span className="font-bold">€399</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {compareRows.map((row, i) => (
+              <tr key={i} className={cn("border-b border-[#f0ece6]", i % 2 === 0 && "bg-[#faf9f7]")}>
+                <td className="py-3 px-4 text-[#555]">{row.label}</td>
+                {row.values.map((val, j) => (
+                  <td key={j} className={cn("py-3 px-4 text-center", j === 1 && "bg-[#d4af37]/5")}>
+                    {typeof val === "boolean" ? (
+                      val
+                        ? <Check className="h-4 w-4 text-[#2d5016] mx-auto" />
+                        : <span className="text-[#ddd]">—</span>
+                    ) : (
+                      <span className="text-[#333]">{val}</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="p-4 text-center text-xs text-[#aaa]">
+        🚚 Gratis verzending · 🇳🇱 Nederlands product · 🔒 GDPR-compliant
+      </div>
+    </div>
   );
 }

@@ -52,3 +52,11 @@ class User(Base):
   onboarding_completed_at = Column(DateTime, nullable=True)
   preferred_recording_method = Column(String(32), nullable=True)  # video, audio, text, mixed
   ai_assistance_level = Column(String(32), nullable=True, default="full")  # full, minimal, none
+
+  # Package / billing fields
+  # Values: NONE | BEGIN | ERFGOED | VOOR_ALTIJD
+  package_tier = Column(String(32), nullable=False, default="NONE", index=True)
+  package_activated_at = Column(DateTime, nullable=True)
+  max_family_members = Column(Integer, nullable=False, default=0)
+  max_chapters = Column(Integer, nullable=True)  # NULL = onbeperkt
+  storage_years = Column(Integer, nullable=False, default=0)

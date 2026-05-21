@@ -18,6 +18,7 @@ from app.api.v1.routes import (
     quick_thoughts,
     blog,
     webhooks,
+    orders,
 )
 
 
@@ -39,3 +40,4 @@ api_router.include_router(emails.router, prefix="/emails", tags=["emails"])
 api_router.include_router(quick_thoughts.router, prefix="/quick-thoughts", tags=["quick-thoughts"])
 api_router.include_router(blog.router, prefix="/blog", tags=["blog"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
+api_router.include_router(orders.router, prefix="/orders", tags=["orders"])

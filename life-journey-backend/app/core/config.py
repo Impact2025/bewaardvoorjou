@@ -70,6 +70,11 @@ class Settings(BaseSettings):
   # Sentry error tracking (optional — leave empty to disable)
   sentry_dsn: str | None = None
 
+  # Stripe Payments
+  stripe_secret_key: str | None = None
+  stripe_publishable_key: str | None = None
+  stripe_webhook_secret: str | None = None
+
   # SEO Indexing
   site_url: str = "https://bewaardvoorjou.nl"
   indexnow_key: str | None = None

@@ -25,6 +25,26 @@ def _decode_token(token: str) -> dict[str, Any]:
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Ongeldig token") from exc
 
 
+def get_optional_user(
+  credentials: HTTPAuthorizationCredentials | None = Depends(http_bearer),
+  db: Session = Depends(get_db),
+) -> User | None:
+  """Zelfde als get_current_user maar geeft None ipv 401 als er geen token is."""
+  if credentials is None or not credentials.credentials:
+    return None
+  try:
+    payload = _decode_token(credentials.credentials)
+  except HTTPException:
+    return None
+  subject = payload.get("sub")
+  if subject is None:
+    return None
+  user = db.query(User).filter(User.id == subject).first()
+  if user is None or not user.is_active:
+    return None
+  return user
+
+
 def get_current_user(
   credentials: HTTPAuthorizationCredentials | None = Depends(http_bearer),
   db: Session = Depends(get_db),
