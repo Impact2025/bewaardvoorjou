@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Mail, Shield, Heart, Sparkles } from "lucide-react";
 
@@ -276,37 +275,7 @@ export default function FAQContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-sand shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/Logo_Bewaardvoorjou.png"
-              alt="BewaardVoorJou.nl Logo"
-              width={40}
-              height={40}
-              className="w-10 h-10"
-              priority
-            />
-            <div className="flex flex-col">
-              <span className="text-xl font-serif font-semibold text-slate-900 leading-tight">
-                BewaardVoorJou.nl
-              </span>
-              <span className="text-xs text-slate-600 hidden sm:block">
-                Vertel het vandaag, bewaar het voor altijd
-              </span>
-            </div>
-          </Link>
-          <Link
-            href="/register"
-            className="bg-orange hover:bg-orange/90 text-white px-6 py-2.5 rounded-full font-medium transition-colors"
-          >
-            Start gratis
-          </Link>
-        </div>
-      </header>
-
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-orange/10 via-warm-amber/5 to-cream py-16 md:py-20">
         <div className="container mx-auto px-4 text-center max-w-4xl">
@@ -403,94 +372,6 @@ export default function FAQContent() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <Image
-                  src="/Logo_Bewaardvoorjou.png"
-                  alt="BewaardVoorJou.nl"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
-                <div className="flex flex-col">
-                  <span className="font-serif font-semibold text-white">
-                    BewaardVoorJou.nl
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    Vertel het vandaag,
-                    <br />
-                    bewaar het voor altijd
-                  </span>
-                </div>
-              </div>
-              <p className="text-sm text-slate-400">
-                Leg je levensverhaal vast met een empathische AI-interviewer.
-                Veilig, privé, en voor altijd bewaard.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Platform</h3>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li>
-                  <Link href="/" className="hover:text-white transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/faq" className="hover:text-white transition-colors">
-                    Veelgestelde vragen
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/register" className="hover:text-white transition-colors">
-                    Start gratis
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-white transition-colors">
-                    Inloggen
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Contact & Ondersteuning</h3>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li>
-                  <a
-                    href="mailto:info@bewaardvoorjou.nl"
-                    className="hover:text-white transition-colors"
-                  >
-                    info@bewaardvoorjou.nl
-                  </a>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors">
-                    Privacybeleid
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="hover:text-white transition-colors">
-                    Algemene voorwaarden
-                  </Link>
-                </li>
-                <li className="pt-2 text-xs">Made with ❤️ in the Netherlands</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
-            © {new Date().getFullYear()} BewaardVoorJou.nl. Alle rechten voorbehouden.
-          </div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

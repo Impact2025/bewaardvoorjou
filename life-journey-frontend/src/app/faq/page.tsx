@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import FAQContent from "./FAQContent";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
   title: "Veelgestelde vragen",
@@ -121,12 +123,14 @@ const faqJsonLd = {
 
 export default function FAQPage() {
   return (
-    <>
+    <div className="min-h-screen bg-cream">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
+      <PublicHeader />
       <FAQContent />
-    </>
+      <PublicFooter />
+    </div>
   );
 }
