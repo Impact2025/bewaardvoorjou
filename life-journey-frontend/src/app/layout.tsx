@@ -91,6 +91,9 @@ export const metadata: Metadata = {
     creator: "@bewaardvoorjou",
   },
   manifest: "/manifest.json",
+  verification: {
+    google: "f5vwMZNHquKAybIYy9k-TBdTQrI6WvHCkuuZVA2Gr3A",
+  },
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
@@ -107,6 +110,27 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "BewaardVoorJou.nl",
+  url: "https://bewaardvoorjou.nl",
+  logo: "https://bewaardvoorjou.nl/Logo_Bewaardvoorjou.png",
+  description:
+    "Digitaal platform om je levensverhaal vast te leggen met een empathische AI-interviewer en veilig te bewaren voor toekomstige generaties.",
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "info@bewaardvoorjou.nl",
+    contactType: "customer support",
+    availableLanguage: "Dutch",
+  },
+  sameAs: [],
+  foundingLocation: {
+    "@type": "Place",
+    addressCountry: "NL",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -114,6 +138,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background text-foreground antialiased",
@@ -136,7 +166,9 @@ export default function RootLayout({
         >
           Ga naar navigatie
         </a>
-        <Providers>{children}</Providers>
+        <Providers>
+          <main id="main-content">{children}</main>
+        </Providers>
       </body>
     </html>
   );

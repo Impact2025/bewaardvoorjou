@@ -1,6 +1,22 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description:
+    "Neem contact op met BewaardVoorJou.nl. We helpen je graag verder met vragen over het platform, je account of het bewaren van je levensverhaal.",
+  openGraph: {
+    title: "Contact | BewaardVoorJou.nl",
+    description:
+      "Neem contact op met BewaardVoorJou.nl. We helpen je graag verder met vragen over het platform, je account of het bewaren van je levensverhaal.",
+    url: "https://bewaardvoorjou.nl/contact",
+  },
+  alternates: {
+    canonical: "https://bewaardvoorjou.nl/contact",
+  },
+};
 
 export default function ContactPage() {
   return (

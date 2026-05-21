@@ -1,4 +1,24 @@
+import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
+
+export const metadata: Metadata = {
+  title: "Privacybeleid",
+  description:
+    "Hoe BewaardVoorJou.nl omgaat met jouw persoonlijke gegevens. Dataminimalisatie, EU-opslag, encryptie by design en volledige eigen regie over je verhalen.",
+  openGraph: {
+    title: "Privacybeleid | BewaardVoorJou.nl",
+    description:
+      "Hoe BewaardVoorJou.nl omgaat met jouw persoonlijke gegevens. Dataminimalisatie, EU-opslag, encryptie by design en volledige eigen regie over je verhalen.",
+    url: "https://bewaardvoorjou.nl/privacy",
+  },
+  alternates: {
+    canonical: "https://bewaardvoorjou.nl/privacy",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 import {
   Card,
   CardContent,

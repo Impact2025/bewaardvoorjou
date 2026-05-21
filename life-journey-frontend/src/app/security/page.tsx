@@ -1,4 +1,24 @@
+import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
+
+export const metadata: Metadata = {
+  title: "Beveiliging",
+  description:
+    "Hoe BewaardVoorJou.nl je verhalen beschermt: TLS 1.3, AES-256 encryptie, role-based toegangscontrole, WebAuthn en GDPR-conforme opslag in EU-datacenters.",
+  openGraph: {
+    title: "Beveiliging | BewaardVoorJou.nl",
+    description:
+      "Hoe BewaardVoorJou.nl je verhalen beschermt: TLS 1.3, AES-256 encryptie, role-based toegangscontrole, WebAuthn en GDPR-conforme opslag in EU-datacenters.",
+    url: "https://bewaardvoorjou.nl/security",
+  },
+  alternates: {
+    canonical: "https://bewaardvoorjou.nl/security",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 import {
   Card,
   CardContent,
