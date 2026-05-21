@@ -33,7 +33,7 @@ async function getArticles(): Promise<ArticleListItem[]> {
   try {
     const res = await fetch(
       `${API_BASE}/blog/public/list?section=knowledge&limit=50`,
-      { cache: "no-store" }
+      { next: { revalidate: 3600 } }
     );
     if (!res.ok) return [];
     return res.json();
