@@ -12,7 +12,7 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { Node, mergeAttributes } from "@tiptap/core";
-import { useEffect, useCallback, useRef, useState } from "react";
+import { useEffect, useCallback, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import {
   Bold,
   Italic,
@@ -53,6 +53,10 @@ const VideoNode = Node.create({
   },
 });
 
+export interface BlogEditorHandle {
+  insertLink: (href: string, text: string) => void;
+}
+
 interface BlogEditorProps {
   content: string;
   onChange: (html: string) => void;
@@ -61,7 +65,10 @@ interface BlogEditorProps {
   onVideoUpload?: (file: File) => Promise<string>;
 }
 
-export function BlogEditor({ content, onChange, placeholder, onImageUpload, onVideoUpload }: BlogEditorProps) {
+export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function BlogEditor(
+  { content, onChange, placeholder, onImageUpload, onVideoUpload }: BlogEditorProps,
+  ref
+) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [imageUploading, setImageUploading] = useState(false);
@@ -92,6 +99,20 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload, onVi
       },
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    insertLink(href: string, text: string) {
+      if (!editor) return;
+      const { from, to } = editor.state.selection;
+      if (from !== to) {
+        // Geselecteerde tekst omzetten naar link
+        editor.chain().focus().setLink({ href }).run();
+      } else {
+        // Geen selectie: link-tekst invoegen op cursorpositie
+        editor.chain().focus().insertContent(`<a href="${href}">${text}</a> `).run();
+      }
+    },
+  }), [editor]);
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -336,7 +357,7 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload, onVi
       </div>
     </div>
   );
-}
+});
 
 function ToolBtn({
   children,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -13,7 +13,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BlogEditor } from "@/components/blog/BlogEditor";
+import { BlogEditor, type BlogEditorHandle } from "@/components/blog/BlogEditor";
 import { SeoPanel } from "@/components/blog/SeoPanel";
 import { HeaderBuilder, type HeaderSettings } from "@/components/blog/HeaderBuilder";
 import { blogApi, type BlogPost, type BlogPostCreate } from "@/lib/api/blog";
@@ -66,6 +66,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
   const [publishedAt, setPublishedAt] = useState("");
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const editorRef = useRef<BlogEditorHandle>(null);
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
@@ -137,6 +138,10 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
 
   const handleVideoUpload = useCallback(async (file: File): Promise<string> => {
     return blogApi.uploadVideo(file);
+  }, []);
+
+  const handleInsertLink = useCallback((href: string, text: string) => {
+    editorRef.current?.insertLink(href, text);
   }, []);
 
   const buildPayload = (): BlogPostCreate => ({
@@ -312,6 +317,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
           />
 
           <BlogEditor
+            ref={editorRef}
             content={content}
             onChange={(html) => {
               setContent(html);
@@ -359,6 +365,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
             section={section}
             values={seo}
             onChange={handleSeoChange}
+            onInsertLink={handleInsertLink}
           />
         </div>
       </div>

@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { blogApi, type InternalLinkSuggestion, type ExternalLinkSuggestion, type SeoOptimizeResult } from "@/lib/api/blog";
@@ -30,9 +31,10 @@ interface SeoPanelProps {
     og_image: string;
   };
   onChange: (field: string, value: string) => void;
+  onInsertLink?: (href: string, text: string) => void;
 }
 
-export function SeoPanel({ title, content, section, values, onChange }: SeoPanelProps) {
+export function SeoPanel({ title, content, section, values, onChange, onInsertLink }: SeoPanelProps) {
   const [open, setOpen] = useState(true);
   const [linksOpen, setLinksOpen] = useState(false);
   const [extLinksOpen, setExtLinksOpen] = useState(false);
@@ -282,15 +284,20 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
             {lastResult?.internal_links?.length ? (
               <div className="pt-4 space-y-2">
                 <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">AI Suggesties</p>
-                {lastResult.internal_links.map((link) => (
-                  <LinkRow
-                    key={link.slug}
-                    link={link}
-                    section={section}
-                    copied={copied === link.slug}
-                    onCopy={() => copyLink(link.slug, link.title)}
-                  />
-                ))}
+                {lastResult.internal_links.map((link) => {
+                  const base = section === "knowledge" ? "kennisbank" : "blog";
+                  const href = `/${base}/${link.slug}`;
+                  return (
+                    <LinkRow
+                      key={link.slug}
+                      link={link}
+                      section={section}
+                      copied={copied === link.slug}
+                      onCopy={() => copyLink(link.slug, link.title)}
+                      onInsert={onInsertLink ? () => onInsertLink(href, link.title) : undefined}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <p className="pt-4 text-xs text-slate-400">
@@ -305,16 +312,21 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
                   Alle gepubliceerde artikelen
                 </p>
                 <div className="max-h-48 overflow-y-auto space-y-1">
-                  {existingPosts.map((post) => (
-                    <LinkRow
-                      key={post.slug}
-                      link={{ slug: post.slug, title: post.title, reason: "" }}
-                      section={section}
-                      copied={copied === post.slug}
-                      onCopy={() => copyLink(post.slug, post.title)}
-                      compact
-                    />
-                  ))}
+                  {existingPosts.map((post) => {
+                    const base = section === "knowledge" ? "kennisbank" : "blog";
+                    const href = `/${base}/${post.slug}`;
+                    return (
+                      <LinkRow
+                        key={post.slug}
+                        link={{ slug: post.slug, title: post.title, reason: "" }}
+                        section={section}
+                        copied={copied === post.slug}
+                        onCopy={() => copyLink(post.slug, post.title)}
+                        onInsert={onInsertLink ? () => onInsertLink(href, post.title) : undefined}
+                        compact
+                      />
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -359,18 +371,30 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
                         <p className="text-xs text-emerald-600 mt-0.5">{link.reason}</p>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => copyExternalLink(link.url, link.title)}
-                      title="Kopieer als Markdown link"
-                      className="flex-shrink-0 p-1.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
-                    >
-                      {copied === link.url ? (
-                        <Check className="h-3.5 w-3.5 text-green-600" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {onInsertLink && (
+                        <button
+                          type="button"
+                          onClick={() => onInsertLink(link.url, link.title)}
+                          title="Invoegen in editor"
+                          className="p-1.5 rounded text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
                       )}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => copyExternalLink(link.url, link.title)}
+                        title="Kopieer als Markdown link"
+                        className="p-1.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
+                      >
+                        {copied === link.url ? (
+                          <Check className="h-3.5 w-3.5 text-green-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -394,12 +418,14 @@ function LinkRow({
   section,
   copied,
   onCopy,
+  onInsert,
   compact = false,
 }: {
   link: InternalLinkSuggestion;
   section: string;
   copied: boolean;
   onCopy: () => void;
+  onInsert?: () => void;
   compact?: boolean;
 }) {
   const base = section === "knowledge" ? "kennisbank" : "blog";
@@ -412,18 +438,30 @@ function LinkRow({
           <p className="text-xs text-indigo-600 mt-0.5">{link.reason}</p>
         )}
       </div>
-      <button
-        type="button"
-        onClick={onCopy}
-        title="Kopieer als Markdown link"
-        className="flex-shrink-0 p-1.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
-      >
-        {copied ? (
-          <Check className="h-3.5 w-3.5 text-green-600" />
-        ) : (
-          <Copy className="h-3.5 w-3.5" />
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {onInsert && (
+          <button
+            type="button"
+            onClick={onInsert}
+            title="Invoegen in editor"
+            className="p-1.5 rounded text-slate-400 hover:text-indigo-600 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
         )}
-      </button>
+        <button
+          type="button"
+          onClick={onCopy}
+          title="Kopieer als Markdown link"
+          className="p-1.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-600" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
