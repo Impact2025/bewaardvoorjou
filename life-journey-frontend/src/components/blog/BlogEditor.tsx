@@ -69,7 +69,7 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload, onVi
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] }, link: false }),
       Image.configure({ inline: false, allowBase64: true }),
       Link.configure({ openOnClick: false, HTMLAttributes: { rel: "noopener noreferrer" } }),
       Placeholder.configure({ placeholder: placeholder ?? "Begin met schrijven…" }),

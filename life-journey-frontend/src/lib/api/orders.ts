@@ -2,10 +2,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem("auth_session") ?? sessionStorage.getItem("auth_session");
+  const raw = localStorage.getItem("life-journey.auth");
   if (!raw) return null;
   try {
-    return JSON.parse(raw).access_token ?? null;
+    return JSON.parse(raw).token ?? null;
   } catch {
     return null;
   }
