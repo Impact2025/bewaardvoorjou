@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { getJourneyStore } from "@/store/journey-store";
+import type { Journey, OfflineQueueItem } from "@/lib/types";
 
 describe("journeyStore", () => {
   it("starts with null journey and profile", () => {
@@ -11,13 +12,13 @@ describe("journeyStore", () => {
 
   it("sets journey via setJourney", () => {
     const store = getJourneyStore();
-    const mockJourney = {
+    const mockJourney: Journey = {
       id: "j-1",
       title: "Mijn verhaal",
       createdAt: "2025-01-01T00:00:00Z",
       updatedAt: "2025-01-01T00:00:00Z",
       activeChapterId: "intro-reflection",
-      progress: {},
+      progress: {} as Journey["progress"],
       activeChapters: [],
       media: [],
       transcripts: [],
@@ -35,7 +36,14 @@ describe("journeyStore", () => {
 
   it("enqueues and clears offline recording items", () => {
     const store = getJourneyStore();
-    const item = { id: "rec-1", chapterId: "intro-reflection", blob: new Blob(), status: "pending" as const, createdAt: "2025-01-01T00:00:00Z" };
+    const item: OfflineQueueItem = {
+      id: "rec-1",
+      chapterId: "intro-reflection",
+      fileName: "rec-1.webm",
+      sizeBytes: 1024,
+      recordedAt: "2025-01-01T00:00:00Z",
+      status: "pending",
+    };
     store.getState().enqueueRecording(item);
     expect(store.getState().offlineQueue).toHaveLength(1);
     store.getState().clearQueueItem("rec-1");
