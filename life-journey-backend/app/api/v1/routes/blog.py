@@ -48,18 +48,35 @@ router = APIRouter()
 
 
 def _repair_truncated_json(raw: str) -> str:
-    """Probeer afgekapte JSON te repareren door ontbrekende sluitingstekens toe te voegen."""
+    """Repareer veelvoorkomende JSON-fouten: HTML-quotes in waarden, afgekapte output."""
+    import re as _re
+
+    if not raw:
+        return raw
+
+    # Poging 1: direct parsen
     try:
         json.loads(raw)
-        return raw  # Al geldig
+        return raw
     except json.JSONDecodeError:
         pass
 
-    # Verwijder onvolledige laatste waarde (na de laatste komma of dubbele punt)
-    # door terug te zoeken naar het laatste complete veld
-    s = raw.rstrip()
+    # Poging 2: vervang HTML-attributen met dubbele quotes door single quotes
+    # bijv. href="https://..." → href='https://...'
+    # Dit is de meest voorkomende oorzaak van JSON-fouten in enhanced_content
+    fixed = _re.sub(
+        r'(?<=[a-z])="([^"<>]*)"',
+        lambda m: "='" + m.group(1) + "'",
+        raw,
+    )
+    try:
+        json.loads(fixed)
+        return fixed
+    except json.JSONDecodeError:
+        pass
 
-    # Sluit open strings: tel oneven aanhalingstekens
+    # Poging 3: sluit open strings en haakjes (afgekapte output)
+    s = fixed.rstrip().rstrip(",")
     in_string = False
     escape = False
     for ch in s:
@@ -73,20 +90,17 @@ def _repair_truncated_json(raw: str) -> str:
             in_string = not in_string
     if in_string:
         s += '"'
-
-    # Voeg ontbrekende sluitende haakjes toe
     opens = s.count("{") - s.count("}")
     closes = s.count("[") - s.count("]")
-    # Verwijder eventueel afgebroken laatste key-value paar (eindigt op komma)
-    s = s.rstrip().rstrip(",")
     s += "]" * max(closes, 0)
     s += "}" * max(opens, 0)
-
     try:
         json.loads(s)
         return s
     except json.JSONDecodeError:
-        return raw  # Geef origineel terug als reparatie niet lukt
+        pass
+
+    return raw
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 _MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -179,12 +193,13 @@ REGELS METADATA:
 
 REGELS ENHANCED_CONTENT (verplicht):
 - Geef ALLE inhoud terug, niets weglaten of inkorten
-- Gebruik uitsluitend deze HTML-tags: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href="...">
+- Gebruik uitsluitend deze HTML-tags: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href='...'>
+- KRITISCH: gebruik ALTIJD single quotes (') in HTML-attributen, NOOIT dubbele aanhalingstekens — anders is de JSON ongeldig
 - Voeg H2-kopjes toe voor elke logische sectie (elke 3-5 alinea's)
 - Voeg H3-kopjes toe voor subsecties waar relevant
 - Elke alinea is een aparte <p>-tag, nooit meerdere alinea's samenvoegen
-- Verwerk de internal_links organisch in de tekst als <a href="/kennisbank/{slug}">{ankertekst}</a>
-- Verwerk 1-2 external_links organisch in de tekst als <a href="{url}" target="_blank" rel="noopener noreferrer">{ankertekst}</a>
+- Verwerk de internal_links organisch in de tekst als <a href='/kennisbank/{slug}'>{ankertekst}</a>
+- Verwerk 1-2 external_links organisch in de tekst als <a href='{url}' target='_blank' rel='noopener noreferrer'>{ankertekst}</a>
 - Ankerteksten zijn beschrijvend, nooit "klik hier" of "lees meer"
 - Professionele, warme toon — gericht op senioren en familiehistorici
 
