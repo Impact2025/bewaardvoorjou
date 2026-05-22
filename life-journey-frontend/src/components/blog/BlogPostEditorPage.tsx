@@ -67,6 +67,8 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const editorRef = useRef<BlogEditorHandle>(null);
+  // Ref houdt altijd de meest recente content bij — ook vóór React re-render
+  const latestContentRef = useRef(content);
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
@@ -144,10 +146,18 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     editorRef.current?.insertLink(href, text);
   }, []);
 
-  const buildPayload = (): BlogPostCreate => ({
+  // Wordt aangeroepen door SeoPanel nadat beide AI-stappen klaar zijn.
+  // Slaat automatisch op met de verbeterde content (zonder timing-probleem).
+  const handleAfterOptimize = useCallback(async (enhancedHtml: string | null) => {
+    await handleSave(enhancedHtml ?? undefined);
+    showToast("success", "AI-verbeteringen opgeslagen en zichtbaar op de site");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post, title, seo, header, publishedAt, isNew]);
+
+  const buildPayload = (contentOverride?: string): BlogPostCreate => ({
     title: title.trim(),
     slug: seo.slug,
-    content,
+    content: contentOverride ?? latestContentRef.current,
     section,
     excerpt: seo.excerpt || undefined,
     header_type: header.header_type,
@@ -162,7 +172,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     published_at: publishedAt ? new Date(publishedAt).toISOString() : undefined,
   });
 
-  const handleSave = async (): Promise<BlogPost | null> => {
+  const handleSave = async (contentOverride?: string): Promise<BlogPost | null> => {
     if (!title.trim() || !seo.slug) {
       showToast("error", "Titel en slug zijn verplicht");
       return null;
@@ -170,7 +180,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     setSaving(true);
     try {
       if (isNew) {
-        const created = await blogApi.create(buildPayload());
+        const created = await blogApi.create(buildPayload(contentOverride));
         setPost(created);
         setIsDirty(false);
         showToast("success", "Concept opgeslagen");
@@ -178,7 +188,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
         router.replace(editPath);
         return created;
       } else {
-        const updated = await blogApi.update(post!.id, buildPayload());
+        const updated = await blogApi.update(post!.id, buildPayload(contentOverride));
         setPost(updated);
         setIsDirty(false);
         showToast("success", "Opgeslagen");
@@ -367,9 +377,11 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
             onChange={handleSeoChange}
             onInsertLink={handleInsertLink}
             onContentChange={(html) => {
+              latestContentRef.current = html;
               setContent(html);
               setIsDirty(true);
             }}
+            onAfterOptimize={handleAfterOptimize}
           />
         </div>
       </div>

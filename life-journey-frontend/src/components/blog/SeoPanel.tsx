@@ -32,9 +32,10 @@ interface SeoPanelProps {
   onChange: (field: string, value: string) => void;
   onInsertLink?: (href: string, text: string) => void;
   onContentChange?: (html: string) => void;
+  onAfterOptimize?: (enhancedHtml: string | null) => Promise<void>;
 }
 
-export function SeoPanel({ title, content, section, values, onChange, onInsertLink, onContentChange }: SeoPanelProps) {
+export function SeoPanel({ title, content, section, values, onChange, onInsertLink, onContentChange, onAfterOptimize }: SeoPanelProps) {
   const [open, setOpen] = useState(true);
   const [linksOpen, setLinksOpen] = useState(false);
   const [extLinksOpen, setExtLinksOpen] = useState(false);
@@ -93,8 +94,12 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
     }
 
     // Stap 2: Content verbetering (plain text/html — geen JSON, geen escaping)
-    if (!onContentChange || !content.trim()) return;
+    if (!content.trim()) {
+      await onAfterOptimize?.(null);
+      return;
+    }
     setLoadingContent(true);
+    let enhancedHtml: string | null = null;
     try {
       const enhanced = await blogApi.enhanceContent({
         title,
@@ -104,13 +109,21 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
         external_links: result.external_links.map((l) => ({ url: l.url, title: l.title })),
       });
       if (enhanced.trim()) {
-        onContentChange(enhanced);
+        enhancedHtml = enhanced;
+        onContentChange?.(enhanced);
         setContentEnhanced(true);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Content verbetering mislukt");
     } finally {
       setLoadingContent(false);
+    }
+
+    // Auto-save met de verbeterde content (direct, geen timing-conflict)
+    try {
+      await onAfterOptimize?.(enhancedHtml);
+    } catch {
+      // Save-fout toont al eigen toast in BlogPostEditorPage
     }
   };
 
@@ -168,7 +181,7 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
                 {loadingSeo ? "SEO analyseren…" : loadingContent ? "Inhoud verbeteren…" : "AI SEO Optimaliseren"}
               </Button>
               <p className="text-xs text-slate-400 mt-1.5 text-center">
-                Stap 1: SEO metadata · Stap 2: opmaak + links in artikel
+                Analyseert · verbetert opmaak · voegt links in · slaat op
               </p>
             </div>
 
