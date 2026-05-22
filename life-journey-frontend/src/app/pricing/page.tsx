@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import PricingContent from "./PricingContent";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
   title: "Pakketten & Prijzen — Bewaardvoorjou",
@@ -71,12 +73,14 @@ const pricingJsonLd = {
 
 export default function PricingPage() {
   return (
-    <>
+    <div className="min-h-screen bg-cream">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
       />
+      <PublicHeader />
       <PricingContent />
-    </>
+      <PublicFooter />
+    </div>
   );
 }

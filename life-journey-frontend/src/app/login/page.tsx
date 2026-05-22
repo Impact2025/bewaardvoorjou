@@ -30,7 +30,9 @@ export default function LoginPage() {
     try {
       const session = await loginUser({ email, password });
       setSession(session);
-      if (!session.primaryJourneyId) {
+      if (session.user.isAdmin) {
+        router.push("/admin");
+      } else if (!session.primaryJourneyId) {
         router.push("/onboarding");
       } else {
         router.push("/dashboard");

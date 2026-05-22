@@ -2,35 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 import {
   Heart,
   Video,
   Mic,
   FileText,
   Shield,
-  Users,
-  Star,
   ArrowRight,
   CheckCircle,
   Sparkles,
-  Clock,
   Lock,
-  Menu,
-  X,
   MessageCircle,
   Upload,
-  Share2
 } from "lucide-react";
 
 export default function Home() {
   const { session, isLoading } = useAuth();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -80,106 +75,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Navigation Header */}
-      <header className="border-b border-neutral-sand bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/Logo_Bewaardvoorjou.png"
-              alt="BewaardVoorJou.nl Logo"
-              width={40}
-              height={40}
-              className="w-10 h-10"
-              priority
-            />
-            <div className="flex flex-col">
-              <span className="text-xl font-serif font-semibold text-slate-900 leading-tight">
-                BewaardVoorJou.nl
-              </span>
-              <span className="text-xs text-slate-600 hidden sm:block">
-                Vertel het vandaag, bewaar het voor altijd
-              </span>
-            </div>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700">
-            <Link href="#features" className="hover:text-orange transition-colors font-medium">
-              Hoe werkt het
-            </Link>
-            <Link href="#trust" className="hover:text-orange transition-colors font-medium">
-              Veiligheid
-            </Link>
-            <Link href="/faq" className="hover:text-orange transition-colors font-medium">
-              Veelgestelde vragen
-            </Link>
-            <Link href="/about" className="hover:text-orange transition-colors font-medium">
-              Over ons
-            </Link>
-            <Link href="/login" className="hover:text-orange transition-colors font-medium">
-              Inloggen
-            </Link>
-            <Button asChild className="bg-orange hover:bg-orange/90 text-white shadow-md">
-              <Link href="/register">Start Gratis</Link>
-            </Button>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-slate-700 hover:text-orange transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menu"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-neutral-sand bg-white">
-            <nav className="px-4 py-4 space-y-3">
-              <Link
-                href="#features"
-                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Hoe werkt het
-              </Link>
-              <Link
-                href="#trust"
-                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Veiligheid
-              </Link>
-              <Link
-                href="/faq"
-                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Veelgestelde vragen
-              </Link>
-              <Link
-                href="/about"
-                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Over ons
-              </Link>
-              <Link
-                href="/login"
-                className="block px-4 py-2 text-slate-700 hover:bg-orange/5 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Inloggen
-              </Link>
-              <Button asChild className="w-full bg-orange hover:bg-orange/90 text-white">
-                <Link href="/register">Start Gratis</Link>
-              </Button>
-            </nav>
-          </div>
-        )}
-      </header>
+      <PublicHeader />
 
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
@@ -499,62 +395,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-sand bg-white py-12 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div className="sm:col-span-2 md:col-span-1">
-              <div className="flex items-center gap-3 mb-4">
-                <Image
-                  src="/Logo_Bewaardvoorjou.png"
-                  alt="BewaardVoorJou.nl"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
-                <div className="flex flex-col">
-                  <span className="font-serif font-semibold text-slate-900">BewaardVoorJou.nl</span>
-                  <span className="text-xs text-slate-600">Vertel het vandaag,<br/>bewaar het voor altijd</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-3">Product</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li><Link href="#features" className="hover:text-orange transition-colors">Hoe werkt het</Link></li>
-                <li><Link href="#trust" className="hover:text-orange transition-colors">Veiligheid</Link></li>
-                <li><Link href="/register" className="hover:text-orange transition-colors">Gratis starten</Link></li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-3">Support</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li><a href="mailto:info@bewaardvoorjou.nl" className="hover:text-orange transition-colors">Contact</a></li>
-                <li><Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen</Link></li>
-                <li><Link href="/about" className="hover:text-orange transition-colors">Over ons</Link></li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-3">Juridisch</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li><Link href="/privacy" className="hover:text-orange transition-colors">Privacybeleid</Link></li>
-                <li><Link href="/terms" className="hover:text-orange transition-colors">Algemene voorwaarden</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-neutral-sand text-center text-sm text-slate-600">
-            <p>&copy; {new Date().getFullYear()} BewaardVoorJou.nl. Met liefde gemaakt in Nederland.</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

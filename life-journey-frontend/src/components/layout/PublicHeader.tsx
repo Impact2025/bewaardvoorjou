@@ -3,16 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 export function PublicHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const onHome = pathname === "/";
 
   const navLinks = [
-    { href: "/#features", label: "Hoe werkt het" },
-    { href: "/#trust", label: "Veiligheid" },
+    { href: onHome ? "#features" : "/#features", label: "Hoe werkt het" },
+    { href: onHome ? "#trust" : "/#trust", label: "Veiligheid" },
     { href: "/kennisbank", label: "Kennisbank" },
+    { href: "/pricing", label: "Pakketten & Prijzen" },
     { href: "/faq", label: "Veelgestelde vragen" },
     { href: "/about", label: "Over ons" },
   ];

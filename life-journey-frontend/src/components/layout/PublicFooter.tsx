@@ -29,6 +29,7 @@ export function PublicFooter() {
             <ul className="space-y-2 text-sm text-slate-600">
               <li><Link href="/#features" className="hover:text-orange transition-colors">Hoe werkt het</Link></li>
               <li><Link href="/#trust" className="hover:text-orange transition-colors">Veiligheid</Link></li>
+              <li><Link href="/pricing" className="hover:text-orange transition-colors">Pakketten & Prijzen</Link></li>
               <li><Link href="/register" className="hover:text-orange transition-colors">Gratis starten</Link></li>
             </ul>
           </div>
