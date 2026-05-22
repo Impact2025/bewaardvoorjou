@@ -46,6 +46,48 @@ from app.services.indexing import ping_google_indexing_api, ping_index_now
 
 router = APIRouter()
 
+
+def _repair_truncated_json(raw: str) -> str:
+    """Probeer afgekapte JSON te repareren door ontbrekende sluitingstekens toe te voegen."""
+    try:
+        json.loads(raw)
+        return raw  # Al geldig
+    except json.JSONDecodeError:
+        pass
+
+    # Verwijder onvolledige laatste waarde (na de laatste komma of dubbele punt)
+    # door terug te zoeken naar het laatste complete veld
+    s = raw.rstrip()
+
+    # Sluit open strings: tel oneven aanhalingstekens
+    in_string = False
+    escape = False
+    for ch in s:
+        if escape:
+            escape = False
+            continue
+        if ch == "\\":
+            escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+    if in_string:
+        s += '"'
+
+    # Voeg ontbrekende sluitende haakjes toe
+    opens = s.count("{") - s.count("}")
+    closes = s.count("[") - s.count("]")
+    # Verwijder eventueel afgebroken laatste key-value paar (eindigt op komma)
+    s = s.rstrip().rstrip(",")
+    s += "]" * max(closes, 0)
+    s += "}" * max(opens, 0)
+
+    try:
+        json.loads(s)
+        return s
+    except json.JSONDecodeError:
+        return raw  # Geef origineel terug als reparatie niet lukt
+
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 _MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 
@@ -170,7 +212,7 @@ Geef terug als JSON:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=900,
+            max_tokens=1800,
             temperature=0.3,
             extra_headers={
                 "HTTP-Referer": settings.openrouter_app_url or settings.site_url,
@@ -184,6 +226,9 @@ Geef terug als JSON:
             if raw.startswith("json"):
                 raw = raw[4:]
             raw = raw.strip()
+
+        # Herstel afgekapte JSON door ontbrekende sluitingstekens aan te vullen
+        raw = _repair_truncated_json(raw)
 
         data = json.loads(raw)
 
