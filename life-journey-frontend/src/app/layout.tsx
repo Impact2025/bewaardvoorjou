@@ -145,18 +145,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-WXQQ6NTRYZ"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-WXQQ6NTRYZ');
-        `}
-      </Script>
       <body
         className={cn(
           "min-h-screen bg-background text-foreground antialiased",
@@ -182,6 +170,17 @@ export default function RootLayout({
         <Providers>
           <main id="main-content">{children}</main>
         </Providers>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-WXQQ6NTRYZ"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-WXQQ6NTRYZ');`,
+          }}
+        />
       </body>
     </html>
   );
