@@ -574,6 +574,7 @@ async def unpublish_blog_post(
 @router.get("/public/list", response_model=List[BlogPostListItem])
 async def list_public_posts(
     section: Optional[str] = Query(None),
+    tag: Optional[str] = Query(None),
     limit: int = Query(50, le=200),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
@@ -582,7 +583,43 @@ async def list_public_posts(
     q = db.query(BlogPost).filter(BlogPost.status == "published")
     if section:
         q = q.filter(BlogPost.section == section)
+    if tag:
+        # Tags zijn kommagescheiden opgeslagen, bijv. "vaderdag,cadeau,familie"
+        q = q.filter(BlogPost.tags.ilike(f"%{tag}%"))
     return q.order_by(BlogPost.published_at.desc()).offset(offset).limit(limit).all()
+
+
+@router.get("/public/most-read", response_model=List[BlogPostListItem])
+async def get_most_read_posts(
+    section: Optional[str] = Query(None),
+    limit: int = Query(5, le=20),
+    db: Session = Depends(get_db),
+):
+    """Meest gelezen gepubliceerde artikelen — gesorteerd op view_count, dan published_at."""
+    q = db.query(BlogPost).filter(BlogPost.status == "published")
+    if section:
+        q = q.filter(BlogPost.section == section)
+    return (
+        q.order_by(BlogPost.view_count.desc(), BlogPost.published_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+
+@router.post("/public/{slug}/view", status_code=204)
+async def increment_view_count(
+    slug: str,
+    db: Session = Depends(get_db),
+):
+    """Verhoog het aantal weergaven van een gepubliceerd artikel."""
+    post = (
+        db.query(BlogPost)
+        .filter(BlogPost.slug == slug, BlogPost.status == "published")
+        .first()
+    )
+    if post:
+        post.view_count = (post.view_count or 0) + 1
+        db.commit()
 
 
 @router.get("/public/slug/{slug}", response_model=BlogPostResponse)

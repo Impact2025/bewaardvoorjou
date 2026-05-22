@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Column, DateTime, String, Text
+from sqlalchemy import Column, DateTime, Integer, String, Text
 
 from app.models.base import Base
 
@@ -50,6 +50,9 @@ class BlogPost(Base):
     keywords = Column(String(500), nullable=True)
     tags = Column(String(500), nullable=True)
 
+    # Statistieken
+    view_count = Column(Integer, nullable=False, default=0, server_default="0")
+
     # Status
     status = Column(String(20), nullable=False, default="draft", index=True)
     published_at = Column(DateTime, nullable=True, index=True)
@@ -76,6 +79,7 @@ class BlogPost(Base):
             "og_image": self.og_image,
             "keywords": self.keywords,
             "tags": self.tags,
+            "view_count": self.view_count,
             "status": self.status,
             "published_at": self.published_at.isoformat() if self.published_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,

@@ -39,6 +39,7 @@ export function PublicFooter() {
             <h3 className="font-semibold text-slate-900 mb-3">Support</h3>
             <ul className="space-y-2 text-sm text-slate-600">
               <li><Link href="/contact" className="hover:text-orange transition-colors">Contact</Link></li>
+              <li><Link href="/blog" className="hover:text-orange transition-colors">Blog</Link></li>
               <li><Link href="/kennisbank" className="hover:text-orange transition-colors">Kennisbank</Link></li>
               <li><Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen</Link></li>
               <li><Link href="/about" className="hover:text-orange transition-colors">Over ons</Link></li>

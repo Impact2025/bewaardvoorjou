@@ -58,6 +58,7 @@ class BlogPostResponse(BaseModel):
     og_image: Optional[str] = None
     keywords: Optional[str] = None
     tags: Optional[str] = None
+    view_count: int = 0
     status: str
     published_at: Optional[datetime] = None
     created_at: datetime
@@ -72,6 +73,10 @@ class BlogPostListItem(BaseModel):
     title: str
     slug: str
     excerpt: Optional[str] = None
+    tags: Optional[str] = None
+    header_color: Optional[str] = None
+    header_text_color: Optional[str] = None
+    view_count: int = 0
     status: str
     published_at: Optional[datetime] = None
     created_at: datetime
