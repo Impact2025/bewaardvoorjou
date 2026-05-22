@@ -94,6 +94,12 @@ export interface InternalLinkSuggestion {
   reason: string;
 }
 
+export interface ExternalLinkSuggestion {
+  url: string;
+  title: string;
+  reason: string;
+}
+
 export interface SeoOptimizeResult {
   meta_title: string;
   meta_description: string;
@@ -102,6 +108,7 @@ export interface SeoOptimizeResult {
   excerpt: string;
   slug: string;
   internal_links: InternalLinkSuggestion[];
+  external_links: ExternalLinkSuggestion[];
 }
 
 export const blogApi = {
@@ -153,6 +160,23 @@ export const blogApi = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error(err.detail ?? "Upload mislukt");
+    }
+    const { url } = await res.json();
+    return url as string;
+  },
+
+  uploadVideo: async (file: File): Promise<string> => {
+    const token = getToken();
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_BASE}/blog/videos/upload`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail ?? "Video upload mislukt");
     }
     const { url } = await res.json();
     return url as string;

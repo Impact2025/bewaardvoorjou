@@ -93,6 +93,12 @@ class InternalLinkSuggestion(BaseModel):
     reason: str
 
 
+class ExternalLinkSuggestion(BaseModel):
+    url: str
+    title: str
+    reason: str
+
+
 class SeoOptimizeResponse(BaseModel):
     meta_title: str
     meta_description: str
@@ -101,6 +107,7 @@ class SeoOptimizeResponse(BaseModel):
     excerpt: str
     slug: str
     internal_links: List[InternalLinkSuggestion] = []
+    external_links: List[ExternalLinkSuggestion] = []
 
 
 class ImageUploadResponse(BaseModel):

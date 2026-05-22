@@ -9,11 +9,12 @@ import {
   AlertCircle,
   CheckCircle2,
   Link2,
+  ExternalLink,
   Copy,
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { blogApi, type InternalLinkSuggestion, type SeoOptimizeResult } from "@/lib/api/blog";
+import { blogApi, type InternalLinkSuggestion, type ExternalLinkSuggestion, type SeoOptimizeResult } from "@/lib/api/blog";
 
 interface SeoPanelProps {
   title: string;
@@ -34,6 +35,7 @@ interface SeoPanelProps {
 export function SeoPanel({ title, content, section, values, onChange }: SeoPanelProps) {
   const [open, setOpen] = useState(true);
   const [linksOpen, setLinksOpen] = useState(false);
+  const [extLinksOpen, setExtLinksOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<SeoOptimizeResult | null>(null);
@@ -71,6 +73,7 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
       onChange("excerpt", result.excerpt);
       if (!values.slug) onChange("slug", result.slug);
       if (result.internal_links?.length > 0) setLinksOpen(true);
+      if (result.external_links?.length > 0) setExtLinksOpen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "AI SEO fout");
     } finally {
@@ -83,6 +86,14 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
     const md = `[${linkTitle}](/${base}/${slug})`;
     navigator.clipboard.writeText(md).then(() => {
       setCopied(slug);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
+  const copyExternalLink = (url: string, linkTitle: string) => {
+    const md = `[${linkTitle}](${url})`;
+    navigator.clipboard.writeText(md).then(() => {
+      setCopied(url);
       setTimeout(() => setCopied(null), 2000);
     });
   };
@@ -124,7 +135,7 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
                 {loading ? "AI analyseert…" : "AI SEO Optimaliseren"}
               </Button>
               <p className="text-xs text-slate-400 mt-1.5 text-center">
-                Genereert meta tags, keywords, tags, excerpt én interne links
+                Genereert meta tags, keywords, excerpt, interne én externe links
               </p>
             </div>
 
@@ -310,6 +321,66 @@ export function SeoPanel({ title, content, section, values, onChange }: SeoPanel
 
             <p className="text-xs text-slate-400">
               Kopieer als Markdown-link en plak in de editor.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* External Links panel */}
+      <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setExtLinksOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <ExternalLink className="h-4 w-4 text-slate-500" />
+            <span className="font-semibold text-slate-800">Externe Links</span>
+            {lastResult?.external_links?.length ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                {lastResult.external_links.length} suggesties
+              </span>
+            ) : null}
+          </div>
+          {extLinksOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+        </button>
+
+        {extLinksOpen && (
+          <div className="px-5 pb-5 border-t border-slate-100 space-y-4">
+            {lastResult?.external_links?.length ? (
+              <div className="pt-4 space-y-2">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">AI Suggesties</p>
+                {lastResult.external_links.map((link) => (
+                  <div key={link.url} className="flex items-start gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{link.title}</p>
+                      <p className="text-xs text-slate-400 truncate">{link.url}</p>
+                      {link.reason && (
+                        <p className="text-xs text-emerald-600 mt-0.5">{link.reason}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyExternalLink(link.url, link.title)}
+                      title="Kopieer als Markdown link"
+                      className="flex-shrink-0 p-1.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
+                    >
+                      {copied === link.url ? (
+                        <Check className="h-3.5 w-3.5 text-green-600" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="pt-4 text-xs text-slate-400">
+                Klik op "AI SEO Optimaliseren" om automatisch externe link-suggesties te ontvangen.
+              </p>
+            )}
+            <p className="text-xs text-slate-400">
+              Kopieer als Markdown-link en plak in de editor. Externe links naar gezaghebbende bronnen versterken je SEO.
             </p>
           </div>
         )}

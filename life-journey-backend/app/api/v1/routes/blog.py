@@ -36,6 +36,7 @@ from app.schemas.blog_post import (
     BlogPostListItem,
     BlogPostResponse,
     BlogPostUpdate,
+    ExternalLinkSuggestion,
     ImageUploadResponse,
     InternalLinkSuggestion,
     SeoOptimizeRequest,
@@ -47,6 +48,9 @@ router = APIRouter()
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 _MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+_ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
+_MAX_VIDEO_BYTES = 200 * 1024 * 1024  # 200 MB
 
 
 def _get_post_or_404(db: Session, post_id: str) -> BlogPost:
@@ -123,7 +127,8 @@ REGELS:
 - tags: 3-5 categorietags, enkelvoud, kleine letters
 - excerpt: 2-3 zinnen, boeiend, geen spoilers
 - slug: lowercase, koppeltekens, alleen a-z 0-9, max 60 tekens
-- internal_links: 2-3 meest relevante artikelen om intern naar te linken
+- internal_links: 2-3 meest relevante artikelen om intern naar te linken (uit de opgegeven lijst)
+- external_links: 2-3 gezaghebbende externe bronnen die het artikel versterken (bijv. wetenschappelijke studies, overheidsinstanties, gerenommeerde media). Gebruik echte, bestaande URLs.
 
 Geef ALLEEN geldige JSON terug, geen uitleg."""
 
@@ -152,6 +157,9 @@ Geef terug als JSON:
   "slug": "...",
   "internal_links": [
     {{"slug": "artikel-slug", "title": "Artikel Titel", "reason": "Waarom relevant"}}
+  ],
+  "external_links": [
+    {{"url": "https://...", "title": "Brontitel", "reason": "Waarom gezaghebbend"}}
   ]
 }}"""
 
@@ -190,6 +198,17 @@ Geef terug als JSON:
                     )
                 )
 
+        ext_links: List[ExternalLinkSuggestion] = []
+        for link in data.get("external_links", []):
+            if isinstance(link, dict) and link.get("url") and link.get("title"):
+                ext_links.append(
+                    ExternalLinkSuggestion(
+                        url=link["url"],
+                        title=link["title"],
+                        reason=link.get("reason", ""),
+                    )
+                )
+
         return SeoOptimizeResponse(
             meta_title=data.get("meta_title", "")[:70],
             meta_description=data.get("meta_description", "")[:160],
@@ -198,6 +217,7 @@ Geef terug als JSON:
             excerpt=data.get("excerpt", ""),
             slug=data.get("slug", ""),
             internal_links=links,
+            external_links=ext_links,
         )
 
     except Exception as exc:
@@ -267,6 +287,69 @@ async def serve_blog_image(filename: str):
     file_path = Path("media_storage/blog") / filename
     if not file_path.exists():
         raise HTTPException(404, detail="Afbeelding niet gevonden")
+    return FileResponse(str(file_path))
+
+
+# ---------------------------------------------------------------------------
+# Video Upload
+# ---------------------------------------------------------------------------
+
+@router.post("/videos/upload", response_model=ImageUploadResponse)
+async def upload_blog_video(
+    file: UploadFile = File(...),
+    admin: User = Depends(get_current_admin_user),
+):
+    """Upload een video voor blog of kennisbank. Max 200 MB, MP4/WebM/MOV."""
+    if file.content_type not in _ALLOWED_VIDEO_TYPES:
+        raise HTTPException(400, detail="Alleen MP4, WebM en MOV zijn toegestaan")
+
+    content = await file.read()
+    if len(content) > _MAX_VIDEO_BYTES:
+        raise HTTPException(400, detail="Video mag maximaal 200 MB zijn")
+
+    ext = Path(file.filename or "video.mp4").suffix.lower() or ".mp4"
+    filename = f"{uuid4()}{ext}"
+
+    if settings.s3_bucket and settings.aws_access_key_id:
+        try:
+            s3 = boto3.client(
+                "s3",
+                region_name=settings.s3_region,
+                aws_access_key_id=settings.aws_access_key_id,
+                aws_secret_access_key=settings.aws_secret_access_key,
+                **({"endpoint_url": settings.s3_endpoint_url} if settings.s3_endpoint_url else {}),
+            )
+            object_key = f"blog/videos/{filename}"
+            s3.put_object(
+                Bucket=settings.s3_bucket,
+                Key=object_key,
+                Body=content,
+                ContentType=file.content_type or "video/mp4",
+            )
+            if settings.s3_endpoint_url:
+                url = f"{settings.s3_endpoint_url.rstrip('/')}/{settings.s3_bucket}/{object_key}"
+            else:
+                url = f"https://{settings.s3_bucket}.s3.{settings.s3_region}.amazonaws.com/{object_key}"
+            return ImageUploadResponse(url=url)
+        except Exception as exc:
+            logger.warning(f"S3 video upload mislukt, lokale opslag: {exc}")
+
+    video_dir = Path("media_storage/blog/videos")
+    video_dir.mkdir(parents=True, exist_ok=True)
+    (video_dir / filename).write_bytes(content)
+
+    url = f"{settings.api_base_url.rstrip('/')}{settings.api_v1_prefix}/blog/videos/{filename}"
+    return ImageUploadResponse(url=url)
+
+
+@router.get("/videos/{filename}")
+async def serve_blog_video(filename: str):
+    """Serveert lokaal opgeslagen blog-video's (development)."""
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(400, detail="Ongeldig bestandspad")
+    file_path = Path("media_storage/blog/videos") / filename
+    if not file_path.exists():
+        raise HTTPException(404, detail="Video niet gevonden")
     return FileResponse(str(file_path))
 
 

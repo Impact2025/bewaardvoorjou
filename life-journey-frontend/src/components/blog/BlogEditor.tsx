@@ -7,6 +7,11 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
 import Typography from "@tiptap/extension-typography";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { Node, mergeAttributes } from "@tiptap/core";
 import { useEffect, useCallback, useRef, useState } from "react";
 import {
   Bold,
@@ -25,19 +30,42 @@ import {
   Link as LinkIcon,
   Image as ImageIcon,
   Loader2,
+  Table as TableIcon,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const VideoNode = Node.create({
+  name: "video",
+  group: "block",
+  atom: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      controls: { default: true },
+    };
+  },
+  parseHTML() {
+    return [{ tag: "video[src]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["video", mergeAttributes({ controls: true, style: "max-width:100%;border-radius:8px;" }, HTMLAttributes)];
+  },
+});
 
 interface BlogEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
   onImageUpload?: (file: File) => Promise<string>;
+  onVideoUpload?: (file: File) => Promise<string>;
 }
 
-export function BlogEditor({ content, onChange, placeholder, onImageUpload }: BlogEditorProps) {
+export function BlogEditor({ content, onChange, placeholder, onImageUpload, onVideoUpload }: BlogEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -47,6 +75,11 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
       Placeholder.configure({ placeholder: placeholder ?? "Begin met schrijven…" }),
       CharacterCount,
       Typography,
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      VideoNode,
     ],
     content,
     onUpdate({ editor }) {
@@ -55,7 +88,7 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
     editorProps: {
       attributes: {
         class:
-          "min-h-[500px] p-6 focus:outline-none prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-orange-400 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-slate-100 prose-code:rounded prose-code:px-1 prose-img:rounded-lg",
+          "min-h-[500px] p-6 focus:outline-none prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-orange-400 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-slate-100 prose-code:rounded prose-code:px-1 prose-img:rounded-lg [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm [&_th]:border [&_th]:border-slate-300 [&_th]:px-3 [&_th]:py-2 [&_th]:text-sm [&_th]:font-semibold [&_th]:bg-slate-50 [&_th]:text-left",
       },
     },
   });
@@ -94,6 +127,22 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
     [editor, onImageUpload]
   );
 
+  const handleVideoFile = useCallback(
+    async (file: File) => {
+      if (!editor || !onVideoUpload) return;
+      setVideoUploading(true);
+      try {
+        const url = await onVideoUpload(file);
+        editor.chain().focus().insertContent({ type: "video", attrs: { src: url } }).run();
+      } catch {
+        // Silently ignore
+      } finally {
+        setVideoUploading(false);
+      }
+    },
+    [editor, onVideoUpload]
+  );
+
   const addImage = useCallback(() => {
     if (!editor) return;
     if (onImageUpload) {
@@ -104,6 +153,21 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
     }
   }, [editor, onImageUpload]);
 
+  const addVideo = useCallback(() => {
+    if (!editor) return;
+    if (onVideoUpload) {
+      videoInputRef.current?.click();
+    } else {
+      const url = window.prompt("Video URL:");
+      if (url) editor.chain().focus().insertContent({ type: "video", attrs: { src: url } }).run();
+    }
+  }, [editor, onVideoUpload]);
+
+  const insertTable = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  }, [editor]);
+
   if (!editor) return null;
 
   const charCount = editor.storage.characterCount?.characters?.() ?? 0;
@@ -111,7 +175,7 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
 
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-      {/* Hidden file input for image upload */}
+      {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
         type="file"
@@ -120,6 +184,17 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleImageFile(file);
+          e.target.value = "";
+        }}
+      />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleVideoFile(file);
           e.target.value = "";
         }}
       />
@@ -221,6 +296,16 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
             <ImageIcon className="h-4 w-4" />
           )}
         </ToolBtn>
+        <ToolBtn onClick={addVideo} disabled={videoUploading} title="Video uploaden">
+          {videoUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Video className="h-4 w-4" />
+          )}
+        </ToolBtn>
+        <ToolBtn onClick={insertTable} title="Tabel invoegen">
+          <TableIcon className="h-4 w-4" />
+        </ToolBtn>
 
         <Divider />
 
@@ -243,7 +328,7 @@ export function BlogEditor({ content, onChange, placeholder, onImageUpload }: Bl
       <EditorContent editor={editor} />
 
       <div className="flex items-center justify-between gap-4 px-6 py-2 border-t border-slate-100 bg-slate-50 text-xs text-slate-400">
-        <span>{imageUploading ? "Afbeelding uploaden…" : ""}</span>
+        <span>{imageUploading ? "Afbeelding uploaden…" : videoUploading ? "Video uploaden…" : ""}</span>
         <div className="flex gap-4">
           <span>{wordCount} woorden</span>
           <span>{charCount} tekens</span>

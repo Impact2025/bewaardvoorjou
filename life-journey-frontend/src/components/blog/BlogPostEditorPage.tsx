@@ -135,6 +135,10 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     return blogApi.uploadImage(file);
   }, []);
 
+  const handleVideoUpload = useCallback(async (file: File): Promise<string> => {
+    return blogApi.uploadVideo(file);
+  }, []);
+
   const buildPayload = (): BlogPostCreate => ({
     title: title.trim(),
     slug: seo.slug,
@@ -314,6 +318,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
               setIsDirty(true);
             }}
             onImageUpload={handleImageUpload}
+            onVideoUpload={handleVideoUpload}
           />
         </div>
 
