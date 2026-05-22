@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
+import Script from "next/script";
 import "./globals.css";
 
 // Existing Geist fonts
@@ -144,6 +145,18 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-WXQQ6NTRYZ"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-WXQQ6NTRYZ');
+        `}
+      </Script>
       <body
         className={cn(
           "min-h-screen bg-background text-foreground antialiased",
