@@ -38,11 +38,15 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
   const [open, setOpen] = useState(true);
   const [linksOpen, setLinksOpen] = useState(false);
   const [extLinksOpen, setExtLinksOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingSeo, setLoadingSeo] = useState(false);
+  const [loadingContent, setLoadingContent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<SeoOptimizeResult | null>(null);
+  const [contentEnhanced, setContentEnhanced] = useState(false);
   const [existingPosts, setExistingPosts] = useState<{ slug: string; title: string }[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const loading = loadingSeo || loadingContent;
 
   // Laad gepubliceerde posts voor interne links
   useEffect(() => {
@@ -57,10 +61,14 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
       setError("Vul eerst een titel in voordat je SEO optimaliseert.");
       return;
     }
-    setLoading(true);
     setError(null);
+    setContentEnhanced(false);
+
+    // Stap 1: SEO metadata (snel, klein JSON — nooit problemen met escaping)
+    setLoadingSeo(true);
+    let result: SeoOptimizeResult;
     try {
-      const result = await blogApi.seoOptimize({
+      result = await blogApi.seoOptimize({
         title,
         content,
         excerpt: values.excerpt || undefined,
@@ -74,15 +82,35 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
       onChange("tags", result.tags);
       onChange("excerpt", result.excerpt);
       if (!values.slug) onChange("slug", result.slug);
-      if (result.enhanced_content && onContentChange) {
-        onContentChange(result.enhanced_content);
-      }
       if (result.internal_links?.length > 0) setLinksOpen(true);
       if (result.external_links?.length > 0) setExtLinksOpen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "AI SEO fout");
+      setLoadingSeo(false);
+      return;
     } finally {
-      setLoading(false);
+      setLoadingSeo(false);
+    }
+
+    // Stap 2: Content verbetering (plain text/html — geen JSON, geen escaping)
+    if (!onContentChange || !content.trim()) return;
+    setLoadingContent(true);
+    try {
+      const enhanced = await blogApi.enhanceContent({
+        title,
+        content,
+        section,
+        internal_links: result.internal_links.map((l) => ({ slug: l.slug, title: l.title })),
+        external_links: result.external_links.map((l) => ({ url: l.url, title: l.title })),
+      });
+      if (enhanced.trim()) {
+        onContentChange(enhanced);
+        setContentEnhanced(true);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Content verbetering mislukt");
+    } finally {
+      setLoadingContent(false);
     }
   };
 
@@ -137,10 +165,10 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
                 ) : (
                   <Sparkles className="h-4 w-4 mr-2" />
                 )}
-                {loading ? "AI analyseert…" : "AI SEO Optimaliseren"}
+                {loadingSeo ? "SEO analyseren…" : loadingContent ? "Inhoud verbeteren…" : "AI SEO Optimaliseren"}
               </Button>
               <p className="text-xs text-slate-400 mt-1.5 text-center">
-                Genereert meta tags, keywords, excerpt, interne én externe links
+                Stap 1: SEO metadata · Stap 2: opmaak + links in artikel
               </p>
             </div>
 
@@ -154,8 +182,10 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
             {lastResult && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 text-sm">
                 <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-                {lastResult.enhanced_content
-                  ? "Inhoud, opmaak en links verbeterd door AI"
+                {contentEnhanced
+                  ? "SEO-velden + inhoud verbeterd door AI"
+                  : loadingContent
+                  ? "SEO-velden klaar, inhoud wordt verbeterd…"
                   : "SEO-velden bijgewerkt door AI"}
               </div>
             )}

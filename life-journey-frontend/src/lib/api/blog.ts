@@ -109,7 +109,6 @@ export interface SeoOptimizeResult {
   slug: string;
   internal_links: InternalLinkSuggestion[];
   external_links: ExternalLinkSuggestion[];
-  enhanced_content?: string;
 }
 
 export const blogApi = {
@@ -164,6 +163,29 @@ export const blogApi = {
     }
     const { url } = await res.json();
     return url as string;
+  },
+
+  enhanceContent: async (payload: {
+    title: string;
+    content: string;
+    section: string;
+    internal_links: { slug: string; title: string }[];
+    external_links: { url: string; title: string }[];
+  }): Promise<string> => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/blog/enhance-content`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail ?? "Content verbetering mislukt");
+    }
+    return res.text();
   },
 
   uploadVideo: async (file: File): Promise<string> => {

@@ -22,7 +22,7 @@ from uuid import uuid4
 
 import boto3
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from loguru import logger
 from openai import AsyncOpenAI
 from sqlalchemy.orm import Session
@@ -36,6 +36,7 @@ from app.schemas.blog_post import (
     BlogPostListItem,
     BlogPostResponse,
     BlogPostUpdate,
+    EnhanceContentRequest,
     ExternalLinkSuggestion,
     ImageUploadResponse,
     InternalLinkSuggestion,
@@ -161,12 +162,12 @@ async def seo_optimize(
     payload: SeoOptimizeRequest,
     admin: User = Depends(get_current_admin_user),
 ):
+    """Genereert SEO-metadata + link-suggesties. Geen HTML in response (voorkomt JSON-escaping problemen)."""
     if not settings.openai_api_key:
         raise HTTPException(503, detail="OpenRouter API key niet geconfigureerd")
 
     client = AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.openai_api_base)
-    # Stuur volledige inhoud mee zodat AI de tekst kan herstructureren
-    content_full = payload.content[:8000] if payload.content else ""
+    content_preview = payload.content[:3000] if payload.content else ""
 
     post_list_str = ""
     if payload.existing_posts:
@@ -175,52 +176,34 @@ async def seo_optimize(
             f"- {p.get('title', '')} (slug: {p.get('slug', '')})" for p in items
         )
 
-    system_prompt = """Je bent een senior SEO-specialist, content-editor en copywriter voor de Nederlandse markt.
+    system_prompt = """Je bent een senior SEO-specialist en copywriter voor de Nederlandse markt.
 
-Je doet twee dingen tegelijk:
-1. Je genereert alle SEO-metadata
-2. Je herschrijft en verbetert de HTML-inhoud tot wereldklasse kwaliteit
-
-REGELS METADATA:
+REGELS:
 - meta_title: max 60 tekens, bevat het primaire zoekwoord
 - meta_description: 140-155 tekens, actief en uitnodigend
 - keywords: 5-8 Nederlandse zoekwoorden, kommagescheiden
 - tags: 3-5 categorietags, enkelvoud, kleine letters
 - excerpt: 2-3 zinnen, boeiend, geen spoilers
 - slug: lowercase, koppeltekens, alleen a-z 0-9, max 60 tekens
-- internal_links: 2-3 meest relevante artikelen (uit de opgegeven lijst) met slug+title+reason
-- external_links: 2-3 gezaghebbende externe bronnen (echte bestaande URLs) met url+title+reason
+- internal_links: 2-3 meest relevante artikelen uit de opgegeven lijst
+- external_links: 2-3 gezaghebbende externe bronnen (echte bestaande URLs)
 
-REGELS ENHANCED_CONTENT (verplicht):
-- Geef ALLE inhoud terug, niets weglaten of inkorten
-- Gebruik uitsluitend deze HTML-tags: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href='...'>
-- KRITISCH: gebruik ALTIJD single quotes (') in HTML-attributen, NOOIT dubbele aanhalingstekens — anders is de JSON ongeldig
-- Voeg H2-kopjes toe voor elke logische sectie (elke 3-5 alinea's)
-- Voeg H3-kopjes toe voor subsecties waar relevant
-- Elke alinea is een aparte <p>-tag, nooit meerdere alinea's samenvoegen
-- Verwerk de internal_links organisch in de tekst als <a href='/kennisbank/{slug}'>{ankertekst}</a>
-- Verwerk 1-2 external_links organisch in de tekst als <a href='{url}' target='_blank' rel='noopener noreferrer'>{ankertekst}</a>
-- Ankerteksten zijn beschrijvend, nooit "klik hier" of "lees meer"
-- Professionele, warme toon — gericht op senioren en familiehistorici
-
-Geef ALLEEN geldige JSON terug, geen uitleg buiten de JSON."""
+Geef ALLEEN geldige JSON terug, geen uitleg."""
 
     posts_section = (
-        f"\n\nBeschikbare interne artikelen (gebruik slugs exact zoals opgegeven):\n{post_list_str}"
-        if post_list_str
-        else ""
+        f"\n\nBeschikbare interne artikelen:\n{post_list_str}" if post_list_str else ""
     )
 
-    user_prompt = f"""Analyseer en verbeter deze blog post volledig:
+    user_prompt = f"""Analyseer deze blog post:
 
 Titel: {payload.title}
-Bestaande keywords: {payload.existing_keywords or 'geen'}
-Huidig excerpt: {payload.excerpt or 'niet opgegeven'}
+Keywords: {payload.existing_keywords or 'geen'}
+Excerpt: {payload.excerpt or 'niet opgegeven'}
 
-Huidige HTML-inhoud:
-{content_full}{posts_section}
+Inhoud (preview):
+{content_preview}{posts_section}
 
-Geef terug als JSON (enhanced_content mag lang zijn):
+Geef terug als JSON:
 {{
   "meta_title": "...",
   "meta_description": "...",
@@ -228,14 +211,116 @@ Geef terug als JSON (enhanced_content mag lang zijn):
   "tags": "...",
   "excerpt": "...",
   "slug": "...",
-  "internal_links": [
-    {{"slug": "artikel-slug", "title": "Artikel Titel", "reason": "Waarom relevant"}}
-  ],
-  "external_links": [
-    {{"url": "https://...", "title": "Brontitel", "reason": "Waarom gezaghebbend"}}
-  ],
-  "enhanced_content": "<h2>Eerste sectie</h2><p>Eerste alinea...</p><p>Tweede alinea...</p>"
+  "internal_links": [{{"slug": "...", "title": "...", "reason": "..."}}],
+  "external_links": [{{"url": "https://...", "title": "...", "reason": "..."}}]
 }}"""
+
+    try:
+        response = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            max_tokens=1200,
+            temperature=0.3,
+            extra_headers={
+                "HTTP-Referer": settings.openrouter_app_url or settings.site_url,
+                "X-Title": settings.openrouter_app_name,
+            },
+        )
+
+        raw = response.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        raw = _repair_truncated_json(raw)
+        data = json.loads(raw)
+
+        links: List[InternalLinkSuggestion] = []
+        for link in data.get("internal_links", []):
+            if isinstance(link, dict) and link.get("slug") and link.get("title"):
+                links.append(InternalLinkSuggestion(
+                    slug=link["slug"], title=link["title"], reason=link.get("reason", ""),
+                ))
+
+        ext_links: List[ExternalLinkSuggestion] = []
+        for link in data.get("external_links", []):
+            if isinstance(link, dict) and link.get("url") and link.get("title"):
+                ext_links.append(ExternalLinkSuggestion(
+                    url=link["url"], title=link["title"], reason=link.get("reason", ""),
+                ))
+
+        return SeoOptimizeResponse(
+            meta_title=data.get("meta_title", "")[:70],
+            meta_description=data.get("meta_description", "")[:160],
+            keywords=data.get("keywords", ""),
+            tags=data.get("tags", ""),
+            excerpt=data.get("excerpt", ""),
+            slug=data.get("slug", ""),
+            internal_links=links,
+            external_links=ext_links,
+        )
+
+    except Exception as exc:
+        logger.error(f"SEO optimalisatie fout: {exc}")
+        raise HTTPException(500, detail=f"AI SEO fout: {str(exc)[:100]}")
+
+
+@router.post("/enhance-content", response_class=PlainTextResponse)
+async def enhance_content(
+    payload: EnhanceContentRequest,
+    admin: User = Depends(get_current_admin_user),
+):
+    """Herschrijft artikel-inhoud met H2/H3-structuur en ingevoegde links.
+    Retourneert puur HTML als text/html — geen JSON, geen escaping-problemen."""
+    if not settings.openai_api_key:
+        raise HTTPException(503, detail="OpenRouter API key niet geconfigureerd")
+
+    client = AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.openai_api_base)
+
+    base_path = "/kennisbank" if payload.section == "knowledge" else "/blog"
+
+    int_links_str = "\n".join(
+        f'- <a href="{base_path}/{l.get("slug")}">{l.get("title")}</a>'
+        for l in payload.internal_links if l.get("slug")
+    )
+    ext_links_str = "\n".join(
+        f'- <a href="{l.get("url")}" target="_blank" rel="noopener noreferrer">{l.get("title")}</a>'
+        for l in payload.external_links if l.get("url")
+    )
+
+    system_prompt = """Je bent een professionele content-editor voor de Nederlandse markt.
+Je taak: verbeter de HTML-structuur van het aangeleverde artikel.
+
+VERPLICHTE REGELS:
+- Geef UITSLUITEND geldige HTML terug, geen JSON, geen markdown, geen uitleg
+- Behoud ALLE inhoud — niets weglaten of inkorten
+- Gebruik: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href="...">
+- Voeg een <h2> toe aan het begin van elke logische sectie (elke 3-5 alinea's)
+- Elke alinea = een aparte <p>-tag
+- Verwerk de opgegeven interne links organisch in de tekst (niet als losse lijst)
+- Verwerk 1-2 externe links organisch in de tekst als bronvermelding
+- Professionele, warme toon voor senioren en familiehistorici
+- Begin direct met de HTML-inhoud, geen <html>/<body>/<head> tags"""
+
+    user_prompt = f"""Verbeter de structuur van dit artikel:
+
+Titel: {payload.title}
+
+Huidige HTML:
+{payload.content[:10000]}
+
+Interne links om te verwerken:
+{int_links_str or '(geen)'}
+
+Externe links om te verwerken:
+{ext_links_str or '(geen)'}
+
+Geef ALLEEN de verbeterde HTML-inhoud terug, direct beginnen met de eerste tag."""
 
     try:
         response = await client.chat.completions.create(
@@ -252,55 +337,20 @@ Geef terug als JSON (enhanced_content mag lang zijn):
             },
         )
 
-        raw = response.choices[0].message.content.strip()
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-            raw = raw.strip()
+        html = response.choices[0].message.content.strip()
+        # Verwijder eventuele markdown code-fences
+        if html.startswith("```"):
+            parts = html.split("```")
+            html = parts[1] if len(parts) > 1 else html
+            if html.startswith("html"):
+                html = html[4:]
+            html = html.strip()
 
-        # Herstel afgekapte JSON door ontbrekende sluitingstekens aan te vullen
-        raw = _repair_truncated_json(raw)
-
-        data = json.loads(raw)
-
-        links: List[InternalLinkSuggestion] = []
-        for link in data.get("internal_links", []):
-            if isinstance(link, dict) and link.get("slug") and link.get("title"):
-                links.append(
-                    InternalLinkSuggestion(
-                        slug=link["slug"],
-                        title=link["title"],
-                        reason=link.get("reason", ""),
-                    )
-                )
-
-        ext_links: List[ExternalLinkSuggestion] = []
-        for link in data.get("external_links", []):
-            if isinstance(link, dict) and link.get("url") and link.get("title"):
-                ext_links.append(
-                    ExternalLinkSuggestion(
-                        url=link["url"],
-                        title=link["title"],
-                        reason=link.get("reason", ""),
-                    )
-                )
-
-        return SeoOptimizeResponse(
-            meta_title=data.get("meta_title", "")[:70],
-            meta_description=data.get("meta_description", "")[:160],
-            keywords=data.get("keywords", ""),
-            tags=data.get("tags", ""),
-            excerpt=data.get("excerpt", ""),
-            slug=data.get("slug", ""),
-            internal_links=links,
-            external_links=ext_links,
-            enhanced_content=data.get("enhanced_content") or None,
-        )
+        return PlainTextResponse(content=html, media_type="text/html; charset=utf-8")
 
     except Exception as exc:
-        logger.error(f"SEO optimalisatie fout: {exc}")
-        raise HTTPException(500, detail=f"AI SEO fout: {str(exc)[:100]}")
+        logger.error(f"Content enhancement fout: {exc}")
+        raise HTTPException(500, detail=f"AI content fout: {str(exc)[:100]}")
 
 
 # ---------------------------------------------------------------------------
