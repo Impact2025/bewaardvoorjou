@@ -108,6 +108,7 @@ class SeoOptimizeResponse(BaseModel):
     slug: str
     internal_links: List[InternalLinkSuggestion] = []
     external_links: List[ExternalLinkSuggestion] = []
+    enhanced_content: Optional[str] = None
 
 
 class ImageUploadResponse(BaseModel):

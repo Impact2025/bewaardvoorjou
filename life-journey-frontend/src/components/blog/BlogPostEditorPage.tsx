@@ -366,6 +366,10 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
             values={seo}
             onChange={handleSeoChange}
             onInsertLink={handleInsertLink}
+            onContentChange={(html) => {
+              setContent(html);
+              setIsDirty(true);
+            }}
           />
         </div>
       </div>

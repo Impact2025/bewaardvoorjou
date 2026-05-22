@@ -109,6 +109,7 @@ export interface SeoOptimizeResult {
   slug: string;
   internal_links: InternalLinkSuggestion[];
   external_links: ExternalLinkSuggestion[];
+  enhanced_content?: string;
 }
 
 export const blogApi = {

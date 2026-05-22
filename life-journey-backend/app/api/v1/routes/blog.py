@@ -151,45 +151,61 @@ async def seo_optimize(
         raise HTTPException(503, detail="OpenRouter API key niet geconfigureerd")
 
     client = AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.openai_api_base)
-    content_preview = payload.content[:3000] if payload.content else ""
+    # Stuur volledige inhoud mee zodat AI de tekst kan herstructureren
+    content_full = payload.content[:8000] if payload.content else ""
 
     post_list_str = ""
     if payload.existing_posts:
         items = payload.existing_posts[:30]
         post_list_str = "\n".join(
-            f"- {p.get('title', '')} (/{p.get('slug', '')})" for p in items
+            f"- {p.get('title', '')} (slug: {p.get('slug', '')})" for p in items
         )
 
-    system_prompt = """Je bent een senior SEO-specialist en copywriter voor de Nederlandse markt.
+    system_prompt = """Je bent een senior SEO-specialist, content-editor en copywriter voor de Nederlandse markt.
 
-REGELS:
+Je doet twee dingen tegelijk:
+1. Je genereert alle SEO-metadata
+2. Je herschrijft en verbetert de HTML-inhoud tot wereldklasse kwaliteit
+
+REGELS METADATA:
 - meta_title: max 60 tekens, bevat het primaire zoekwoord
 - meta_description: 140-155 tekens, actief en uitnodigend
 - keywords: 5-8 Nederlandse zoekwoorden, kommagescheiden
 - tags: 3-5 categorietags, enkelvoud, kleine letters
 - excerpt: 2-3 zinnen, boeiend, geen spoilers
 - slug: lowercase, koppeltekens, alleen a-z 0-9, max 60 tekens
-- internal_links: 2-3 meest relevante artikelen om intern naar te linken (uit de opgegeven lijst)
-- external_links: 2-3 gezaghebbende externe bronnen die het artikel versterken (bijv. wetenschappelijke studies, overheidsinstanties, gerenommeerde media). Gebruik echte, bestaande URLs.
+- internal_links: 2-3 meest relevante artikelen (uit de opgegeven lijst) met slug+title+reason
+- external_links: 2-3 gezaghebbende externe bronnen (echte bestaande URLs) met url+title+reason
 
-Geef ALLEEN geldige JSON terug, geen uitleg."""
+REGELS ENHANCED_CONTENT (verplicht):
+- Geef ALLE inhoud terug, niets weglaten of inkorten
+- Gebruik uitsluitend deze HTML-tags: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href="...">
+- Voeg H2-kopjes toe voor elke logische sectie (elke 3-5 alinea's)
+- Voeg H3-kopjes toe voor subsecties waar relevant
+- Elke alinea is een aparte <p>-tag, nooit meerdere alinea's samenvoegen
+- Verwerk de internal_links organisch in de tekst als <a href="/kennisbank/{slug}">{ankertekst}</a>
+- Verwerk 1-2 external_links organisch in de tekst als <a href="{url}" target="_blank" rel="noopener noreferrer">{ankertekst}</a>
+- Ankerteksten zijn beschrijvend, nooit "klik hier" of "lees meer"
+- Professionele, warme toon — gericht op senioren en familiehistorici
+
+Geef ALLEEN geldige JSON terug, geen uitleg buiten de JSON."""
 
     posts_section = (
-        f"\n\nBestaande artikelen voor interne links:\n{post_list_str}"
+        f"\n\nBeschikbare interne artikelen (gebruik slugs exact zoals opgegeven):\n{post_list_str}"
         if post_list_str
         else ""
     )
 
-    user_prompt = f"""Analyseer deze blog post:
+    user_prompt = f"""Analyseer en verbeter deze blog post volledig:
 
 Titel: {payload.title}
 Bestaande keywords: {payload.existing_keywords or 'geen'}
-Excerpt: {payload.excerpt or 'niet opgegeven'}
+Huidig excerpt: {payload.excerpt or 'niet opgegeven'}
 
-Inhoud:
-{content_preview}{posts_section}
+Huidige HTML-inhoud:
+{content_full}{posts_section}
 
-Geef terug als JSON:
+Geef terug als JSON (enhanced_content mag lang zijn):
 {{
   "meta_title": "...",
   "meta_description": "...",
@@ -202,7 +218,8 @@ Geef terug als JSON:
   ],
   "external_links": [
     {{"url": "https://...", "title": "Brontitel", "reason": "Waarom gezaghebbend"}}
-  ]
+  ],
+  "enhanced_content": "<h2>Eerste sectie</h2><p>Eerste alinea...</p><p>Tweede alinea...</p>"
 }}"""
 
     try:
@@ -212,7 +229,7 @@ Geef terug als JSON:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=1800,
+            max_tokens=4000,
             temperature=0.3,
             extra_headers={
                 "HTTP-Referer": settings.openrouter_app_url or settings.site_url,
@@ -263,6 +280,7 @@ Geef terug als JSON:
             slug=data.get("slug", ""),
             internal_links=links,
             external_links=ext_links,
+            enhanced_content=data.get("enhanced_content") or None,
         )
 
     except Exception as exc:
