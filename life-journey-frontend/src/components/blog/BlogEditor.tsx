@@ -113,7 +113,7 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
     },
     setContent(html: string) {
       if (!editor) return;
-      editor.commands.setContent(html, false);
+      editor.commands.setContent(html, { emitUpdate: false });
     },
   }), [editor]);
 
