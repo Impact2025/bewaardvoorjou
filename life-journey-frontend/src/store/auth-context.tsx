@@ -61,6 +61,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSessionState(normalized);
       if (typeof window !== "undefined") {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+        // Sync cookie for server-side middleware
+        document.cookie = "ljauth=1; path=/; SameSite=Lax; max-age=86400";
       }
     };
 
@@ -68,6 +70,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSessionState(null);
       if (typeof window !== "undefined") {
         window.localStorage.removeItem(STORAGE_KEY);
+        // Clear auth cookie
+        document.cookie = "ljauth=; path=/; max-age=0";
       }
     };
 

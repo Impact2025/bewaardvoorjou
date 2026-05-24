@@ -1,65 +1,72 @@
 """
-Create admin user script
+Create or promote an admin user.
 Run with: python -m scripts.create_admin
+
+Reads credentials from environment variables:
+  ADMIN_EMAIL     — required
+  ADMIN_PASSWORD  — required (min 12 chars recommended)
+  ADMIN_NAME      — optional, defaults to "Admin"
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
-# Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+
+from app.core.config import settings
 from app.models.user import User
 from app.services.auth import hash_password
-from app.core.config import settings
 from datetime import datetime, timezone
 
-def create_admin_user():
-    """Create admin user with credentials"""
 
-    # Create engine
+def main() -> None:
+    email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+    password = os.environ.get("ADMIN_PASSWORD", "").strip()
+    name = os.environ.get("ADMIN_NAME", "Admin").strip()
+
+    if not email or not password:
+        print("ERROR: Set ADMIN_EMAIL and ADMIN_PASSWORD environment variables.")
+        print("  ADMIN_EMAIL=... ADMIN_PASSWORD=... python -m scripts.create_admin")
+        sys.exit(1)
+
+    if len(password) < 12:
+        print("ERROR: ADMIN_PASSWORD must be at least 12 characters.")
+        sys.exit(1)
+
     engine = create_engine(str(settings.database_url))
 
     with Session(engine) as db:
-        # Check if admin already exists
-        existing_admin = db.query(User).filter(User.email == "bewaard@weareimpact.nl").first()
+        existing = db.query(User).filter(User.email == email).first()
 
-        if existing_admin:
-            print("Admin user already exists!")
-            print(f"Email: {existing_admin.email}")
-            print(f"Is Admin: {existing_admin.is_admin}")
-
-            # Update to ensure is_admin is True
-            if not existing_admin.is_admin:
-                existing_admin.is_admin = True
+        if existing:
+            if not existing.is_admin:
+                existing.is_admin = True
                 db.commit()
-                print("Updated existing user to admin")
+                print(f"Promoted {email} to admin.")
+            else:
+                print(f"{email} is already an admin.")
             return
 
-        # Create new admin user
-        admin_user = User(
-            email="bewaard@weareimpact.nl",
-            display_name="Admin",
+        user = User(
+            email=email,
+            display_name=name,
             country="Nederland",
             locale="nl",
-            password_hash=hash_password("Demo1234"),
+            password_hash=hash_password(password),
             is_active=True,
             is_admin=True,
+            email_verified=True,
+            privacy_level="private",
+            target_recipients=[],
             created_at=datetime.now(timezone.utc),
         )
-
-        db.add(admin_user)
+        db.add(user)
         db.commit()
-        db.refresh(admin_user)
+        print(f"Admin user created: {email}")
 
-        print("Admin user created successfully!")
-        print(f"Email: {admin_user.email}")
-        print(f"Password: Demo1234")
-        print(f"ID: {admin_user.id}")
-        print(f"Is Admin: {admin_user.is_admin}")
 
 if __name__ == "__main__":
-    print("Creating admin user...")
-    create_admin_user()
+    main()

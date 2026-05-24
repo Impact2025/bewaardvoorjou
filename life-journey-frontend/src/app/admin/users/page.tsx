@@ -16,6 +16,7 @@ import {
   UserCheck,
   UserX,
   ChevronRight,
+  Trash2,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -104,6 +105,13 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
+  // Debounced server-side search
+  useEffect(() => {
+    const timer = setTimeout(() => fetchUsers(searchQuery || undefined), 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -114,11 +122,13 @@ export default function AdminUsersPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (query?: string) => {
     setIsLoadingUsers(true);
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_URL}/admin/users`, {
+      const params = new URLSearchParams({ limit: "200" });
+      if (query) params.set("search", query);
+      const response = await fetch(`${API_URL}/admin/users?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Failed to fetch users");
@@ -199,6 +209,26 @@ export default function AdminUsersPage() {
     }
   };
 
+  const deleteUser = async (userId: string, displayName: string) => {
+    if (!confirm(`Weet je zeker dat je "${displayName}" permanent wil verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+    setTogglingId(userId);
+    setOpenMenuId(null);
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to delete user");
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      if (selectedUser?.user.id === userId) setSelectedUser(null);
+    } catch (error: unknown) {
+      alert(`Fout: ${error instanceof Error ? error.message : "Onbekende fout"}`);
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreating(true);
@@ -233,16 +263,14 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Search is server-side; filter status client-side for instant feedback
   const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
+    return (
       filterStatus === "all" ||
       (filterStatus === "active" && user.is_active) ||
       (filterStatus === "inactive" && !user.is_active) ||
-      (filterStatus === "admin" && user.is_admin);
-    return matchesSearch && matchesStatus;
+      (filterStatus === "admin" && user.is_admin)
+    );
   });
 
   const activeUsers = users.filter((u) => u.is_active).length;
@@ -433,6 +461,14 @@ export default function AdminUsersPage() {
                                     ) : (
                                       <><UserCheck className="h-4 w-4 text-emerald-500" /><span className="text-emerald-600">Account activeren</span></>
                                     )}
+                                  </button>
+                                  <div className="border-t border-slate-100 my-1" />
+                                  <button
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-red-50"
+                                    onClick={() => deleteUser(user.id, user.display_name)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                    <span className="text-red-600">Gebruiker verwijderen</span>
                                   </button>
                                 </div>
                               )}
