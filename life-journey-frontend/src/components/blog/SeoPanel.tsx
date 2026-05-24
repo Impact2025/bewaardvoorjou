@@ -108,13 +108,15 @@ export function SeoPanel({ title, content, section, values, onChange, onInsertLi
         internal_links: result.internal_links.map((l) => ({ slug: l.slug, title: l.title })),
         external_links: result.external_links.map((l) => ({ url: l.url, title: l.title })),
       });
-      if (enhanced.trim()) {
+      if (enhanced.trim() && enhanced.trimStart().startsWith("<")) {
         enhancedHtml = enhanced;
         onContentChange?.(enhanced);
         setContentEnhanced(true);
+      } else if (enhanced.trim()) {
+        setError("AI retourneerde geen geldige HTML — inhoud niet bijgewerkt. Probeer opnieuw.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Content verbetering mislukt");
+      setError(err instanceof Error ? err.message : "Content verbetering mislukt — probeer opnieuw.");
     } finally {
       setLoadingContent(false);
     }

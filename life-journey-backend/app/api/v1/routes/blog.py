@@ -176,29 +176,37 @@ async def seo_optimize(
             f"- {p.get('title', '')} (slug: {p.get('slug', '')})" for p in items
         )
 
-    system_prompt = """Je bent een senior SEO-specialist en copywriter voor de Nederlandse markt.
+    system_prompt = """Je bent een senior SEO-specialist voor de Nederlandse markt, gespecialiseerd in content voor senioren en familiehistorici.
 
-REGELS:
-- meta_title: max 60 tekens, bevat het primaire zoekwoord
-- meta_description: 140-155 tekens, actief en uitnodigend
-- keywords: 5-8 Nederlandse zoekwoorden, kommagescheiden
-- tags: 3-5 categorietags, enkelvoud, kleine letters
-- excerpt: 2-3 zinnen, boeiend, geen spoilers
-- slug: lowercase, koppeltekens, alleen a-z 0-9, max 60 tekens
-- internal_links: 2-3 meest relevante artikelen uit de opgegeven lijst
-- external_links: 2-3 gezaghebbende externe bronnen (echte bestaande URLs)
+VELDREGELS:
+- meta_title: 50-60 tekens, primair zoekwoord vooraan, actief en krachtig
+- meta_description: 145-155 tekens, bevat zoekwoord, eindigt met een voordeel of uitnodiging
+- keywords: 5-8 Nederlandse zoekwoorden (long-tail), kommagescheiden, lowercase
+- tags: 3-5 categorietags, enkelvoud, lowercase, geen spaties (gebruik koppelteken)
+- excerpt: 2-3 zinnen die de lezer direct aanspreken; bevat zoekwoord; geen spoilers; max 280 tekens
+- slug: lowercase, koppeltekens, alleen a-z 0-9, max 55 tekens, bevat primair zoekwoord
+- internal_links: 2-3 artikelen uit de lijst die het sterkst thematisch aansluiten
+- external_links: 2-3 gezaghebbende Nederlandse of internationale bronnen (echte, bestaande URLs)
 
-Geef ALLEEN geldige JSON terug, geen uitleg."""
+KWALITEITSEISEN:
+- meta_title eindigt NOOIT met "..." of wordt afgeknipt
+- meta_description is een complete zin, actief geschreven, geen passieve constructies
+- excerpt is uitnodigend en emotioneel aansprekend voor mensen die herinneringen willen bewaren
+
+Geef ALLEEN geldige JSON terug, geen uitleg, geen markdown."""
 
     posts_section = (
         f"\n\nBeschikbare interne artikelen:\n{post_list_str}" if post_list_str else ""
     )
 
-    user_prompt = f"""Analyseer deze blog post:
+    user_prompt = f"""Analyseer en optimaliseer deze blog post voor BewaardVoorJou.nl — een platform waar mensen hun levensverhaal bewaren voor toekomstige generaties.
+
+Doelgroep: Nederlandstalige senioren (55+) en familiehistorici die herinneringen willen doorgeven.
+Primair zoekwoord bepaal je zelf op basis van titel en inhoud.
 
 Titel: {payload.title}
-Keywords: {payload.existing_keywords or 'geen'}
-Excerpt: {payload.excerpt or 'niet opgegeven'}
+Huidige keywords: {payload.existing_keywords or 'nog geen'}
+Huidig excerpt: {payload.excerpt or 'nog geen'}
 
 Inhoud (preview):
 {content_preview}{posts_section}
@@ -293,34 +301,79 @@ async def enhance_content(
         for l in payload.external_links if l.get("url")
     )
 
-    system_prompt = """Je bent een professionele content-editor voor de Nederlandse markt.
-Je taak: verbeter de HTML-structuur van het aangeleverde artikel.
+    system_prompt = """Je bent een expert SEO-copywriter en content-strateeg voor de Nederlandse markt, gespecialiseerd in content voor senioren en familiehistorici.
 
-VERPLICHTE REGELS:
-- Geef UITSLUITEND geldige HTML terug, geen JSON, geen markdown, geen uitleg
-- Behoud ALLE inhoud — niets weglaten of inkorten
-- Gebruik: <h2>, <h3>, <p>, <strong>, <em>, <ul>, <li>, <ol>, <blockquote>, <a href="...">
-- Voeg een <h2> toe aan het begin van elke logische sectie (elke 3-5 alinea's)
-- Elke alinea = een aparte <p>-tag
-- Verwerk de opgegeven interne links organisch in de tekst (niet als losse lijst)
-- Verwerk 1-2 externe links organisch in de tekst als bronvermelding
-- Professionele, warme toon voor senioren en familiehistorici
-- Begin direct met de HTML-inhoud, geen <html>/<body>/<head> tags"""
+DOEL: Transformeer de aangeleverde tekst naar een perfect gestructureerd, SEO-geoptimaliseerd artikel.
 
-    user_prompt = f"""Verbeter de structuur van dit artikel:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERPLICHTE ARTIKELSTRUCTUUR (in deze volgorde):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. INTRO-ALINEA (eerste <p>-tag, 80-120 woorden):
+   - Bevat het primaire zoekwoord in de EERSTE zin
+   - Pakt direct een emotie of concreet voordeel
+   - Eindigt met een brug naar de rest van het artikel
+
+2. H2-SECTIES (verplicht 3-5 koppen):
+   - Formuleer elke <h2> als een vraag OF een concreet voordeel
+   - Eerste <h2> bevat het zoekwoord
+   - Per sectie 100-200 woorden in aparte <p>-tags
+   - Gebruik minstens één <ul> of <ol> in het artikel
+
+3. H3-SUBSECTIES (optioneel, max 3 per H2):
+   - Alleen als er duidelijke sub-onderwerpen zijn
+
+4. HIGHLIGHT-BOX (verplicht, precies 1x):
+   - Gebruik <blockquote> voor een kernboodschap of inspirerende quote
+   - Staat logisch in het midden van het artikel
+
+5. CONCLUSIE (laatste sectie, 60-100 woorden):
+   - Begin met een <h2> "Tot slot" of vergelijkbaar
+   - Vat de kernboodschap samen
+   - Eindig met een zachte uitnodiging richting het platform
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEYWORD & LEESBAARHEIDSREGELS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Zoekwoord: eerste alinea + minstens 2 H2-koppen + 1x per 200 woorden totaal
+- Max 20 woorden per zin (korte, krachtige zinnen)
+- Actieve schrijfstijl (niet "er kan worden gedaan" maar "je doet")
+- Spreektaal die senioren aanspreken — warm, direct, zonder jargon
+- Gebruik <strong> voor sleutelwoorden en kernbegrippen (max 3-5x per artikel)
+- Gebruik <em> spaarzaam voor extra nadruk
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LINKREGELS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Verwerk interne links ORGANISCH in lopende tekst (NOOIT als losse lijst onderaan)
+- Gebruik beschrijvende ankertekst (NOOIT "klik hier" of "lees meer")
+- Externe links krijgen altijd: target="_blank" rel="noopener noreferrer"
+- Alle href-waarden zijn volledige URLs of absolute paden
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HTML-REGELS (STRIKT):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Toegestane tags: <h2> <h3> <p> <strong> <em> <ul> <li> <ol> <blockquote> <a href="...">
+- GEEN inline styles, GEEN class-attributen, GEEN data-attributen
+- GEEN <html> <body> <head> <script> <style> tags
+- Elke alinea = eigen <p>-tag (nooit tekst zonder tag)
+- Begin DIRECT met de eerste HTML-tag, geen inleiding of uitleg
+- Sluit ALLE tags correct af"""
+
+    user_prompt = f"""Herschrijf en verbeter dit artikel naar wereldklasse SEO-content:
 
 Titel: {payload.title}
 
-Huidige HTML:
-{payload.content[:10000]}
+Huidige inhoud:
+{payload.content[:12000]}
 
-Interne links om te verwerken:
-{int_links_str or '(geen)'}
+Interne links (verwerk organisch in de tekst):
+{int_links_str or '(geen beschikbaar)'}
 
-Externe links om te verwerken:
-{ext_links_str or '(geen)'}
+Externe links (verwerk als bronvermelding):
+{ext_links_str or '(geen beschikbaar)'}
 
-Geef ALLEEN de verbeterde HTML-inhoud terug, direct beginnen met de eerste tag."""
+Geef UITSLUITEND de verbeterde HTML terug. Begin direct met de eerste tag."""
 
     try:
         response = await client.chat.completions.create(
@@ -329,8 +382,8 @@ Geef ALLEEN de verbeterde HTML-inhoud terug, direct beginnen met de eerste tag."
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=4000,
-            temperature=0.3,
+            max_tokens=8192,
+            temperature=0.25,
             extra_headers={
                 "HTTP-Referer": settings.openrouter_app_url or settings.site_url,
                 "X-Title": settings.openrouter_app_name,
@@ -338,13 +391,16 @@ Geef ALLEEN de verbeterde HTML-inhoud terug, direct beginnen met de eerste tag."
         )
 
         html = response.choices[0].message.content.strip()
-        # Verwijder eventuele markdown code-fences
+        # Verwijder markdown code-fences indien aanwezig
         if html.startswith("```"):
             parts = html.split("```")
             html = parts[1] if len(parts) > 1 else html
             if html.startswith("html"):
                 html = html[4:]
             html = html.strip()
+
+        if not html or not html.startswith("<"):
+            raise HTTPException(500, detail="AI retourneerde geen geldige HTML")
 
         return PlainTextResponse(content=html, media_type="text/html; charset=utf-8")
 

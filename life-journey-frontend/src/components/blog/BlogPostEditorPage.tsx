@@ -379,6 +379,8 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
             onContentChange={(html) => {
               latestContentRef.current = html;
               setContent(html);
+              // Force-update TipTap direct via ref, omzeilt React render-cycle
+              editorRef.current?.setContent(html);
               setIsDirty(true);
             }}
             onAfterOptimize={handleAfterOptimize}

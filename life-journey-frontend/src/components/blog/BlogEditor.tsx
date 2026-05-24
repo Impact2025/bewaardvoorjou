@@ -55,6 +55,7 @@ const VideoNode = Node.create({
 
 export interface BlogEditorHandle {
   insertLink: (href: string, text: string) => void;
+  setContent: (html: string) => void;
 }
 
 interface BlogEditorProps {
@@ -105,12 +106,14 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
       if (!editor) return;
       const { from, to } = editor.state.selection;
       if (from !== to) {
-        // Geselecteerde tekst omzetten naar link
         editor.chain().focus().setLink({ href }).run();
       } else {
-        // Geen selectie: link-tekst invoegen op cursorpositie
         editor.chain().focus().insertContent(`<a href="${href}">${text}</a> `).run();
       }
+    },
+    setContent(html: string) {
+      if (!editor) return;
+      editor.commands.setContent(html, false);
     },
   }), [editor]);
 
