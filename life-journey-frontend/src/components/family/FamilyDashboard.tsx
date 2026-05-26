@@ -15,7 +15,6 @@ import type {
   FamilyStats,
   CreateFamilyMemberRequest,
 } from "@/lib/family-types";
-import { ROLE_LABELS } from "@/lib/family-types";
 import { FamilyMemberCard } from "./FamilyMemberCard";
 import { AddFamilyMemberModal } from "./AddFamilyMemberModal";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -119,9 +118,7 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (isLoading) {
-    return <FamilyDashboardSkeleton />;
-  }
+  if (isLoading) return <FamilyDashboardSkeleton />;
 
   if (error) {
     return (
@@ -141,100 +138,80 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
 
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard
-          icon={<Users className="h-5 w-5 text-blue-500" />}
-          label="Totaal"
-          value={stats?.total_members || 0}
-          color="blue"
-        />
-        <StatCard
-          icon={<CheckCircle className="h-5 w-5 text-emerald-500" />}
-          label="Actief"
-          value={stats?.active_members || 0}
-          color="emerald"
-        />
-        <StatCard
-          icon={<Clock className="h-5 w-5 text-amber-500" />}
-          label="In afwachting"
-          value={stats?.pending_invites || 0}
-          color="amber"
-        />
-        <StatCard
-          icon={<Heart className="h-5 w-5 text-pink-500" />}
-          label="Partners"
-          value={stats?.members_by_role?.spouse || 0}
-          color="pink"
-        />
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard icon={<Users className="h-4 w-4" />} label="Totaal" value={stats?.total_members || 0} />
+        <StatCard icon={<CheckCircle className="h-4 w-4" />} label="Actief" value={stats?.active_members || 0} />
+        <StatCard icon={<Clock className="h-4 w-4" />} label="In afwachting" value={stats?.pending_invites || 0} />
+        <StatCard icon={<Heart className="h-4 w-4" />} label="Partners" value={stats?.members_by_role?.spouse || 0} />
       </div>
 
-      {/* Invite URL notification */}
+      {/* Invite URL */}
       {lastInviteUrl && (
-        <div className="p-4 rounded-xl bg-teal-50 border border-teal-200">
+        <div className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E6E2DD]">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-medium text-teal-900">
-                Uitnodiging aangemaakt!
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-[#333333] text-sm">
+                Uitnodiging aangemaakt
               </p>
-              <p className="text-sm text-teal-700 mt-1">
+              <p className="text-xs text-[#555555] mt-0.5 mb-2">
                 Deel deze link met je familielid:
               </p>
-              <code className="block mt-2 p-2 bg-white rounded text-sm text-teal-800 break-all">
+              <code className="block p-2 bg-white rounded border border-[#E6E2DD] text-xs text-[#333333] break-all">
                 {lastInviteUrl}
               </code>
             </div>
-            <Button
-              variant="ghost"
-
+            <button
               onClick={copyInviteUrl}
-              className="border-teal-300 text-teal-700 hover:bg-teal-100 flex-shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E6E2DD] text-xs font-medium text-[#555555] hover:border-[#FF8C42]/40 hover:text-[#FF8C42] transition-colors shrink-0"
             >
               {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-1" />
-                  Gekopieerd
-                </>
+                <><Check className="h-3.5 w-3.5" />Gekopieerd</>
               ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-1" />
-                  Kopiëren
-                </>
+                <><Copy className="h-3.5 w-3.5" />Kopiëren</>
               )}
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
       {/* Family members */}
-      <Card>
+      <Card className="bg-white border border-[#E6E2DD]">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Familieleden</CardTitle>
+            <CardTitle className="text-[#333333]">Familieleden</CardTitle>
             <CardDescription>
               Beheer wie toegang heeft tot je levensverhaal
             </CardDescription>
           </div>
-          <Button onClick={() => setShowAddModal(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF8C42] hover:bg-[#F47B3B] text-white text-sm font-semibold transition-colors"
+          >
+            <UserPlus className="h-4 w-4" />
             Toevoegen
-          </Button>
+          </button>
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
             <div className="text-center py-12">
-              <Users className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">
+              <div className="w-12 h-12 rounded-full bg-[#FAF7F2] flex items-center justify-center mx-auto mb-4">
+                <Users className="h-6 w-6 text-[#FF8C42]/50" />
+              </div>
+              <h3 className="font-medium text-[#333333] mb-2">
                 Nog geen familieleden
               </h3>
-              <p className="text-slate-600 mb-4 max-w-sm mx-auto">
+              <p className="text-sm text-[#555555] mb-5 max-w-sm mx-auto leading-relaxed">
                 Nodig familieleden uit om je levensverhaal te delen.
                 Zij krijgen toegang tot de hoofdstukken die jij kiest.
               </p>
-              <Button onClick={() => setShowAddModal(true)}>
-                <UserPlus className="h-4 w-4 mr-2" />
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF8C42] hover:bg-[#F47B3B] text-white text-sm font-semibold transition-colors"
+              >
+                <UserPlus className="h-4 w-4" />
                 Eerste familielid toevoegen
-              </Button>
+              </button>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -252,7 +229,6 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
         </CardContent>
       </Card>
 
-      {/* Add member modal */}
       <AddFamilyMemberModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -263,28 +239,14 @@ export function FamilyDashboard({ journeyId, className }: FamilyDashboardProps) 
   );
 }
 
-interface StatCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  color: "blue" | "emerald" | "amber" | "pink";
-}
-
-const colorClasses = {
-  blue: "bg-blue-50 border-blue-200",
-  emerald: "bg-emerald-50 border-emerald-200",
-  amber: "bg-amber-50 border-amber-200",
-  pink: "bg-pink-50 border-pink-200",
-};
-
-function StatCard({ icon, label, value, color }: StatCardProps) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className={cn("p-4 rounded-xl border", colorClasses[color])}>
-      <div className="flex items-center gap-2 mb-1">
-        {icon}
-        <span className="text-sm text-slate-600">{label}</span>
+    <div className="p-4 rounded-xl border border-[#E6E2DD] bg-white">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[#FF8C42]">{icon}</span>
+        <span className="text-xs text-[#999] font-medium">{label}</span>
       </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
+      <div className="text-2xl font-semibold text-[#333333]">{value}</div>
     </div>
   );
 }
@@ -292,15 +254,15 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
 function FamilyDashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-20 rounded-xl" />
         ))}
       </div>
-      <Card>
+      <Card className="border border-[#E6E2DD]">
         <CardHeader>
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-48 mt-2" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-48 mt-1" />
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

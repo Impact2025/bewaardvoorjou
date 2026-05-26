@@ -23,12 +23,9 @@ import type { ChapterId } from "@/lib/types";
 import {
   Play,
   BookOpen,
-  Settings,
-  Share2,
   Clock,
   Mic,
   TrendingUp,
-  Sparkles,
   Lightbulb,
   Mic2,
   Video,
@@ -38,33 +35,15 @@ import {
 import { QuickThoughtFAB } from "@/components/quick-thoughts";
 import { MemoryLaneNavigation } from "@/components/MemoryLaneNavigation";
 
-// Lazy load heavy Timeline component (reduces initial bundle)
 const Timeline = dynamic(
   () => import("@/components/timeline/Timeline").then((mod) => mod.Timeline),
   {
     loading: () => (
-      <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
+      <div className="h-96 rounded-xl bg-[#F5F2ED] animate-pulse" />
     ),
     ssr: false,
   }
 );
-
-type Season = 'spring' | 'summer' | 'autumn' | 'winter';
-
-function getCurrentSeason(): Season {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'spring';
-  if (month >= 5 && month <= 7) return 'summer';
-  if (month >= 8 && month <= 10) return 'autumn';
-  return 'winter';
-}
-
-const SEASON_GRADIENTS: Record<Season, string> = {
-  spring: 'from-[#FF8C42] to-[#FFB84D]',
-  summer: 'from-[#F5A623] to-[#FF8C42]',
-  autumn: 'from-[#E06828] to-[#C0392B]',
-  winter: 'from-[#5C6BC0] to-[#7986CB]',
-};
 
 function DashboardContent() {
   const router = useRouter();
@@ -72,16 +51,13 @@ function DashboardContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [milestonePulse, setMilestonePulse] = useState(false);
   const { triggerConfetti, ConfettiComponent } = useConfetti();
-  const season = getCurrentSeason();
 
-  // Auto-show onboarding for first-time users
   useEffect(() => {
     if (!hasSeenOnboarding()) {
       setShowOnboarding(true);
     }
   }, []);
 
-  // Celebrate milestones with confetti
   useEffect(() => {
     const completedChapters = journey?.journeyProgress?.completedChapters ?? 0;
     if (completedChapters === 0) return;
@@ -123,7 +99,7 @@ function DashboardContent() {
         description="Ontdek wat je al hebt opgebouwd"
         activeHref="/dashboard"
       >
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white border border-[#E6E2DD]">
           <CardHeader>
             <CardTitle>Kon dashboard niet laden</CardTitle>
             <CardDescription>{error}</CardDescription>
@@ -142,7 +118,6 @@ function DashboardContent() {
     : null;
   const isNewUser = completedChapters === 0;
 
-  // Time-aware personalized greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     const name = profile?.displayName || 'daar';
@@ -155,60 +130,22 @@ function DashboardContent() {
         : `Goedenavond ${name}, tijd voor herinneringen`;
     }
 
-    if (completedChapters === 1) {
-      return `Fantastisch ${name}! Je eerste verhaal staat 🎉`;
-    }
-
-    if (completedChapters < 10) {
-      return `Welkom terug, ${name}`;
-    }
-
-    if (completedChapters < 20) {
-      return `Je doet het geweldig, ${name}`;
-    }
-
-    if (progressPercent >= 80) {
-      return `Je bent er bijna, ${name}!`;
-    }
-
+    if (completedChapters === 1) return `Fantastisch ${name}! Je eerste verhaal staat.`;
+    if (completedChapters < 10) return `Welkom terug, ${name}`;
+    if (completedChapters < 20) return `Je doet het geweldig, ${name}`;
+    if (progressPercent >= 80) return `Je bent er bijna, ${name}`;
     return `Hallo ${name}`;
   };
 
-  // Emotional, meaningful progress messages
   const getProgressMessage = () => {
-    if (completedChapters === 0) {
-      return "Elk verhaal begint met één woord. Wat is jouw vroegste herinnering?";
-    }
-
-    if (completedChapters === 1) {
-      return "Je eerste verhaal staat! 🎉 Hoe voelt dat? Zullen we doorgaan?";
-    }
-
-    if (completedChapters === 3) {
-      return "3 hoofdstukken! Je bent op weg. Je kleinkinderen zullen dit koesteren.";
-    }
-
-    if (completedChapters === 5) {
-      return "5 verhalen vol herinneringen. Dit wordt echt mooi.";
-    }
-
-    if (completedChapters === 10) {
-      return "10 hoofdstukken! Je bouwt aan iets bijzonders hier.";
-    }
-
-    if (completedChapters === 15) {
-      return "Halverwege! Elke herinnering die je deelt is een cadeau.";
-    }
-
-    if (progressPercent === 100) {
-      return "Je hebt het gedaan. Je levensverhaal is compleet. ❤️";
-    }
-
-    if (progressPercent < 100) {
-      return `${completedChapters} hoofdstukken verteld. Blijf zo doorgaan!`;
-    }
-
-    return "Je hebt alle hoofdstukken voltooid. Je levensverhaal is compleet.";
+    if (completedChapters === 0) return "Elk verhaal begint met één woord. Wat is jouw vroegste herinnering?";
+    if (completedChapters === 1) return "Je eerste verhaal staat! Zullen we doorgaan?";
+    if (completedChapters === 3) return "3 hoofdstukken! Je bent op weg. Je kleinkinderen zullen dit koesteren.";
+    if (completedChapters === 5) return "5 verhalen vol herinneringen. Dit wordt echt mooi.";
+    if (completedChapters === 10) return "10 hoofdstukken! Je bouwt aan iets bijzonders hier.";
+    if (completedChapters === 15) return "Halverwege! Elke herinnering die je deelt is een cadeau.";
+    if (progressPercent === 100) return "Je hebt het gedaan. Je levensverhaal is compleet.";
+    return `${completedChapters} hoofdstukken verteld. Blijf zo doorgaan!`;
   };
 
   return (
@@ -221,69 +158,59 @@ function DashboardContent() {
         activeHref="/dashboard"
         onShowHandleiding={() => setShowOnboarding(true)}
       >
-        <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-full overflow-hidden">
-          {/* Mobile-only greeting (desktop sees greeting in AppShell header) */}
+        <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
+          {/* Mobile-only greeting */}
           <div className="sm:hidden">
-            <p className="text-sm font-medium text-gray-400">
-              {new Date().getHours() < 12
-                ? "Goedemorgen"
-                : new Date().getHours() < 18
-                ? "Goedemiddag"
-                : "Goedenavond"}
+            <p className="text-xs font-medium text-[#999]">
+              {new Date().getHours() < 12 ? "Goedemorgen" : new Date().getHours() < 18 ? "Goedemiddag" : "Goedenavond"}
             </p>
-            <h2 className="text-2xl font-bold text-slate-900 font-serif leading-tight">
+            <h2 className="text-2xl font-serif font-semibold text-[#333333] leading-tight">
               {profile?.displayName?.split(" ")[0] || "Welkom"}
             </h2>
           </div>
 
-          {/* Hero Section — seizoensgebonden gradient */}
-          <div className={cn(
-            "relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 sm:p-6 md:p-8 text-white shadow-[0_4px_24px_rgba(255,140,66,0.25)]",
-            SEASON_GRADIENTS[season]
-          )}>
-            <div className="absolute -right-6 -top-6 opacity-10">
-              <Sparkles className="h-32 w-32" />
-            </div>
-            <div className="relative z-10">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Progress card */}
+          <div className="bg-white rounded-xl border border-[#E6E2DD] overflow-hidden">
+            <div className="h-1 bg-[#FF8C42]" />
+            <div className="p-6 sm:p-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg sm:text-2xl font-bold mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[#FF8C42] mb-1">
+                    Je voortgang
+                  </p>
+                  <h3 className="font-serif font-semibold text-[#333333] text-xl sm:text-2xl mb-1">
                     {progressPercent === 0
                       ? "Begin je reis"
                       : progressPercent < 50
-                      ? "Je bent goed op weg!"
+                      ? "Je bent goed op weg"
                       : progressPercent < 100
-                      ? "Bijna daar!"
-                      : "Gefeliciteerd! 🎉"}
+                      ? "Bijna daar"
+                      : "Voltooid"}
                   </h3>
-                  <p className="text-white/80 text-sm sm:text-base max-w-md leading-relaxed">
+                  <p className="text-[#555555] text-sm leading-relaxed max-w-md">
                     {getProgressMessage()}
                   </p>
                 </div>
                 {nextChapter && (
-                  <Button
-                    asChild
-                    className="w-full sm:w-auto bg-white text-orange font-semibold hover:bg-white/90 shadow-md whitespace-nowrap"
+                  <Link
+                    href={`/chapter/${nextChapter}`}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FF8C42] hover:bg-[#F47B3B] text-white text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
                   >
-                    <Link href={`/chapter/${nextChapter}`}>
-                      <Play className="h-4 w-4" />
-                      {nextChapterTitle || "Start volgende"}
-                    </Link>
-                  </Button>
+                    <Play className="h-3.5 w-3.5" />
+                    {nextChapterTitle || "Start volgende"}
+                  </Link>
                 )}
               </div>
-
-              {/* Progress bar */}
               <div className="mt-5">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-white/90">Voortgang</span>
-                  <span className={cn("font-bold", milestonePulse && "heart-pulse inline-block")}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs text-[#999]">Voortgang</span>
+                  <span className={cn("text-xs font-bold text-[#FF8C42]", milestonePulse && "heart-pulse inline-block")}>
                     {progressPercent}%
                   </span>
                 </div>
-                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-[#E6E2DD] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-white rounded-full transition-all duration-700"
+                    className="h-full bg-[#FF8C42] rounded-full transition-all duration-700"
                     style={{ width: `${Math.max(progressPercent, 2)}%` }}
                   />
                 </div>
@@ -291,164 +218,161 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Nieuwe gebruiker: uitgebreide welkomst-sectie */}
+          {/* New user: how it works */}
           {isNewUser && (
-            <Card className="bg-white border border-gray-200">
+            <Card className="bg-white border border-[#E6E2DD]">
               <CardHeader>
-                <CardTitle className="text-xl font-serif">Zo werkt Bewaard voor jou</CardTitle>
-                <CardDescription className="text-base">
-                  In drie eenvoudige stappen leg je jouw levensverhaal vast.
+                <CardTitle className="text-lg font-serif">Zo werkt Bewaard voor jou</CardTitle>
+                <CardDescription>
+                  In drie stappen leg je jouw levensverhaal vast.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-3">
                   {[
                     {
-                      icon: <Mic2 className="h-6 w-6 text-orange" />,
+                      icon: <Mic2 className="h-5 w-5 text-[#FF8C42]" />,
                       step: "1",
                       title: "Kies een hoofdstuk",
                       desc: "Je begint bij het begin — jouw vroegste herinneringen.",
                     },
                     {
-                      icon: <Video className="h-6 w-6 text-orange" />,
+                      icon: <Video className="h-5 w-5 text-[#FF8C42]" />,
                       step: "2",
                       title: "Vertel je verhaal",
                       desc: "Praat, film of schrijf — jij kiest hoe je het liefst vertelt.",
                     },
                     {
-                      icon: <FileText className="h-6 w-6 text-orange" />,
+                      icon: <FileText className="h-5 w-5 text-[#FF8C42]" />,
                       step: "3",
                       title: "Bewaar voor altijd",
                       desc: "Je verhaal wordt veilig opgeslagen en klaar voor je dierbaren.",
                     },
                   ].map(({ icon, step, title, desc }) => (
-                    <div key={step} className="flex flex-col items-start gap-3 p-4 rounded-xl bg-cream">
+                    <div key={step} className="flex flex-col gap-3 p-4 rounded-xl bg-[#FAF7F2] border border-[#E6E2DD]">
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-orange/15 text-orange text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-[#FF8C42]/15 text-[#FF8C42] text-[10px] font-bold flex items-center justify-center shrink-0">
                           {step}
                         </span>
                         {icon}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{title}</p>
-                        <p className="text-sm text-slate-500 mt-0.5">{desc}</p>
+                        <p className="font-semibold text-[#333333] text-sm">{title}</p>
+                        <p className="text-xs text-[#555555] mt-0.5 leading-relaxed">{desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 {nextChapter && (
                   <div className="mt-5">
-                    <Button asChild className="btn-primary w-full sm:w-auto flex items-center gap-2 py-4 text-base">
-                      <Link href={`/chapter/${nextChapter}`}>
-                        <Play className="h-4 w-4" />
-                        Begin met mijn eerste verhaal
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <Link
+                      href={`/chapter/${nextChapter}`}
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#FF8C42] hover:bg-[#F47B3B] text-white text-sm font-semibold transition-colors"
+                    >
+                      <Play className="h-4 w-4" />
+                      Begin met mijn eerste verhaal
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 )}
               </CardContent>
             </Card>
           )}
 
-          {/* Storyteller CTA — prominent card for returning users */}
+          {/* Returning user: continue CTA */}
           {!isNewUser && (
             <Link href="/vertel" className="block group">
-              <div
-                className="rounded-2xl p-6 flex items-center gap-5 transition-opacity hover:opacity-90 active:opacity-80"
-                style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)" }}
-              >
-                <span className="text-5xl">🎤</span>
+              <div className="bg-white rounded-xl border border-[#E6E2DD] hover:border-[#FF8C42]/40 hover:shadow-[0_4px_12px_rgba(255,140,66,0.08)] transition-all duration-200 p-5 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#FF8C42]/10 flex items-center justify-center shrink-0">
+                  <Mic2 className="h-5 w-5 text-[#FF8C42]" />
+                </div>
                 <div className="flex-1">
-                  <p className="text-white font-serif text-xl font-semibold leading-tight">
+                  <p className="font-serif font-semibold text-[#333333] leading-tight">
                     Begin met vertellen
                   </p>
-                  <p className="text-orange-100 text-sm mt-1">
-                    Jouw volgende verhaalfragment wacht — één klik en je bent er
+                  <p className="text-[#555555] text-sm mt-0.5">
+                    Jouw volgende verhaalfragment wacht
                   </p>
                 </div>
-                <ArrowRight className="h-6 w-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-5 w-5 text-[#FF8C42] group-hover:translate-x-1 transition-transform shrink-0" />
               </div>
             </Link>
           )}
 
-          {/* Main Content Grid — sidebar first on mobile via CSS order */}
+          {/* Main content grid */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
-            {/* Timeline — verborgen voor nieuwe gebruikers */}
+            {/* Timeline */}
             {!isNewUser && (
-            <div className="order-2 md:order-1 space-y-6">
-              <Card className="bg-white border border-gray-200">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-orange" />
-                      Je Levensreis
-                    </CardTitle>
-                    <CardDescription>
-                      Volg je voortgang door alle levensfasen
-                    </CardDescription>
-                  </div>
-                  <Button variant="ghost" asChild>
-                    <Link href="/chapters">
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Alle hoofdstukken
-                    </Link>
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {journey?.id ? (
-                    <Timeline
-                      journeyId={journey.id}
-                      onChapterSelect={handleChapterSelect}
-                    />
-                  ) : (
-                    <p className="text-slate-600 text-center py-8">
-                      Nog geen journey gestart
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+              <div className="order-2 md:order-1 space-y-6">
+                <Card className="bg-white border border-[#E6E2DD]">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-[#333333]">
+                        <TrendingUp className="h-4 w-4 text-[#FF8C42]" />
+                        Je Levensreis
+                      </CardTitle>
+                      <CardDescription>
+                        Volg je voortgang door alle levensfasen
+                      </CardDescription>
+                    </div>
+                    <Button variant="ghost" asChild className="text-[#555555] hover:text-[#FF8C42]">
+                      <Link href="/chapters">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Alle hoofdstukken
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {journey?.id ? (
+                      <Timeline
+                        journeyId={journey.id}
+                        onChapterSelect={handleChapterSelect}
+                      />
+                    ) : (
+                      <p className="text-[#555555] text-center py-8">
+                        Nog geen journey gestart
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             )}
 
-            {/* Sidebar — order-1 op mobile */}
-            <div className={`order-1 md:order-2 space-y-4 sm:space-y-6 ${isNewUser ? "md:col-span-2 md:grid md:grid-cols-2 md:gap-4 md:space-y-0" : ""}`}>
-              {/* Quick Stats — verborgen voor nieuwe gebruikers */}
+            {/* Sidebar */}
+            <div className={`order-1 md:order-2 space-y-4 ${isNewUser ? "md:col-span-2 md:grid md:grid-cols-2 md:gap-4 md:space-y-0" : ""}`}>
+              {/* Quick stats */}
               {!isNewUser && (
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-base">Snel overzicht</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-3 sm:block sm:space-y-4">
-                    <QuickStat
-                      icon={<BookOpen className="h-4 w-4" />}
-                      label="Voltooid"
-                      value={`${completedChapters}/${totalChapters}`}
-                      color="emerald"
-                    />
-                    <QuickStat
-                      icon={<Mic className="h-4 w-4" />}
-                      label="Opnames"
-                      value={String(journey?.media?.length || 0)}
-                      color="blue"
-                    />
-                    <QuickStat
-                      icon={<Clock className="h-4 w-4" />}
-                      label="Bijgewerkt"
-                      value={journey ? formatDate(journey.updatedAt) : "-"}
-                      color="violet"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                <Card className="bg-white border border-[#E6E2DD]">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-[#333333]">Snel overzicht</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3 sm:block sm:space-y-4">
+                      <QuickStat
+                        icon={<BookOpen className="h-4 w-4" />}
+                        label="Voltooid"
+                        value={`${completedChapters}/${totalChapters}`}
+                      />
+                      <QuickStat
+                        icon={<Mic className="h-4 w-4" />}
+                        label="Opnames"
+                        value={String(journey?.media?.length || 0)}
+                      />
+                      <QuickStat
+                        icon={<Clock className="h-4 w-4" />}
+                        label="Bijgewerkt"
+                        value={journey ? formatDate(journey.updatedAt) : "-"}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Memory Lane navigatie voor bestaande gebruikers */}
+              {/* Memory Lane / Quick actions */}
               {!isNewUser ? (
-                <Card className="bg-white border border-gray-200 overflow-hidden">
+                <Card className="bg-white border border-[#E6E2DD] overflow-hidden">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Memory Lane</CardTitle>
+                    <CardTitle className="text-sm text-[#333333]">Memory Lane</CardTitle>
                     <CardDescription>Navigeer door je levensverhaal</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0 pb-2">
@@ -456,9 +380,9 @@ function DashboardContent() {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="bg-white border border-gray-200">
+                <Card className="bg-white border border-[#E6E2DD]">
                   <CardHeader>
-                    <CardTitle className="text-base">Snelle acties</CardTitle>
+                    <CardTitle className="text-sm text-[#333333]">Snelle acties</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {nextChapter && (
@@ -483,36 +407,32 @@ function DashboardContent() {
                 </Card>
               )}
 
-              {/* Help Card */}
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
-                      <Sparkles className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-amber-900 mb-1">
-                        Vragen? Wij helpen je.
-                      </h3>
-                      <p className="text-sm text-amber-700 mb-3">
-                        Bekijk een korte uitleg over hoe de app werkt.
-                      </p>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setShowOnboarding(true)}
-                        className="border-amber-300 text-amber-700 hover:bg-amber-100 text-sm"
-                      >
-                        Uitleg bekijken
-                      </Button>
-                    </div>
+              {/* Help card */}
+              <div className="bg-white rounded-xl border border-[#E6E2DD] p-5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#FAF7F2] rounded-lg shrink-0">
+                    <Lightbulb className="h-4 w-4 text-[#FF8C42]" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="font-medium text-[#333333] text-sm mb-1">
+                      Vragen? Wij helpen je.
+                    </h3>
+                    <p className="text-xs text-[#555555] mb-3 leading-relaxed">
+                      Bekijk een korte uitleg over hoe de app werkt.
+                    </p>
+                    <button
+                      onClick={() => setShowOnboarding(true)}
+                      className="text-xs font-semibold text-[#FF8C42] hover:underline"
+                    >
+                      Uitleg bekijken
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Thought FAB — raised above mobile bottom nav */}
         <QuickThoughtFAB
           className="bottom-24 sm:bottom-6"
           onThoughtCreated={(thoughtId) => {
@@ -528,24 +448,17 @@ interface QuickStatProps {
   icon: React.ReactNode;
   label: string;
   value: string;
-  color: "emerald" | "blue" | "violet";
 }
 
-const statColors = {
-  emerald: "text-emerald-600 bg-emerald-50",
-  blue: "text-blue-600 bg-blue-50",
-  violet: "text-violet-600 bg-violet-50",
-};
-
-function QuickStat({ icon, label, value, color }: QuickStatProps) {
+function QuickStat({ icon, label, value }: QuickStatProps) {
   return (
     <div className="flex flex-col items-center gap-1 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
-      <div className={cn("p-2 rounded-lg flex-shrink-0", statColors[color])}>
+      <div className="p-2 rounded-lg bg-[#FAF7F2] text-[#FF8C42] shrink-0">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] sm:text-xs text-slate-500">{label}</p>
-        <p className="text-sm font-semibold text-slate-900 truncate">{value}</p>
+        <p className="text-[10px] sm:text-xs text-[#999]">{label}</p>
+        <p className="text-sm font-semibold text-[#333333] truncate">{value}</p>
       </div>
     </div>
   );
@@ -560,36 +473,30 @@ interface QuickActionButtonProps {
 
 function QuickActionButton({ href, icon, label, primary }: QuickActionButtonProps) {
   return (
-    <Button
-      asChild
-      variant={primary ? "primary" : "ghost"}
+    <Link
+      href={href}
       className={cn(
-        "w-full justify-start min-h-[44px] py-3 sm:py-2",
+        "flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
         primary
-          ? "bg-teal-600 hover:bg-teal-700 text-white"
-          : "text-slate-700 hover:bg-slate-100",
+          ? "bg-[#FF8C42] hover:bg-[#F47B3B] text-white"
+          : "text-[#555555] hover:bg-[#FAF7F2]",
       )}
     >
-      <Link href={href}>
-        {icon}
-        <span className="ml-2">{label}</span>
-      </Link>
-    </Button>
+      <span className={primary ? "text-white" : "text-[#FF8C42]"}>{icon}</span>
+      {label}
+    </Link>
   );
 }
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-8">
-      {/* Hero skeleton */}
-      <div className="h-48 rounded-2xl bg-slate-100 animate-pulse" />
-
-      {/* Content grid skeleton */}
+    <div className="space-y-6">
+      <div className="h-40 rounded-xl bg-[#F5F2ED] animate-pulse" />
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
-        <div className="h-96 rounded-xl bg-slate-100 animate-pulse" />
-        <div className="space-y-6">
-          <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />
-          <div className="h-60 rounded-xl bg-slate-100 animate-pulse" />
+        <div className="h-96 rounded-xl bg-[#F5F2ED] animate-pulse" />
+        <div className="space-y-4">
+          <div className="h-40 rounded-xl bg-[#F5F2ED] animate-pulse" />
+          <div className="h-48 rounded-xl bg-[#F5F2ED] animate-pulse" />
         </div>
       </div>
     </div>
