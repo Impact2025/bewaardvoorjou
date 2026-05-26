@@ -88,9 +88,10 @@ export default function AdminDashboardPage() {
       ? Math.round((stats.users.active_30d / stats.users.total) * 100)
       : 0;
 
-  const trendUp = stats.users.trend_percent >= 0;
+  const trendPercent = stats.users.trend_percent ?? 0;
+  const trendUp = trendPercent >= 0;
   const trendLabel =
-    (trendUp ? "+" : "") + stats.users.trend_percent.toFixed(1) + "% vs gisteren";
+    (trendUp ? "+" : "") + trendPercent.toFixed(1) + "% vs gisteren";
 
   const recordingsTrendUp = stats.recordings.today >= (stats.recordings.week / 7);
   const recordingsTrendLabel =
