@@ -23,8 +23,8 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
   const isLocked = !chapter.is_unlocked;
 
   const statusIcon = useMemo(() => {
-    if (isLocked) return <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />;
-    if (isCompleted) return <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" />;
+    if (isLocked) return <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#999]" />;
+    if (isCompleted) return <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF8C42]" />;
     return null;
   }, [isLocked, isCompleted]);
 
@@ -47,8 +47,8 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
         "active:scale-95",
         isLocked && "opacity-50 cursor-not-allowed",
         !isLocked && "hover:shadow-lg hover:scale-105 hover:-translate-y-1 cursor-pointer",
-        isCompleted && "ring-2 ring-green-400 animate-pulse-once",
-        isSelected && "ring-2 ring-offset-2 ring-teal-500",
+        isCompleted && "ring-2 ring-[#FF8C42]/40 animate-pulse-once",
+        isSelected && "ring-2 ring-offset-2 ring-[#FF8C42]",
         colors.bg,
         colors.border,
       )}
@@ -69,7 +69,7 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",
-            isCompleted ? "bg-emerald-500" : "bg-current opacity-60",
+            isCompleted ? "bg-[#FF8C42]" : "bg-[#FF8C42] opacity-40",
             colors.text,
           )}
           style={{ width: `${progressPercent}%` }}

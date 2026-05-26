@@ -69,41 +69,13 @@ export interface TimelineChapterDetail {
  * Phase colors for consistent styling
  */
 export const PHASE_COLORS: Record<LifePhase, { bg: string; text: string; border: string }> = {
-  intro: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-300",
-  },
-  youth: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-300",
-  },
-  love: {
-    bg: "bg-pink-50",
-    text: "text-pink-700",
-    border: "border-pink-300",
-  },
-  work: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-300",
-  },
-  future: {
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-    border: "border-violet-300",
-  },
-  bonus: {
-    bg: "bg-teal-50",
-    text: "text-teal-700",
-    border: "border-teal-300",
-  },
-  deep: {
-    bg: "bg-indigo-50",
-    text: "text-indigo-700",
-    border: "border-indigo-300",
-  },
+  intro:  { bg: "bg-white",       text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  youth:  { bg: "bg-[#FAF7F2]",  text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  love:   { bg: "bg-white",       text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  work:   { bg: "bg-[#FAF7F2]",  text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  future: { bg: "bg-white",       text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  bonus:  { bg: "bg-[#FAF7F2]",  text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
+  deep:   { bg: "bg-white",       text: "text-[#FF8C42]", border: "border-[#E6E2DD]" },
 };
 
 /**

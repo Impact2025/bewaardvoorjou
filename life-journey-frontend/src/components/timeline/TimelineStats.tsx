@@ -16,102 +16,68 @@ export function TimelineStats({ timeline, className }: TimelineStatsProps) {
       ? Math.round((timeline.completed_chapters / timeline.total_chapters) * 100)
       : 0;
 
-    const durationFormatted = formatDuration(timeline.total_duration_seconds);
-
-    const lastActivityFormatted = timeline.last_activity_at
-      ? formatRelativeTime(new Date(timeline.last_activity_at))
-      : "Nog geen activiteit";
-
     return {
       progressPercent,
-      durationFormatted,
-      lastActivityFormatted,
+      durationFormatted: formatDuration(timeline.total_duration_seconds),
+      lastActivityFormatted: timeline.last_activity_at
+        ? formatRelativeTime(new Date(timeline.last_activity_at))
+        : "Nog geen activiteit",
     };
   }, [timeline]);
 
   return (
-    <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-4", className)}>
-      {/* Progress */}
+    <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", className)}>
       <StatCard
-        icon={<CheckCircle className="h-5 w-5 text-emerald-500" />}
+        icon={<CheckCircle className="h-4 w-4" />}
         label="Voortgang"
         value={`${stats.progressPercent}%`}
         subtext={`${timeline.completed_chapters}/${timeline.total_chapters} hoofdstukken`}
-        color="emerald"
       />
-
-      {/* Media count */}
       <StatCard
-        icon={<Video className="h-5 w-5 text-blue-500" />}
+        icon={<Video className="h-4 w-4" />}
         label="Opnames"
         value={String(timeline.total_media)}
         subtext={timeline.total_media === 1 ? "opname" : "opnames"}
-        color="blue"
       />
-
-      {/* Duration */}
       <StatCard
-        icon={<Clock className="h-5 w-5 text-violet-500" />}
+        icon={<Clock className="h-4 w-4" />}
         label="Totale duur"
         value={stats.durationFormatted}
         subtext="opgenomen"
-        color="violet"
       />
-
-      {/* Chapters */}
       <StatCard
-        icon={<BookOpen className="h-5 w-5 text-amber-500" />}
+        icon={<BookOpen className="h-4 w-4" />}
         label="Laatste activiteit"
         value={stats.lastActivityFormatted}
         subtext=""
-        color="amber"
       />
     </div>
   );
 }
 
-interface StatCardProps {
+function StatCard({ icon, label, value, subtext }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   subtext: string;
-  color: "emerald" | "blue" | "violet" | "amber";
-}
-
-const colorClasses = {
-  emerald: "bg-emerald-50 border-emerald-200",
-  blue: "bg-blue-50 border-blue-200",
-  violet: "bg-violet-50 border-violet-200",
-  amber: "bg-amber-50 border-amber-200",
-};
-
-function StatCard({ icon, label, value, subtext, color }: StatCardProps) {
+}) {
   return (
-    <div
-      className={cn(
-        "p-4 rounded-xl border-2 transition-all hover:shadow-sm",
-        colorClasses[color],
-      )}
-    >
+    <div className="p-4 rounded-xl border border-[#E6E2DD] bg-white">
       <div className="flex items-center gap-2 mb-2">
-        {icon}
-        <span className="text-sm text-slate-600">{label}</span>
+        <span className="text-[#FF8C42]">{icon}</span>
+        <span className="text-xs text-[#999] font-medium">{label}</span>
       </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-      {subtext && <div className="text-xs text-slate-500">{subtext}</div>}
+      <div className="text-xl font-semibold text-[#333333]">{value}</div>
+      {subtext && <div className="text-xs text-[#999] mt-0.5">{subtext}</div>}
     </div>
   );
 }
 
 function formatDuration(seconds: number): string {
   if (seconds === 0) return "0m";
-
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
-
-  if (hours > 0) {
-    return `${hours}u ${mins}m`;
-  }
+  if (hours > 0) return `${hours}u ${mins}m`;
   return `${mins}m`;
 }
 
