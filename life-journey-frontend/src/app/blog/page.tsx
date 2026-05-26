@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import { ArrowRight, BookOpen, TrendingUp, Tag } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Blog — Verhalen, tips & inspiratie | BewaardVoorJou.nl",
@@ -76,44 +76,41 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-function tagColor(tagStr: string | null): string {
-  return tagStr ?? "#E8773C";
-}
-
-// ─── Article Card (grid) ────────────────────────────────────────────────────
+// ─── Article Card ────────────────────────────────────────────────────────────
 
 function ArticleCard({ article }: { article: ArticleListItem }) {
   const tags = parseTags(article.tags);
-  const accentColor = article.header_color ?? "#E8773C";
 
   return (
     <Link href={`/blog/${article.slug}`} className="group block h-full">
-      <article className="h-full bg-white rounded-2xl border border-neutral-sand overflow-hidden hover:shadow-md hover:border-orange/30 transition-all duration-200 flex flex-col">
-        <div className="h-1.5 shrink-0" style={{ backgroundColor: accentColor }} />
+      <article className="h-full bg-white rounded-xl border border-[#E6E2DD] hover:border-[#FF8C42]/40 hover:shadow-[0_4px_20px_rgba(255,140,66,0.08)] transition-all duration-200 flex flex-col overflow-hidden">
+        <div className="h-1 shrink-0 bg-[#FF8C42]" />
         <div className="p-5 flex flex-col flex-1">
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
               {tags.slice(0, 2).map((t) => (
                 <span
                   key={t}
-                  className="text-xs px-2 py-0.5 rounded-full bg-orange/10 text-orange font-medium capitalize"
+                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#FAF7F2] text-[#FF8C42] font-medium capitalize border border-[#FF8C42]/20"
                 >
                   {t}
                 </span>
               ))}
             </div>
           )}
-          <h3 className="font-serif font-semibold text-slate-900 text-base leading-snug mb-2 group-hover:text-orange transition-colors line-clamp-3 flex-1">
+          <h3 className="font-serif font-semibold text-[#333333] text-base leading-snug mb-2 group-hover:text-[#FF8C42] transition-colors line-clamp-3 flex-1">
             {article.title}
           </h3>
           {article.excerpt && (
-            <p className="text-sm text-slate-500 line-clamp-2 mb-4">
+            <p className="text-sm text-[#555555] line-clamp-2 mb-4 leading-relaxed">
               {article.excerpt}
             </p>
           )}
-          <div className="flex items-center justify-between text-xs text-slate-400 mt-auto pt-3 border-t border-neutral-sand/60">
+          <div className="flex items-center justify-between text-xs text-[#999] mt-auto pt-3 border-t border-[#E6E2DD]/60">
             <span>{formatDate(article.published_at ?? article.created_at)}</span>
-            <ArrowRight className="h-3.5 w-3.5 text-orange opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="flex items-center gap-1 text-[#FF8C42] opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+              Lees meer <ArrowRight className="h-3 w-3" />
+            </span>
           </div>
         </div>
       </article>
@@ -125,50 +122,40 @@ function ArticleCard({ article }: { article: ArticleListItem }) {
 
 function FeaturedArticle({ article }: { article: ArticleListItem }) {
   const tags = parseTags(article.tags);
-  const bg = article.header_color ?? "#F5E6D3";
-  const textColor = article.header_text_color ?? "#5C3D2E";
 
   return (
     <Link href={`/blog/${article.slug}`} className="group block">
-      <article
-        className="rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-transparent hover:border-orange/20"
-        style={{ backgroundColor: bg }}
-      >
-        <div className="p-8 sm:p-10" style={{ color: textColor }}>
+      <article className="bg-white rounded-xl border border-[#E6E2DD] hover:border-[#FF8C42]/40 hover:shadow-[0_8px_32px_rgba(255,140,66,0.10)] transition-all duration-300 overflow-hidden flex flex-col sm:flex-row">
+        {/* Orange left accent bar */}
+        <div className="w-full sm:w-1.5 h-1.5 sm:h-auto shrink-0 bg-gradient-to-b from-[#FF8C42] to-[#FFB84D]" />
+        <div className="p-7 sm:p-9 flex flex-col flex-1">
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {tags.map((t) => (
                 <span
                   key={t}
-                  className="text-xs px-3 py-1 rounded-full font-medium capitalize"
-                  style={{ backgroundColor: `${textColor}22`, color: textColor }}
+                  className="text-[11px] px-3 py-1 rounded-full bg-[#FAF7F2] text-[#FF8C42] font-semibold capitalize border border-[#FF8C42]/25"
                 >
                   {t}
                 </span>
               ))}
             </div>
           )}
-          <h2
-            className="font-serif font-semibold text-2xl sm:text-3xl leading-tight mb-4 group-hover:opacity-80 transition-opacity"
-            style={{ color: textColor }}
-          >
+          <h2 className="font-serif font-semibold text-[#333333] text-2xl sm:text-3xl leading-tight mb-3 group-hover:text-[#FF8C42] transition-colors">
             {article.title}
           </h2>
           {article.excerpt && (
-            <p className="text-base leading-relaxed mb-6 opacity-80 max-w-2xl line-clamp-3">
+            <p className="text-[#555555] leading-relaxed mb-6 max-w-2xl line-clamp-2">
               {article.excerpt}
             </p>
           )}
-          <div className="flex items-center justify-between">
-            <span className="text-sm opacity-60">
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-xs text-[#999]">
               {formatDate(article.published_at ?? article.created_at)}
             </span>
-            <span
-              className="inline-flex items-center gap-2 text-sm font-semibold group-hover:gap-3 transition-all"
-              style={{ color: textColor }}
-            >
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF8C42] group-hover:gap-3 transition-all">
               Lees artikel
-              <ArrowRight className="h-4 w-4" />
+              <ArrowUpRight className="h-4 w-4" />
             </span>
           </div>
         </div>
@@ -181,15 +168,13 @@ function FeaturedArticle({ article }: { article: ArticleListItem }) {
 
 function MostReadSidebar({ articles }: { articles: ArticleListItem[] }) {
   return (
-    <div className="bg-white rounded-2xl border border-neutral-sand p-6">
-      <div className="flex items-center gap-2 mb-5">
-        <TrendingUp className="h-4 w-4 text-orange" />
-        <h2 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">
-          Meest gelezen
-        </h2>
-      </div>
+    <div className="bg-white rounded-xl border border-[#E6E2DD] p-6">
+      <h2 className="font-semibold text-[#333333] text-sm uppercase tracking-widest mb-5 flex items-center gap-2">
+        <span className="inline-block w-3 h-0.5 bg-[#FF8C42] rounded-full" />
+        Meest gelezen
+      </h2>
       {articles.length === 0 ? (
-        <p className="text-sm text-slate-400">Binnenkort beschikbaar</p>
+        <p className="text-sm text-[#999]">Binnenkort beschikbaar</p>
       ) : (
         <ol className="space-y-4">
           {articles.map((article, i) => (
@@ -198,14 +183,14 @@ function MostReadSidebar({ articles }: { articles: ArticleListItem[] }) {
                 href={`/blog/${article.slug}`}
                 className="group flex items-start gap-3"
               >
-                <span className="text-2xl font-serif font-bold text-slate-100 leading-none shrink-0 select-none">
+                <span className="text-xs font-bold text-[#FF8C42]/50 leading-none shrink-0 mt-1 w-4 tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <p className="text-sm font-medium text-slate-800 group-hover:text-orange transition-colors leading-snug line-clamp-2">
+                  <p className="text-sm font-medium text-[#333333] group-hover:text-[#FF8C42] transition-colors leading-snug line-clamp-2">
                     {article.title}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-[#999] mt-1">
                     {formatDate(article.published_at ?? article.created_at)}
                   </p>
                 </div>
@@ -228,17 +213,16 @@ function TagFilterBar({
   selectedTag: string | null;
 }) {
   return (
-    <section className="bg-white border-b border-neutral-sand">
+    <section className="bg-white border-b border-[#E6E2DD]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center gap-2 py-3 overflow-x-auto">
-          <Tag className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
           <Link
             href="/blog"
             className={[
               "whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0",
               !selectedTag
-                ? "bg-orange text-white shadow-sm"
-                : "bg-slate-100 text-slate-600 hover:bg-orange/10 hover:text-orange",
+                ? "bg-[#FF8C42] text-white"
+                : "text-[#555555] hover:text-[#FF8C42]",
             ].join(" ")}
           >
             Alle verhalen
@@ -250,12 +234,12 @@ function TagFilterBar({
               className={[
                 "whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 capitalize",
                 selectedTag === tagName
-                  ? "bg-orange text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-orange/10 hover:text-orange",
+                  ? "bg-[#FF8C42] text-white"
+                  : "text-[#555555] hover:text-[#FF8C42]",
               ].join(" ")}
             >
               {tagName}
-              <span className="ml-1 opacity-50 text-xs">({count})</span>
+              <span className="ml-1 opacity-40 text-xs">({count})</span>
             </Link>
           ))}
         </div>
@@ -268,17 +252,19 @@ function TagFilterBar({
 
 function CtaSidebarCard() {
   return (
-    <div className="bg-gradient-to-br from-orange/10 to-orange/5 rounded-2xl border border-orange/20 p-6 text-center">
-      <div className="text-3xl mb-3">📖</div>
-      <h3 className="font-serif font-semibold text-slate-900 mb-2 leading-tight">
+    <div className="bg-[#FAF7F2] rounded-xl border border-[#E6E2DD] p-6 text-center">
+      <div className="w-10 h-10 rounded-full bg-[#FF8C42]/10 flex items-center justify-center mx-auto mb-4">
+        <span className="text-xl">📖</span>
+      </div>
+      <h3 className="font-serif font-semibold text-[#333333] mb-2 leading-tight">
         Begin jouw verhaal vandaag
       </h3>
-      <p className="text-sm text-slate-600 mb-5">
+      <p className="text-sm text-[#555555] mb-5 leading-relaxed">
         Leg jouw herinneringen vast voor toekomstige generaties.
       </p>
       <Link
         href="/register"
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange text-white text-sm font-semibold hover:bg-orange/90 transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF8C42] text-white text-sm font-semibold hover:bg-[#F47B3B] transition-colors"
       >
         Gratis starten
         <ArrowRight className="h-3.5 w-3.5" />
@@ -302,7 +288,6 @@ export default async function BlogPage({
     getMostRead(),
   ]);
 
-  // Collect unique tags with counts
   const tagMap: Record<string, number> = {};
   for (const a of allArticles) {
     parseTags(a.tags).forEach((t) => {
@@ -311,7 +296,6 @@ export default async function BlogPage({
   }
   const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
 
-  // Filter articles
   const displayArticles =
     selectedTag !== null
       ? allArticles.filter((a) => parseTags(a.tags).includes(selectedTag))
@@ -341,23 +325,22 @@ export default async function BlogPage({
       />
       <PublicHeader />
 
-      <main className="min-h-screen bg-warm-50">
+      <main className="min-h-screen bg-[#FAF7F2]">
         {/* Hero */}
-        <section className="bg-white border-b border-neutral-sand py-14 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange/10 text-orange text-sm font-medium mb-6">
-              <BookOpen className="h-4 w-4" />
+        <section className="bg-white border-b border-[#E6E2DD] py-16 px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#FF8C42] mb-4">
               Blog
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-serif font-semibold text-slate-900 mb-4 leading-tight">
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-serif font-semibold text-[#333333] mb-4 leading-tight">
               Verhalen die blijven
             </h1>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Inspiratie, cadeautips en waardevolle inzichten over het bewaren
-              van herinneringen — voor elke generatie.
+            <p className="text-lg text-[#555555] max-w-xl mx-auto leading-relaxed">
+              Inspiratie, tips en waardevolle inzichten over het bewaren van
+              herinneringen — voor elke generatie.
             </p>
             {allArticles.length > 0 && (
-              <p className="text-sm text-slate-400 mt-4">
+              <p className="text-sm text-[#999] mt-5">
                 {allArticles.length} artikel{allArticles.length !== 1 ? "en" : ""}
               </p>
             )}
@@ -372,15 +355,14 @@ export default async function BlogPage({
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
           {displayArticles.length === 0 ? (
-            /* Empty state */
             <div className="text-center py-24">
-              <BookOpen className="h-12 w-12 mx-auto text-slate-200 mb-4" />
-              <h2 className="text-xl font-serif font-semibold text-slate-700 mb-2">
+              <p className="text-4xl mb-4">📝</p>
+              <h2 className="text-xl font-serif font-semibold text-[#333333] mb-2">
                 {selectedTag
-                  ? `Geen artikelen gevonden voor "${selectedTag}"`
+                  ? `Geen artikelen voor "${selectedTag}"`
                   : "Nog geen artikelen gepubliceerd"}
               </h2>
-              <p className="text-slate-500 mb-6">
+              <p className="text-[#555555] mb-6">
                 {selectedTag
                   ? "Probeer een andere categorie."
                   : "Kom binnenkort terug voor nieuwe verhalen."}
@@ -388,7 +370,7 @@ export default async function BlogPage({
               {selectedTag && (
                 <Link
                   href="/blog"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange text-white text-sm font-semibold hover:bg-orange/90 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF8C42] text-white text-sm font-semibold hover:bg-[#F47B3B] transition-colors"
                 >
                   Alle verhalen bekijken
                 </Link>
@@ -398,17 +380,14 @@ export default async function BlogPage({
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main column */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Featured */}
                 {featured && <FeaturedArticle article={featured} />}
 
-                {/* Grid */}
                 {restArticles.length > 0 && (
                   <>
-                    {restArticles.length > 0 && (
-                      <h2 className="font-serif font-semibold text-slate-900 text-xl pt-2">
-                        {selectedTag ? `Meer over "${selectedTag}"` : "Alle artikelen"}
-                      </h2>
-                    )}
+                    <h2 className="font-serif font-semibold text-[#333333] text-lg pt-1 flex items-center gap-3">
+                      <span className="inline-block w-4 h-0.5 bg-[#FF8C42] rounded-full" />
+                      {selectedTag ? `Meer over "${selectedTag}"` : "Alle artikelen"}
+                    </h2>
                     <div className="grid sm:grid-cols-2 gap-5">
                       {restArticles.map((article) => (
                         <ArticleCard key={article.id} article={article} />
@@ -419,7 +398,7 @@ export default async function BlogPage({
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-6 lg:pt-0">
+              <div className="space-y-5">
                 <MostReadSidebar articles={mostRead} />
                 <CtaSidebarCard />
               </div>
@@ -428,26 +407,29 @@ export default async function BlogPage({
         </div>
 
         {/* Bottom CTA */}
-        <section className="bg-white border-t border-neutral-sand py-14 px-4 sm:px-6 mt-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-3">
+        <section className="bg-white border-t border-[#E6E2DD] py-16 px-4 sm:px-6 mt-8">
+          <div className="max-w-xl mx-auto text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#FF8C42] mb-3">
+              Aan de slag
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-[#333333] mb-3 leading-tight">
               Begin vandaag met jouw verhaal
             </h2>
-            <p className="text-slate-600 mb-8">
+            <p className="text-[#555555] mb-8 leading-relaxed">
               Maak gratis een account aan en leg je eerste herinnering vast — het
               duurt maar 2 minuten.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-orange text-white font-semibold hover:bg-orange/90 transition-colors shadow-md"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#FF8C42] text-white font-semibold hover:bg-[#F47B3B] transition-colors shadow-sm"
               >
                 Gratis starten
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/kennisbank"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-[#E6E2DD] text-[#555555] font-medium hover:border-[#FF8C42]/40 hover:text-[#FF8C42] transition-colors"
               >
                 Kennisbank bekijken
               </Link>
