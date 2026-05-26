@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { loginUser } from "@/lib/auth-client";
+import { loginUser, requestMagicLink } from "@/lib/auth-client";
 import { isApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,21 @@ export default function LoginPage() {
   const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showMagicLink, setShowMagicLink] = useState(false);
+  const [magicLinkEmail, setMagicLinkEmail] = useState("");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [isSendingMagicLink, setIsSendingMagicLink] = useState(false);
+
+  async function handleMagicLinkRequest(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSendingMagicLink(true);
+    try {
+      await requestMagicLink(magicLinkEmail);
+    } finally {
+      setIsSendingMagicLink(false);
+      setMagicLinkSent(true);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -147,7 +162,60 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-medium">
+          <div className="mt-6 border-t border-card pt-5">
+            {!showMagicLink ? (
+              <p className="text-center text-sm text-medium">
+                Geen wachtwoord?{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowMagicLink(true)}
+                  className="text-warm-amber hover:text-warm-amber/80 font-medium underline-offset-2 hover:underline"
+                >
+                  Ontvang een toegangslink
+                </button>
+              </p>
+            ) : magicLinkSent ? (
+              <div className="rounded-xl border border-warm-amber/40 bg-warm-amber/10 p-4 text-sm text-center">
+                <p className="font-medium text-heading mb-1">Controleer je inbox</p>
+                <p className="text-medium">
+                  Als dit e-mailadres bij ons bekend is, ontvang je een toegangslink per e-mail.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleMagicLinkRequest} className="space-y-3">
+                <p className="text-sm text-medium text-center">
+                  Ontvang een toegangslink via e-mail
+                </p>
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="jouw@email.nl"
+                  value={magicLinkEmail}
+                  onChange={(e) => setMagicLinkEmail(e.target.value)}
+                  className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+                />
+                <Button
+                  type="submit"
+                  className="w-full justify-center bg-warm-amber hover:bg-warm-amber/90 text-slate-900"
+                  disabled={isSendingMagicLink || !magicLinkEmail}
+                >
+                  {isSendingMagicLink ? "Bezig met versturen..." : "Stuur toegangslink"}
+                </Button>
+                <p className="text-center text-xs text-medium">
+                  <button
+                    type="button"
+                    onClick={() => setShowMagicLink(false)}
+                    className="hover:text-heading underline-offset-2 hover:underline"
+                  >
+                    Terug naar inloggen
+                  </button>
+                </p>
+              </form>
+            )}
+          </div>
+
+          <p className="mt-4 text-center text-sm text-medium">
             Nog geen account?{" "}
             <Link href="/register" className="text-warm-amber hover:text-warm-amber/80 font-medium">
               Maak er één aan

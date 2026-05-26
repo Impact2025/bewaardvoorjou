@@ -103,6 +103,8 @@ def test_authenticate_user_returns_user_and_updates_last_login():
     locale="nl",
     privacy_level="private",
   )
+  # Email must be verified before login is allowed
+  user.email_verified = True
   assert user.last_login_at is None
 
   authenticated = auth_service.authenticate_user(session, email="login@example.com", password="password123")

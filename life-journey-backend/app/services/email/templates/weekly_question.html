@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Jouw vraag van deze week{% endblock %}
+
+{% block content %}
+<h2>Dag {{ display_name }} 👋</h2>
+
+<p>
+    We hebben een vraag voor je bewaard. Neem gerust de tijd —
+    er is geen haast. Jouw verhaal is het waard.
+</p>
+
+<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); padding: 28px 24px; border-radius: 12px; margin: 28px 0; border-left: 5px solid #F97316;">
+    <p style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #9A8070; margin: 0 0 12px 0; font-weight: 600;">
+        Hoofdstuk: {{ chapter_name }}
+    </p>
+    <p style="font-size: 22px; color: #2C2416; font-weight: 600; margin: 0; line-height: 1.4; font-style: italic;">
+        "{{ question_text }}"
+    </p>
+</div>
+
+<p style="color: #4A4239;">
+    Klik op de knop hieronder en vertel je antwoord in je eigen woorden —
+    in je eigen tempo. Spreek, typ of neem video op. Jij kiest.
+</p>
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ journey_url }}" class="cta-button" style="font-size: 18px; padding: 18px 40px;">
+        🎤 Beantwoord deze vraag
+    </a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; color: #9A8070; text-align: center; margin: 0;">
+    Geen tijd deze week? Geen probleem — de vraag wacht op je.
+</p>
+{% endblock %}

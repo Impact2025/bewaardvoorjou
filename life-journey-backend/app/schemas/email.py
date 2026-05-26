@@ -13,6 +13,10 @@ class EmailPreferenceResponse(BaseModel):
     welcome_emails: bool
     chapter_emails: bool
     milestone_emails: bool
+    weekly_question_emails: bool = True
+    inactivity_reminders: bool = True
+    seasonal_emails: bool = True
+    family_notifications: bool = True
     unsubscribed_all: bool
     unsubscribed_at: datetime | None = None
 
@@ -25,6 +29,10 @@ class EmailPreferenceUpdate(BaseModel):
     welcome_emails: bool | None = None
     chapter_emails: bool | None = None
     milestone_emails: bool | None = None
+    weekly_question_emails: bool | None = None
+    inactivity_reminders: bool | None = None
+    seasonal_emails: bool | None = None
+    family_notifications: bool | None = None
     unsubscribed_all: bool | None = None
 
 

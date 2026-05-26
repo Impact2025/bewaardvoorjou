@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Jouw verhalen staan klaar voor download — Bewaardvoorjou{% endblock %}
+
+{% block content %}
+<h2>Dag {{ user_display_name }},</h2>
+
+<p style="font-size: 18px; color: #2C2416;">
+  Je exportverzoek is klaar! Al jouw verhalen, transcripties en herinneringen staan gebundeld in één bestand.
+</p>
+
+<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FEF3E2 100%); border-left: 4px solid #F97316; padding: 24px 28px; border-radius: 8px; margin: 28px 0; text-align: center;">
+  <p style="margin: 0 0 8px; font-size: 16px; color: #6B6456;">Jouw persoonlijk archief</p>
+  <p style="margin: 0; font-size: 28px; font-weight: 700; color: #2C2416;">📦 Exportbestand klaar</p>
+</div>
+
+<p style="font-size: 16px; color: #4A4239;">
+  Het bestand bevat:
+</p>
+<ul style="color: #4A4239; font-size: 16px; line-height: 2;">
+  <li>✅ Volledige transcripties van alle verhaalfragmenten</li>
+  <li>✅ Metadata en tijdlijn van jouw levensverhaal</li>
+  <li>✅ Alle gestelde vragen en thema's</li>
+  <li>✅ Jouw notities en aantekeningen</li>
+  <li>✅ Overzicht van alle audio- en video-opnames</li>
+</ul>
+
+<div style="text-align: center; margin: 32px 0;">
+  <a href="{{ download_url }}" class="cta-button" style="font-size: 18px; padding: 18px 48px; border-radius: 12px;">
+    ⬇️ Download mijn verhalen
+  </a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; color: #6B6456; background: #FAF8F3; padding: 16px; border-radius: 8px;">
+  <strong>Let op:</strong> Deze downloadlink is {{ expires_hours }} uur geldig. Na verloop van tijd kun je een nieuwe export aanvragen via je instellingen.
+</p>
+{% endblock %}

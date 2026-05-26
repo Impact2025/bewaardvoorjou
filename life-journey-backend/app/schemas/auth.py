@@ -66,3 +66,11 @@ class ResendVerificationRequest(BaseModel):
 
 class MessageResponse(BaseModel):
   message: str
+
+
+class MagicLinkRequest(BaseModel):
+  email: EmailStr
+
+
+class MagicLinkVerifyRequest(BaseModel):
+  token: str

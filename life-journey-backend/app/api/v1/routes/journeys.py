@@ -16,7 +16,7 @@ from app.schemas.media import MediaAsset as MediaAssetSchema
 from app.schemas.user import UserProfile as UserProfileSchema, AccessibilitySettings, DeadlineEntry
 from app.api.deps import get_current_user
 from app.models.user import User
-from app.services.journey_progress import get_all_chapter_statuses, CHAPTER_ORDER
+from app.services.journey_progress import get_all_chapter_statuses, get_next_available_chapter, CHAPTER_ORDER
 
 
 router = APIRouter()
@@ -269,3 +269,109 @@ def get_journey_detail(
     chapter_statuses=chapter_statuses,
     journey_progress=journey_progress,
   )
+
+
+class NextQuestionResponse(BaseModel):
+  chapter_id: str
+  chapter_title: str
+  question: str
+  session_id: str | None = None
+
+
+@router.get("/{journey_id}/next-question", response_model=NextQuestionResponse)
+@limiter.limit(RateLimits.READ_STANDARD)
+def get_next_question(
+  request: Request,
+  journey_id: str,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> NextQuestionResponse:
+  """Return the next available chapter and an AI-generated interview question for the storyteller UI."""
+  journey = db.query(JourneyModel).filter(JourneyModel.id == journey_id).first()
+  if not journey or journey.user_id != current_user.id:
+    raise HTTPException(status_code=403, detail="Geen toegang tot deze journey")
+
+  chapter_id = get_next_available_chapter(db, journey_id)
+  if not chapter_id:
+    raise HTTPException(status_code=404, detail="Alle hoofdstukken zijn al beantwoord")
+
+  try:
+    chapter_enum = ChapterId(chapter_id)
+  except ValueError:
+    raise HTTPException(status_code=404, detail="Onbekend hoofdstuk")
+
+  from app.services.ai.interviewer import build_prompt_with_ai, CHAPTER_CONTEXTS, build_prompt_fallback
+  chapter_ctx = CHAPTER_CONTEXTS.get(chapter_enum, {})
+  chapter_title = chapter_ctx.get("title", chapter_id.replace("-", " ").title())
+
+  try:
+    question = build_prompt_with_ai(
+      chapter=chapter_enum,
+      follow_up_history=[],
+      db=db,
+      journey_id=journey_id,
+    )
+  except Exception:
+    question = build_prompt_fallback(chapter_enum, [])
+
+  return NextQuestionResponse(
+    chapter_id=chapter_id,
+    chapter_title=chapter_title,
+    question=question,
+    session_id=None,
+  )
+
+
+class TextAnswerRequest(BaseModel):
+  content: str
+
+
+@router.post("/{journey_id}/chapters/{chapter_id}/text", status_code=201)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def submit_text_answer(
+  request: Request,
+  journey_id: str,
+  chapter_id: str,
+  payload: TextAnswerRequest,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+  """Store a text answer from the storyteller UI as a completed media asset + transcript."""
+  from uuid import uuid4
+  from datetime import datetime, timezone
+
+  journey = db.query(JourneyModel).filter(JourneyModel.id == journey_id).first()
+  if not journey or journey.user_id != current_user.id:
+    raise HTTPException(status_code=403, detail="Geen toegang tot deze journey")
+
+  content = payload.content.strip()
+  if not content:
+    raise HTTPException(status_code=422, detail="Antwoord mag niet leeg zijn")
+
+  asset_id = str(uuid4())
+  asset = MediaAssetModel(
+    id=asset_id,
+    journey_id=journey_id,
+    chapter_id=chapter_id,
+    modality="text",
+    object_key=f"{journey_id}/{chapter_id}/{asset_id}/text.txt",
+    original_filename="text_answer.txt",
+    size_bytes=len(content.encode()),
+    duration_seconds=0,
+    storage_state="ready",
+    recorded_at=datetime.now(timezone.utc),
+  )
+  segment = TranscriptSegmentModel(
+    id=str(uuid4()),
+    media_asset_id=asset_id,
+    start_ms=0,
+    end_ms=0,
+    text=content,
+    sentiment=None,
+    emotion_hint=None,
+  )
+  db.add(asset)
+  db.add(segment)
+  db.commit()
+
+  return {"asset_id": asset_id, "status": "saved"}

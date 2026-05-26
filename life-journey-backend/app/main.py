@@ -86,7 +86,21 @@ def create_app() -> FastAPI:
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
-    return {"status": "ok", "version": "2025-12-17-v6", "cors_fixed": "exception_handler"}
+    from app.db.session import SessionLocal
+    from sqlalchemy import text
+    db_ok = False
+    try:
+      db = SessionLocal()
+      db.execute(text("SELECT 1"))
+      db.close()
+      db_ok = True
+    except Exception:
+      pass
+    return {
+      "status": "ok" if db_ok else "degraded",
+      "db": "ok" if db_ok else "unreachable",
+      "environment": settings.environment,
+    }
 
   app.include_router(api_router, prefix=settings.api_v1_prefix)
 

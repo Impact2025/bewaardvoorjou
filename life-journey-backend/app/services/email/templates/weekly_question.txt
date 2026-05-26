@@ -1,0 +1,19 @@
+Dag {{ display_name }},
+
+We hebben een vraag voor je bewaard.
+
+Hoofdstuk: {{ chapter_name }}
+
+"{{ question_text }}"
+
+Neem gerust de tijd om te antwoorden:
+{{ journey_url }}
+
+Geen tijd deze week? Geen probleem — de vraag wacht op je.
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+---
+Emails niet meer ontvangen?
+{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}

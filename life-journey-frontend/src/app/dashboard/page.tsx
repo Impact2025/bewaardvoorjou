@@ -351,6 +351,27 @@ function DashboardContent() {
             </Card>
           )}
 
+          {/* Storyteller CTA — prominent card for returning users */}
+          {!isNewUser && (
+            <Link href="/vertel" className="block group">
+              <div
+                className="rounded-2xl p-6 flex items-center gap-5 transition-opacity hover:opacity-90 active:opacity-80"
+                style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)" }}
+              >
+                <span className="text-5xl">🎤</span>
+                <div className="flex-1">
+                  <p className="text-white font-serif text-xl font-semibold leading-tight">
+                    Begin met vertellen
+                  </p>
+                  <p className="text-orange-100 text-sm mt-1">
+                    Jouw volgende verhaalfragment wacht — één klik en je bent er
+                  </p>
+                </div>
+                <ArrowRight className="h-6 w-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          )}
+
           {/* Main Content Grid — sidebar first on mobile via CSS order */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
             {/* Timeline — verborgen voor nieuwe gebruikers */}

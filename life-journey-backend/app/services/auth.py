@@ -172,6 +172,79 @@ def reset_password(db: Session, *, token: str, new_password: str) -> User:
   return user
 
 
+def create_magic_link_token(db: Session, *, user: User) -> str:
+  """Genereer een magic link token voor passwordless login. Geldig 7 dagen."""
+  token = secrets.token_urlsafe(32)
+  user.magic_link_token = token
+  user.magic_link_token_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+  db.add(user)
+  db.commit()
+  return token
+
+
+def verify_magic_link_token(db: Session, *, token: str) -> User:
+  """Valideer een magic link token en retourneer de gebruiker. Invalideert het token na gebruik."""
+  user = db.query(User).filter(User.magic_link_token == token).first()
+  if not user:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ongeldige toegangslink")
+
+  expires_at = user.magic_link_token_expires_at
+  if expires_at is None:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ongeldige toegangslink")
+
+  if expires_at.tzinfo is None:
+    expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+  if datetime.now(timezone.utc) > expires_at:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Toegangslink is verlopen. Vraag een nieuwe aan.")
+
+  # Token eenmalig geldig — wis na gebruik en log gebruik
+  user.magic_link_token = None
+  user.magic_link_token_expires_at = None
+  user.magic_link_last_used_at = datetime.now(timezone.utc)
+  user.email_verified = True  # Magic link = impliciete emailverificatie
+  user.last_login_at = datetime.now(timezone.utc)
+  db.add(user)
+  db.commit()
+  db.refresh(user)
+  return user
+
+
+def get_or_create_storyteller(db: Session, *, email: str, display_name: str) -> User:
+  """
+  Haal bestaande gebruiker op of maak een nieuw pending account aan.
+  Gebruikt wanneer een kind oma uitnodigt — oma heeft nog geen account.
+  """
+  normalized_email = email.lower()
+  user = db.query(User).filter_by(email=normalized_email).first()
+  if user:
+    return user
+
+  user = User(
+    email=normalized_email,
+    display_name=display_name,
+    country="NL",
+    locale="nl",
+    is_active=True,
+    email_verified=False,
+    package_tier="NONE",
+    max_family_members=0,
+    max_chapters=None,
+    storage_years=0,
+  )
+  journey = Journey(
+    id=str(uuid4()),
+    title=f"Verhaal van {display_name}",
+    user=user,
+    progress=_default_progress(),
+  )
+  db.add(user)
+  db.add(journey)
+  db.commit()
+  db.refresh(user)
+  return user
+
+
 def authenticate_user(db: Session, *, email: str, password: str) -> User:
   normalized_email = email.lower()
   user = db.query(User).filter_by(email=normalized_email).first()

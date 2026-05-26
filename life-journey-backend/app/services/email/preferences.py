@@ -40,8 +40,20 @@ def should_send_email(db: Session, user_id: str, email_type: str) -> bool:
         return prefs.chapter_emails
     elif email_type == "milestone_unlock":
         return prefs.milestone_emails
+    elif email_type == "weekly_question":
+        return getattr(prefs, "weekly_question_emails", True)
+    elif email_type == "inactivity_reminder":
+        return getattr(prefs, "inactivity_reminders", True)
+    elif email_type == "seasonal":
+        return getattr(prefs, "seasonal_emails", True)
+    elif email_type == "family_notification":
+        return getattr(prefs, "family_notifications", True)
+    elif email_type == "progress_milestone":
+        return prefs.milestone_emails
+    elif email_type in ("magic_link", "export_ready"):
+        return True  # transactional, always send
 
-    return False
+    return True
 
 
 def get_or_create_preferences(db: Session, user_id: str) -> EmailPreferenceModel:
@@ -65,6 +77,10 @@ def get_or_create_preferences(db: Session, user_id: str) -> EmailPreferenceModel
             welcome_emails=True,
             chapter_emails=True,
             milestone_emails=True,
+            weekly_question_emails=True,
+            inactivity_reminders=True,
+            seasonal_emails=True,
+            family_notifications=True,
             unsubscribed_all=False,
         )
         db.add(prefs)

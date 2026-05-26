@@ -7,16 +7,19 @@ from app.core.config import settings
 from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
 from app.schemas.auth import (
-    AuthResponse, ForgotPasswordRequest, LoginRequest, MessageResponse,
-    RegisterRequest, RegisterResponse, ResendVerificationRequest,
-    ResetPasswordRequest, UserPublic, VerifyEmailRequest,
+    AuthResponse, ForgotPasswordRequest, LoginRequest, MagicLinkRequest,
+    MagicLinkVerifyRequest, MessageResponse, RegisterRequest, RegisterResponse,
+    ResendVerificationRequest, ResetPasswordRequest, UserPublic, VerifyEmailRequest,
 )
 from app.services.auth import (
-    authenticate_user, create_access_token, generate_email_verification_token,
-    generate_password_reset_token, register_user, reset_password, verify_email_token,
+    authenticate_user, create_access_token, create_magic_link_token,
+    generate_email_verification_token, generate_password_reset_token,
+    get_or_create_storyteller, register_user, reset_password,
+    verify_email_token, verify_magic_link_token,
 )
 from app.services.email.events import (
-    trigger_email_verification, trigger_password_reset_email, trigger_welcome_email,
+    trigger_email_verification, trigger_magic_link_email,
+    trigger_password_reset_email, trigger_welcome_email,
 )
 from loguru import logger
 
@@ -110,6 +113,36 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest, db: Sessio
 def reset_password_endpoint(request: Request, payload: ResetPasswordRequest, db: Session = Depends(get_db)) -> MessageResponse:
   reset_password(db, token=payload.token, new_password=payload.new_password)
   return MessageResponse(message="Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen.")
+
+
+@router.post("/magic-link", response_model=MessageResponse, tags=["auth"])
+@limiter.limit(RateLimits.AUTH_LOGIN)
+def request_magic_link(request: Request, payload: MagicLinkRequest, db: Session = Depends(get_db)) -> MessageResponse:
+  from app.models.user import User as UserModel
+  user = db.query(UserModel).filter_by(email=payload.email.lower()).first()
+  if not user:
+    user = get_or_create_storyteller(db, email=payload.email, display_name=payload.email.split("@")[0])
+
+  token = create_magic_link_token(db, user=user)
+  magic_link_url = f"{settings.app_base_url}/uitnodiging/{token}"
+  try:
+    trigger_magic_link_email(db, user.id, magic_link_url)
+  except Exception as e:
+    logger.warning(f"Failed to queue magic link email for user {user.id}: {e}")
+
+  return MessageResponse(message="Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een toegangslink.")
+
+
+@router.get("/magic-link/verify/{token}", response_model=AuthResponse, tags=["auth"])
+def verify_magic_link(token: str, db: Session = Depends(get_db)) -> AuthResponse:
+  user = verify_magic_link_token(db, token=token)
+  access_token = create_access_token(subject=user.id)
+  primary_journey = next(iter(user.journeys), None)
+  return AuthResponse(
+    access_token=access_token,
+    user=UserPublic.model_validate(user),
+    primary_journey_id=primary_journey.id if primary_journey else None,
+  )
 
 
 @router.post("/login", response_model=AuthResponse, tags=["auth"])

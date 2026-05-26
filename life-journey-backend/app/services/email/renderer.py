@@ -159,3 +159,139 @@ def build_email_verification_email(
     html, text = render_email("email_verification", context)
     logger.info(f"Built email_verification email for {user_display_name}")
     return subject, html, text
+
+
+def build_weekly_question_email(
+    user_display_name: str,
+    chapter_id: str,
+    question_text: str,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    chapter_name = get_chapter_name(chapter_id)
+    subject = f"Jouw vraag van deze week: {question_text[:60]}..."
+    context = {
+        "display_name": user_display_name,
+        "chapter_name": chapter_name,
+        "question_text": question_text,
+        "journey_url": journey_url,
+    }
+    html, text = render_email("weekly_question", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_inactivity_reminder_email(
+    user_display_name: str,
+    days_inactive: int,
+    next_chapter_id: str,
+    next_question: str,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"Je verhaal wacht op je, {user_display_name}"
+    context = {
+        "display_name": user_display_name,
+        "days_inactive": days_inactive,
+        "next_chapter_name": get_chapter_name(next_chapter_id),
+        "next_question": next_question,
+        "journey_url": journey_url,
+    }
+    html, text = render_email("inactivity_reminder", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_seasonal_email(
+    user_display_name: str,
+    occasion: str,
+    question_text: str,
+    chapter_id: str,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    occasion_subjects = {
+        "moederdag": f"Op Moederdag: een vraag speciaal voor jou, {user_display_name}",
+        "vaderdag": f"Op Vaderdag: een vraag speciaal voor jou, {user_display_name}",
+        "kerst": f"Met kerst: deel een herinnering, {user_display_name}",
+        "verjaardag": f"Gefeliciteerd! Een bijzondere vraag op jouw dag",
+        "oud_nieuw": f"Een nieuw jaar, een nieuw verhaal — speciaal voor jou",
+    }
+    subject = occasion_subjects.get(occasion, f"Een bijzondere vraag voor jou, {user_display_name}")
+    context = {
+        "display_name": user_display_name,
+        "occasion": occasion,
+        "question_text": question_text,
+        "chapter_name": get_chapter_name(chapter_id),
+        "journey_url": journey_url,
+    }
+    html, text = render_email("seasonal", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_progress_milestone_email(
+    user_display_name: str,
+    journey_title: str,
+    percent: int,
+    completed_count: int,
+    total_count: int,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"Geweldig! Je bent {percent}% van je verhaal klaar"
+    context = {
+        "display_name": user_display_name,
+        "journey_title": journey_title,
+        "percent": percent,
+        "completed_count": completed_count,
+        "total_count": total_count,
+        "journey_url": journey_url,
+    }
+    html, text = render_email("progress_milestone", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_family_notification_email(
+    recipient_name: str,
+    storyteller_name: str,
+    chapter_title: str,
+    share_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"{storyteller_name} heeft een nieuw verhaal gedeeld"
+    context = {
+        "recipient_name": recipient_name,
+        "storyteller_name": storyteller_name,
+        "chapter_title": chapter_title,
+        "share_url": share_url,
+    }
+    html, text = render_email("family_notification", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_magic_link_email(
+    user_display_name: str,
+    magic_link_url: str,
+    gifter_name: str | None = None,
+) -> tuple[str, str, str]:
+    subject = "Je persoonlijke toegangslink – Bewaard voor jou"
+    context = {
+        "display_name": user_display_name,
+        "magic_link_url": magic_link_url,
+        "gifter_name": gifter_name,
+    }
+    html, text = render_email("magic_link", context)
+    return subject, html, text
+
+
+def build_export_ready_email(
+    user_display_name: str,
+    download_url: str,
+    expires_hours: int,
+) -> tuple[str, str, str]:
+    subject = "Uw verhalen staan klaar voor download – Bewaard voor jou"
+    context = {
+        "display_name": user_display_name,
+        "download_url": download_url,
+        "expires_hours": expires_hours,
+    }
+    html, text = render_email("export_ready", context)
+    return subject, html, text

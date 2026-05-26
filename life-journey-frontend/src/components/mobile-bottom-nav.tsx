@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpen, Layers, Mic, Users } from "lucide-react";
+import { House, BookOpen, Mic2, Mic, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: House },
   { href: "/chapters", label: "Verhalen", icon: BookOpen },
-  { href: "/timeline", label: "Tijdlijn", icon: Layers },
+  { href: "/vertel", label: "Vertel", icon: Mic2, primary: true },
   { href: "/recordings", label: "Opnames", icon: Mic },
   { href: "/family", label: "Familie", icon: Users },
 ] as const;
@@ -26,7 +26,8 @@ export function MobileBottomNav() {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}
       >
         <div className="flex h-[68px] items-center justify-around px-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {NAV_ITEMS.map(({ href, label, icon: Icon, ...rest }) => {
+            const isPrimary = "primary" in rest && rest.primary;
             const isActive =
               pathname === href ||
               (href !== "/dashboard" && pathname.startsWith(href));
@@ -40,23 +41,33 @@ export function MobileBottomNav() {
                 <div
                   className={cn(
                     "flex h-9 w-11 items-center justify-center rounded-full transition-all duration-200",
-                    isActive && "bg-orange/10"
+                    isPrimary
+                      ? "bg-orange"
+                      : isActive
+                        ? "bg-orange/10"
+                        : ""
                   )}
                 >
                   <Icon
                     className={cn(
                       "transition-all duration-200",
-                      isActive
-                        ? "h-6 w-6 text-orange"
-                        : "h-5 w-5 text-gray-400"
+                      isPrimary
+                        ? "h-6 w-6 text-white"
+                        : isActive
+                          ? "h-6 w-6 text-orange"
+                          : "h-5 w-5 text-gray-400"
                     )}
-                    strokeWidth={isActive ? 2.5 : 2}
+                    strokeWidth={isActive || isPrimary ? 2.5 : 2}
                   />
                 </div>
                 <span
                   className={cn(
                     "text-xs font-semibold leading-none truncate",
-                    isActive ? "text-orange" : "text-gray-400"
+                    isPrimary
+                      ? "text-orange"
+                      : isActive
+                        ? "text-orange"
+                        : "text-gray-400"
                   )}
                 >
                   {label}

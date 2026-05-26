@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Jouw toegangslink — Bewaardvoorjou{% endblock %}
+
+{% block content %}
+<h2>Dag {{ user_display_name }},</h2>
+
+{% if gifter_name %}
+<p style="font-size: 18px; color: #2C2416;">
+  <strong>{{ gifter_name }}</strong> heeft je uitgenodigd om jouw levensverhaal te vertellen — een onbetaalbaar cadeau voor de hele familie.
+</p>
+{% else %}
+<p style="font-size: 18px; color: #2C2416;">
+  Klik op de knop hieronder om direct in te loggen. Geen wachtwoord nodig.
+</p>
+{% endif %}
+
+<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FEF3E2 100%); border-left: 4px solid #F97316; padding: 24px 28px; border-radius: 8px; margin: 28px 0;">
+  <p style="margin: 0; font-size: 20px; color: #2C2416; font-style: italic; line-height: 1.6;">
+    "Jouw verhalen zijn de mooiste erfenis die je kunt achterlaten."
+  </p>
+</div>
+
+<p style="font-size: 17px; color: #4A4239;">
+  Één klik is alles wat je nodig hebt:
+</p>
+
+<div style="text-align: center; margin: 32px 0;">
+  <a href="{{ magic_link_url }}" class="cta-button" style="font-size: 20px; padding: 18px 48px; border-radius: 12px;">
+    ✨ Begin mijn verhaal
+  </a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; color: #6B6456; background: #FAF8F3; padding: 16px; border-radius: 8px;">
+  <strong>Veilig en eenvoudig:</strong> Deze link is 7 dagen geldig en werkt alleen voor jou.
+  Je hoeft niets te installeren — alles werkt gewoon via je browser.
+</p>
+
+<p style="font-size: 14px; color: #6B6456;">
+  Als je deze link niet hebt aangevraagd, kun je deze e-mail gewoon negeren.
+</p>
+{% endblock %}

@@ -20,6 +20,29 @@ from pathlib import Path
 from typing import List, Optional
 from uuid import uuid4
 
+try:
+    import nh3
+    _ALLOWED_TAGS = {
+        "p", "br", "strong", "em", "b", "i", "u", "s", "del",
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "ul", "ol", "li", "blockquote", "pre", "code",
+        "a", "img",
+        "table", "thead", "tbody", "tr", "th", "td",
+        "hr", "figure", "figcaption", "span", "div",
+    }
+    _ALLOWED_ATTRS = {
+        "a": {"href", "title", "target", "rel"},
+        "img": {"src", "alt", "title", "width", "height"},
+        "*": {"class", "id"},
+    }
+    def _sanitize_html(html: str | None) -> str | None:
+        if html is None:
+            return None
+        return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
+except ImportError:
+    def _sanitize_html(html: str | None) -> str | None:  # type: ignore[misc]
+        return html
+
 import boto3
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
@@ -146,7 +169,9 @@ async def create_blog_post(
 ):
     if db.query(BlogPost).filter(BlogPost.slug == payload.slug).first():
         raise HTTPException(status_code=409, detail="Slug al in gebruik")
-    post = BlogPost(id=str(uuid4()), author_id=admin.id, **payload.model_dump())
+    data = payload.model_dump()
+    data["content"] = _sanitize_html(data.get("content"))
+    post = BlogPost(id=str(uuid4()), author_id=admin.id, **data)
     db.add(post)
     db.commit()
     db.refresh(post)
@@ -564,6 +589,8 @@ async def update_blog_post(
         ).first():
             raise HTTPException(status_code=409, detail="Slug al in gebruik")
     for field, value in payload.model_dump(exclude_none=True).items():
+        if field == "content":
+            value = _sanitize_html(value)
         setattr(post, field, value)
     db.commit()
     db.refresh(post)

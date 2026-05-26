@@ -268,6 +268,35 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     db.commit()
     logger.info(f"Order {order.id} succesvol verwerkt (€{order.price_paid / 100:.2f})")
 
+    # Gift flow: stuur magic link naar begiftigde storyteller
+    recipient_email = metadata.get("recipient_email")
+    recipient_name = metadata.get("recipient_name")
+    if recipient_email and recipient_name:
+        gifter_email = metadata.get("contact_email") or order.guest_email or ""
+        _send_storyteller_magic_link(db, recipient_email, recipient_name, gifter_email)
+
+
+def _send_storyteller_magic_link(
+    db: Session,
+    recipient_email: str,
+    recipient_name: str,
+    gifter_email: str,
+) -> None:
+    """Create (or fetch) a pending storyteller account and send them a magic link."""
+    from app.services.auth import get_or_create_storyteller, create_magic_link_token
+    from app.services.email.events import trigger_magic_link_email
+    from app.core.config import settings as _settings
+
+    try:
+        user = get_or_create_storyteller(db, email=recipient_email, display_name=recipient_name)
+        token = create_magic_link_token(db, user=user)
+        magic_link_url = f"{_settings.app_base_url}/uitnodiging/{token}"
+        gifter_name = gifter_email.split("@")[0] if gifter_email else "iemand die van je houdt"
+        trigger_magic_link_email(db, user.id, magic_link_url, gifter_name=gifter_name)
+        logger.info(f"Magic link verstuurd naar begiftigde storyteller {recipient_email}")
+    except Exception as exc:
+        logger.error(f"Kon magic link niet sturen naar {recipient_email}: {exc}")
+
 
 def _handle_payment_failed(db: Session, payment_intent: dict) -> None:
     intent_id = payment_intent.get("id") if isinstance(payment_intent, dict) else payment_intent.id

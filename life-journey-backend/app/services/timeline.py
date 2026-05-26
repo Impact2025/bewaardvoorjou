@@ -12,7 +12,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.journey import Journey
-from app.models.media import MediaAsset
+from app.models.media import MediaAsset, TranscriptSegment
 from app.models.preferences import ChapterPreference
 from app.schemas.common import ChapterId
 from app.core.config import settings
@@ -291,10 +291,28 @@ def get_chapter_detail(
         for a in assets
     ]
 
+    # Build transcript preview from the most recent asset with segments
+    transcripts_preview: str | None = None
+    for asset in assets:
+        segs = (
+            db.query(TranscriptSegment)
+            .filter(TranscriptSegment.media_asset_id == asset.id)
+            .order_by(TranscriptSegment.start_ms.asc())
+            .limit(20)
+            .all()
+        )
+        if segs:
+            full_text = " ".join(s.text for s in segs)
+            if len(full_text) > 280:
+                transcripts_preview = full_text[:280].rsplit(" ", 1)[0] + "…"
+            else:
+                transcripts_preview = full_text
+            break
+
     return TimelineChapterDetail(
         chapter=chapter,
         phase=PHASE_METADATA[phase],
         prompt_hint=prompt_hint,
         media_assets=media_assets,
-        transcripts_preview=None,  # TODO: Add transcript preview
+        transcripts_preview=transcripts_preview,
     )

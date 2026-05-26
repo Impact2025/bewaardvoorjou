@@ -94,6 +94,12 @@ def create_payment_intent(
     }
     if current_user:
         metadata["user_id"] = current_user.id
+    if payload.recipient_name:
+        metadata["recipient_name"] = payload.recipient_name
+    if payload.recipient_email:
+        metadata["recipient_email"] = str(payload.recipient_email)
+    if payload.personal_message:
+        metadata["personal_message"] = payload.personal_message[:200]
 
     try:
         intent = stripe.PaymentIntent.create(

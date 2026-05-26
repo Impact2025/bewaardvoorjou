@@ -60,3 +60,11 @@ class User(Base):
   max_family_members = Column(Integer, nullable=False, default=0)
   max_chapters = Column(Integer, nullable=True)  # NULL = onbeperkt
   storage_years = Column(Integer, nullable=False, default=0)
+
+  # Magic link (passwordless) authenticatie
+  magic_link_token = Column(String(128), nullable=True, index=True)
+  magic_link_token_expires_at = Column(DateTime, nullable=True)
+  magic_link_last_used_at = Column(DateTime, nullable=True)
+
+  # Contact
+  phone_number = Column(String(32), nullable=True)  # voor SMS notificaties (toekomst)

@@ -266,6 +266,8 @@ export interface AuthUser {
   birthYear?: number | null;
   privacyLevel: string;
   isAdmin?: boolean;
+  packageTier?: string;
+  packageActivatedAt?: string | null;
   createdAt: string;
   updatedAt?: string | null;
 }

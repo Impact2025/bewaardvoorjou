@@ -1,0 +1,19 @@
+Dag {{ user_display_name }},
+
+Je exportverzoek is klaar! Al jouw verhalen, transcripties en herinneringen staan gebundeld in één bestand.
+
+Het bestand bevat:
+- Volledige transcripties van alle verhaalfragmenten
+- Metadata en tijdlijn van jouw levensverhaal
+- Alle gestelde vragen en thema's
+- Jouw notities en aantekeningen
+- Overzicht van alle audio- en video-opnames
+
+Download jouw verhalen hier:
+{{ download_url }}
+
+Let op: Deze downloadlink is {{ expires_hours }} uur geldig.
+Na verloop van tijd kun je een nieuwe export aanvragen via je instellingen.
+
+Met warme groet,
+Het Bewaardvoorjou team

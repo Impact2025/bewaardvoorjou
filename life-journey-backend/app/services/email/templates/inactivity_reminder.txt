@@ -1,0 +1,21 @@
+Dag {{ display_name }},
+
+Je verhaal wacht op je.
+
+Het is al {{ days_inactive }} dagen geleden dat je iets hebt verteld.
+Dat is helemaal oké. Maar we willen je laten weten dat je verhalen
+er nog steeds op wachten.
+
+Volgende stap: {{ next_chapter_name }}
+
+"{{ next_question }}"
+
+Begin wanneer het goed voelt:
+{{ journey_url }}
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+---
+Emails niet meer ontvangen?
+{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}

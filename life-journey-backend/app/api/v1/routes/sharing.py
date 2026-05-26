@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -10,7 +13,6 @@ from app.models.user import User
 from app.schemas.sharing import ShareInviteRequest, ShareInviteResponse
 from app.schemas.common import ShareGrant as ShareGrantSchema
 from app.services.sharing.generator import create_share_invite
-from app.services.sharing.exporter import generate_export_bundle
 from app.services.sharing.expiry import revoke_grant, enforce_expired_grants
 
 
@@ -103,14 +105,35 @@ def revoke_share_grant(
     raise HTTPException(status_code=400, detail="Kon deellink niet intrekken")
 
 
-@router.get("/{journey_id}/export")
+@router.get("/export/download/{bundle_id}")
+def download_export_bundle(
+  bundle_id: str,
+  current_user: User = Depends(get_current_user),
+) -> FileResponse:
+  """Serve a locally-stored export ZIP (fallback when S3 is not configured)."""
+  # Sanitize: bundle_id must be URL-safe alphanumerics only
+  if not bundle_id.replace("-", "").replace("_", "").isalnum():
+    raise HTTPException(status_code=400, detail="Ongeldig bundle ID")
+  path = Path("media_storage") / "exports" / f"{bundle_id}.zip"
+  if not path.exists():
+    raise HTTPException(status_code=404, detail="Export niet gevonden of verlopen")
+  return FileResponse(
+    path=str(path),
+    media_type="application/zip",
+    filename=f"bewaardvoorjou_export_{bundle_id}.zip",
+  )
+
+
+@router.post("/{journey_id}/export", status_code=202)
 @limiter.limit(RateLimits.EXPORT)
-def export_journey_bundle(
+def request_export_bundle(
   request: Request,
   journey_id: str,
   db: Session = Depends(get_db),
   current_user: User = Depends(get_current_user),
 ) -> dict[str, str]:
-  """Export journey data as a downloadable bundle."""
+  """Start async export generation. User receives a download link by email."""
   _ensure_journey_access(journey_id, db, current_user)
-  return generate_export_bundle(journey_id)
+  from app.services.email.tasks import generate_export_task
+  generate_export_task.delay(journey_id, current_user.id)
+  return {"message": "Je exportverzoek is ontvangen. Je ontvangt een download-link per e-mail zodra het klaar is."}

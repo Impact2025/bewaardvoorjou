@@ -42,9 +42,10 @@ class CreatePaymentIntentRequest(BaseModel):
     package_type: PackageType
     addons: list[AddonCode] = Field(default_factory=list)
     recipient_name: str | None = Field(default=None, max_length=255)
+    recipient_email: EmailStr | None = None  # e-mailadres van de begiftigde storyteller
     personal_message: str | None = Field(default=None, max_length=500)
     shipping_address: ShippingAddress
-    guest_email: EmailStr | None = None  # voor niet-ingelogde gebruikers
+    guest_email: EmailStr | None = None  # voor niet-ingelogde gebruikers (koper)
 
 
 class CreatePaymentIntentResponse(BaseModel):

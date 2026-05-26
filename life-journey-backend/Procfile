@@ -1,2 +1,4 @@
 web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-worker: celery -A app.services.media.tasks worker --loglevel=info
+worker: celery -A app.services.media.tasks worker --loglevel=info -Q media
+email-worker: celery -A app.services.email.tasks worker --loglevel=info -Q celery
+beat: celery -A app.services.email.tasks beat --loglevel=info

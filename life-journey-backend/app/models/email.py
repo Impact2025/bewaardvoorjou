@@ -65,6 +65,10 @@ class EmailPreference(Base):
     welcome_emails = Column(Boolean, nullable=False, default=True)
     chapter_emails = Column(Boolean, nullable=False, default=True)
     milestone_emails = Column(Boolean, nullable=False, default=True)
+    weekly_question_emails = Column(Boolean, nullable=False, default=True)
+    inactivity_reminders = Column(Boolean, nullable=False, default=True)
+    seasonal_emails = Column(Boolean, nullable=False, default=True)
+    family_notifications = Column(Boolean, nullable=False, default=True)
 
     # Global unsubscribe
     unsubscribed_all = Column(Boolean, nullable=False, default=False)

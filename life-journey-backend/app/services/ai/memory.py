@@ -4,25 +4,26 @@ AI Memory Service - Maintains context across recording sessions.
 Provides persistent memory of user's responses, themes, and emotional patterns
 to enable more personalized and context-aware interview experiences.
 """
+from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
+import json
+from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from loguru import logger
+from openai import OpenAI
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.media import MediaAsset, TranscriptSegment, PromptRun
 from app.models.journey import Journey
-from app.schemas.common import ChapterId
+
+
+_CACHE_TTL_HOURS = 6
 
 
 class JourneyMemory:
-    """
-    Represents the accumulated memory/context for a journey.
-
-    Contains extracted themes, emotional patterns, key people,
-    and important events mentioned across all recordings.
-    """
+    """Accumulated cross-chapter memory for a journey."""
 
     def __init__(
         self,
@@ -45,40 +46,28 @@ class JourneyMemory:
         self.chapter_summaries = chapter_summaries
 
     def to_context_string(self, current_chapter: str | None = None) -> str:
-        """
-        Convert memory to a context string for AI prompts.
-
-        Args:
-            current_chapter: The chapter being recorded (to exclude from context)
-
-        Returns:
-            A formatted context string
-        """
         parts = []
 
-        # Add completed chapters context
         if self.completed_chapters:
             completed = [c for c in self.completed_chapters if c != current_chapter]
             if completed:
                 parts.append(f"De gebruiker heeft al gesproken over: {', '.join(self._format_chapters(completed[:5]))}")
 
-        # Add key people
         if self.key_people:
             parts.append(f"Belangrijke mensen in het verhaal: {', '.join(self.key_people[:5])}")
 
-        # Add key places
         if self.key_places:
-            parts.append(f"Genoemde plaatsen: {', '.join(self.key_places[:3])}")
+            parts.append(f"Genoemde plaatsen: {', '.join(self.key_places[:5])}")
 
-        # Add themes
+        if self.key_events:
+            parts.append(f"Sleutelmomenten: {', '.join(self.key_events[:3])}")
+
         if self.themes:
             parts.append(f"Terugkerende thema's: {', '.join(self.themes[:3])}")
 
-        # Add emotional tone
         if self.emotional_tone:
             parts.append(f"Algemene emotionele toon: {self.emotional_tone}")
 
-        # Add chapter summaries (max 2 most relevant)
         relevant_summaries = self._get_relevant_summaries(current_chapter)
         for chapter_id, summary in relevant_summaries[:2]:
             chapter_name = self._format_chapter(chapter_id)
@@ -87,54 +76,171 @@ class JourneyMemory:
         return "\n".join(parts) if parts else ""
 
     def _format_chapters(self, chapter_ids: list[str]) -> list[str]:
-        """Format chapter IDs to readable names."""
         return [self._format_chapter(c) for c in chapter_ids]
 
     def _format_chapter(self, chapter_id: str) -> str:
-        """Format a single chapter ID to readable name."""
-        # Simple mapping - could be expanded
-        parts = chapter_id.replace("-", " ").split()
-        if len(parts) >= 2:
-            return parts[1].capitalize()
-        return chapter_id
+        from app.services.email.chapter_names import get_chapter_name
+        return get_chapter_name(chapter_id)
 
     def _get_relevant_summaries(self, current_chapter: str | None) -> list[tuple[str, str]]:
-        """Get summaries most relevant to the current chapter."""
         if not self.chapter_summaries:
             return []
+        return [(k, v) for k, v in self.chapter_summaries.items() if k != current_chapter][:2]
 
-        # For now, return the most recent summaries
-        # Could be enhanced with semantic similarity
-        return [
-            (k, v) for k, v in self.chapter_summaries.items()
-            if k != current_chapter
-        ][:2]
+
+def _call_claude(system: str, user: str, max_tokens: int = 256) -> str | None:
+    """Call Claude via OpenRouter. Returns response text or None on failure."""
+    if not settings.openai_api_key:
+        return None
+    try:
+        client = OpenAI(api_key=settings.openai_api_key, base_url=settings.openai_api_base)
+        resp = client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+            max_tokens=max_tokens,
+            temperature=0.2,
+        )
+        return (resp.choices[0].message.content or "").strip()
+    except Exception as exc:
+        logger.warning(f"Claude call failed in memory service: {exc}")
+        return None
+
+
+def _ai_extract_people(text: str) -> list[str]:
+    """Use Claude to extract named persons with their relation."""
+    result = _call_claude(
+        system="Je bent een Nederlandse NLP-assistent. Extraheer personen uit de tekst.",
+        user=(
+            f"Tekst:\n{text[:2000]}\n\n"
+            "Noem alle personen die worden genoemd (naam of relatie, bijv. 'oma Riet', 'vader Jan', 'mijn beste vriend'). "
+            "Geef maximaal 8 entries. Antwoord als JSON array van strings, niets anders."
+        ),
+        max_tokens=200,
+    )
+    if result:
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, list):
+                return [str(p) for p in parsed[:8]]
+        except (json.JSONDecodeError, ValueError):
+            pass
+    # keyword fallback
+    keywords = ["mama", "papa", "opa", "oma", "partner", "vriend", "vriendin", "broer", "zus", "man", "vrouw"]
+    found = set()
+    lower = text.lower()
+    for kw in keywords:
+        if kw in lower:
+            found.add(kw.capitalize())
+    return list(found)[:5]
+
+
+def _ai_extract_places(text: str) -> list[str]:
+    """Use Claude to extract locations from text."""
+    result = _call_claude(
+        system="Je bent een Nederlandse NLP-assistent. Extraheer plaatsnamen uit de tekst.",
+        user=(
+            f"Tekst:\n{text[:2000]}\n\n"
+            "Noem alle geografische plaatsen (steden, dorpen, gebouwen, straten, landen) die worden vermeld. "
+            "Maximaal 8 entries. Antwoord als JSON array van strings, niets anders."
+        ),
+        max_tokens=200,
+    )
+    if result:
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, list):
+                return [str(p) for p in parsed[:8]]
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return []
+
+
+def _ai_extract_events(text: str) -> list[str]:
+    """Use Claude to extract key life events from text."""
+    result = _call_claude(
+        system="Je bent een Nederlandse NLP-assistent die levensverhalen analyseert.",
+        user=(
+            f"Tekst:\n{text[:2000]}\n\n"
+            "Noem de belangrijkste levensgebeurtenissen (huwelijk, geboorte kind, verhuizing, verlies, eerste baan etc.) "
+            "die worden beschreven. Maximaal 5 entries in 1-5 woorden elk. "
+            "Antwoord als JSON array van strings, niets anders."
+        ),
+        max_tokens=200,
+    )
+    if result:
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, list):
+                return [str(e) for e in parsed[:5]]
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return []
+
+
+def _ai_summarize_chapter(chapter_id: str, text: str) -> str:
+    """Use Claude to produce a 2-3 sentence summary of a chapter transcript."""
+    result = _call_claude(
+        system=(
+            "Je bent een empathische assistent die levensverhalen samenvat. "
+            "Schrijf beknopte, warme samenvattingen in het Nederlands."
+        ),
+        user=(
+            f"Hoofdstuk: {chapter_id}\n\nTranscript:\n{text[:3000]}\n\n"
+            "Vat dit verhaalfragment samen in 2-3 zinnen. "
+            "Focus op: genoemde namen, plaatsen, emoties en kernthema's. "
+            "Maximaal 120 woorden. Schrijf in de derde persoon ('De verteller...')."
+        ),
+        max_tokens=160,
+    )
+    if result:
+        return result
+    # fallback: first 120 chars
+    if len(text) > 120:
+        return text[:120].rsplit(" ", 1)[0] + "…"
+    return text
 
 
 def build_journey_memory(db: Session, journey_id: str) -> JourneyMemory:
-    """
-    Build a memory/context object from a journey's recordings.
+    """Build a JourneyMemory from all ready recordings. Uses DB cache to avoid redundant AI calls."""
+    from app.models.memory_cache import JourneyMemoryCache
 
-    Args:
-        db: Database session
-        journey_id: ID of the journey
-
-    Returns:
-        JourneyMemory with extracted context
-    """
-    # Get all completed media assets
-    assets = (
-        db.query(MediaAsset)
-        .filter(
+    # Check cache
+    cached: JourneyMemoryCache | None = (
+        db.query(JourneyMemoryCache).filter(JourneyMemoryCache.journey_id == journey_id).first()
+    )
+    if cached:
+        age = datetime.now(timezone.utc) - (
+            cached.built_at.replace(tzinfo=timezone.utc) if cached.built_at.tzinfo is None else cached.built_at
+        )
+        current_count = db.query(MediaAsset).filter(
             MediaAsset.journey_id == journey_id,
             MediaAsset.storage_state == "ready",
-        )
+        ).count()
+        if age < timedelta(hours=_CACHE_TTL_HOURS) and current_count == cached.chapters_included:
+            try:
+                data: dict[str, Any] = json.loads(cached.memory_json)
+                return JourneyMemory(
+                    journey_id=journey_id,
+                    themes=data.get("themes", []),
+                    key_people=data.get("key_people", []),
+                    key_places=data.get("key_places", []),
+                    key_events=data.get("key_events", []),
+                    emotional_tone=data.get("emotional_tone", "reflectief"),
+                    completed_chapters=data.get("completed_chapters", []),
+                    chapter_summaries=data.get("chapter_summaries", {}),
+                )
+            except Exception:
+                pass  # Rebuild on corrupt cache
+
+    # Fetch assets and transcripts
+    assets = (
+        db.query(MediaAsset)
+        .filter(MediaAsset.journey_id == journey_id, MediaAsset.storage_state == "ready")
         .order_by(MediaAsset.recorded_at.asc())
         .all()
     )
 
-    # Get all transcripts
-    transcripts = []
+    transcripts: list[dict[str, Any]] = []
     for asset in assets:
         segs = (
             db.query(TranscriptSegment)
@@ -147,34 +253,23 @@ def build_journey_memory(db: Session, journey_id: str) -> JourneyMemory:
             transcripts.append({
                 "chapter_id": asset.chapter_id,
                 "text": full_text,
-                "sentiment": segs[0].sentiment if segs else None,
+                "sentiment": segs[0].sentiment,
             })
 
-    # Get prompt runs
-    prompt_runs = (
-        db.query(PromptRun)
-        .filter(PromptRun.journey_id == journey_id)
-        .all()
-    )
+    completed_chapters = list(dict.fromkeys(a.chapter_id for a in assets))
+    all_text = " ".join(t["text"] for t in transcripts)
 
-    # Extract completed chapters
-    completed_chapters = list(set(a.chapter_id for a in assets))
-
-    # Extract themes, people, places (simplified - could use NLP)
     themes = _extract_themes(transcripts)
-    key_people = _extract_people(transcripts)
-    key_places = _extract_places(transcripts)
-    key_events = _extract_events(transcripts)
-
-    # Determine emotional tone
+    key_people = _ai_extract_people(all_text) if all_text else []
+    key_places = _ai_extract_places(all_text) if all_text else []
+    key_events = _ai_extract_events(all_text) if all_text else []
     emotional_tone = _determine_emotional_tone(transcripts)
+    chapter_summaries = {
+        t["chapter_id"]: _ai_summarize_chapter(t["chapter_id"], t["text"])
+        for t in transcripts
+    }
 
-    # Build chapter summaries
-    chapter_summaries = _build_chapter_summaries(transcripts)
-
-    logger.info(f"Built memory for journey {journey_id}: {len(completed_chapters)} chapters, {len(themes)} themes")
-
-    return JourneyMemory(
+    memory = JourneyMemory(
         journey_id=journey_id,
         themes=themes,
         key_people=key_people,
@@ -185,10 +280,37 @@ def build_journey_memory(db: Session, journey_id: str) -> JourneyMemory:
         chapter_summaries=chapter_summaries,
     )
 
+    # Persist to cache
+    memory_dict: dict[str, Any] = {
+        "themes": themes,
+        "key_people": key_people,
+        "key_places": key_places,
+        "key_events": key_events,
+        "emotional_tone": emotional_tone,
+        "completed_chapters": completed_chapters,
+        "chapter_summaries": chapter_summaries,
+    }
+    try:
+        if cached:
+            cached.memory_json = json.dumps(memory_dict, ensure_ascii=False)
+            cached.built_at = datetime.now(timezone.utc)
+            cached.chapters_included = len(assets)
+        else:
+            db.add(JourneyMemoryCache(
+                journey_id=journey_id,
+                memory_json=json.dumps(memory_dict, ensure_ascii=False),
+                built_at=datetime.now(timezone.utc),
+                chapters_included=len(assets),
+            ))
+        db.commit()
+    except Exception as exc:
+        logger.warning(f"Failed to persist memory cache for journey {journey_id}: {exc}")
+
+    logger.info(f"Built memory for journey {journey_id}: {len(completed_chapters)} chapters, {len(key_people)} people, {len(key_places)} places")
+    return memory
+
 
 def _extract_themes(transcripts: list[dict]) -> list[str]:
-    """Extract recurring themes from transcripts."""
-    # Simplified extraction - could use NLP/AI
     theme_keywords = {
         "familie": ["familie", "ouders", "kinderen", "broer", "zus", "opa", "oma"],
         "liefde": ["liefde", "verliefd", "partner", "huwelijk", "relatie"],
@@ -198,108 +320,28 @@ def _extract_themes(transcripts: list[dict]) -> list[str]:
         "groei": ["geleerd", "groeien", "veranderen", "ontwikkeling"],
         "dromen": ["droom", "hopen", "toekomst", "wens", "ambitie"],
     }
-
     theme_counts: dict[str, int] = {}
-    for transcript in transcripts:
-        text = transcript["text"].lower()
+    for t in transcripts:
+        text = t["text"].lower()
         for theme, keywords in theme_keywords.items():
             if any(k in text for k in keywords):
                 theme_counts[theme] = theme_counts.get(theme, 0) + 1
-
-    # Return top themes
-    sorted_themes = sorted(theme_counts.items(), key=lambda x: x[1], reverse=True)
-    return [t[0] for t in sorted_themes[:5]]
-
-
-def _extract_people(transcripts: list[dict]) -> list[str]:
-    """Extract mentioned people from transcripts."""
-    # Simplified - could use NER
-    people_keywords = ["mama", "papa", "opa", "oma", "partner", "vriend", "vriendin"]
-    found = set()
-
-    for transcript in transcripts:
-        text = transcript["text"].lower()
-        for person in people_keywords:
-            if person in text:
-                found.add(person.capitalize())
-
-    return list(found)[:5]
-
-
-def _extract_places(transcripts: list[dict]) -> list[str]:
-    """Extract mentioned places from transcripts."""
-    # Simplified - could use NER
-    place_indicators = ["in ", "naar ", "uit ", "bij "]
-    # This is a placeholder - real implementation would use NLP
-    return []
-
-
-def _extract_events(transcripts: list[dict]) -> list[str]:
-    """Extract key events from transcripts."""
-    # Placeholder for event extraction
-    return []
+    return [t for t, _ in sorted(theme_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
 
 
 def _determine_emotional_tone(transcripts: list[dict]) -> str:
-    """Determine the overall emotional tone of recordings."""
-    sentiment_counts = {"positive": 0, "neutral": 0, "somber": 0, "mixed": 0}
-
-    for transcript in transcripts:
-        sentiment = transcript.get("sentiment", "neutral")
-        if sentiment in sentiment_counts:
-            sentiment_counts[sentiment] += 1
-
-    # Find dominant sentiment
-    if not any(sentiment_counts.values()):
+    counts: dict[str, int] = {"positive": 0, "neutral": 0, "somber": 0, "mixed": 0}
+    for t in transcripts:
+        s = t.get("sentiment", "neutral")
+        if s in counts:
+            counts[s] += 1
+    if not any(counts.values()):
         return "reflectief"
-
-    dominant = max(sentiment_counts.items(), key=lambda x: x[1])
-
-    tone_map = {
-        "positive": "positief en dankbaar",
-        "neutral": "reflectief en beschouwend",
-        "somber": "emotioneel en diepgaand",
-        "mixed": "gevarieerd en rijk",
-    }
-
-    return tone_map.get(dominant[0], "reflectief")
+    dominant = max(counts.items(), key=lambda x: x[1])[0]
+    return {"positive": "positief en dankbaar", "neutral": "reflectief en beschouwend",
+            "somber": "emotioneel en diepgaand", "mixed": "gevarieerd en rijk"}.get(dominant, "reflectief")
 
 
-def _build_chapter_summaries(transcripts: list[dict]) -> dict[str, str]:
-    """Build short summaries for each chapter."""
-    summaries = {}
-
-    for transcript in transcripts:
-        chapter_id = transcript["chapter_id"]
-        text = transcript["text"]
-
-        # Simple summary - first 100 chars
-        # Could use AI summarization
-        if len(text) > 100:
-            summary = text[:100].rsplit(" ", 1)[0] + "..."
-        else:
-            summary = text
-
-        summaries[chapter_id] = summary
-
-    return summaries
-
-
-def get_personalized_prompt_context(
-    db: Session,
-    journey_id: str,
-    chapter_id: str,
-) -> str:
-    """
-    Get personalized context for generating interview prompts.
-
-    Args:
-        db: Database session
-        journey_id: ID of the journey
-        chapter_id: Current chapter being recorded
-
-    Returns:
-        Context string for AI prompts
-    """
+def get_personalized_prompt_context(db: Session, journey_id: str, chapter_id: str) -> str:
     memory = build_journey_memory(db, journey_id)
     return memory.to_context_string(current_chapter=chapter_id)

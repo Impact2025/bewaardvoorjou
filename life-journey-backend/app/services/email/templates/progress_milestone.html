@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Je bent {{ percent }}% klaar met je levensverhaal!{% endblock %}
+
+{% block content %}
+<h2>Wauw, {{ display_name }}! 🎉</h2>
+
+<p style="font-size: 18px; color: #2C2416; font-weight: 600;">
+    Je hebt {{ percent }}% van je levensverhaal verteld!
+</p>
+
+<p>
+    Je hebt al {{ completed_count }} van de {{ total_count }} verhalen gedeeld.
+    Dat is een prestatie om trots op te zijn.
+</p>
+
+<div style="margin: 28px 0;">
+    <p style="font-size: 13px; color: #9A8070; margin: 0 0 8px 0;">Jouw voortgang</p>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ percent }}%;"></div>
+    </div>
+    <p style="font-size: 14px; color: #F97316; font-weight: 600; margin: 8px 0 0 0;">
+        {{ percent }}% — {{ completed_count }} van {{ total_count }} verhalen
+    </p>
+</div>
+
+{% if percent == 25 %}
+<div style="background: #FFF7ED; padding: 20px; border-radius: 12px; margin: 24px 0;">
+    <p style="margin: 0; color: #4A4239;">
+        🌱 <strong>Geweldig begin!</strong> Je hebt de basis gelegd. Elk verhaal
+        dat je deelt, maakt het archief rijker en waardevoller.
+    </p>
+</div>
+{% elif percent == 50 %}
+<div style="background: #FFF7ED; padding: 20px; border-radius: 12px; margin: 24px 0;">
+    <p style="margin: 0; color: #4A4239;">
+        🌿 <strong>Halverwege!</strong> Je bent al voorbij het midden.
+        De mooiste verhalen liggen nog voor je.
+    </p>
+</div>
+{% elif percent == 75 %}
+<div style="background: #FFF7ED; padding: 20px; border-radius: 12px; margin: 24px 0;">
+    <p style="margin: 0; color: #4A4239;">
+        🌳 <strong>Bijna klaar!</strong> Je bent 75% van de weg.
+        Nog een paar stappen en je verhaal is compleet.
+    </p>
+</div>
+{% endif %}
+
+<p>Ga verder waar je gebleven was:</p>
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ journey_url }}" class="cta-button" style="font-size: 18px; padding: 18px 40px;">
+        Vertel verder →
+    </a>
+</div>
+{% endblock %}

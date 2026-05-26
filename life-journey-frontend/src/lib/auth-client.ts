@@ -13,6 +13,8 @@ interface AuthResponseDto {
     birth_year?: number | null;
     privacy_level: string;
     is_admin?: boolean;
+    package_tier?: string;
+    package_activated_at?: string | null;
     created_at: string;
     updated_at?: string | null;
   };
@@ -58,6 +60,8 @@ function mapAuthResponse(payload: AuthResponseDto): AuthSession {
       birthYear: payload.user.birth_year ?? null,
       privacyLevel: payload.user.privacy_level,
       isAdmin: payload.user.is_admin ?? false,
+      packageTier: payload.user.package_tier ?? "NONE",
+      packageActivatedAt: payload.user.package_activated_at ?? null,
       createdAt: payload.user.created_at,
       updatedAt: payload.user.updated_at ?? null,
     },
@@ -109,6 +113,21 @@ export async function loginUser(payload: LoginPayload): Promise<AuthSession> {
       email: payload.email,
       password: payload.password,
     }),
+  });
+
+  return mapAuthResponse(response);
+}
+
+export async function requestMagicLink(email: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>("/auth/magic-link", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyMagicLink(token: string): Promise<AuthSession> {
+  const response = await apiFetch<AuthResponseDto>(`/auth/magic-link/verify/${token}`, {
+    method: "GET",
   });
 
   return mapAuthResponse(response);

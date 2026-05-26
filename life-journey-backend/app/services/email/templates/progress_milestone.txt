@@ -1,0 +1,16 @@
+Dag {{ display_name }},
+
+Je bent {{ percent }}% klaar met je levensverhaal!
+
+Je hebt al {{ completed_count }} van de {{ total_count }} verhalen gedeeld.
+Dat is een prestatie om trots op te zijn.
+
+Ga verder waar je gebleven was:
+{{ journey_url }}
+
+Met warme groet,
+Het Bewaardvoorjou team
+
+---
+Emails niet meer ontvangen?
+{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}

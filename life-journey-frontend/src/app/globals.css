@@ -482,3 +482,28 @@ body {
 .animate-pulse-once {
   animation: pulse-once 0.8s ease-in-out;
 }
+
+/* 65+ Storyteller mode — large text, generous touch targets */
+[data-storyteller-mode] {
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+[data-storyteller-mode] button {
+  min-height: 60px;
+  min-width: 60px;
+  font-size: 20px;
+}
+
+[data-storyteller-mode] textarea {
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+[data-storyteller-mode] h2 {
+  font-size: 28px;
+}
+
+[data-storyteller-mode] p {
+  font-size: 20px;
+}

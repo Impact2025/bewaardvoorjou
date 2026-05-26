@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ storyteller_name }} heeft een nieuw verhaal gedeeld{% endblock %}
+
+{% block content %}
+<h2>Dag {{ recipient_name }} 💛</h2>
+
+<p style="font-size: 17px; color: #2C2416;">
+    <strong>{{ storyteller_name }}</strong> heeft een nieuw verhaal gedeeld:
+</p>
+
+<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center;">
+    <p style="font-size: 20px; font-weight: 600; color: #EA580C; margin: 0 0 8px 0;">
+        📖 {{ chapter_title }}
+    </p>
+    <p style="color: #6B6456; margin: 0; font-size: 15px;">
+        Een nieuw hoofdstuk in het levensverhaal van {{ storyteller_name }}
+    </p>
+</div>
+
+<p style="color: #4A4239;">
+    Klik op de knop hieronder om het verhaal te lezen en te beluisteren.
+    Je kunt ook je eigen reactie achterlaten.
+</p>
+
+<div style="text-align: center; margin: 32px 0;">
+    <a href="{{ share_url }}" class="cta-button" style="font-size: 18px; padding: 18px 40px;">
+        Luister naar het verhaal →
+    </a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; color: #9A8070; text-align: center; margin: 0;">
+    Dit verhaal is speciaal voor jou bewaard door {{ storyteller_name }}.
+</p>
+{% endblock %}

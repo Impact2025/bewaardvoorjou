@@ -1,0 +1,22 @@
+Dag {{ display_name }},
+
+{% if occasion == "moederdag" %}Fijne Moederdag!
+{% elif occasion == "vaderdag" %}Fijne Vaderdag!
+{% elif occasion == "kerst" %}Fijne Kerst!
+{% elif occasion == "oud_nieuw" %}Goed Nieuwjaar!
+{% else %}Een bijzondere vraag voor jou vandaag.
+{% endif %}
+
+Hoofdstuk: {{ chapter_name }}
+
+"{{ question_text }}"
+
+Vertel jouw verhaal:
+{{ journey_url }}
+
+Met hartelijke groeten,
+Het Bewaardvoorjou team
+
+---
+Emails niet meer ontvangen?
+{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}

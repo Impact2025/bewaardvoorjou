@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from celery import Celery
+from celery.schedules import crontab
 from loguru import logger
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,13 @@ from app.services.email.renderer import (
     build_milestone_unlock_email,
     build_password_reset_email,
     build_email_verification_email,
+    build_weekly_question_email,
+    build_inactivity_reminder_email,
+    build_seasonal_email,
+    build_progress_milestone_email,
+    build_family_notification_email,
+    build_magic_link_email,
+    build_export_ready_email,
 )
 
 celery_app = Celery("life_journey_email")
@@ -27,6 +35,29 @@ celery_app.conf.broker_url = settings.redis_url
 celery_app.conf.result_backend = settings.redis_url
 celery_app.conf.broker_connection_timeout = 2
 celery_app.conf.broker_connection_retry_on_startup = False
+
+# Celery Beat schedule — re-engagement automation
+celery_app.conf.beat_schedule = {
+    # Elke maandag 09:00 Amsterdam time (= 07:00 UTC winter, 07:00 UTC zomer)
+    "weekly-questions": {
+        "task": "email.weekly_questions",
+        "schedule": crontab(hour=7, minute=0, day_of_week=1),
+        "options": {"expires": 3600},
+    },
+    # Dagelijks 08:00 UTC — inactiviteitscheck
+    "daily-inactivity-check": {
+        "task": "email.check_inactive_users",
+        "schedule": crontab(hour=8, minute=0),
+        "options": {"expires": 3600},
+    },
+    # Dagelijks 09:00 UTC — seizoenstriggers
+    "daily-seasonal-triggers": {
+        "task": "email.seasonal_triggers",
+        "schedule": crontab(hour=9, minute=0),
+        "options": {"expires": 3600},
+    },
+}
+celery_app.conf.timezone = "Europe/Amsterdam"
 
 # Retry on any exception: 3 attempts, 60s / 120s / 240s backoff
 @celery_app.task(
@@ -166,4 +197,92 @@ def _build_email(
     if email_event.email_type == "password_reset":
         return build_password_reset_email(user.display_name, ctx["reset_url"])
 
+    if email_event.email_type == "weekly_question":
+        journey_url = f"{settings.app_base_url}/vertel"
+        return build_weekly_question_email(
+            user_display_name=user.display_name,
+            chapter_id=ctx.get("chapter_id", "intro-reflection"),
+            question_text=ctx.get("question_text", "Vertel iets moois..."),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "inactivity_reminder":
+        journey_url = f"{settings.app_base_url}/vertel"
+        return build_inactivity_reminder_email(
+            user_display_name=user.display_name,
+            days_inactive=ctx.get("days_inactive", 7),
+            next_chapter_id=ctx.get("next_chapter_id", "intro-reflection"),
+            next_question=ctx.get("next_question", "Vertel iets moois over je jeugd..."),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "seasonal":
+        journey_url = f"{settings.app_base_url}/vertel"
+        return build_seasonal_email(
+            user_display_name=user.display_name,
+            occasion=ctx.get("occasion", "kerst"),
+            question_text=ctx.get("question_text", "Vertel over een bijzonder moment..."),
+            chapter_id=ctx.get("chapter_id", "intro-reflection"),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "progress_milestone":
+        journey = db.query(JourneyModel).filter(JourneyModel.id == email_event.journey_id).first()
+        journey_title = journey.title if journey else "Je levensverhaal"
+        percent = ctx.get("percent", 25)
+        journey_url = f"{settings.app_base_url}/vertel"
+        return build_progress_milestone_email(
+            user_display_name=user.display_name,
+            journey_title=journey_title,
+            percent=percent,
+            completed_count=ctx.get("completed_count", 0),
+            total_count=ctx.get("total_count", 30),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "family_notification":
+        return build_family_notification_email(
+            recipient_name=ctx.get("recipient_name", ""),
+            storyteller_name=ctx.get("storyteller_name", ""),
+            chapter_title=ctx.get("chapter_title", ""),
+            share_url=ctx.get("share_url", settings.app_base_url),
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "magic_link":
+        return build_magic_link_email(
+            user_display_name=user.display_name,
+            magic_link_url=ctx["magic_link_url"],
+            gifter_name=ctx.get("gifter_name"),
+        )
+
+    if email_event.email_type == "export_ready":
+        return build_export_ready_email(
+            user_display_name=user.display_name,
+            download_url=ctx["download_url"],
+            expires_hours=ctx.get("expires_hours", 24),
+        )
+
     raise ValueError(f"Unknown email type: {email_event.email_type}")
+
+
+@celery_app.task(name="sharing.generate_export", acks_late=True, max_retries=2, retry_backoff=30)
+def generate_export_task(journey_id: str, user_id: str) -> None:
+    """Async export generation — builds ZIP, uploads to S3, emails download link."""
+    from app.services.sharing.exporter import generate_export_bundle
+    from app.services.email.events import trigger_export_ready_email
+
+    db: Session = SessionLocal()
+    try:
+        result = generate_export_bundle(journey_id, db)
+        trigger_export_ready_email(db, user_id, result["download_url"])
+        logger.info(f"Export complete for journey {journey_id}, user {user_id}")
+    except Exception as exc:
+        logger.error(f"Export task failed for journey {journey_id}: {exc}")
+        raise
+    finally:
+        db.close()

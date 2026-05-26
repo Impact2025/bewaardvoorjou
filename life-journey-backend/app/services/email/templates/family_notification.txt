@@ -1,0 +1,11 @@
+Dag {{ recipient_name }},
+
+{{ storyteller_name }} heeft een nieuw verhaal gedeeld: {{ chapter_title }}
+
+Luister naar het verhaal:
+{{ share_url }}
+
+Dit verhaal is speciaal voor jou bewaard door {{ storyteller_name }}.
+
+Met warme groet,
+Het Bewaardvoorjou team

@@ -45,6 +45,14 @@ def update_email_preferences(
         prefs.chapter_emails = payload.chapter_emails
     if payload.milestone_emails is not None:
         prefs.milestone_emails = payload.milestone_emails
+    if payload.weekly_question_emails is not None:
+        prefs.weekly_question_emails = payload.weekly_question_emails
+    if payload.inactivity_reminders is not None:
+        prefs.inactivity_reminders = payload.inactivity_reminders
+    if payload.seasonal_emails is not None:
+        prefs.seasonal_emails = payload.seasonal_emails
+    if payload.family_notifications is not None:
+        prefs.family_notifications = payload.family_notifications
     if payload.unsubscribed_all is not None:
         prefs.unsubscribed_all = payload.unsubscribed_all
         prefs.unsubscribed_at = datetime.now(timezone.utc) if payload.unsubscribed_all else None

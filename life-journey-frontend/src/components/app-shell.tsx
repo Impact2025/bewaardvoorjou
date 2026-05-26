@@ -19,6 +19,7 @@ const navItems = [
   { href: "/family", label: "Familie" },
   { href: "/recordings", label: "Mijn Opnames" },
   { href: "/memos", label: "Memo's" },
+  { href: "/instellingen", label: "Instellingen" },
 ];
 
 interface AppShellProps {
@@ -33,7 +34,7 @@ interface AppShellProps {
 const settingsItems = [
   { href: "/pricing", label: "Upgrade Plan" },
   { href: "/admin", label: "Admin Dashboard" },
-  { href: "/onboarding", label: "Instellingen" },
+  { href: "/onboarding", label: "Profiel aanvullen" },
   { href: "#handleiding", label: "Handleiding" },
   { href: "/about", label: "Over" },
   { href: "/privacy", label: "Privacy" },

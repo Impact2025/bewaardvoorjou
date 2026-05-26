@@ -120,6 +120,19 @@ def generate_transcript(asset_id: str) -> None:
             # Don't fail the entire task if highlight detection fails
             db.rollback()
 
+        # Invalidate AI memory cache so next request triggers a rebuild
+        try:
+            from app.models.memory_cache import JourneyMemoryCache
+            cache_row = db.query(JourneyMemoryCache).filter(
+                JourneyMemoryCache.journey_id == asset.journey_id
+            ).first()
+            if cache_row:
+                db.delete(cache_row)
+                db.commit()
+                logger.info(f"Invalidated memory cache for journey {asset.journey_id}")
+        except Exception as cache_exc:
+            logger.warning(f"Could not invalidate memory cache: {cache_exc}")
+
     except Exception as e:
         logger.error(f"Failed to generate transcript for asset {asset_id}: {e}")
         db.rollback()
