@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { StorytellerView } from "@/components/storyteller/StorytellerView";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { getNextQuestion } from "@/lib/storyteller-client";
 import type { NextQuestion } from "@/lib/storyteller-client";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -51,15 +53,18 @@ function VertelContent() {
     return (
       <div
         data-storyteller-mode="true"
-        className="flex min-h-screen items-center justify-center"
+        className="flex min-h-screen items-center justify-center pb-20"
         style={{ background: "#FAF7F2" }}
       >
         <div className="text-center">
-          <div className="text-6xl mb-6 animate-pulse">✨</div>
+          <div className="flex justify-center mb-6">
+            <Loader2 className="h-14 w-14 animate-spin" style={{ color: "#F97316" }} />
+          </div>
           <p className="font-serif text-2xl" style={{ color: "#2C2416" }}>
             Even laden…
           </p>
         </div>
+        <MobileBottomNav />
       </div>
     );
   }
@@ -68,11 +73,13 @@ function VertelContent() {
     return (
       <div
         data-storyteller-mode="true"
-        className="flex min-h-screen items-center justify-center px-6"
+        className="flex min-h-screen items-center justify-center px-6 pb-20"
         style={{ background: "#FAF7F2" }}
       >
         <div className="w-full max-w-lg text-center">
-          <div className="text-7xl mb-6">🎉</div>
+          <div className="flex justify-center mb-6">
+            <CheckCircle className="h-20 w-20" style={{ color: "#22C55E" }} />
+          </div>
           <h2 className="font-serif text-3xl font-semibold mb-4" style={{ color: "#2C2416" }}>
             Alle vragen beantwoord!
           </h2>
@@ -87,6 +94,7 @@ function VertelContent() {
             Naar mijn verhalen
           </button>
         </div>
+        <MobileBottomNav />
       </div>
     );
   }
@@ -95,11 +103,13 @@ function VertelContent() {
     return (
       <div
         data-storyteller-mode="true"
-        className="flex min-h-screen items-center justify-center px-6"
+        className="flex min-h-screen items-center justify-center px-6 pb-20"
         style={{ background: "#FAF7F2" }}
       >
         <div className="w-full max-w-lg text-center">
-          <div className="text-7xl mb-6">😕</div>
+          <div className="flex justify-center mb-6">
+            <AlertCircle className="h-20 w-20" style={{ color: "#EF4444" }} />
+          </div>
           <p className="font-serif text-2xl mb-8" style={{ color: "#2C2416" }}>
             Kon de volgende vraag niet laden.
           </p>
@@ -111,6 +121,7 @@ function VertelContent() {
             Opnieuw proberen
           </button>
         </div>
+        <MobileBottomNav />
       </div>
     );
   }

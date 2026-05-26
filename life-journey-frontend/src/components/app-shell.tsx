@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AccountActions } from "@/components/account-actions";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/store/auth-context";
 import { useAccessibility } from "@/lib/accessibility-context";
-import { Settings } from "lucide-react";
+import { Settings, LogOut, User } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -50,9 +51,11 @@ export function AppShell({
   activeHref,
   onShowHandleiding,
 }: AppShellProps) {
-  const { session } = useAuth();
+  const { session, clearSession } = useAuth();
   const { largeText, highContrast, toggleLargeText, toggleHighContrast } = useAccessibility();
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const router = useRouter();
 
   const userInitial =
     session?.user?.displayName?.[0]?.toUpperCase() ||
@@ -189,10 +192,51 @@ export function AppShell({
               <div className="hidden sm:flex">
                 <AccountActions />
               </div>
-              {/* Mobile: user initial avatar */}
+              {/* Mobile: user initial avatar - taps open logout/profile menu */}
               {session && (
-                <div className="sm:hidden flex h-9 w-9 select-none items-center justify-center rounded-full bg-orange/15 text-sm font-bold text-orange">
-                  {userInitial}
+                <div className="sm:hidden relative">
+                  <button
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-orange/15 text-sm font-bold text-orange"
+                    aria-label="Account menu"
+                  >
+                    {userInitial}
+                  </button>
+                  {showMobileMenu && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowMobileMenu(false)}
+                      />
+                      <div className="absolute right-0 z-20 mt-2 w-52 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
+                        <div className="px-4 py-2.5 border-b border-gray-100">
+                          <p className="text-sm font-semibold text-slate-900 truncate">
+                            {session.user.displayName || session.user.email}
+                          </p>
+                          <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                        </div>
+                        <Link
+                          href="/instellingen"
+                          className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 hover:bg-gray-50"
+                          onClick={() => setShowMobileMenu(false)}
+                        >
+                          <User className="h-4 w-4 text-slate-400" />
+                          Profiel &amp; Instellingen
+                        </Link>
+                        <button
+                          onClick={() => {
+                            clearSession();
+                            setShowMobileMenu(false);
+                            router.push("/");
+                          }}
+                          className="flex w-full items-center gap-2.5 px-4 py-3 text-sm text-red-600 hover:bg-gray-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Uitloggen
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
