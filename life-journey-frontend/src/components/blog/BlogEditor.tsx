@@ -66,6 +66,51 @@ interface BlogEditorProps {
   onVideoUpload?: (file: File) => Promise<string>;
 }
 
+function convertMarkdownToHtml(text: string): string {
+  const lines = text.split('\n');
+  const out: string[] = [];
+  let listType = '';
+
+  const inline = (s: string) =>
+    s
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+
+  const closeList = () => { if (listType) { out.push(`</${listType}>`); listType = ''; } };
+
+  for (const line of lines) {
+    const h1 = line.match(/^# (.+)/);
+    const h2 = line.match(/^## (.+)/);
+    const h3 = line.match(/^### (.+)/);
+    const ul = line.match(/^[-*+] (.+)/);
+    const ol = line.match(/^\d+\. (.+)/);
+
+    if (h3) { closeList(); out.push(`<h3>${inline(h3[1])}</h3>`); continue; }
+    if (h2) { closeList(); out.push(`<h2>${inline(h2[1])}</h2>`); continue; }
+    if (h1) { closeList(); out.push(`<h1>${inline(h1[1])}</h1>`); continue; }
+
+    if (ul) {
+      if (listType !== 'ul') { closeList(); out.push('<ul>'); listType = 'ul'; }
+      out.push(`<li>${inline(ul[1])}</li>`);
+      continue;
+    }
+    if (ol) {
+      if (listType !== 'ol') { closeList(); out.push('<ol>'); listType = 'ol'; }
+      out.push(`<li>${inline(ol[1])}</li>`);
+      continue;
+    }
+
+    closeList();
+    if (line.trim() === '') continue;
+    out.push(`<p>${inline(line)}</p>`);
+  }
+  closeList();
+  return out.join('');
+}
+
 export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function BlogEditor(
   { content, onChange, placeholder, onImageUpload, onVideoUpload }: BlogEditorProps,
   ref
@@ -74,6 +119,7 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [imageUploading, setImageUploading] = useState(false);
   const [videoUploading, setVideoUploading] = useState(false);
+  const editorInstanceRef = useRef<import("@tiptap/react").Editor | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -94,12 +140,34 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
       onChange(editor.getHTML());
     },
     editorProps: {
+      handlePaste: (view, event) => {
+        const data = event.clipboardData;
+        if (!data) return false;
+
+        // If clipboard has HTML with heading tags, let TipTap handle it natively
+        const html = data.getData('text/html');
+        if (html && /<h[1-6][\s>]/i.test(html)) return false;
+
+        const text = data.getData('text/plain');
+        if (!text) return false;
+
+        // Only intercept when the text looks like it has markdown headings
+        if (!/^#{1,6} /m.test(text)) return false;
+
+        const converted = convertMarkdownToHtml(text);
+        editorInstanceRef.current?.commands.insertContent(converted);
+        return true;
+      },
       attributes: {
         class:
           "min-h-[500px] p-6 focus:outline-none prose prose-slate max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-orange-400 prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-slate-100 prose-code:rounded prose-code:px-1 prose-img:rounded-lg [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm [&_th]:border [&_th]:border-slate-300 [&_th]:px-3 [&_th]:py-2 [&_th]:text-sm [&_th]:font-semibold [&_th]:bg-slate-50 [&_th]:text-left",
       },
     },
   });
+
+  useEffect(() => {
+    editorInstanceRef.current = editor;
+  }, [editor]);
 
   useImperativeHandle(ref, () => ({
     insertLink(href: string, text: string) {
