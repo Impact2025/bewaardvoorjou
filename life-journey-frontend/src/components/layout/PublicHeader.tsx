@@ -16,9 +16,7 @@ export function PublicHeader() {
     { href: onHome ? "#features" : "/#features", label: "Hoe werkt het" },
     { href: onHome ? "#trust" : "/#trust", label: "Veiligheid" },
     { href: "/blog", label: "Blog" },
-    { href: "/kennisbank", label: "Kennisbank" },
-    { href: "/pricing", label: "Pakketten & Prijzen" },
-    { href: "/faq", label: "Veelgestelde vragen" },
+    { href: "/pricing", label: "Prijzen" },
     { href: "/about", label: "Over ons" },
   ];
 

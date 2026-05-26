@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     "http://localhost:3006",
     "http://localhost:3007",
     "http://localhost:3011",
+    "http://localhost:2345",
   ]
 
   # Database configuration

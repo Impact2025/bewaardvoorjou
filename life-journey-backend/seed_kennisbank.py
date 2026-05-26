@@ -2,9 +2,14 @@
 """
 Seed script voor BewaardVoorJou.nl kennisbank.
 
-Maakt 15 SEO-geoptimaliseerde kennisbank artikelen aan via de API.
+Maakt 15 kennisbank artikelen aan via de API (alleen bij eerste keer).
+Bestaande artikelen worden overgeslagen (409).
 
-Gebruik:
+Voor het BIJWERKEN van bestaande artikelen met de geoptimaliseerde versie
+(inclusief interne links, externe links, blockquote tips en verbeterde H2-structuur):
+  python update_kennisbank.py --email admin@example.com --password ww
+
+Gebruik (seed nieuwe omgeving):
   python seed_kennisbank.py --email admin@example.com --password jouwwachtwoord
   python seed_kennisbank.py --email admin@example.com --password jouwwachtwoord --url https://api.bewaardvoorjou.nl/api/v1
 """
