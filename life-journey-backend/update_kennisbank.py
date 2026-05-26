@@ -63,8 +63,8 @@ ARTICLES = [
     {
         "slug": "hoe-begin-ik-met-het-vastleggen-van-mijn-levensverhaal",
         "title": "Hoe begin ik met het vastleggen van mijn levensverhaal?",
-        "meta_title": "Hoe begin ik met mijn levensverhaal? Stap-voor-stap gids | BewaardVoorJou.nl",
-        "meta_description": "Begin vandaag nog met je levensverhaal. Ontdek waarom één herinnering genoeg is om te starten, hoe de AI-interviewer je begeleidt en welke structuur je helpt. Gratis proberen.",
+        "meta_title": "Hoe begin ik met mijn levensverhaal? | BewaardVoorJou.nl",
+        "meta_description": "Begin vandaag met je levensverhaal. Ontdek waarom één herinnering genoeg is om te starten en hoe de AI-interviewer je stap voor stap begeleidt.",
         "keywords": "levensverhaal vastleggen beginnen, biografie starten, herinneringen bewaren, levensverhaal ouderen, hoe schrijf je een biografie, levensverhaal beginnen tips",
         "excerpt": "Het vastleggen van je levensverhaal begint niet met het schrijven van een heel boek, maar met het uitspreken van één enkele herinnering. BewaardVoorJou.nl begeleidt je stap voor stap door dertig hoofdstukken, zodat jouw unieke verhaal bewaard blijft voor de mensen die jou lief zijn.",
         "content": """<blockquote>
@@ -162,8 +162,8 @@ ARTICLES = [
     {
         "slug": "de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten",
         "title": "De 30 hoofdstukken van je leven: wat kun je verwachten?",
-        "meta_title": "De 30 hoofdstukken van je levensverhaal uitgelegd | BewaardVoorJou.nl",
-        "meta_description": "Ontdek hoe de 30 hoofdstukken van BewaardVoorJou.nl jouw levensverhaal structureren. Van vroege jeugd tot wijsheid — elk hoofdstuk heeft zijn eigen focus en vragen.",
+        "meta_title": "De 30 levensverhaal-hoofdstukken uitgelegd | BewaardVoorJou.nl",
+        "meta_description": "Ontdek hoe de 30 hoofdstukken jouw levensverhaal structureren. Van vroege jeugd tot wijsheid — elk hoofdstuk heeft zijn eigen focus en vragen.",
         "keywords": "30 hoofdstukken levensverhaal, levensfasen biografie, structuur levensverhaal, levensverhaal onderwerpen, biografie schrijven structuur",
         "excerpt": "BewaardVoorJou.nl begeleidt je door dertig zorgvuldig ontworpen hoofdstukken, verdeeld over vijf levensfasen. Van je vroegste herinneringen tot de wijsheid die je wilt doorgeven.",
         "content": """<blockquote>
@@ -241,8 +241,8 @@ ARTICLES = [
     {
         "slug": "tips-om-herinneringen-op-te-halen-voor-je-biografie",
         "title": "Tips om herinneringen op te halen voor je biografie",
-        "meta_title": "6 bewezen tips om herinneringen op te halen voor je biografie | BewaardVoorJou.nl",
-        "meta_description": "Lukt het niet om herinneringen boven te halen voor je levensverhaal? Gebruik muziek, foto's, geuren en de AI-interviewer. Zes bewezen technieken uitgelegd.",
+        "meta_title": "6 tips om herinneringen op te halen voor je biografie",
+        "meta_description": "Lukt het niet om herinneringen boven te halen voor je levensverhaal? Gebruik muziek, foto's, geuren en de AI-interviewer. Zes technieken uitgelegd.",
         "keywords": "herinneringen ophalen biografie, geheugen activeren levensverhaal, herinneringen terughalen tips, autobiografie hulp, levensverhaal herinneringen ophalen",
         "excerpt": "Herinneringen ophalen voor je biografie lukt het beste met de juiste triggers. Van oude foto's tot bekende geuren en muziek: ontdek zes bewezen technieken om vergeten momenten weer tot leven te wekken.",
         "content": """<blockquote>
@@ -318,8 +318,8 @@ ARTICLES = [
     {
         "slug": "ik-ben-geen-schrijver-kan-ik-bewaardvoorjou-toch-gebruiken",
         "title": "Ik ben geen schrijver, kan ik BewaardVoorJou.nl toch gebruiken?",
-        "meta_title": "Geen schrijver? Toch je levensverhaal vastleggen via audio of video | BewaardVoorJou.nl",
-        "meta_description": "Je hoeft geen schrijver te zijn om je levensverhaal vast te leggen. Spreek je verhaal in via audio of video — BewaardVoorJou.nl transcribeert automatisch. Gratis proberen.",
+        "meta_title": "Geen schrijver? Toch je levensverhaal vastleggen",
+        "meta_description": "Je hoeft geen schrijver te zijn. Spreek je verhaal in via audio of video — BewaardVoorJou.nl transcribeert automatisch. Gratis proberen.",
         "keywords": "geen schrijver levensverhaal, levensverhaal inspreken, audio biografie, video biografie, levensverhaal zonder schrijven, biografie ouderen gemakkelijk",
         "excerpt": "Je hoeft helemaal geen schrijver te zijn om jouw levensverhaal vast te leggen. Bij BewaardVoorJou.nl kun je jouw herinneringen gewoon inspreken via audio of video. De app zet je woorden automatisch om naar tekst.",
         "content": """<blockquote>
@@ -478,8 +478,8 @@ ARTICLES = [
     {
         "slug": "wat-doet-de-ai-interviewer-precies",
         "title": "Wat doet de AI-interviewer precies?",
-        "meta_title": "De AI-interviewer van BewaardVoorJou.nl uitgelegd | Warm, geduldig, persoonlijk",
-        "meta_description": "De AI-interviewer stelt warme, gerichte vragen om jouw levensverhaal boven te halen. Geen koude vragenlijst — een gesprek aan de keukentafel. Zo werkt het precies.",
+        "meta_title": "De AI-interviewer van BewaardVoorJou.nl uitgelegd",
+        "meta_description": "De AI-interviewer stelt warme, gerichte vragen om jouw levensverhaal boven te halen. Geen koude vragenlijst — een gesprek aan de keukentafel.",
         "keywords": "AI interviewer levensverhaal, kunstmatige intelligentie biografie, AI vragen stellen, digitale interviewer ouderen, AI levensverhaal schrijven, Claude AI biografie",
         "excerpt": "De AI-interviewer van BewaardVoorJou.nl is geen koude vragenlijst maar een warme, intelligente gesprekspartner. Hij stelt gerichte vragen, luistert naar jouw antwoorden en vraagt door op de momenten die ertoe doen.",
         "content": """<blockquote>
@@ -621,8 +621,8 @@ ARTICLES = [
     {
         "slug": "stapsgewijze-handleiding-je-eerste-herinnering-opnemen",
         "title": "Stapsgewijze handleiding: je eerste herinnering opnemen",
-        "meta_title": "Je eerste herinnering opnemen in 5 stappen | BewaardVoorJou.nl handleiding",
-        "meta_description": "Binnen vijf minuten heb je je eerste herinnering vastgelegd in BewaardVoorJou.nl. Stap-voor-stap handleiding van account aanmaken tot je eerste opgeslagen herinnering.",
+        "meta_title": "Je eerste herinnering opnemen: stap voor stap",
+        "meta_description": "Binnen vijf minuten leg je je eerste herinnering vast in BewaardVoorJou.nl. Handleiding van account aanmaken tot je eerste opgeslagen herinnering.",
         "keywords": "eerste herinnering opnemen BewaardVoorJou, handleiding levensverhaal app, biografie beginnen stap voor stap, BewaardVoorJou handleiding, levensverhaal beginnen handleiding",
         "excerpt": "Binnen vijf minuten heb je je eerste herinnering opgenomen in BewaardVoorJou.nl. Deze stap voor stap handleiding leidt je door het hele proces, van account aanmaken tot je eerste bewaarde herinnering.",
         "content": """<blockquote>
@@ -698,8 +698,8 @@ ARTICLES = [
     {
         "slug": "waar-worden-mijn-levensverhalen-opgeslagen-nederlandse-servers",
         "title": "Waar worden mijn levensverhalen opgeslagen? Alles over onze Europese servers",
-        "meta_title": "Waar worden mijn levensverhalen opgeslagen? Europese servers & AVG | BewaardVoorJou.nl",
-        "meta_description": "Jouw levensverhalen staan op streng beveiligde Europese servers, volledig AVG-conform. Geen Amerikaanse big tech, geen datadeling met derden. Alles uitgelegd.",
+        "meta_title": "Levensverhalen opgeslagen op Europese servers | AVG",
+        "meta_description": "Jouw levensverhalen staan op beveiligde Europese servers, volledig AVG-conform. Geen Amerikaanse big tech, geen datadeling met derden. Alles uitgelegd.",
         "keywords": "levensverhaal opgeslagen waar, data privacy biografie, Nederlandse servers privacy, AVG biografie, veilige opslag levensverhaal, GDPR biografie, Europese servers",
         "excerpt": "Jouw levensverhalen worden opgeslagen op streng beveiligde Europese servers, volledig conform de AVG-wetgeving. Geen Amerikaanse bedrijven, geen datadeling met derden.",
         "content": """<blockquote>
@@ -773,8 +773,8 @@ ARTICLES = [
     {
         "slug": "hoe-werkt-de-tijdgestuurde-vrijgave-voor-familie",
         "title": "Hoe werkt de tijdgestuurde vrijgave voor familie?",
-        "meta_title": "Tijdgestuurde vrijgave: jouw levensverhaal op het juiste moment | BewaardVoorJou.nl",
-        "meta_description": "Stel in dat jouw levensverhaal automatisch vrijgegeven wordt voor familie op een door jou gekozen datum. Op een verjaardag, jubileum of na je overlijden — jij bepaalt.",
+        "meta_title": "Tijdgestuurde vrijgave voor familie | BewaardVoorJou.nl",
+        "meta_description": "Stel in wanneer jouw familie toegang krijgt tot je levensverhaal. Op een verjaardag, jubileum of na je overlijden — jij bepaalt de datum.",
         "keywords": "tijdgestuurde vrijgave levensverhaal, digitale erfenis familie, levensverhaal doorgeven na overlijden, digitale nalatenschap, levensverhaal toekomst, dead man switch levensverhaal",
         "excerpt": "De tijdgestuurde vrijgave van BewaardVoorJou.nl laat jou bepalen wanneer jouw familie toegang krijgt tot jouw levensverhaal. Op een verjaardag, bij een bijzondere gelegenheid of na jouw overlijden: jij stelt de datum in.",
         "content": """<blockquote>
@@ -843,8 +843,8 @@ ARTICLES = [
     {
         "slug": "wie-heeft-er-toegang-tot-mijn-verhalen",
         "title": "Wie heeft er toegang tot mijn verhalen?",
-        "meta_title": "Wie heeft toegang tot jouw levensverhaal? Volledige controle | BewaardVoorJou.nl",
-        "meta_description": "Standaard heeft alleen jijzelf toegang tot jouw levensverhaal bij BewaardVoorJou.nl. Jij bepaalt wie je uitnodigt, welke delen zichtbaar zijn en wanneer. Alles uitgelegd.",
+        "meta_title": "Wie heeft toegang tot mijn levensverhaal? | BewaardVoorJou.nl",
+        "meta_description": "Standaard heeft alleen jijzelf toegang tot jouw levensverhaal. Jij bepaalt wie je uitnodigt, welke delen zichtbaar zijn en wanneer. Alles uitgelegd.",
         "keywords": "wie heeft toegang levensverhaal, privacy biografie, levensverhaal beveiligd, toegang beheren biografie, familie toegang levensverhaal, privacy controle BewaardVoorJou",
         "excerpt": "Standaard heeft alleen jijzelf toegang tot jouw levensverhaal bij BewaardVoorJou.nl. Jij bepaalt zelf wie je uitnodigt, welke delen zichtbaar zijn en wanneer. Er is geen automatische toegang voor familieleden of medewerkers.",
         "content": """<blockquote>
@@ -910,7 +910,7 @@ ARTICLES = [
     {
         "slug": "hoe-exporteer-ik-mijn-eigen-data-en-herinneringen",
         "title": "Hoe exporteer ik mijn eigen data en herinneringen?",
-        "meta_title": "Jouw levensverhaal exporteren: PDF, MP3, MP4 en ZIP | BewaardVoorJou.nl",
+        "meta_title": "Levensverhaal exporteren: PDF, MP3, MP4 en ZIP",
         "meta_description": "Exporteer je levensverhaal als PDF, Word, MP3 of MP4 vanuit BewaardVoorJou.nl. Jouw data is altijd van jou — download alles op elk moment. AVG-conform.",
         "keywords": "levensverhaal exporteren, biografie downloaden, data export biografie, levensverhaal opslaan eigen apparaat, AVG data portabiliteit, PDF biografie downloaden",
         "excerpt": "Bij BewaardVoorJou.nl kun je jouw volledige levensverhaal op elk moment exporteren: tekst als PDF of Word, audio als MP3 en video als MP4. Jouw data is altijd van jou.",
@@ -989,8 +989,8 @@ ARTICLES = [
     {
         "slug": "hoe-maak-ik-een-gratis-account-aan",
         "title": "Hoe maak ik een gratis account aan bij BewaardVoorJou.nl?",
-        "meta_title": "Gratis account aanmaken bij BewaardVoorJou.nl — in 1 minuut | Stap voor stap",
-        "meta_description": "Een gratis account aanmaken bij BewaardVoorJou.nl is klaar in één minuut. Alleen een e-mailadres nodig. Geen creditcard, geen technische kennis. Stap voor stap uitgelegd.",
+        "meta_title": "Gratis account aanmaken bij BewaardVoorJou.nl",
+        "meta_description": "Een gratis account aanmaken duurt één minuut. Alleen een e-mailadres nodig. Geen creditcard, geen technische kennis vereist. Stap voor stap uitgelegd.",
         "keywords": "account aanmaken BewaardVoorJou, gratis registreren levensverhaal, BewaardVoorJou beginnen, levensverhaal app registratie, gratis biografie account aanmaken",
         "excerpt": "Een gratis account aanmaken bij BewaardVoorJou.nl duurt minder dan één minuut. Je hebt alleen een e-mailadres nodig. Geen creditcard, geen technische kennis en geen verplichtingen.",
         "content": """<blockquote>
@@ -1060,8 +1060,8 @@ ARTICLES = [
     {
         "slug": "is-bewaardvoorjou-echt-gratis-te-proberen",
         "title": "Is BewaardVoorJou.nl echt gratis te proberen?",
-        "meta_title": "Is BewaardVoorJou.nl echt gratis? Geen creditcard, geen valkuilen | BewaardVoorJou.nl",
-        "meta_description": "Ja, BewaardVoorJou.nl is echt gratis — geen creditcard nodig, geen proefperiode die stilletjes overgaat naar betaald. Ontdek precies wat de gratis versie biedt.",
+        "meta_title": "Is BewaardVoorJou.nl gratis? De gratis versie uitgelegd",
+        "meta_description": "Ja, echt gratis — geen creditcard nodig, geen proefperiode die overgaat naar betaald. Ontdek precies wat de gratis versie van BewaardVoorJou.nl biedt.",
         "keywords": "BewaardVoorJou gratis, levensverhaal app gratis proberen, gratis biografie app Nederland, BewaardVoorJou kosten, levensverhaal gratis beginnen, geen creditcard nodig",
         "excerpt": "Ja, BewaardVoorJou.nl is echt gratis te proberen. Geen creditcard nodig, geen proefperiode die automatisch overgaat in een betaald abonnement. De gratis versie is ruim genoeg om jouw eerste herinneringen vast te leggen.",
         "content": """<blockquote>
@@ -1136,8 +1136,8 @@ ARTICLES = [
     {
         "slug": "hoe-kan-ik-mijn-abonnement-opzeggen",
         "title": "Hoe kan ik mijn abonnement opzeggen?",
-        "meta_title": "Abonnement opzeggen bij BewaardVoorJou.nl — eenvoudig, direct, geen gedoe",
-        "meta_description": "Je kunt jouw abonnement bij BewaardVoorJou.nl op elk moment opzeggen via jouw accountinstellingen. Geen opzegtermijn, geen telefoontje. Jouw verhalen blijven altijd bewaard.",
+        "meta_title": "Abonnement opzeggen bij BewaardVoorJou.nl | Stap voor stap",
+        "meta_description": "Je kunt jouw abonnement op elk moment opzeggen via accountinstellingen. Geen opzegtermijn, geen telefoontje. Jouw verhalen blijven altijd bewaard.",
         "keywords": "abonnement opzeggen BewaardVoorJou, BewaardVoorJou opzeggen stap voor stap, abonnement annuleren levensverhaal app, opzeggen biografie account, account verwijderen BewaardVoorJou",
         "excerpt": "Je kunt jouw abonnement bij BewaardVoorJou.nl op elk moment opzeggen via jouw accountinstellingen. Geen opzegtermijn, geen telefoontje nodig. Je verhalen blijven altijd bewaard.",
         "content": """<blockquote>
