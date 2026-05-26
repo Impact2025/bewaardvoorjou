@@ -140,18 +140,35 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
       onChange(editor.getHTML());
     },
     editorProps: {
+      transformPastedHTML(html) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          // Remove non-content elements
+          doc.querySelectorAll('script, style, nav, footer, header, aside, form, button, input, select, textarea').forEach(el => el.remove());
+          // Strip presentation attributes so TipTap can parse clean semantic HTML
+          doc.querySelectorAll('*').forEach(el => {
+            el.removeAttribute('class');
+            el.removeAttribute('style');
+            el.removeAttribute('id');
+          });
+          return doc.body.innerHTML;
+        } catch {
+          return html;
+        }
+      },
       handlePaste: (view, event) => {
         const data = event.clipboardData;
         if (!data) return false;
 
-        // If clipboard has HTML with heading tags, let TipTap handle it natively
+        // If clipboard has HTML, let transformPastedHTML + TipTap handle it natively
         const html = data.getData('text/html');
-        if (html && /<h[1-6][\s>]/i.test(html)) return false;
+        if (html && html.trim()) return false;
 
         const text = data.getData('text/plain');
         if (!text) return false;
 
-        // Only intercept when the text looks like it has markdown headings
+        // Only intercept plain text with markdown headings
         if (!/^#{1,6} /m.test(text)) return false;
 
         const converted = convertMarkdownToHtml(text);
