@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { FamilyRole, AccessLevel, CreateFamilyMemberRequest } from "@/lib/family-types";
-import { ROLE_LABELS, ACCESS_LABELS, ROLE_COLORS } from "@/lib/family-types";
+import { ROLE_LABELS, ACCESS_LABELS } from "@/lib/family-types";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +131,6 @@ export function AddFamilyMemberModal({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {AVAILABLE_ROLES.map((r) => {
               const Icon = RoleIcons[r];
-              const colors = ROLE_COLORS[r];
               const isSelected = role === r;
 
               return (
@@ -141,23 +140,23 @@ export function AddFamilyMemberModal({
                   onClick={() => setRole(r)}
                   disabled={isLoading}
                   className={cn(
-                    "p-3 rounded-lg border-2 transition-all text-left",
-                    "hover:shadow-sm",
+                    "p-3 rounded-lg border transition-all text-left",
+                    "hover:border-[#FF8C42]/40",
                     isSelected
-                      ? cn(colors.bg, "border-current", colors.text)
-                      : "bg-white border-slate-200 hover:border-slate-300",
+                      ? "bg-[#FAF7F2] border-[#FF8C42]"
+                      : "bg-white border-[#E6E2DD]",
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-5 w-5 mb-1",
-                      isSelected ? colors.text : "text-slate-400",
+                      isSelected ? "text-[#FF8C42]" : "text-[#999]",
                     )}
                   />
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      isSelected ? colors.text : "text-slate-700",
+                      isSelected ? "text-[#FF8C42]" : "text-[#333333]",
                     )}
                   >
                     {ROLE_LABELS[r]}
@@ -179,29 +178,29 @@ export function AddFamilyMemberModal({
                 onClick={() => setAccessLevel(level)}
                 disabled={isLoading}
                 className={cn(
-                  "w-full p-3 rounded-lg border-2 transition-all text-left flex items-center justify-between",
+                  "w-full p-3 rounded-lg border transition-all text-left flex items-center justify-between",
                   accessLevel === level
-                    ? "border-teal-500 bg-teal-50"
-                    : "border-slate-200 hover:border-slate-300 bg-white",
+                    ? "border-[#FF8C42] bg-[#FAF7F2]"
+                    : "border-[#E6E2DD] hover:border-[#FF8C42]/40 bg-white",
                 )}
               >
                 <div>
                   <p
                     className={cn(
-                      "font-medium",
-                      accessLevel === level ? "text-teal-700" : "text-slate-700",
+                      "font-medium text-sm",
+                      accessLevel === level ? "text-[#FF8C42]" : "text-[#333333]",
                     )}
                   >
                     {ACCESS_LABELS[level]}
                   </p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-xs text-[#555555] mt-0.5">
                     {level === "full" && "Kan alle hoofdstukken en media bekijken"}
                     {level === "selected" && "Je kiest welke hoofdstukken zichtbaar zijn"}
                     {level === "highlights" && "Kan alleen gemarkeerde momenten zien"}
                   </p>
                 </div>
                 {accessLevel === level && (
-                  <Check className="h-5 w-5 text-teal-600" />
+                  <Check className="h-4 w-4 text-[#FF8C42] shrink-0" />
                 )}
               </button>
             ))}
@@ -215,7 +214,7 @@ export function AddFamilyMemberModal({
             checked={sendInvite}
             onChange={(e) => setSendInvite(e.target.checked)}
             disabled={isLoading}
-            className="w-5 h-5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            className="w-5 h-5 rounded border-[#E6E2DD] accent-[#FF8C42] focus:ring-[#FF8C42]"
           />
           <div>
             <span className="font-medium text-slate-900">

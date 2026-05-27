@@ -132,18 +132,19 @@ export function Modal({
         className={cn(
           "relative z-10 w-full rounded-2xl bg-white shadow-2xl",
           "animate-in zoom-in-95 fade-in duration-200",
+          "flex flex-col max-h-[calc(100svh-2rem)]",
           sizeClasses[size],
           className
         )}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between border-b border-slate-200 p-4">
+          <div className="flex items-start justify-between border-b border-[#E6E2DD] p-4 shrink-0">
             <div className="flex-1">
               {title && (
                 <h2
                   id="modal-title"
-                  className="text-lg font-semibold text-slate-900"
+                  className="text-lg font-semibold text-[#333333]"
                 >
                   {title}
                 </h2>
@@ -151,7 +152,7 @@ export function Modal({
               {description && (
                 <p
                   id="modal-description"
-                  className="mt-1 text-sm text-slate-600"
+                  className="mt-1 text-sm text-[#555555]"
                 >
                   {description}
                 </p>
@@ -160,7 +161,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="ml-4 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2"
+                className="ml-4 rounded-full p-1 text-[#999] transition-colors hover:bg-[#FAF7F2] hover:text-[#333333] focus:outline-none focus:ring-2 focus:ring-[#FF8C42] focus:ring-offset-2"
                 aria-label="Sluit modal"
               >
                 <X className="h-5 w-5" />
@@ -169,8 +170,8 @@ export function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className="p-4">{children}</div>
+        {/* Body — scrollable on small screens */}
+        <div className="p-4 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );
