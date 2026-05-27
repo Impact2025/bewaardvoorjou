@@ -318,12 +318,12 @@ async def enhance_content(
     base_path = "/kennisbank" if payload.section == "knowledge" else "/blog"
 
     int_links_str = "\n".join(
-        f'- <a href="{base_path}/{l.get("slug")}">{l.get("title")}</a>'
-        for l in payload.internal_links if l.get("slug")
+        f'- <a href="{base_path}/{lnk.get("slug")}">{lnk.get("title")}</a>'
+        for lnk in payload.internal_links if lnk.get("slug")
     )
     ext_links_str = "\n".join(
-        f'- <a href="{l.get("url")}" target="_blank" rel="noopener noreferrer">{l.get("title")}</a>'
-        for l in payload.external_links if l.get("url")
+        f'- <a href="{lnk.get("url")}" target="_blank" rel="noopener noreferrer">{lnk.get("title")}</a>'
+        for lnk in payload.external_links if lnk.get("url")
     )
 
     system_prompt = """Je bent een expert SEO-copywriter en content-strateeg voor de Nederlandse markt, gespecialiseerd in content voor senioren en familiehistorici.

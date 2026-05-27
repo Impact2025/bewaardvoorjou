@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from typing import BinaryIO
 
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,7 +12,7 @@ from app.schemas.media import MediaAsset, MediaPresignRequest, MediaPresignRespo
 from app.services.media.presigner import build_presigned_upload
 from app.services.media.processor import enqueue_transcode_job, enqueue_transcript_job
 from app.services.media.local_storage import local_storage
-from app.services.media.validators import validate_upload_file, validate_object_key, validate_file_extension
+from app.services.media.validators import validate_object_key, validate_file_extension
 from app.services.email.events import trigger_chapter_complete_email, trigger_milestone_email
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
@@ -256,7 +255,7 @@ async def local_upload(
     logger.info(f"Extracted filename: {filename}")
 
     # Validate extension
-    extension = validate_file_extension(filename)
+    validate_file_extension(filename)
 
     # Validate and sanitize object key (prevent path traversal)
     safe_object_key = validate_object_key(object_key)

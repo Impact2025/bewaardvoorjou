@@ -22,8 +22,6 @@ from loguru import logger
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.media import TranscriptSegment, PromptRun
-from app.models.journey import Journey
 from app.models.quick_thought import QuickThought
 from app.schemas.common import ChapterId
 from app.services.ai.interviewer import CHAPTER_CONTEXTS, get_system_prompt, clean_ai_question
@@ -150,22 +148,21 @@ class ConversationSession:
         Only returns unused thoughts (not yet used in an interview).
         """
         from sqlalchemy import or_, and_, cast, String
-        from sqlalchemy.dialects.postgresql import JSONB
 
         # First query: direct matches and unassigned recent thoughts
         thoughts = (
             self.db.query(QuickThought)
             .filter(
                 QuickThought.journey_id == self.journey_id,
-                QuickThought.is_used_in_interview == False,
-                QuickThought.archived_at == None,
+                ~QuickThought.is_used_in_interview,
+                QuickThought.archived_at.is_(None),
                 QuickThought.processing_status == "completed",
                 or_(
                     # Direct match: thought is for this chapter
                     QuickThought.chapter_id == self.chapter_id,
                     # Unassigned but recent (within last 7 days)
                     and_(
-                        QuickThought.chapter_id == None,
+                        QuickThought.chapter_id.is_(None),
                         QuickThought.created_at >= datetime.now(timezone.utc) - timedelta(days=7)
                     )
                 )
@@ -186,8 +183,8 @@ class ConversationSession:
                 self.db.query(QuickThought)
                 .filter(
                     QuickThought.journey_id == self.journey_id,
-                    QuickThought.is_used_in_interview == False,
-                    QuickThought.archived_at == None,
+                    ~QuickThought.is_used_in_interview,
+                    QuickThought.archived_at.is_(None),
                     QuickThought.processing_status == "completed",
                     QuickThought.chapter_id != self.chapter_id,  # Not already direct match
                     QuickThought.suggested_chapters.isnot(None),

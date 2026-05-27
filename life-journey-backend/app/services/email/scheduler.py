@@ -10,10 +10,9 @@ Taken:
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 
 from loguru import logger
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
@@ -56,7 +55,6 @@ def _get_user_birthday_occasion(user: UserModel) -> tuple[str, str, str] | None:
     """Controleer of vandaag de verjaardag van de gebruiker is."""
     if not user.birth_year:
         return None
-    today = date.today()
     # We kennen alleen het geboortejaar, niet de exacte datum — sla over
     return None
 
@@ -67,9 +65,9 @@ def _get_active_journeys(db: Session) -> list[tuple[UserModel, JourneyModel]]:
         db.query(UserModel, JourneyModel)
         .join(JourneyModel, JourneyModel.user_id == UserModel.id)
         .filter(
-            UserModel.is_active == True,
-            UserModel.email_verified == True,
-            UserModel.email_bounced == False,
+            UserModel.is_active,
+            UserModel.email_verified,
+            ~UserModel.email_bounced,
         )
         .all()
     )

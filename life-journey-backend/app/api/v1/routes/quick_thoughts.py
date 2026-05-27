@@ -290,7 +290,7 @@ async def list_thoughts(
     if not include_archived:
         query = query.filter(QuickThought.archived_at.is_(None))
     if unused_only:
-        query = query.filter(QuickThought.is_used_in_interview == False)
+        query = query.filter(~QuickThought.is_used_in_interview)
 
     # Order by most recent first
     query = query.order_by(QuickThought.created_at.desc())
@@ -360,7 +360,7 @@ async def get_stats(
 
     # Unused count
     unused_count = base_query.filter(
-        QuickThought.is_used_in_interview == False
+        ~QuickThought.is_used_in_interview
     ).count()
 
     # Recent count (last 7 days)
@@ -400,7 +400,7 @@ async def get_thoughts_for_interview(
     direct_query = db.query(QuickThought).filter(
         QuickThought.journey_id == journey.id,
         QuickThought.chapter_id == chapter_id,
-        QuickThought.is_used_in_interview == False,
+        ~QuickThought.is_used_in_interview,
         QuickThought.archived_at.is_(None),
         QuickThought.processing_status == "ready"
     ).order_by(QuickThought.created_at.desc())
@@ -412,7 +412,7 @@ async def get_thoughts_for_interview(
     suggested_query = db.query(QuickThought).filter(
         QuickThought.journey_id == journey.id,
         QuickThought.chapter_id.is_(None),
-        QuickThought.is_used_in_interview == False,
+        ~QuickThought.is_used_in_interview,
         QuickThought.archived_at.is_(None),
         QuickThought.processing_status == "ready"
     ).order_by(QuickThought.created_at.desc())

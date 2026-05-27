@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import cast, Date as SADate, desc, func, and_, text
@@ -399,7 +399,7 @@ def get_system_health(
     total_journeys = db.query(func.count(Journey.id)).scalar() or 0
     total_media = db.query(func.count(MediaAsset.id)).scalar() or 0
     total_storage = db.query(func.sum(MediaAsset.size_bytes)).scalar() or 0
-    admin_count = db.query(func.count(User.id)).filter(User.is_admin == True).scalar() or 0
+    admin_count = db.query(func.count(User.id)).filter(User.is_admin).scalar() or 0
 
     return {
         "status": "operational" if db_status == "healthy" else "degraded",
@@ -413,7 +413,7 @@ def get_system_health(
         "api": {"status": "healthy"},
         "security": {
             "admin_accounts": admin_count,
-            "active_users": db.query(func.count(User.id)).filter(User.is_active == True).scalar() or 0,
+            "active_users": db.query(func.count(User.id)).filter(User.is_active).scalar() or 0,
         },
     }
 

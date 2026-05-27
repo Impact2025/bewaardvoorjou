@@ -521,32 +521,29 @@ function RecordingsContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-0.5 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-warm-amber hover:text-warm-amber/80"
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors hover:bg-amber-100 active:scale-95"
                               onClick={() => handleViewText(recording)}
+                              aria-label="Bekijken"
                             >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-warm-amber hover:text-warm-amber/80"
+                              <Eye className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors hover:bg-amber-100 active:scale-95"
                               onClick={() => handleEditText(recording)}
+                              aria-label="Bewerken"
                             >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-red-600 hover:text-red-700"
+                              <Edit2 className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
+                              aria-label="Verwijderen"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                              <Trash2 className="h-4.5 w-4.5" />
+                            </button>
                           </div>
                         </div>
                       );
@@ -605,32 +602,29 @@ function RecordingsContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-0.5 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-teal hover:text-teal-dark"
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 transition-colors hover:bg-teal-100 active:scale-95"
                               onClick={() => setPlayingRecording(recording)}
+                              aria-label="Afspelen"
                             >
-                              <PlayCircle className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-slate-600 hover:text-slate-900"
+                              <PlayCircle className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
                               onClick={() => handleDownload(recording)}
+                              aria-label="Downloaden"
                             >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-red-600 hover:text-red-700"
+                              <Download className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
+                              aria-label="Verwijderen"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                              <Trash2 className="h-4.5 w-4.5" />
+                            </button>
                           </div>
                         </div>
                       );
@@ -689,32 +683,29 @@ function RecordingsContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-0.5 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-orange hover:text-orange-dark"
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-500 transition-colors hover:bg-orange-100 active:scale-95"
                               onClick={() => setPlayingRecording(recording)}
+                              aria-label="Afspelen"
                             >
-                              <PlayCircle className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-slate-600 hover:text-slate-900"
+                              <PlayCircle className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
                               onClick={() => handleDownload(recording)}
+                              aria-label="Downloaden"
                             >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                
-                              className="h-8 w-8 text-red-600 hover:text-red-700"
+                              <Download className="h-4.5 w-4.5" />
+                            </button>
+                            <button
+                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
+                              aria-label="Verwijderen"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                              <Trash2 className="h-4.5 w-4.5" />
+                            </button>
                           </div>
                         </div>
                       );

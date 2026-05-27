@@ -92,7 +92,7 @@ def add_member(
     current_user: User = Depends(get_current_user),
 ) -> FamilyInviteResponse:
     """Add a new family member and optionally send an invitation."""
-    journey = _ensure_journey_access(journey_id, db, current_user)
+    _ensure_journey_access(journey_id, db, current_user)
 
     try:
         member, invite = create_family_member(
