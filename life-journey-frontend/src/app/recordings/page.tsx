@@ -416,7 +416,7 @@ function RecordingsContent() {
     >
       <div className="space-y-8">
         {/* Statistics */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Card className="bg-card border-neutral-sand">
             <CardHeader className="pb-3">
               <CardDescription>Totaal</CardDescription>
@@ -475,7 +475,7 @@ function RecordingsContent() {
             {textRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-warm-amber" />
@@ -484,12 +484,12 @@ function RecordingsContent() {
                       <CardDescription>{textRecordings.length} teksten</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
                       <Select
                         options={textSortOptions}
                         value={textSort}
                         onChange={setTextSort}
-                        className="w-[180px]"
+                        className="flex-1 sm:w-[180px]"
                       />
                     </div>
                   </div>
@@ -502,54 +502,46 @@ function RecordingsContent() {
                       return (
                         <div
                           key={recording.id}
-                          className="flex items-center justify-between p-4 rounded-lg border border-neutral-sand bg-cream hover:border-warm-amber/40 transition-colors"
+                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-warm-amber/40 transition-colors"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-lg bg-warm-amber/20 flex items-center justify-center">
-                              <FileText className="h-6 w-6 text-warm-amber" />
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-warm-amber/20 flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-warm-amber" />
                             </div>
-                            <div>
-                              <h4 className="font-medium text-slate-900">
+                            <div className="min-w-0">
+                              <h4 className="font-medium text-slate-900 truncate text-sm">
                                 {chapter?.title || recording.chapter_id}
                               </h4>
-                              <div className="flex items-center gap-3 text-xs text-medium mt-1">
-                                <span>~{words} woorden</span>
-                                <span>•</span>
+                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
+                                <span>~{words} wrd</span>
+                                <span>·</span>
                                 <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>•</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL")}</span>
+                                <span>·</span>
+                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
                             <Button
                               variant="ghost"
-
-                              className="text-warm-amber hover:text-warm-amber/80"
+                
+                              className="h-8 w-8 text-warm-amber hover:text-warm-amber/80"
                               onClick={() => handleViewText(recording)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-warm-amber hover:text-warm-amber/80"
+                
+                              className="h-8 w-8 text-warm-amber hover:text-warm-amber/80"
                               onClick={() => handleEditText(recording)}
                             >
                               <Edit2 className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-slate-600 hover:text-slate-900"
-                              onClick={() => handleDownload(recording)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-
-                              className="text-red-600 hover:text-red-700"
+                
+                              className="h-8 w-8 text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
                             >
@@ -568,21 +560,21 @@ function RecordingsContent() {
             {videoRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <Video className="h-5 w-5 text-teal" />
                         <CardTitle>Video Opnames</CardTitle>
                       </div>
-                      <CardDescription>{videoRecordings.length} video's</CardDescription>
+                      <CardDescription>{videoRecordings.length} video&apos;s</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
                       <Select
                         options={mediaSortOptions}
                         value={videoSort}
                         onChange={setVideoSort}
-                        className="w-[180px]"
+                        className="flex-1 sm:w-[180px]"
                       />
                     </div>
                   </div>
@@ -594,46 +586,46 @@ function RecordingsContent() {
                       return (
                         <div
                           key={recording.id}
-                          className="flex items-center justify-between p-4 rounded-lg border border-neutral-sand bg-cream hover:border-teal/40 transition-colors"
+                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-teal/40 transition-colors"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-lg bg-teal/20 flex items-center justify-center">
-                              <Video className="h-6 w-6 text-teal" />
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-teal/20 flex items-center justify-center">
+                              <Video className="h-5 w-5 text-teal" />
                             </div>
-                            <div>
-                              <h4 className="font-medium text-slate-900">
+                            <div className="min-w-0">
+                              <h4 className="font-medium text-slate-900 truncate text-sm">
                                 {chapter?.title || recording.chapter_id}
                               </h4>
-                              <div className="flex items-center gap-3 text-xs text-medium mt-1">
+                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
                                 <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>•</span>
+                                <span>·</span>
                                 <span>{formatDuration(recording.duration_seconds)}</span>
-                                <span>•</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL")}</span>
+                                <span>·</span>
+                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
                             <Button
                               variant="ghost"
-
-                              className="text-teal hover:text-teal-dark"
+                
+                              className="h-8 w-8 text-teal hover:text-teal-dark"
                               onClick={() => setPlayingRecording(recording)}
                             >
                               <PlayCircle className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-slate-600 hover:text-slate-900"
+                
+                              className="h-8 w-8 text-slate-600 hover:text-slate-900"
                               onClick={() => handleDownload(recording)}
                             >
                               <Download className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-red-600 hover:text-red-700"
+                
+                              className="h-8 w-8 text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
                             >
@@ -652,7 +644,7 @@ function RecordingsContent() {
             {audioRecordings.length > 0 && (
               <Card className="bg-card border-neutral-sand">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <Mic className="h-5 w-5 text-orange" />
@@ -661,12 +653,12 @@ function RecordingsContent() {
                       <CardDescription>{audioRecordings.length} audio fragmenten</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500" />
+                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
                       <Select
                         options={mediaSortOptions}
                         value={audioSort}
                         onChange={setAudioSort}
-                        className="w-[180px]"
+                        className="flex-1 sm:w-[180px]"
                       />
                     </div>
                   </div>
@@ -678,46 +670,46 @@ function RecordingsContent() {
                       return (
                         <div
                           key={recording.id}
-                          className="flex items-center justify-between p-4 rounded-lg border border-neutral-sand bg-cream hover:border-orange/40 transition-colors"
+                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-orange/40 transition-colors"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-lg bg-orange/20 flex items-center justify-center">
-                              <Mic className="h-6 w-6 text-orange" />
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-orange/20 flex items-center justify-center">
+                              <Mic className="h-5 w-5 text-orange" />
                             </div>
-                            <div>
-                              <h4 className="font-medium text-slate-900">
+                            <div className="min-w-0">
+                              <h4 className="font-medium text-slate-900 truncate text-sm">
                                 {chapter?.title || recording.chapter_id}
                               </h4>
-                              <div className="flex items-center gap-3 text-xs text-medium mt-1">
+                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
                                 <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>•</span>
+                                <span>·</span>
                                 <span>{formatDuration(recording.duration_seconds)}</span>
-                                <span>•</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL")}</span>
+                                <span>·</span>
+                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
                             <Button
                               variant="ghost"
-
-                              className="text-orange hover:text-orange-dark"
+                
+                              className="h-8 w-8 text-orange hover:text-orange-dark"
                               onClick={() => setPlayingRecording(recording)}
                             >
                               <PlayCircle className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-slate-600 hover:text-slate-900"
+                
+                              className="h-8 w-8 text-slate-600 hover:text-slate-900"
                               onClick={() => handleDownload(recording)}
                             >
                               <Download className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-
-                              className="text-red-600 hover:text-red-700"
+                
+                              className="h-8 w-8 text-red-600 hover:text-red-700"
                               onClick={() => handleDeleteRecording(recording)}
                               disabled={deletingId === recording.id}
                             >
