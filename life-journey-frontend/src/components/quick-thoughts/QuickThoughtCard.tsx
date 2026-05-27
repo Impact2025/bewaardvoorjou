@@ -203,26 +203,25 @@ export function QuickThoughtCard({
 
           {/* Actions */}
           {showActions && isReady && (
-            <div className="flex gap-1 mt-2">
+            <div className="flex gap-1.5 mt-2">
               {!thought.chapter_id && onLinkToChapter && (
-                <Button
-                  variant="ghost"
+                <button
                   onClick={() => onLinkToChapter(thought.id)}
-                  className="h-7 text-xs text-stone-500 hover:text-amber-600"
+                  className="flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-100 active:scale-95"
                 >
-                  <Link2 className="w-3 h-3 mr-1" />
+                  <Link2 className="w-3 h-3" />
                   Koppelen
-                </Button>
+                </button>
               )}
 
               {onDelete && (
-                <Button
-                  variant="ghost"
+                <button
                   onClick={() => onDelete(thought.id)}
-                  className="h-7 text-xs text-stone-400 hover:text-red-600"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-400 transition-colors hover:bg-red-100 hover:text-red-600 active:scale-95"
+                  aria-label="Verwijderen"
                 >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
           )}

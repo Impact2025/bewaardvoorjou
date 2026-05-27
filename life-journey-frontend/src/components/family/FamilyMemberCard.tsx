@@ -93,13 +93,13 @@ export function FamilyMemberCard({
 
           {/* Actions menu */}
           <div className="relative">
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
               onClick={() => setShowActions(!showActions)}
+              aria-label="Acties"
             >
               <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            </button>
 
             {showActions && (
               <>
