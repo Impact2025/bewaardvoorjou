@@ -22,10 +22,15 @@ function authHeaders(): HeadersInit {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: { ...authHeaders(), ...init?.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: { ...authHeaders(), ...init?.headers },
+    });
+  } catch {
+    throw new Error("De server is niet bereikbaar. Controleer je internetverbinding en probeer opnieuw.");
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail ?? `HTTP ${res.status}`);

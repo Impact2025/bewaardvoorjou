@@ -1,9 +1,17 @@
 #!/bin/bash
 set -e
 
-# Run database migrations
+# Run database migrations (met retry voor Neon.tech cold-start)
 echo "Running alembic migrations..."
-python -m alembic upgrade head
+for attempt in 1 2 3; do
+  python -m alembic upgrade head && break
+  echo "Migration poging $attempt mislukt, opnieuw proberen in 5s..."
+  sleep 5
+  if [ "$attempt" -eq 3 ]; then
+    echo "Migrations definitief mislukt na 3 pogingen."
+    exit 1
+  fi
+done
 
 # Start Celery workers in background
 echo "Starting Celery email worker..."
