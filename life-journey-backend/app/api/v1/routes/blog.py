@@ -38,7 +38,7 @@ try:
     def _sanitize_html(html: str | None) -> str | None:
         if html is None:
             return None
-        return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
+        return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS, link_rel=None)
 except ImportError:
     def _sanitize_html(html: str | None) -> str | None:  # type: ignore[misc]
         return html
