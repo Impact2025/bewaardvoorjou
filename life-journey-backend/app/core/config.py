@@ -46,6 +46,8 @@ class Settings(BaseSettings):
   aws_access_key_id: str | None = None
   aws_secret_access_key: str | None = None
   media_encryption_kms_key: str | None = None
+  # Publieke basis-URL voor opgeslagen bestanden (bijv. Cloudflare R2 public dev URL of custom domain)
+  s3_public_url: str | None = None
 
   # AI/Whisper configuration
   whisper_endpoint: str | None = None
@@ -86,7 +88,7 @@ class Settings(BaseSettings):
   # For production, this MUST be set to a secure, persistent value
   jwt_secret_key: str | None = None
   jwt_algorithm: str = "HS256"
-  jwt_access_token_expires_minutes: int = 60 * 24  # 24 hours
+  jwt_access_token_expires_minutes: int = 60  # 60 minutes
 
   @field_validator('jwt_secret_key')
   @classmethod
@@ -109,8 +111,8 @@ class Settings(BaseSettings):
     if not v:
       generated_key = secrets.token_hex(32)
       print("⚠️  WARNING: No JWT_SECRET_KEY set. Generated temporary key for development.", file=sys.stderr)
-      print(f"⚠️  Sessions will not persist across server restarts.", file=sys.stderr)
-      print(f"⚠️  Set JWT_SECRET_KEY in .env to persist sessions:", file=sys.stderr)
+      print("⚠️  Sessions will not persist across server restarts.", file=sys.stderr)
+      print("⚠️  Set JWT_SECRET_KEY in .env to persist sessions:", file=sys.stderr)
       print(f"    JWT_SECRET_KEY={generated_key}", file=sys.stderr)
       return generated_key
 

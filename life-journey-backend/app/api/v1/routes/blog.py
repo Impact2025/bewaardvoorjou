@@ -471,7 +471,9 @@ async def upload_blog_image(
                 Body=content,
                 ContentType=file.content_type or "image/jpeg",
             )
-            if settings.s3_endpoint_url:
+            if settings.s3_public_url:
+                url = f"{settings.s3_public_url.rstrip('/')}/{object_key}"
+            elif settings.s3_endpoint_url:
                 url = f"{settings.s3_endpoint_url.rstrip('/')}/{settings.s3_bucket}/{object_key}"
             else:
                 url = f"https://{settings.s3_bucket}.s3.{settings.s3_region}.amazonaws.com/{object_key}"
@@ -535,7 +537,9 @@ async def upload_blog_video(
                 Body=content,
                 ContentType=file.content_type or "video/mp4",
             )
-            if settings.s3_endpoint_url:
+            if settings.s3_public_url:
+                url = f"{settings.s3_public_url.rstrip('/')}/{object_key}"
+            elif settings.s3_endpoint_url:
                 url = f"{settings.s3_endpoint_url.rstrip('/')}/{settings.s3_bucket}/{object_key}"
             else:
                 url = f"https://{settings.s3_bucket}.s3.{settings.s3_region}.amazonaws.com/{object_key}"
