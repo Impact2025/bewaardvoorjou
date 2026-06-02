@@ -78,6 +78,14 @@ class SubmitAnswersRequest(BaseModel):
     answers: list[AnswerItem]
 
 
+class AnswerResponse(BaseModel):
+    id: str
+    question_id: str
+    question_text: str
+    answer_text: str
+    created_at: str
+
+
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 def _ensure_journey_access(journey_id: str, db: Session, user: User) -> Journey:
@@ -237,6 +245,34 @@ def delete_interview(
         raise HTTPException(status_code=404, detail="Interview niet gevonden")
     db.delete(interview)
     db.commit()
+
+
+@router.get("/family/{journey_id}/parent-interviews/{interview_id}/answers", response_model=list[AnswerResponse])
+@limiter.limit(RateLimits.READ_STANDARD)
+def get_answers(
+    request: Request,
+    journey_id: str,
+    interview_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[AnswerResponse]:
+    _ensure_journey_access(journey_id, db, current_user)
+    interview = db.query(ParentInterview).filter(
+        ParentInterview.id == interview_id,
+        ParentInterview.journey_id == journey_id,
+    ).first()
+    if not interview:
+        raise HTTPException(status_code=404, detail="Interview niet gevonden")
+    return [
+        AnswerResponse(
+            id=a.id,
+            question_id=a.question_id,
+            question_text=a.question_text,
+            answer_text=a.answer_text,
+            created_at=a.created_at.isoformat(),
+        )
+        for a in interview.answers
+    ]
 
 
 # ── Public endpoints (no auth) ─────────────────────────────────────────────────

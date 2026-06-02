@@ -35,6 +35,14 @@ export interface AnswerItem {
   answer_text: string;
 }
 
+export interface AnswerResponse {
+  id: string;
+  question_id: string;
+  question_text: string;
+  answer_text: string;
+  created_at: string;
+}
+
 export async function listInterviews(journeyId: string, token: string): Promise<Interview[]> {
   return apiFetch<Interview[]>(`/family/${journeyId}/parent-interviews`, { method: "GET" }, { token });
 }
@@ -53,6 +61,14 @@ export async function createInterview(
 
 export async function deleteInterview(journeyId: string, interviewId: string, token: string): Promise<void> {
   await apiFetch<void>(`/family/${journeyId}/parent-interviews/${interviewId}`, { method: "DELETE" }, { token });
+}
+
+export async function getAnswers(journeyId: string, interviewId: string, token: string): Promise<AnswerResponse[]> {
+  return apiFetch<AnswerResponse[]>(
+    `/family/${journeyId}/parent-interviews/${interviewId}/answers`,
+    { method: "GET" },
+    { token },
+  );
 }
 
 export async function getPublicInterview(token: string): Promise<PublicInterview> {

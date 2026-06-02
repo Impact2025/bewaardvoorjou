@@ -23,7 +23,9 @@ import {
   listInterviews,
   createInterview,
   deleteInterview,
+  getAnswers,
   type Interview,
+  type AnswerResponse,
 } from "@/lib/parent-interview-client";
 
 interface InterviewOudersProps {
@@ -40,6 +42,8 @@ export function InterviewOuders({ journeyId, className }: InterviewOudersProps) 
   const [showCreate, setShowCreate] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [answersCache, setAnswersCache] = useState<Record<string, AnswerResponse[]>>({});
+  const [loadingAnswers, setLoadingAnswers] = useState<string | null>(null);
 
   // Create form
   const [name, setName] = useState("");
@@ -89,6 +93,21 @@ export function InterviewOuders({ journeyId, className }: InterviewOudersProps) 
     setInterviews(prev => prev.filter(i => i.id !== interview.id));
     if (expandedId === interview.id) setExpandedId(null);
   }, [journeyId, token, expandedId]);
+
+  const handleExpand = useCallback(async (interview: Interview) => {
+    const isOpening = expandedId !== interview.id;
+    setExpandedId(isOpening ? interview.id : null);
+
+    if (isOpening && interview.is_completed && !answersCache[interview.id]) {
+      setLoadingAnswers(interview.id);
+      try {
+        const answers = await getAnswers(journeyId, interview.id, token);
+        setAnswersCache(prev => ({ ...prev, [interview.id]: answers }));
+      } finally {
+        setLoadingAnswers(null);
+      }
+    }
+  }, [expandedId, answersCache, journeyId, token]);
 
   const handleCopy = useCallback((interview: Interview) => {
     void navigator.clipboard.writeText(interview.share_url);
@@ -209,7 +228,7 @@ export function InterviewOuders({ journeyId, className }: InterviewOudersProps) 
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 <button
-                  onClick={() => setExpandedId(expandedId === interview.id ? null : interview.id)}
+                  onClick={() => void handleExpand(interview)}
                   className="p-1.5 rounded-lg border transition-colors"
                   style={{ borderColor: "#E9E4DB", color: "#6B6456" }}
                 >
@@ -228,21 +247,50 @@ export function InterviewOuders({ journeyId, className }: InterviewOudersProps) 
 
             {/* Expanded: questions + answers */}
             {expandedId === interview.id && (
-              <div className="border-t px-5 py-4 space-y-4" style={{ borderColor: "#F5F5F4", background: "#FAFAF9" }}>
-                {interview.questions.map((q, i) => {
-                  return (
+              <div className="border-t px-5 py-5 space-y-5" style={{ borderColor: "#F0EDE8", background: "#FAFAF9" }}>
+                {loadingAnswers === interview.id ? (
+                  <div className="flex items-center gap-2 py-4 justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin" style={{ color: "#FF8C42" }} />
+                    <span className="text-sm" style={{ color: "#6B6456" }}>Antwoorden laden…</span>
+                  </div>
+                ) : interview.is_completed ? (
+                  /* Completed: show questions with answers */
+                  (() => {
+                    const answers = answersCache[interview.id] ?? [];
+                    const answerMap = Object.fromEntries(answers.map(a => [a.question_id, a]));
+                    return interview.questions.map((q, i) => {
+                      const answer = answerMap[q.id];
+                      return (
+                        <div key={q.id} className="space-y-2">
+                          <p className="text-sm font-semibold leading-snug" style={{ color: "#2C2416" }}>
+                            <span style={{ color: "#FF8C42" }}>{i + 1}.&nbsp;</span>{q.text}
+                          </p>
+                          {answer ? (
+                            <div
+                              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
+                              style={{ background: "#FFF8F3", border: "1px solid #FFE4CC", color: "#4A4239" }}
+                            >
+                              {answer.answer_text}
+                            </div>
+                          ) : (
+                            <p className="text-xs italic pl-1" style={{ color: "#BBBBBB" }}>
+                              — niet beantwoord
+                            </p>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()
+                ) : (
+                  /* Not yet completed: show pending questions */
+                  interview.questions.map((q, i) => (
                     <div key={q.id} className="space-y-1">
-                      <p className="text-sm font-medium" style={{ color: "#2C2416" }}>
-                        <span style={{ color: "#FF8C42" }}>{i + 1}. </span>{q.text}
+                      <p className="text-sm font-medium leading-snug" style={{ color: "#2C2416" }}>
+                        <span style={{ color: "#FF8C42" }}>{i + 1}.&nbsp;</span>{q.text}
                       </p>
-                      {!interview.is_completed && (
-                        <p className="text-xs italic" style={{ color: "#999" }}>Nog niet beantwoord</p>
-                      )}
+                      <p className="text-xs italic pl-1" style={{ color: "#BBBBBB" }}>Wacht op antwoord…</p>
                     </div>
-                  );
-                })}
-                {interview.is_completed && interview.answer_count === 0 && (
-                  <p className="text-sm" style={{ color: "#6B6456" }}>Antwoorden worden geladen…</p>
+                  ))
                 )}
               </div>
             )}
