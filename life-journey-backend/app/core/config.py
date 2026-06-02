@@ -2,7 +2,7 @@ from functools import lru_cache
 import secrets
 import sys
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -96,6 +96,16 @@ class Settings(BaseSettings):
   jwt_secret_key: str | None = None
   jwt_algorithm: str = "HS256"
   jwt_access_token_expires_minutes: int = 60  # 60 minutes
+
+  @model_validator(mode='after')
+  def strip_localhost_in_production(self) -> 'Settings':
+    """Remove localhost CORS origins in production to prevent dev origins leaking."""
+    if self.environment == 'production':
+      self.cors_origins = [
+        o for o in self.cors_origins
+        if not o.startswith('http://localhost') and not o.startswith('http://127.')
+      ]
+    return self
 
   @field_validator('jwt_secret_key')
   @classmethod
