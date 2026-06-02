@@ -4,11 +4,8 @@ from pydantic import BaseModel
 
 from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
-from app.models.consent import ConsentLog as ConsentLogModel
 from app.models.journey import Journey as JourneyModel
-from app.models.legacy import LegacyPolicy as LegacyPolicyModel
-from app.models.media import MediaAsset as MediaAssetModel, PromptRun as PromptRunModel, TranscriptSegment as TranscriptSegmentModel
-from app.models.sharing import Highlight as HighlightModel, ShareGrant as ShareGrantModel
+from app.models.media import MediaAsset as MediaAssetModel, TranscriptSegment as TranscriptSegmentModel
 from app.models.preferences import ChapterPreference as ChapterPreferenceModel
 from app.schemas.journey import JourneyDetail, PromptRun, TranscriptSegment, ChapterStatus, JourneyProgress
 from app.schemas.common import Highlight as HighlightSchema, ShareGrant as ShareGrantSchema, ConsentLog as ConsentLogSchema, ChapterId

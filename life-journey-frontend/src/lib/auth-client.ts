@@ -34,6 +34,9 @@ export interface RegisterPayload {
   locale?: string;
   privacyLevel?: string;
   birthYear?: number;
+  consentTerms: boolean;
+  consentSpecialCategories: boolean;
+  consentMarketing: boolean;
 }
 
 export interface LoginPayload {
@@ -76,6 +79,9 @@ export async function registerUser(payload: RegisterPayload): Promise<RegisterRe
     country: payload.country,
     locale: payload.locale ?? "nl",
     privacy_level: payload.privacyLevel ?? "private",
+    consent_terms: payload.consentTerms,
+    consent_special_categories: payload.consentSpecialCategories,
+    consent_marketing: payload.consentMarketing,
   };
 
   if (payload.birthYear) {

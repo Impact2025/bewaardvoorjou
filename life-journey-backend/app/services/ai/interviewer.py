@@ -7,14 +7,14 @@ Features:
 - Personalized questions using extracted themes and key people
 - Follow-up engine for deeper conversations
 """
-from typing import Iterable, Optional
+from typing import Iterable
 from openai import OpenAI
 from loguru import logger
 from sqlalchemy.orm import Session
 
 from app.schemas.common import ChapterId
 from app.core.config import settings
-from app.services.ai.memory import get_personalized_prompt_context, build_journey_memory
+from app.services.ai.memory import get_personalized_prompt_context
 
 
 # Chapter-specific context and themes - v2.0: 7 fasen, 78 vragen
@@ -997,7 +997,7 @@ def build_prompt_with_ai(
         if follow_up_history:
             history_list = list(follow_up_history)
             if history_list:
-                history_context = f"\n\nEerdere vragen die al gesteld zijn (varieer hiervan):\n" + "\n".join(f"- {q}" for q in history_list[-3:])  # Last 3 for context
+                history_context = "\n\nEerdere vragen die al gesteld zijn (varieer hiervan):\n" + "\n".join(f"- {q}" for q in history_list[-3:])  # Last 3 for context
 
         # Add previous chapters context if available (legacy support)
         context_info = ""

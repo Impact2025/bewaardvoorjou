@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function isValidToken(cookie: string | undefined): boolean {
+  if (!cookie) return false;
+  const parts = cookie.split(".");
+  if (parts.length !== 3) return false;
+  try {
+    const pad = parts[1].length % 4;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad ? 4 - pad : 0);
+    const payload = JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function isSafeRedirect(pathname: string): boolean {
+  return pathname.startsWith("/") && !pathname.startsWith("//");
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin")) {
-    const isLoggedIn = request.cookies.has("ljauth");
-    if (!isLoggedIn) {
+    const token = request.cookies.get("ljauth")?.value;
+    if (!isValidToken(token)) {
       const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
+      const redirect = isSafeRedirect(pathname) ? pathname : "/admin";
+      loginUrl.searchParams.set("redirect", redirect);
       return NextResponse.redirect(loginUrl);
     }
   }

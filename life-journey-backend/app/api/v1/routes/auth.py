@@ -8,7 +8,7 @@ from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
 from app.schemas.auth import (
     AuthResponse, ForgotPasswordRequest, LoginRequest, MagicLinkRequest,
-    MagicLinkVerifyRequest, MessageResponse, RegisterRequest, RegisterResponse,
+    MessageResponse, RegisterRequest, RegisterResponse,
     ResendVerificationRequest, ResetPasswordRequest, UserPublic, VerifyEmailRequest,
 )
 from app.services.auth import (
@@ -30,6 +30,12 @@ router = APIRouter()
 @router.post("/register", response_model=RegisterResponse, status_code=201, tags=["auth"])
 @limiter.limit(RateLimits.AUTH_REGISTER)
 def register(request: Request, payload: RegisterRequest, db: Session = Depends(get_db)) -> RegisterResponse:
+  from fastapi import HTTPException as _HTTPException
+  if not payload.consent_terms:
+    raise _HTTPException(status_code=422, detail="Je moet de algemene voorwaarden en privacyverklaring accepteren.")
+  if not payload.consent_special_categories:
+    raise _HTTPException(status_code=422, detail="Je moet toestemming geven voor de verwerking van je opnamen.")
+
   user = register_user(
     db,
     email=payload.email,
@@ -39,6 +45,9 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
     locale=payload.locale,
     birth_year=payload.birth_year,
     privacy_level=payload.privacy_level,
+    consent_terms=payload.consent_terms,
+    consent_special_categories=payload.consent_special_categories,
+    consent_marketing=payload.consent_marketing,
   )
 
   try:
@@ -134,7 +143,8 @@ def request_magic_link(request: Request, payload: MagicLinkRequest, db: Session 
 
 
 @router.get("/magic-link/verify/{token}", response_model=AuthResponse, tags=["auth"])
-def verify_magic_link(token: str, db: Session = Depends(get_db)) -> AuthResponse:
+@limiter.limit(RateLimits.AUTH_MAGIC_VERIFY)
+def verify_magic_link(request: Request, token: str, db: Session = Depends(get_db)) -> AuthResponse:
   user = verify_magic_link_token(db, token=token)
   access_token = create_access_token(subject=user.id)
   primary_journey = next(iter(user.journeys), None)

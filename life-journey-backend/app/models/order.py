@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, JSON, String, Text
+from sqlalchemy import Column, DateTime, Integer, JSON, String, Text
 
 from app.models.base import Base
 from app.models.user import generate_uuid

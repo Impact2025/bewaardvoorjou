@@ -8,7 +8,6 @@ from loguru import logger
 
 from app.core.config import settings
 from app.schemas.media import MediaPresignRequest, MediaPresignResponse
-from app.services.media.local_storage import local_storage
 
 
 def build_presigned_upload(payload: MediaPresignRequest) -> MediaPresignResponse:

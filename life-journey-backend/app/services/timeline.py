@@ -5,10 +5,7 @@ Aggregates journey, chapter, and media data into a structured format
 optimized for rendering an interactive timeline visualization.
 """
 
-from datetime import datetime
-from typing import Optional
 
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.journey import Journey
@@ -22,7 +19,6 @@ from app.schemas.timeline import (
     PHASE_METADATA,
     LifePhase,
     MediaAssetInfo,
-    PhaseMetadata,
     TimelineChapter,
     TimelineChapterDetail,
     TimelinePhase,

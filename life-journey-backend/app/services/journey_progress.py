@@ -5,10 +5,9 @@ Handles chapter unlock logic and progress tracking
 PERFORMANCE OPTIMIZED: Uses bulk queries instead of per-chapter queries
 """
 
-from typing import Dict, List
+from typing import Dict
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from app.models.journey import Journey as JourneyModel
 from app.models.media import MediaAsset as MediaAssetModel
 
 

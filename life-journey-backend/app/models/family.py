@@ -7,7 +7,7 @@ Tracks family relationships, roles, and access permissions.
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, DateTime, ForeignKey, String, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 import enum
 

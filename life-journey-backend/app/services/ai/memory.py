@@ -15,8 +15,7 @@ from openai import OpenAI
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.media import MediaAsset, TranscriptSegment, PromptRun
-from app.models.journey import Journey
+from app.models.media import MediaAsset, TranscriptSegment
 
 
 _CACHE_TTL_HOURS = 6

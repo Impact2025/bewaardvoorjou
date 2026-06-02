@@ -1,7 +1,6 @@
 """
 Local file storage fallback for development (when S3 is not configured)
 """
-import os
 import shutil
 from pathlib import Path
 from typing import BinaryIO

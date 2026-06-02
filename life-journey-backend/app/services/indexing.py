@@ -3,7 +3,6 @@ SEO indexing service — pings IndexNow en Google Indexing API na publicatie.
 
 Beide calls zijn non-blocking: een fout breekt de publish-flow NOOIT.
 """
-import base64
 import json
 import time
 from typing import Optional

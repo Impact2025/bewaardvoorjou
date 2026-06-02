@@ -68,3 +68,11 @@ class User(Base):
 
   # Contact
   phone_number = Column(String(32), nullable=True)  # voor SMS notificaties (toekomst)
+
+  # AVG / consent (Art. 6 + Art. 9)
+  terms_accepted_at = Column(DateTime, nullable=True)               # timestamp AV + privacyverklaring
+  consent_special_categories_at = Column(DateTime, nullable=True)   # toestemming bijzondere categorieën (audio/video/emotie)
+  consent_marketing = Column(Boolean, nullable=False, default=False) # toestemming marketing e-mails
+
+  # Account wissing (Art. 17)
+  deletion_requested_at = Column(DateTime, nullable=True)           # wissingsverzoek ingediend

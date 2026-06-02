@@ -112,7 +112,7 @@ def find_text_position(full_text: str, highlight_text: str, words_per_second: fl
 
     if pos == -1:
         # If exact match not found, return estimate based on text length
-        logger.warning(f"Could not find exact position for highlight text")
+        logger.warning("Could not find exact position for highlight text")
         words_before = len(full_text.split()) // 2
         highlight_words = len(highlight_text.split())
         start_ms = int((words_before / words_per_second) * 1000)

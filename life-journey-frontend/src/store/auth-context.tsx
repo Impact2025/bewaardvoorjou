@@ -61,8 +61,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSessionState(normalized);
       if (typeof window !== "undefined") {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-        // Sync cookie for server-side middleware
-        document.cookie = "ljauth=1; path=/; SameSite=Lax; max-age=86400";
+        // Sync JWT token to cookie for middleware validation
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `ljauth=${newSession.token}; path=/; SameSite=Strict; max-age=86400${secure}`;
       }
     };
 

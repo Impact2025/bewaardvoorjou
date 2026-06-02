@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.routes import (
+    account,
     onboarding,
     journeys,
     media,
@@ -23,6 +24,7 @@ from app.api.v1.routes import (
 
 
 api_router = APIRouter()
+api_router.include_router(account.router, prefix="/account", tags=["account"])
 api_router.include_router(onboarding.router, prefix="/onboarding", tags=["onboarding"])
 api_router.include_router(journeys.router, prefix="/journeys", tags=["journeys"])
 api_router.include_router(media.router, prefix="/media", tags=["media"])

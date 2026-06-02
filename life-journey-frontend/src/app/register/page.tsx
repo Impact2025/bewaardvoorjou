@@ -50,6 +50,9 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentSpecialCategories, setConsentSpecialCategories] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,6 +67,9 @@ export default function RegisterPage() {
         country,
         privacyLevel,
         birthYear: birthYear ? Number(birthYear) : undefined,
+        consentTerms,
+        consentSpecialCategories,
+        consentMarketing,
       });
       router.push(`/email-verificeren?email=${encodeURIComponent(result.email)}`);
     } catch (cause) {
@@ -233,6 +239,71 @@ export default function RegisterPage() {
               </p>
             </div>
 
+            {/* AVG Toestemmingen */}
+            <div className="space-y-3 md:col-span-2 pt-2 border-t border-slate-100">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                Toestemming (vereist)
+              </p>
+
+              {/* Verplicht: AV + Privacyverklaring */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentTerms}
+                  onChange={(e) => setConsentTerms(e.target.checked)}
+                  className="mt-0.5 accent-warm-amber h-4 w-4 flex-shrink-0"
+                  required
+                />
+                <span className="text-sm text-slate-700 leading-relaxed">
+                  Ik heb de{" "}
+                  <a href="/terms" target="_blank" className="text-warm-amber underline hover:text-warm-amber/80">
+                    Algemene voorwaarden
+                  </a>{" "}
+                  en de{" "}
+                  <a href="/privacy" target="_blank" className="text-warm-amber underline hover:text-warm-amber/80">
+                    Privacyverklaring
+                  </a>{" "}
+                  gelezen en ga hiermee akkoord.{" "}
+                  <span className="text-coral font-medium">*</span>
+                </span>
+              </label>
+
+              {/* Verplicht: bijzondere categorieën (Art. 9 AVG) */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentSpecialCategories}
+                  onChange={(e) => setConsentSpecialCategories(e.target.checked)}
+                  className="mt-0.5 accent-warm-amber h-4 w-4 flex-shrink-0"
+                  required
+                />
+                <span className="text-sm text-slate-700 leading-relaxed">
+                  Ik geef toestemming voor de verwerking van mijn audio- en video-opnamen
+                  en de bijbehorende AI-analyse (transcriptie, emotieherkenning) door
+                  BewaardVoorJou en haar verwerkers.{" "}
+                  <span className="text-coral font-medium">*</span>
+                </span>
+              </label>
+
+              {/* Optioneel: marketing */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentMarketing}
+                  onChange={(e) => setConsentMarketing(e.target.checked)}
+                  className="mt-0.5 accent-warm-amber h-4 w-4 flex-shrink-0"
+                />
+                <span className="text-sm text-slate-600 leading-relaxed">
+                  Ik ontvang graag nieuwsbrieven en tips over het vastleggen van herinneringen.
+                  Je kunt je altijd afmelden. <span className="text-slate-400">(optioneel)</span>
+                </span>
+              </label>
+
+              <p className="text-xs text-slate-400">
+                <span className="text-coral font-medium">*</span> Verplicht voor gebruik van het platform
+              </p>
+            </div>
+
             {error ? (
               <p className="md:col-span-2 text-sm text-coral">{error}</p>
             ) : null}
@@ -246,7 +317,9 @@ export default function RegisterPage() {
                   !displayName ||
                   !email ||
                   !password ||
-                  !country
+                  !country ||
+                  !consentTerms ||
+                  !consentSpecialCategories
                 }
               >
                 {isSubmitting ? "Account wordt aangemaakt..." : "Account aanmaken"}

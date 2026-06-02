@@ -42,7 +42,7 @@ describe("registerUser", () => {
       ok: true,
       text: async () => JSON.stringify(mockRegisterResponse),
     });
-    await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL" });
+    await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL", consentTerms: true, consentSpecialCategories: true, consentMarketing: false });
     expect(mockFetch).toHaveBeenCalledWith(
       "http://localhost:8001/api/v1/auth/register",
       expect.objectContaining({ method: "POST" }),
@@ -54,7 +54,7 @@ describe("registerUser", () => {
       ok: true,
       text: async () => JSON.stringify(mockRegisterResponse),
     });
-    const result = await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL" });
+    const result = await registerUser({ displayName: "Test", email: "t@t.nl", password: "pass123", country: "NL", consentTerms: true, consentSpecialCategories: true, consentMarketing: false });
     expect(result.message).toContain("inbox");
     expect(result.email).toBe("t@t.nl");
   });

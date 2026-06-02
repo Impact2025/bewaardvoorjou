@@ -31,7 +31,8 @@ class RateLimits:
 
     # Authentication (stricter limits)
     AUTH_REGISTER = "5/hour"
-    AUTH_LOGIN = "10/minute"
+    AUTH_LOGIN = "3/minute"
+    AUTH_MAGIC_VERIFY = "10/hour"
 
     # Read operations (generous limits)
     READ_STANDARD = "100/minute"

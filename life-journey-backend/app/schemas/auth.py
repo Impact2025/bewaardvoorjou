@@ -28,6 +28,9 @@ class RegisterRequest(BaseModel):
   locale: str = Field(default="nl")
   birth_year: int | None = None
   privacy_level: str = Field(default="private")
+  consent_terms: bool = Field(default=False)
+  consent_special_categories: bool = Field(default=False)
+  consent_marketing: bool = Field(default=False)
 
 
 class RegisterResponse(BaseModel):

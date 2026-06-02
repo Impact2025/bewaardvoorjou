@@ -110,8 +110,6 @@ def _process_quick_thought_sync(thought_id: str) -> None:
     from app.models.quick_thought import QuickThought
     from app.services.ai.transcriber import transcribe_audio
     from app.services.media.local_storage import local_storage
-    from app.services.quick_thoughts.analyzer import analyze_quick_thought_content
-    from datetime import datetime, timezone
 
     db = SessionLocal()
     try:

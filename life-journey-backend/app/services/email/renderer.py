@@ -212,8 +212,8 @@ def build_seasonal_email(
         "moederdag": f"Op Moederdag: een vraag speciaal voor jou, {user_display_name}",
         "vaderdag": f"Op Vaderdag: een vraag speciaal voor jou, {user_display_name}",
         "kerst": f"Met kerst: deel een herinnering, {user_display_name}",
-        "verjaardag": f"Gefeliciteerd! Een bijzondere vraag op jouw dag",
-        "oud_nieuw": f"Een nieuw jaar, een nieuw verhaal — speciaal voor jou",
+        "verjaardag": "Gefeliciteerd! Een bijzondere vraag op jouw dag",
+        "oud_nieuw": "Een nieuw jaar, een nieuw verhaal — speciaal voor jou",
     }
     subject = occasion_subjects.get(occasion, f"Een bijzondere vraag voor jou, {user_display_name}")
     context = {

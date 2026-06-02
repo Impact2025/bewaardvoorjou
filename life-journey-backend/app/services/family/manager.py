@@ -19,14 +19,11 @@ from app.models.family import (
     FamilyRole as FamilyRoleModel,
     AccessLevel as AccessLevelModel,
 )
-from app.models.journey import Journey
-from app.models.user import User
 from app.schemas.family import (
     FamilyMemberCreateRequest,
     FamilyMemberUpdateRequest,
     FamilyMemberResponse,
     FamilyMemberListResponse,
-    FamilyInviteResponse,
     FamilyStatsResponse,
     InviteStatus,
     FamilyRole,

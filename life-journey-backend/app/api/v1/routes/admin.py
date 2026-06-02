@@ -12,7 +12,6 @@ from app.models.audit_log import AuditLog
 from app.models.journey import Journey
 from app.models.user import User
 from app.schemas.admin import (
-    AuditLogEntry,
     CreateUserRequest,
     ToggleActiveResponse,
     ToggleAdminResponse,

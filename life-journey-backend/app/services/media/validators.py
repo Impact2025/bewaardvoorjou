@@ -5,6 +5,49 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile
 
 
+# Magic byte signatures per extension.
+# Each extension maps to a list of valid signatures.
+# A signature is a list of (offset, expected_bytes) — ALL must match (AND).
+# Multiple signatures per extension = alternatives (OR).
+_MAGIC_SIGNATURES: dict[str, list[list[tuple[int, bytes]]]] = {
+    ".webm": [[(0, b"\x1a\x45\xdf\xa3")]],
+    ".mp4":  [[(4, b"ftyp")]],
+    ".m4a":  [[(4, b"ftyp")]],
+    ".mov":  [[(4, b"ftyp")]],
+    ".wav":  [[(0, b"RIFF"), (8, b"WAVE")]],
+    ".avi":  [[(0, b"RIFF"), (8, b"AVI ")]],
+    ".ogg":  [[(0, b"OggS")]],
+    ".flac": [[(0, b"fLaC")]],
+    ".mp3":  [
+        [(0, b"\x49\x44\x33")],   # ID3 tag
+        [(0, b"\xff\xfb")],        # MPEG sync, Layer III, no CRC
+        [(0, b"\xff\xf3")],        # MPEG sync, Layer III, CRC
+        [(0, b"\xff\xf2")],        # MPEG sync, Layer III, CRC (variant)
+    ],
+}
+
+_MAGIC_READ_BYTES = 16
+
+
+def validate_magic_bytes(file: UploadFile, extension: str) -> None:
+    """Validate that the file's magic bytes match the expected extension."""
+    signatures = _MAGIC_SIGNATURES.get(extension)
+    if not signatures:
+        return  # No magic check for text files
+
+    header = file.file.read(_MAGIC_READ_BYTES)
+    file.file.seek(0)
+
+    for signature in signatures:
+        if all(header[offset:offset + len(expected)] == expected for offset, expected in signature):
+            return
+
+    raise HTTPException(
+        status_code=400,
+        detail=f"Bestandsinhoud klopt niet met de verwachte extensie '{extension}'"
+    )
+
+
 # Allowed file extensions and their MIME types
 ALLOWED_EXTENSIONS = {
     # Video formats
@@ -200,8 +243,11 @@ def validate_upload_file(file: UploadFile) -> tuple[str, str]:
     # Validate extension
     extension = validate_file_extension(file.filename)
 
-    # Validate MIME type
+    # Validate MIME type (client-provided header)
     validate_mime_type(file, extension)
+
+    # Validate actual file content via magic bytes
+    validate_magic_bytes(file, extension)
 
     # Validate file size
     validate_file_size(file, extension)

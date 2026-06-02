@@ -54,7 +54,16 @@ def create_access_token(*, subject: str, expires_delta: timedelta | None = None)
   return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
-def register_user(db: Session, *, email: str, password: str, **user_kwargs) -> User:
+def register_user(
+  db: Session,
+  *,
+  email: str,
+  password: str,
+  consent_terms: bool = False,
+  consent_special_categories: bool = False,
+  consent_marketing: bool = False,
+  **user_kwargs,
+) -> User:
   normalized_email = email.lower()
   existing_user = db.query(User).filter_by(email=normalized_email).first()
   if existing_user:
@@ -68,13 +77,17 @@ def register_user(db: Session, *, email: str, password: str, **user_kwargs) -> U
   if "is_active" not in user_kwargs:
     user_kwargs["is_active"] = True
 
+  now = datetime.now(timezone.utc)
   verification_token = secrets.token_urlsafe(32)
   user = User(
     email=normalized_email,
     password_hash=hash_password(password),
     email_verified=False,
     email_verification_token=verification_token,
-    email_verification_token_expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+    email_verification_token_expires_at=now + timedelta(hours=24),
+    terms_accepted_at=now if consent_terms else None,
+    consent_special_categories_at=now if consent_special_categories else None,
+    consent_marketing=consent_marketing,
     **user_kwargs,
   )
   journey_title = user.display_name if getattr(user, "display_name", None) else "Mijn levensverhaal"
@@ -173,10 +186,10 @@ def reset_password(db: Session, *, token: str, new_password: str) -> User:
 
 
 def create_magic_link_token(db: Session, *, user: User) -> str:
-  """Genereer een magic link token voor passwordless login. Geldig 7 dagen."""
+  """Genereer een magic link token voor passwordless login. Geldig 24 uur."""
   token = secrets.token_urlsafe(32)
   user.magic_link_token = token
-  user.magic_link_token_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+  user.magic_link_token_expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
   db.add(user)
   db.commit()
   return token

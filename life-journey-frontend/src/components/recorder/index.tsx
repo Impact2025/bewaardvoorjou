@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { MessageCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CHAPTERS } from "@/lib/chapters";
 import { useRouter } from "next/navigation";
+import { useRecordingConsent } from "./useRecordingConsent";
+import { RecordingConsentModal } from "./RecordingConsentModal";
 
 const AIAssistantChat = dynamic(
   () => import("@/components/journey/ai-assistant-chat").then((m) => m.AIAssistantChat),
@@ -67,6 +69,36 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   } = state;
 
   const actions = useRecorderActions({ chapterId });
+
+  // AVG Art. 9 — eenmalige consent voor audio/video opnamen
+  const { consentGiven, giveConsent, isReady } = useRecordingConsent(session?.user.id);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const pendingAction = useRef<(() => void) | null>(null);
+
+  const requireConsent = useCallback(
+    (action: () => Promise<void>): Promise<void> => {
+      if (mode === "text" || consentGiven) {
+        return action();
+      }
+      return new Promise<void>((resolve) => {
+        pendingAction.current = () => { action().then(resolve); };
+        setShowConsentModal(true);
+      });
+    },
+    [mode, consentGiven]
+  );
+
+  const handleConsentAccept = useCallback(() => {
+    giveConsent();
+    setShowConsentModal(false);
+    pendingAction.current?.();
+    pendingAction.current = null;
+  }, [giveConsent]);
+
+  const handleConsentDecline = useCallback(() => {
+    setShowConsentModal(false);
+    pendingAction.current = null;
+  }, []);
 
   // Haal de eerste AI-vraag op bij het laden
   useEffect(() => {
@@ -210,9 +242,9 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
               </Button>
             )}
             <RecorderControls
-              onStartPreview={actions.startPreview}
+              onStartPreview={() => requireConsent(actions.startPreview)}
               onStopPreview={actions.stopPreview}
-              onStartRecording={actions.startRecording}
+              onStartRecording={() => requireConsent(actions.startRecording)}
               onStopRecording={actions.stopRecording}
               onTogglePause={actions.togglePause}
               onUpload={actions.uploadRecording}
@@ -226,6 +258,14 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
       </div>
 
       <PermissionError />
+
+      {/* AVG Art. 9 — consent modal bij eerste audio/video opname */}
+      {isReady && showConsentModal && (
+        <RecordingConsentModal
+          onAccept={handleConsentAccept}
+          onDecline={handleConsentDecline}
+        />
+      )}
 
       {chapterId && (
         <AIAssistantChat
