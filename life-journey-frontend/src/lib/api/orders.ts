@@ -33,8 +33,9 @@ export interface CreatePaymentIntentPayload {
   package_type: PackageType;
   addons: AddonCode[];
   recipient_name: string;
+  recipient_email?: string;
   personal_message: string;
-  shipping_address: ShippingAddress;
+  shipping_address?: ShippingAddress;
   guest_email?: string;
 }
 

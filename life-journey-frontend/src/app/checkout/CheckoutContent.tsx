@@ -2,6 +2,8 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+
+const SOLD_OUT_PACKAGES = new Set(["ERFGOED", "VOOR_ALTIJD"]);
 import { Check, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -22,8 +24,10 @@ export interface CheckoutState {
   packageType: PackageType;
   addons: AddonCode[];
   recipientName: string;
+  recipientEmail: string;
   personalMessage: string;
   shippingAddress: ShippingAddress;
+  skipShipping: boolean;
   guestEmail: string;
   orderId: string;
   paymentIntentId: string;
@@ -46,13 +50,22 @@ export default function CheckoutContent() {
     ? (rawPackage as PackageType)
     : "ERFGOED";
 
+  // Redirect uitverkochte pakketten terug naar de pricing pagina
+  useEffect(() => {
+    if (SOLD_OUT_PACKAGES.has(packageType)) {
+      router.replace("/pricing");
+    }
+  }, [packageType, router]);
+
   const [step, setStep] = useState(0);
   const [state, setState] = useState<CheckoutState>({
     packageType,
     addons: [],
     recipientName: "",
+    recipientEmail: "",
     personalMessage: "",
     shippingAddress: DEFAULT_ADDRESS,
+    skipShipping: false,
     guestEmail: "",
     orderId: "",
     paymentIntentId: "",

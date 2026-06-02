@@ -159,6 +159,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Vaderdag banner */}
+      <section className="bg-[#1a1a1a] py-6 px-4">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <p className="text-[#d4af37] text-xs font-bold tracking-widest uppercase mb-1">Vaderdag — 15 juni</p>
+            <p className="text-white font-serif text-xl font-bold">Het mooiste cadeau dat je kunt geven</p>
+            <p className="text-[#aaa] text-sm mt-0.5">Direct beschikbaar via e-mail · Doos volgt in september</p>
+          </div>
+          <Link
+            href="/pricing"
+            className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
+          >
+            Bestel Het Begin → €89
+          </Link>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="py-20 px-4 sm:px-6 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto">

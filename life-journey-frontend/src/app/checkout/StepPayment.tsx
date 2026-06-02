@@ -31,8 +31,9 @@ export default function StepPayment({ state, totalPrice, onSuccess }: Props) {
           package_type: state.packageType,
           addons: state.addons,
           recipient_name: state.recipientName,
+          recipient_email: state.recipientEmail || undefined,
           personal_message: state.personalMessage,
-          shipping_address: state.shippingAddress,
+          shipping_address: state.skipShipping ? undefined : state.shippingAddress,
           guest_email: state.guestEmail || undefined,
         });
         if (!cancelled) {

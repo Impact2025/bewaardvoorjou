@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Star, Phone, Shield, Truck } from "lucide-react";
+import { Check, X, Star, Phone, Shield, Truck, Mail, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { joinWaitlist, type WaitlistPackage } from "@/lib/api/waitlist";
 
 // ─── Pakket definities ───────────────────────────────────────────────────────
 
@@ -114,6 +115,14 @@ const packages = [
   },
 ] as const;
 
+// ─── Sold-out configuratie ───────────────────────────────────────────────────
+// Zet een pakket-ID hier neer om het als uitverkocht te markeren.
+// Verwijder het entry zodra de dozen leverbaar zijn.
+const SOLD_OUT: Partial<Record<string, { availableFrom: string }>> = {
+  ERFGOED: { availableFrom: "september" },
+  VOOR_ALTIJD: { availableFrom: "september" },
+};
+
 // ─── Vergelijkingstabel ──────────────────────────────────────────────────────
 
 const compareRows = [
@@ -186,8 +195,11 @@ export default function PricingContent() {
         <p className="text-lg text-[#555] mb-2">
           Eenmalige betaling. Geen abonnement. Altijd van jou.
         </p>
-        <div className="flex items-center justify-center gap-6 text-sm text-[#555] mt-4">
-          <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> Gratis verzending</span>
+        <div className="inline-flex items-center gap-2 bg-[#d4af37]/15 border border-[#d4af37]/40 rounded-full px-4 py-2 text-sm text-[#1a1a1a] font-medium mb-4">
+          🎁 Vaderdag — direct beschikbaar via e-mail · doos volgt in september
+        </div>
+        <div className="flex items-center justify-center gap-6 text-sm text-[#555] mt-2">
+          <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> Gratis verzending (september)</span>
           <span className="flex items-center gap-1"><Shield className="h-4 w-4" /> 14 dagen bedenktijd</span>
           <span className="flex items-center gap-1"><Phone className="h-4 w-4" /> NL telefoonsupport</span>
         </div>
@@ -200,6 +212,7 @@ export default function PricingContent() {
             <PackageCard
               key={pkg.id}
               pkg={pkg}
+              soldOut={SOLD_OUT[pkg.id] ?? null}
               onSelect={handleSelectPackage}
             />
           ))}
@@ -280,12 +293,18 @@ export default function PricingContent() {
           Wacht niet tot "later." Later wordt vaak nooit.
         </p>
         <button
-          onClick={() => handleSelectPackage("ERFGOED")}
+          onClick={() => handleSelectPackage("BEGIN")}
           className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-10 py-4 rounded-xl text-lg transition-colors"
         >
-          Start Nu — Kies Je Pakket
+          Start Nu — Het Begin →
         </button>
         <p className="text-[#666] text-sm mt-4">Gratis verzending · 14 dagen bedenktijd</p>
+        <p className="text-[#555] text-xs mt-2">
+          De Erfgoed Box &amp; Voor Altijd zijn beschikbaar vanaf september —{" "}
+          <span className="underline cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            schrijf je in voor de wachtlijst
+          </span>
+        </p>
       </section>
     </div>
   );
@@ -295,9 +314,11 @@ export default function PricingContent() {
 
 function PackageCard({
   pkg,
+  soldOut,
   onSelect,
 }: {
   pkg: (typeof packages)[number];
+  soldOut: { availableFrom: string } | null;
   onSelect: (id: string) => void;
 }) {
   const [showMissing, setShowMissing] = useState(false);
@@ -306,97 +327,202 @@ function PackageCard({
     <div
       className={cn(
         "relative bg-white rounded-2xl overflow-hidden border transition-shadow",
-        pkg.hero
+        soldOut
+          ? "border-[#e5e0d8] shadow-md opacity-90"
+          : pkg.hero
           ? "border-[#d4af37] shadow-2xl md:scale-105 ring-2 ring-[#d4af37]/30"
           : "border-[#e5e0d8] shadow-md hover:shadow-lg"
       )}
     >
-      {/* Hero badge */}
-      {pkg.hero && (
+      {/* Sold-out banner (vervangt hero badge) */}
+      {soldOut ? (
+        <div className="bg-[#1a1a1a] text-white text-xs font-bold text-center py-2 tracking-widest">
+          UITVERKOCHT VOOR VADERDAG · BESCHIKBAAR VANAF {soldOut.availableFrom.toUpperCase()}
+        </div>
+      ) : pkg.hero ? (
         <div className="bg-[#d4af37] text-[#1a1a1a] text-xs font-bold text-center py-2 tracking-widest">
           ⭐ MEEST GEKOZEN · BESTE PRIJS-KWALITEIT ⭐
         </div>
-      )}
+      ) : null}
 
-      <div className="p-6 md:p-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h3 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">{pkg.name}</h3>
-          <p className="text-[#888] text-sm mb-4">{pkg.subtitle}</p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-[#1a1a1a]">{pkg.priceDisplay}</span>
-            {"originalPrice" in pkg && pkg.originalPrice && (
-              <span className="text-[#aaa] line-through text-lg">{pkg.originalPrice}</span>
-            )}
-          </div>
-          {"priceNote" in pkg && pkg.priceNote && (
-            <p className="text-xs text-[#d4af37] font-medium mt-1">{pkg.priceNote}</p>
-          )}
-          <p className="text-xs text-[#888] mt-1">(eenmalig)</p>
-        </div>
-
-        {/* Social proof */}
-        <p className="text-xs text-[#888] mb-4 flex items-center gap-1">
-          <Star className="h-3 w-3 fill-[#d4af37] text-[#d4af37]" />
-          {pkg.socialProof}
-        </p>
-
-        {/* CTA knop */}
-        <button
-          onClick={() => onSelect(pkg.id)}
-          className={cn(
-            "w-full py-3 rounded-xl font-bold text-sm transition-colors mb-6",
-            pkg.hero
-              ? "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"
-              : "bg-[#1a1a1a] hover:bg-[#333] text-white"
-          )}
-        >
-          {pkg.ctaLabel} →
-        </button>
-
-        {/* Feature lijst */}
-        <ul className="space-y-2 mb-6">
-          {pkg.features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
-              <Check className="h-4 w-4 text-[#2d5016] flex-shrink-0 mt-0.5" />
-              <span className="text-[#333]">{f}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* "Wat je mist" voor BEGIN pakket */}
-        {"missingHighlights" in pkg && pkg.missingHighlights.length > 0 && (
-          <div className="border-t border-[#f0ece6] pt-4">
-            <button
-              onClick={() => setShowMissing(!showMissing)}
-              className="text-xs text-[#aaa] hover:text-[#888] underline underline-offset-2"
-            >
-              {showMissing ? "Verberg" : "Wat mis je in dit pakket?"}
-            </button>
-            {showMissing && (
-              <ul className="mt-3 space-y-1">
-                {pkg.missingHighlights.map((m, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-[#aaa]">
-                    <X className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                    <span>{m}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+      <div className={cn("p-6 md:p-8", soldOut && "relative")}>
+        {/* Sold-out overlay op de kaartinhoud */}
+        {soldOut && (
+          <div className="absolute inset-0 bg-white/40 pointer-events-none rounded-b-2xl z-0" />
         )}
 
-        {/* Perfect voor */}
-        <div className="mt-4 bg-[#f8f6f2] rounded-xl p-4">
-          <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2">Perfect voor</p>
-          <ul className="space-y-1">
-            {pkg.perfectFor.map((p, i) => (
-              <li key={i} className="text-xs text-[#555]">→ {p}</li>
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="mb-6">
+            <h3 className={cn("font-serif text-2xl font-bold mb-1", soldOut ? "text-[#888]" : "text-[#1a1a1a]")}>
+              {pkg.name}
+            </h3>
+            <p className="text-[#888] text-sm mb-4">{pkg.subtitle}</p>
+            <div className="flex items-baseline gap-2">
+              <span className={cn("text-4xl font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>
+                {pkg.priceDisplay}
+              </span>
+              {"originalPrice" in pkg && pkg.originalPrice && (
+                <span className="text-[#aaa] line-through text-lg">{pkg.originalPrice}</span>
+              )}
+            </div>
+            {"priceNote" in pkg && pkg.priceNote && (
+              <p className="text-xs text-[#d4af37] font-medium mt-1">{pkg.priceNote}</p>
+            )}
+            <p className="text-xs text-[#888] mt-1">(eenmalig)</p>
+          </div>
+
+          {/* Social proof */}
+          <p className="text-xs text-[#888] mb-4 flex items-center gap-1">
+            <Star className="h-3 w-3 fill-[#d4af37] text-[#d4af37]" />
+            {pkg.socialProof}
+          </p>
+
+          {/* CTA: sold-out wachtlijst OF bestelknop */}
+          {soldOut ? (
+            <WaitlistForm packageId={pkg.id as WaitlistPackage} availableFrom={soldOut.availableFrom} />
+          ) : (
+            <button
+              onClick={() => onSelect(pkg.id)}
+              className={cn(
+                "w-full py-3 rounded-xl font-bold text-sm transition-colors mb-6",
+                pkg.hero
+                  ? "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"
+                  : "bg-[#1a1a1a] hover:bg-[#333] text-white"
+              )}
+            >
+              {pkg.ctaLabel} →
+            </button>
+          )}
+
+          {/* Feature lijst */}
+          <ul className="space-y-2 mb-6">
+            {pkg.features.map((f, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <Check className={cn("h-4 w-4 flex-shrink-0 mt-0.5", soldOut ? "text-[#bbb]" : "text-[#2d5016]")} />
+                <span className={soldOut ? "text-[#aaa]" : "text-[#333]"}>{f}</span>
+              </li>
             ))}
           </ul>
+
+          {/* "Wat je mist" voor BEGIN pakket */}
+          {"missingHighlights" in pkg && pkg.missingHighlights.length > 0 && (
+            <div className="border-t border-[#f0ece6] pt-4">
+              <button
+                onClick={() => setShowMissing(!showMissing)}
+                className="text-xs text-[#aaa] hover:text-[#888] underline underline-offset-2"
+              >
+                {showMissing ? "Verberg" : "Wat mis je in dit pakket?"}
+              </button>
+              {showMissing && (
+                <ul className="mt-3 space-y-1">
+                  {pkg.missingHighlights.map((m, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-[#aaa]">
+                      <X className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                      <span>{m}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Perfect voor */}
+          <div className="mt-4 bg-[#f8f6f2] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2">Perfect voor</p>
+            <ul className="space-y-1">
+              {pkg.perfectFor.map((p, i) => (
+                <li key={i} className={cn("text-xs", soldOut ? "text-[#bbb]" : "text-[#555]")}>→ {p}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Wachtlijst formulier ─────────────────────────────────────────────────────
+
+function WaitlistForm({
+  packageId,
+  availableFrom,
+}: {
+  packageId: WaitlistPackage;
+  availableFrom: string;
+}) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "already" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    try {
+      const res = await joinWaitlist(email.trim(), packageId);
+      setStatus(res.already_registered ? "already" : "success");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Probeer het opnieuw");
+      setStatus("error");
+    }
+  };
+
+  if (status === "success") {
+    return (
+      <div className="mb-6 bg-[#2d5016]/10 border border-[#2d5016]/30 rounded-xl p-4 text-center">
+        <p className="text-[#2d5016] font-bold text-sm">✓ Je staat op de wachtlijst!</p>
+        <p className="text-[#555] text-xs mt-1">
+          We sturen je een mail zodra de dozen beschikbaar zijn in {availableFrom}.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === "already") {
+    return (
+      <div className="mb-6 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-xl p-4 text-center">
+        <p className="text-[#1a1a1a] font-bold text-sm">Je staat er al op!</p>
+        <p className="text-[#555] text-xs mt-1">
+          We bewaren je plek voor de lancering in {availableFrom}.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mb-6 space-y-2">
+      <p className="text-xs text-[#555] font-medium">
+        Beschikbaar vanaf {availableFrom} — schrijf je in:
+      </p>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#aaa]" />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="jouw@email.nl"
+            required
+            className="w-full pl-9 pr-3 py-2.5 text-sm border border-[#e5e0d8] rounded-xl focus:outline-none focus:border-[#d4af37] bg-white"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="bg-[#1a1a1a] hover:bg-[#333] disabled:opacity-60 text-white text-xs font-bold px-4 rounded-xl transition-colors flex items-center gap-1 flex-shrink-0"
+        >
+          {status === "loading" ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            "Aanmelden"
+          )}
+        </button>
+      </div>
+      {status === "error" && (
+        <p className="text-red-500 text-xs">{errorMsg}</p>
+      )}
+    </form>
   );
 }
 

@@ -282,6 +282,21 @@ def build_magic_link_email(
     return subject, html, text
 
 
+def build_waitlist_confirmation_email(
+    email: str,
+    package_name: str,
+    available_from: str,
+) -> tuple[str, str, str]:
+    subject = f"Je staat op de wachtlijst voor {package_name}"
+    context = {
+        "package_name": package_name,
+        "available_from": available_from,
+    }
+    html, text = render_email("waitlist_confirmation", context)
+    logger.info(f"Built waitlist_confirmation email for {email} ({package_name})")
+    return subject, html, text
+
+
 def build_export_ready_email(
     user_display_name: str,
     download_url: str,

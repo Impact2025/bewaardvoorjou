@@ -4,7 +4,11 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import csv
+import io
+
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy import cast, Date as SADate, desc, func, and_, text
 from sqlalchemy.orm import Session
 
@@ -15,6 +19,7 @@ from app.models.memo import Memo
 from app.models.sharing import Highlight, ShareGrant
 from app.models.journey import Journey
 from app.models.user import User
+from app.models.waitlist import WaitlistEntry
 from app.schemas.admin import AuditLogEntry
 
 
@@ -429,3 +434,67 @@ def get_audit_log(
     if action:
         q = q.filter(AuditLog.action == action)
     return q.order_by(desc(AuditLog.created_at)).limit(limit).all()
+
+
+# ─── Wachtlijst admin ─────────────────────────────────────────────────────────
+
+@router.get("/waitlist")
+def get_waitlist(
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+    package_type: Optional[str] = Query(default=None),
+    limit: int = Query(default=100, le=500),
+    offset: int = Query(default=0, ge=0),
+):
+    q = db.query(WaitlistEntry)
+    if package_type:
+        q = q.filter(WaitlistEntry.package_type == package_type)
+
+    total = q.count()
+    entries = q.order_by(desc(WaitlistEntry.created_at)).offset(offset).limit(limit).all()
+
+    by_package = (
+        db.query(WaitlistEntry.package_type, func.count(WaitlistEntry.id))
+        .group_by(WaitlistEntry.package_type)
+        .all()
+    )
+
+    return {
+        "total": total,
+        "by_package": {pkg: count for pkg, count in by_package},
+        "entries": [
+            {
+                "id": e.id,
+                "email": e.email,
+                "package_type": e.package_type,
+                "created_at": e.created_at.isoformat(),
+            }
+            for e in entries
+        ],
+    }
+
+
+@router.get("/waitlist/export.csv")
+def export_waitlist_csv(
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+    package_type: Optional[str] = Query(default=None),
+):
+    q = db.query(WaitlistEntry)
+    if package_type:
+        q = q.filter(WaitlistEntry.package_type == package_type)
+    entries = q.order_by(WaitlistEntry.package_type, WaitlistEntry.created_at).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["email", "pakket", "aangemeld_op"])
+    for e in entries:
+        writer.writerow([e.email, e.package_type, e.created_at.strftime("%Y-%m-%d %H:%M")])
+
+    output.seek(0)
+    filename = f"wachtlijst_{package_type or 'alle'}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

@@ -18,12 +18,14 @@ import {
   X,
   BookOpen,
   GraduationCap,
+  ListOrdered,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/waitlist", label: "Wachtlijst", icon: ListOrdered },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },

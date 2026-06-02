@@ -1,0 +1,14 @@
+Je plek is gereserveerd!
+
+We hebben je aanmelding voor {{ package_name }} ontvangen.
+Zodra de dozen beschikbaar zijn, ben jij een van de eersten die we persoonlijk op de hoogte stellen.
+
+Aangemeld voor: {{ package_name }}
+Beschikbaar vanaf: {{ available_from }}
+
+Terwijl je wacht: je kunt vandaag al beginnen via Het Begin-pakket op {{ app_base_url }}/pricing
+
+We nemen contact op via dit e-mailadres zodra de lancering nadert.
+
+Met warme groet,
+Het Bewaardvoorjou team

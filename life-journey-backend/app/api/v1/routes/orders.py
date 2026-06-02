@@ -80,7 +80,7 @@ def create_payment_intent(
         addons_price=addon_total,
         recipient_name=payload.recipient_name,
         personal_message=payload.personal_message,
-        shipping_address=payload.shipping_address.model_dump(),
+        shipping_address=payload.shipping_address.model_dump() if payload.shipping_address else None,
         status="PENDING",
     )
     db.add(order)
