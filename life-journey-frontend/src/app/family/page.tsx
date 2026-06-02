@@ -6,9 +6,10 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { FamilyDashboard } from "@/components/family/FamilyDashboard";
 import { FamilyTree } from "@/components/family/FamilyTree";
 import { SharedPods } from "@/components/family/SharedPods";
+import { InterviewOuders } from "@/components/family/InterviewOuders";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, TreePine, Share2 } from "lucide-react";
+import { Users, TreePine, Share2, MessageCircle } from "lucide-react";
 import { useJourneyStore } from "@/store/journey-store";
 
 function FamilyContent() {
@@ -41,7 +42,7 @@ function FamilyContent() {
 
         {/* Family Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid bg-[#FAF7F2] border border-[#E6E2DD]">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid bg-[#FAF7F2] border border-[#E6E2DD]">
             <TabsTrigger value="dashboard" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-[#FF8C42]">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -53,6 +54,10 @@ function FamilyContent() {
             <TabsTrigger value="pods" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-[#FF8C42]">
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">Gedeelde Ruimtes</span>
+            </TabsTrigger>
+            <TabsTrigger value="interview" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-[#FF8C42]">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Interview Ouders</span>
             </TabsTrigger>
           </TabsList>
 
@@ -98,6 +103,27 @@ function FamilyContent() {
               </CardHeader>
               <CardContent>
                 <SharedPods journeyId={journeyId} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="interview" className="space-y-6">
+            <Card className="bg-white border border-[#E6E2DD]">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#FAF7F2] rounded-lg">
+                    <MessageCircle className="h-5 w-5 text-[#FF8C42]" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-[#333333]">Interview je Ouders</CardTitle>
+                    <CardDescription>
+                      Stuur een persoonlijke vragenlijst — zonder dat je ouder een account nodig heeft
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <InterviewOuders journeyId={journeyId} />
               </CardContent>
             </Card>
           </TabsContent>
