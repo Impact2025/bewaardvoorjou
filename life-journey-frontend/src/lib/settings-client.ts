@@ -66,3 +66,10 @@ export async function requestDataExport(journeyId: string, token: string): Promi
     method: "POST",
   }, { token });
 }
+
+export async function deleteAccount(password: string, token: string): Promise<void> {
+  await apiFetch<void>("/account/me", {
+    method: "DELETE",
+    body: JSON.stringify({ password, confirm: true }),
+  }, { token });
+}

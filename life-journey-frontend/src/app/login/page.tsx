@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, requestMagicLink } from "@/lib/auth-client";
@@ -13,6 +13,8 @@ import { useAuth } from "@/store/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const accountDeleted = searchParams.get("deleted") === "1";
   const { setSession } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,6 +72,11 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-6 py-16">
       <Card className="w-full max-w-md border-card bg-card shadow-lg">
+        {accountDeleted && (
+          <div className="mx-6 mt-6 rounded-xl px-4 py-3 text-sm text-center" style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", color: "#15803D" }}>
+            Je account is verwijderd. Bedankt voor je vertrouwen in BewaardVoorJou.
+          </div>
+        )}
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
             <Image

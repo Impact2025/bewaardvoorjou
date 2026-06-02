@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/store/auth-context";
@@ -9,11 +10,13 @@ import {
   getEmailPreferences,
   updateEmailPreferences,
   requestDataExport,
+  deleteAccount,
   type EmailPreferences,
 } from "@/lib/settings-client";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 type ExportState = "idle" | "loading" | "sent" | "error";
+type DeleteState = "idle" | "confirm" | "deleting" | "error";
 
 function Toggle({
   label,
@@ -65,11 +68,16 @@ function Toggle({
 }
 
 function SettingsContent() {
-  const { session } = useAuth();
+  const router = useRouter();
+  const { session, clearSession } = useAuth();
   const { journey } = useJourneyBootstrap();
   const [prefs, setPrefs] = useState<EmailPreferences | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [exportState, setExportState] = useState<ExportState>("idle");
+  const [deleteState, setDeleteState] = useState<DeleteState>("idle");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -109,6 +117,37 @@ function SettingsContent() {
       setTimeout(() => setExportState("idle"), 3000);
     }
   }, [journey?.id, session?.token]);
+
+  const openDeleteConfirm = useCallback(() => {
+    setDeleteState("confirm");
+    setDeletePassword("");
+    setDeleteError(null);
+    setTimeout(() => passwordInputRef.current?.focus(), 100);
+  }, []);
+
+  const cancelDelete = useCallback(() => {
+    setDeleteState("idle");
+    setDeletePassword("");
+    setDeleteError(null);
+  }, []);
+
+  const handleDeleteAccount = useCallback(async () => {
+    if (!session?.token || !deletePassword) return;
+    setDeleteState("deleting");
+    setDeleteError(null);
+    try {
+      await deleteAccount(deletePassword, session.token);
+      clearSession();
+      router.push("/login?deleted=1");
+    } catch (err) {
+      const msg =
+        typeof err === "object" && err && "message" in err
+          ? String(err.message)
+          : "Er ging iets mis. Controleer je wachtwoord en probeer opnieuw.";
+      setDeleteError(msg);
+      setDeleteState("confirm");
+    }
+  }, [session?.token, deletePassword, clearSession, router]);
 
   const disabled = prefs?.unsubscribedAll ?? false;
 
@@ -272,6 +311,89 @@ function SettingsContent() {
                   </p>
                 )}
               </>
+            )}
+          </div>
+        </section>
+
+        {/* Account verwijderen (AVG Art. 17) */}
+        <section>
+          <h2 className="text-xl font-serif font-semibold mb-1" style={{ color: "#7F1D1D" }}>
+            Account verwijderen
+          </h2>
+          <p className="text-sm mb-4" style={{ color: "#6B6456" }}>
+            Dit verwijdert je account en alle bijbehorende gegevens permanent. Deze actie kan niet ongedaan worden gemaakt.
+          </p>
+
+          <div
+            className="rounded-2xl p-6"
+            style={{ background: "#FFFFFF", border: "1px solid #FECACA" }}
+          >
+            {deleteState === "idle" && (
+              <button
+                onClick={openDeleteConfirm}
+                className="w-full rounded-xl py-3 font-semibold text-white transition-opacity"
+                style={{ background: "#DC2626" }}
+              >
+                Account permanent verwijderen
+              </button>
+            )}
+
+            {(deleteState === "confirm" || deleteState === "deleting") && (
+              <div className="space-y-4">
+                <div
+                  className="rounded-xl p-4 text-sm"
+                  style={{ background: "#FEF2F2", border: "1px solid #FECACA", color: "#7F1D1D" }}
+                >
+                  <p className="font-semibold mb-1">Weet je het zeker?</p>
+                  <p>
+                    Al je verhalen, opnames, transcripties en notities worden permanent verwijderd.
+                    Facturen worden bewaard vanwege de wettelijke bewaarplicht.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: "#2C2416" }}>
+                    Bevestig met je wachtwoord
+                  </label>
+                  <input
+                    ref={passwordInputRef}
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="Jouw wachtwoord"
+                    autoComplete="current-password"
+                    disabled={deleteState === "deleting"}
+                    className="w-full rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+                    style={{ borderColor: "#FECACA", outline: "none" }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && deletePassword) void handleDeleteAccount();
+                    }}
+                  />
+                </div>
+
+                {deleteError && (
+                  <p className="text-sm" style={{ color: "#DC2626" }}>{deleteError}</p>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={cancelDelete}
+                    disabled={deleteState === "deleting"}
+                    className="flex-1 rounded-xl py-3 font-semibold text-sm transition-opacity disabled:opacity-40"
+                    style={{ background: "#F5F5F4", color: "#2C2416" }}
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteState === "deleting" || !deletePassword}
+                    className="flex-1 rounded-xl py-3 font-semibold text-sm text-white transition-opacity disabled:opacity-40"
+                    style={{ background: "#DC2626" }}
+                  >
+                    {deleteState === "deleting" ? "Verwijderen…" : "Ja, verwijder mijn account"}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </section>
