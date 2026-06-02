@@ -1299,29 +1299,108 @@ def get_contextual_encouragement(emotion_type: str) -> str:
 
 def detect_voice_emotion(audio_file_path: str) -> dict[str, float]:
     """
-    Analyze voice recording for emotional content using sentiment analysis.
-
-    This is a placeholder for future implementation with audio processing APIs
-    like AssemblyAI, Google Cloud Speech-to-Text, or OpenAI Whisper with emotion detection.
+    Analyze voice recording for emotional content.
+    Transcribes audio via Whisper, then classifies emotions using Claude.
 
     Args:
         audio_file_path: Path to the audio file to analyze
 
     Returns:
-        Dictionary with emotion scores (joy, sadness, anger, fear, neutral)
+        Dictionary with emotion scores (joy, sadness, anger, fear, neutral, confidence)
     """
-    # TODO: Implement actual voice emotion detection
-    # For now, return neutral scores
-    logger.info(f"Voice emotion detection requested for {audio_file_path} - placeholder implementation")
+    import json
+    from pathlib import Path
+    from openai import OpenAI
 
-    return {
-        "joy": 0.0,
-        "sadness": 0.0,
-        "anger": 0.0,
-        "fear": 0.0,
-        "neutral": 1.0,
-        "confidence": 0.0
+    _neutral: dict[str, float] = {"joy": 0.0, "sadness": 0.0, "anger": 0.0, "fear": 0.0, "neutral": 1.0, "confidence": 0.0}
+
+    if not settings.openai_api_key:
+        logger.warning("OpenAI/OpenRouter API key not configured — returning neutral emotion scores")
+        return _neutral
+
+    file_path = Path(audio_file_path)
+    if not file_path.exists():
+        logger.warning(f"Audio file not found for emotion detection: {audio_file_path}")
+        return _neutral
+
+    client = OpenAI(api_key=settings.openai_api_key, base_url=settings.openai_api_base)
+    extra_headers = {
+        "HTTP-Referer": settings.openrouter_app_url or "http://localhost",
+        "X-Title": settings.openrouter_app_name,
     }
+
+    # Step 1: Transcribe audio via Whisper
+    try:
+        with open(file_path, "rb") as f:
+            transcription = client.audio.transcriptions.create(
+                model=settings.whisper_model,
+                file=(file_path.name, f),
+                language="nl",
+                response_format="text",
+                extra_headers=extra_headers,
+            )
+        transcript_text = transcription if isinstance(transcription, str) else transcription.text
+        logger.info(f"Transcribed audio for emotion detection ({len(transcript_text)} chars): {file_path.name}")
+    except Exception as e:
+        logger.error(f"Transcription failed during voice emotion detection for {audio_file_path}: {e}")
+        return _neutral
+
+    if len(transcript_text.strip()) < 10:
+        logger.info("Transcript too short for emotion detection — returning neutral")
+        return _neutral
+
+    # Step 2: Classify emotions using Claude
+    try:
+        response = client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Je bent een empathische emotie-analyst die gesproken levensverhalen analyseert. "
+                        "Geef emotie-scores tussen 0.0 en 1.0 die samen optellen tot precies 1.0. "
+                        "Geef je antwoord uitsluitend als JSON object."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Analyseer de emotionele toon van deze transcriptie. "
+                        "Geef scores voor joy (blijdschap), sadness (verdriet), anger (boosheid), "
+                        "fear (angst) en neutral (neutraal). Scores moeten optellen tot 1.0.\n\n"
+                        f"Transcriptie:\n{transcript_text}\n\n"
+                        'Formaat: {"joy": 0.0, "sadness": 0.0, "anger": 0.0, "fear": 0.0, "neutral": 1.0, "confidence": 0.8}'
+                    ),
+                },
+            ],
+            temperature=0.3,
+            max_tokens=150,
+            response_format={"type": "json_object"},
+            extra_headers=extra_headers,
+        )
+
+        scores = json.loads(response.choices[0].message.content)
+        result: dict[str, float] = {
+            k: float(scores.get(k, 0.0))
+            for k in ("joy", "sadness", "anger", "fear", "neutral", "confidence")
+        }
+
+        # Normalize emotion keys (excluding confidence) to sum to 1.0
+        emotion_keys = ("joy", "sadness", "anger", "fear", "neutral")
+        total = sum(result[k] for k in emotion_keys)
+        if total > 0:
+            for k in emotion_keys:
+                result[k] = result[k] / total
+        else:
+            result = _neutral.copy()
+
+        dominant = max(emotion_keys, key=lambda k: result[k])
+        logger.info(f"Emotion detection complete for {file_path.name}: dominant={dominant} ({result[dominant]:.2f})")
+        return result
+
+    except Exception as e:
+        logger.error(f"Emotion classification failed for {audio_file_path}: {e}")
+        return _neutral
 
 
 def get_emotion_based_follow_up(voice_emotion: dict[str, float], current_transcript: str) -> str:

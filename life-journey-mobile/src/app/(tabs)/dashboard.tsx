@@ -221,9 +221,7 @@ export default function DashboardScreen() {
 
             <Button
               mode="outlined"
-              onPress={() => {
-                /* TODO: Navigate to recordings */
-              }}
+              onPress={() => router.push('/(tabs)/recordings')}>
               icon="play-circle-outline"
               style={styles.actionButton}
               accessible={true}

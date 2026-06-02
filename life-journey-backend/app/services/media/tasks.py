@@ -22,12 +22,67 @@ celery_app.conf.broker_connection_retry = False
 @celery_app.task(name="media.transcode")
 def transcode_asset(asset_id: str) -> None:
     """
-    Transcode media asset for optimal playback
-    Currently a placeholder - transcoding not yet implemented
+    Transcode media asset for optimal playback using ffmpeg.
+    Re-encodes in the same format as the source to keep object_key unchanged.
+    Audio: loudness normalization. Video: H.264/AAC with CRF 23.
+    Skips silently when ffmpeg is not installed.
     """
+    import shutil
+    import subprocess
+    from pathlib import Path
+
     logger.info(f"Transcoding asset {asset_id}")
-    # TODO: Implement actual transcoding logic when needed
-    # For now, original files are used directly
+
+    if not shutil.which("ffmpeg"):
+        logger.warning("ffmpeg not found — skipping transcoding, original file will be used directly")
+        return
+
+    db: Session = SessionLocal()
+    temp_path: Path | None = None
+    try:
+        asset = crud.get_media_asset(db, asset_id)
+        if not asset:
+            logger.error(f"Asset {asset_id} not found for transcoding")
+            return
+
+        source_path: Path = local_storage.get_file_path(asset.object_key)
+        if not source_path.exists():
+            logger.error(f"Source file missing for asset {asset_id}: {asset.object_key}")
+            return
+
+        # Output to a temp file with the same extension so object_key stays valid
+        temp_path = source_path.with_suffix(".tmp" + source_path.suffix)
+        is_audio = asset.modality == "audio"
+
+        cmd = ["ffmpeg", "-y", "-i", str(source_path)]
+        if is_audio:
+            # Re-encode with audio normalization, keep original container
+            cmd += ["-af", "loudnorm", "-codec:a", "aac", "-b:a", "128k"]
+        else:
+            cmd += [
+                "-codec:v", "libx264", "-crf", "23", "-preset", "fast",
+                "-codec:a", "aac", "-b:a", "128k",
+            ]
+        cmd.append(str(temp_path))
+
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if result.returncode != 0:
+            logger.error(f"ffmpeg failed for asset {asset_id}: {result.stderr[-500:]}")
+            return
+
+        # Atomically swap temp → original (keeps object_key pointing to same path)
+        source_path.unlink()
+        temp_path.rename(source_path)
+        logger.info(f"Transcoding complete for asset {asset_id}: {source_path.name}")
+
+    except subprocess.TimeoutExpired:
+        logger.error(f"ffmpeg timed out (>5 min) for asset {asset_id}")
+    except Exception as e:
+        logger.error(f"Transcoding error for asset {asset_id}: {e}")
+    finally:
+        if temp_path and temp_path.exists():
+            temp_path.unlink()
+        db.close()
 
 
 @celery_app.task(name="media.transcript")
