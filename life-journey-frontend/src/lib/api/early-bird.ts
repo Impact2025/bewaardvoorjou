@@ -5,6 +5,7 @@ export interface EarlyBirdStatus {
   discount_cents: number;
   deadline_iso: string;
   waitlist_discount_cents: number;
+  digitaal_discount_cents: number;
 }
 
 let _cache: EarlyBirdStatus | null = null;
@@ -17,6 +18,6 @@ export async function getEarlyBirdStatus(): Promise<EarlyBirdStatus> {
     _cache = await res.json();
     return _cache!;
   } catch {
-    return { active: false, discount_cents: 0, deadline_iso: "", waitlist_discount_cents: 0 };
+    return { active: false, discount_cents: 0, deadline_iso: "", waitlist_discount_cents: 0, digitaal_discount_cents: 0 };
   }
 }

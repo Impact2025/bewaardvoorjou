@@ -1,0 +1,27 @@
+Je Vaderdag Digitaal cadeaukaart — Bewaardvoorjou
+=================================================
+
+Je cadeau voor {{ recipient_name }} staat klaar!
+
+Bekijk en verstuur de cadeaukaart via:
+{{ gift_card_url }}
+
+Stuur deze link door of print de pagina als mooi Vaderdagcadeau.
+
+--------------------------------------------------
+UPGRADE VOUCHER — geldig t/m september 2026
+--------------------------------------------------
+Gebruik code: {{ voucher_code }}
+Voor €30 korting op De Erfgoed Box in september.
+Bewaar deze code goed!
+
+--------------------------------------------------
+Wat nu?
+1. Stuur de cadeaukaart link door naar {{ recipient_name }} (of print hem)
+2. {{ recipient_name }} maakt een account aan en begint zijn/haar levensverhaal
+3. In september sturen we je een herinnering voor de upgrade
+
+Vragen? Mail ons op support@bewaardvoorjou.nl
+
+Met warme groet,
+Het Bewaardvoorjou team

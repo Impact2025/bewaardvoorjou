@@ -27,7 +27,7 @@ export type AddonCode =
   | "EXTRA_STORAGE"
   | "VIDEO_INTRO";
 
-export type PackageType = "BEGIN" | "ERFGOED" | "VOOR_ALTIJD";
+export type PackageType = "BEGIN" | "ERFGOED" | "VOOR_ALTIJD" | "DIGITAAL";
 
 export interface CreatePaymentIntentPayload {
   package_type: PackageType;
@@ -72,12 +72,14 @@ export const PACKAGE_PRICES: Record<PackageType, number> = {
   BEGIN: 89,
   ERFGOED: 249,
   VOOR_ALTIJD: 399,
+  DIGITAAL: 49,
 };
 
 export const PACKAGE_NAMES: Record<PackageType, string> = {
   BEGIN: "Het Begin",
   ERFGOED: "De Erfgoed Box",
   VOOR_ALTIJD: "Voor Altijd",
+  DIGITAAL: "Vaderdag Digitaal",
 };
 
 export const ADDON_OPTIONS: { code: AddonCode; label: string; price: number; description: string }[] = [

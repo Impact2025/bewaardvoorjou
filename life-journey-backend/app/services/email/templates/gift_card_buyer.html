@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Je Vaderdag Digitaal cadeaukaart — Bewaardvoorjou{% endblock %}
+
+{% block content %}
+<h2 style="color: #2d5016; font-size: 24px; font-weight: 700; margin-bottom: 8px;">
+  🎁 Je cadeau staat klaar!
+</h2>
+
+<p style="font-size: 16px; color: #4A4239;">
+  Gefeliciteerd met je aankoop van <strong>Vaderdag Digitaal</strong>. Het cadeau voor
+  <strong>{{ recipient_name }}</strong> is klaar om te versturen.
+</p>
+
+<div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 16px; padding: 28px; margin: 28px 0; text-align: center;">
+  <p style="margin: 0 0 8px 0; color: #d4af37; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Jouw digitale cadeaukaart</p>
+  <p style="margin: 0 0 4px 0; color: #ffffff; font-size: 20px; font-weight: 700;">{{ recipient_name }}</p>
+  <p style="margin: 0; color: #aaa; font-size: 13px;">Bewaardvoorjou — Levensverhalen voor altijd bewaard</p>
+</div>
+
+<div style="text-align: center; margin: 28px 0;">
+  <a href="{{ gift_card_url }}" class="cta-button" style="background-color: #2d5016; font-size: 18px; padding: 16px 40px; border-radius: 12px;">
+    🎁 Bekijk de cadeaukaart
+  </a>
+  <p style="font-size: 13px; color: #888; margin-top: 12px;">
+    Stuur deze link door of print de pagina als mooi cadeau.
+  </p>
+</div>
+
+<div class="divider"></div>
+
+<div style="background: #f0f7eb; border: 1px solid #2d5016; border-radius: 12px; padding: 20px; margin: 20px 0;">
+  <p style="margin: 0 0 8px 0; color: #2d5016; font-weight: 700; font-size: 15px;">⬆️ Upgrade Voucher — geldig t/m september 2026</p>
+  <p style="margin: 0 0 12px 0; color: #555; font-size: 14px;">
+    Gebruik deze code voor <strong>€30 korting</strong> bij de aankoop van De Erfgoed Box zodra de dozen beschikbaar zijn:
+  </p>
+  <div style="background: #1a1a1a; border-radius: 8px; padding: 12px 20px; text-align: center; letter-spacing: 3px;">
+    <span style="color: #d4af37; font-family: monospace; font-size: 22px; font-weight: 700;">{{ voucher_code }}</span>
+  </div>
+  <p style="margin: 10px 0 0 0; color: #888; font-size: 12px; text-align: center;">
+    Bewaar dit goed — je hebt hem nodig bij je upgrade in september.
+  </p>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; color: #6B6456;">
+  <strong>Wat nu?</strong><br>
+  1. Stuur de cadeaukaart link door naar {{ recipient_name }} (of print hem uit)<br>
+  2. {{ recipient_name }} maakt een account aan en begint met zijn/haar levensverhaal<br>
+  3. In september ontvang je een e-mail over de fysieke Erfgoed Box — gebruik dan de voucher voor €30 korting
+</p>
+{% endblock %}

@@ -3,7 +3,6 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const SOLD_OUT_PACKAGES = new Set(["ERFGOED", "VOOR_ALTIJD"]);
 import { Check, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -18,6 +17,9 @@ import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
 import StepPersonalize from "./StepPersonalize";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
+
+const SOLD_OUT_PACKAGES = new Set(["ERFGOED", "VOOR_ALTIJD"]);
+const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL"]);
 
 const STEPS = ["Pakket", "Personaliseer", "Betalen", "Bevestiging"] as const;
 
@@ -46,10 +48,10 @@ const DEFAULT_ADDRESS: ShippingAddress = {
 export default function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const rawPackage = searchParams.get("package") ?? "ERFGOED";
-  const packageType: PackageType = ["BEGIN", "ERFGOED", "VOOR_ALTIJD"].includes(rawPackage)
+  const rawPackage = searchParams.get("package") ?? "BEGIN";
+  const packageType: PackageType = ["BEGIN", "ERFGOED", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
     ? (rawPackage as PackageType)
-    : "ERFGOED";
+    : "BEGIN";
 
   // Redirect uitverkochte pakketten terug naar de pricing pagina
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function CheckoutContent() {
     recipientEmail: "",
     personalMessage: "",
     shippingAddress: DEFAULT_ADDRESS,
-    skipShipping: false,
+    skipShipping: DIGITAL_ONLY_PACKAGES.has(packageType),
     guestEmail: "",
     orderId: "",
     paymentIntentId: "",
@@ -89,10 +91,13 @@ export default function CheckoutContent() {
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const earlyBirdDiscount =
-    earlyBird?.active && state.packageType === "BEGIN"
+  const earlyBirdDiscount = earlyBird?.active
+    ? state.packageType === "BEGIN"
       ? earlyBird.discount_cents / 100
-      : 0;
+      : state.packageType === "DIGITAAL"
+      ? (earlyBird.digitaal_discount_cents ?? 0) / 100
+      : 0
+    : 0;
   const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount;
 
   return (
@@ -201,7 +206,7 @@ function StepSelectPlan({
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const discount = state.packageType === "BEGIN" ? earlyBirdDiscount : 0;
+  const discount = ["BEGIN", "DIGITAAL"].includes(state.packageType) ? earlyBirdDiscount : 0;
   const total = PACKAGE_PRICES[state.packageType] + totalAddons - discount;
 
   const toggleAddon = (code: AddonCode) => {
@@ -220,7 +225,7 @@ function StepSelectPlan({
 
       {/* Pakket keuze */}
       <div className="space-y-3">
-        {(["BEGIN", "ERFGOED", "VOOR_ALTIJD"] as PackageType[]).map((pkg) => {
+        {(["BEGIN", "ERFGOED", "VOOR_ALTIJD", "DIGITAAL"] as PackageType[]).map((pkg) => {
           const soldOut = SOLD_OUT_PACKAGES.has(pkg);
           return (
             <label
