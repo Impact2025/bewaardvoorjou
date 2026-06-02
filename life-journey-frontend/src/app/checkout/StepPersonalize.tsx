@@ -23,7 +23,8 @@ export default function StepPersonalize({ state, onChange, onNext }: Props) {
     addr.postal_code.length >= 4 &&
     addr.city.length >= 2;
 
-  const isValid = state.skipShipping ? true : addressFilled;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.guestEmail);
+  const isValid = emailValid && (state.skipShipping || addressFilled);
 
   return (
     <div className="space-y-6">
@@ -199,8 +200,15 @@ export default function StepPersonalize({ state, onChange, onNext }: Props) {
           placeholder="jij@email.nl"
           value={state.guestEmail}
           onChange={(e) => onChange({ guestEmail: e.target.value })}
-          className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
+            state.guestEmail && !emailValid
+              ? "border-red-300 bg-red-50"
+              : "border-[#e5e0d8]"
+          }`}
         />
+        {state.guestEmail && !emailValid && (
+          <p className="text-xs text-red-500 mt-1">Vul een geldig e-mailadres in</p>
+        )}
       </div>
 
       <button

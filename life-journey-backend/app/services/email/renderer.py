@@ -286,11 +286,13 @@ def build_waitlist_confirmation_email(
     email: str,
     package_name: str,
     available_from: str,
+    guaranteed_discount_cents: int = 0,
 ) -> tuple[str, str, str]:
     subject = f"Je staat op de wachtlijst voor {package_name}"
     context = {
         "package_name": package_name,
         "available_from": available_from,
+        "guaranteed_discount_euros": guaranteed_discount_cents // 100 if guaranteed_discount_cents else None,
     }
     html, text = render_email("waitlist_confirmation", context)
     logger.info(f"Built waitlist_confirmation email for {email} ({package_name})")

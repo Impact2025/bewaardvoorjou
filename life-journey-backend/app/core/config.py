@@ -78,6 +78,13 @@ class Settings(BaseSettings):
   stripe_publishable_key: str | None = None
   stripe_webhook_secret: str | None = None
 
+  # Early Bird campagne
+  # Zet EARLY_BIRD_ACTIVE=false in .env om de actie uit te zetten zonder herdeployment
+  early_bird_active: bool = True
+  early_bird_deadline: str = "2026-06-10T23:59:59+00:00"   # ISO-8601 UTC
+  early_bird_begin_discount_cents: int = 2000                # €20 op BEGIN
+  early_bird_waitlist_discount_cents: int = 3000             # €30 garantie op wachtlijst
+
   # SEO Indexing
   site_url: str = "https://bewaardvoorjou.nl"
   indexnow_key: str | None = None

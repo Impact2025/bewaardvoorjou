@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Star, Phone, Shield, Truck, Mail, Loader2 } from "lucide-react";
+import { Check, X, Star, Phone, Shield, Truck, Mail, Loader2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { joinWaitlist, type WaitlistPackage } from "@/lib/api/waitlist";
+import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
 
 // ─── Pakket definities ───────────────────────────────────────────────────────
 
@@ -180,6 +181,11 @@ export default function PricingContent() {
   const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showCompare, setShowCompare] = useState(false);
+  const [earlyBird, setEarlyBird] = useState<EarlyBirdStatus | null>(null);
+
+  useEffect(() => {
+    getEarlyBirdStatus().then(setEarlyBird);
+  }, []);
 
   const handleSelectPackage = (packageId: string) => {
     router.push(`/checkout?package=${packageId}`);
@@ -213,6 +219,7 @@ export default function PricingContent() {
               key={pkg.id}
               pkg={pkg}
               soldOut={SOLD_OUT[pkg.id] ?? null}
+              earlyBird={pkg.id === "BEGIN" ? earlyBird : null}
               onSelect={handleSelectPackage}
             />
           ))}
@@ -315,10 +322,12 @@ export default function PricingContent() {
 function PackageCard({
   pkg,
   soldOut,
+  earlyBird,
   onSelect,
 }: {
   pkg: (typeof packages)[number];
   soldOut: { availableFrom: string } | null;
+  earlyBird: EarlyBirdStatus | null;
   onSelect: (id: string) => void;
 }) {
   const [showMissing, setShowMissing] = useState(false);
@@ -352,6 +361,16 @@ function PackageCard({
         )}
 
         <div className="relative z-10">
+          {/* Early bird badge */}
+          {earlyBird?.active && !soldOut && (
+            <div className="flex items-center gap-1.5 bg-[#d4af37]/15 border border-[#d4af37]/50 rounded-lg px-3 py-1.5 mb-4 w-fit">
+              <Zap className="h-3 w-3 text-[#d4af37]" />
+              <span className="text-xs font-bold text-[#1a1a1a]">
+                EARLY BIRD — €{earlyBird.discount_cents / 100} korting
+              </span>
+            </div>
+          )}
+
           {/* Header */}
           <div className="mb-6">
             <h3 className={cn("font-serif text-2xl font-bold mb-1", soldOut ? "text-[#888]" : "text-[#1a1a1a]")}>
@@ -359,17 +378,36 @@ function PackageCard({
             </h3>
             <p className="text-[#888] text-sm mb-4">{pkg.subtitle}</p>
             <div className="flex items-baseline gap-2">
-              <span className={cn("text-4xl font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>
-                {pkg.priceDisplay}
-              </span>
-              {"originalPrice" in pkg && pkg.originalPrice && (
-                <span className="text-[#aaa] line-through text-lg">{pkg.originalPrice}</span>
+              {earlyBird?.active && !soldOut ? (
+                <>
+                  <span className="text-4xl font-bold text-[#1a1a1a]">
+                    €{pkg.price - earlyBird.discount_cents / 100}
+                  </span>
+                  <span className="text-[#aaa] line-through text-lg">{pkg.priceDisplay}</span>
+                </>
+              ) : (
+                <>
+                  <span className={cn("text-4xl font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>
+                    {pkg.priceDisplay}
+                  </span>
+                  {"originalPrice" in pkg && pkg.originalPrice && (
+                    <span className="text-[#aaa] line-through text-lg">{pkg.originalPrice}</span>
+                  )}
+                </>
               )}
             </div>
-            {"priceNote" in pkg && pkg.priceNote && (
-              <p className="text-xs text-[#d4af37] font-medium mt-1">{pkg.priceNote}</p>
+            {earlyBird?.active && !soldOut ? (
+              <div className="mt-1">
+                <EarlyBirdCountdown deadlineIso={earlyBird.deadline_iso} />
+              </div>
+            ) : (
+              <>
+                {"priceNote" in pkg && pkg.priceNote && (
+                  <p className="text-xs text-[#d4af37] font-medium mt-1">{pkg.priceNote}</p>
+                )}
+                <p className="text-xs text-[#888] mt-1">(eenmalig)</p>
+              </>
             )}
-            <p className="text-xs text-[#888] mt-1">(eenmalig)</p>
           </div>
 
           {/* Social proof */}
@@ -454,6 +492,12 @@ function WaitlistForm({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "already" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [guaranteedDiscount, setGuaranteedDiscount] = useState(0);
+  const [earlyBird, setEarlyBird] = useState<EarlyBirdStatus | null>(null);
+
+  useEffect(() => {
+    getEarlyBirdStatus().then(setEarlyBird);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -461,6 +505,7 @@ function WaitlistForm({
     setStatus("loading");
     try {
       const res = await joinWaitlist(email.trim(), packageId);
+      setGuaranteedDiscount(res.guaranteed_discount_cents);
       setStatus(res.already_registered ? "already" : "success");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Probeer het opnieuw");
@@ -470,8 +515,13 @@ function WaitlistForm({
 
   if (status === "success") {
     return (
-      <div className="mb-6 bg-[#2d5016]/10 border border-[#2d5016]/30 rounded-xl p-4 text-center">
+      <div className="mb-6 bg-[#2d5016]/10 border border-[#2d5016]/30 rounded-xl p-4">
         <p className="text-[#2d5016] font-bold text-sm">✓ Je staat op de wachtlijst!</p>
+        {guaranteedDiscount > 0 && (
+          <p className="text-[#d4af37] font-bold text-xs mt-1">
+            🎉 Early Bird garantie: €{guaranteedDiscount / 100} korting bij lancering
+          </p>
+        )}
         <p className="text-[#555] text-xs mt-1">
           We sturen je een mail zodra de dozen beschikbaar zijn in {availableFrom}.
         </p>
@@ -492,6 +542,14 @@ function WaitlistForm({
 
   return (
     <form onSubmit={handleSubmit} className="mb-6 space-y-2">
+      {earlyBird?.active && earlyBird.waitlist_discount_cents > 0 && (
+        <div className="flex items-center gap-1.5 bg-[#d4af37]/10 rounded-lg px-2.5 py-1.5">
+          <Zap className="h-3 w-3 text-[#d4af37] flex-shrink-0" />
+          <p className="text-xs text-[#1a1a1a] font-semibold">
+            Early Bird: schrijf je in en ontvang €{earlyBird.waitlist_discount_cents / 100} garantiekorting bij lancering
+          </p>
+        </div>
+      )}
       <p className="text-xs text-[#555] font-medium">
         Beschikbaar vanaf {availableFrom} — schrijf je in:
       </p>
@@ -523,6 +581,39 @@ function WaitlistForm({
         <p className="text-red-500 text-xs">{errorMsg}</p>
       )}
     </form>
+  );
+}
+
+// ─── Early Bird Countdown ─────────────────────────────────────────────────────
+
+function EarlyBirdCountdown({ deadlineIso }: { deadlineIso: string }) {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const deadline = new Date(deadlineIso).getTime();
+
+    const update = () => {
+      const diff = deadline - Date.now();
+      if (diff <= 0) { setTimeLeft("Verlopen"); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(d > 0 ? `${d}d ${h}u ${m}m` : `${h}u ${m}m ${s}s`);
+    };
+
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [deadlineIso]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <p className="text-xs font-bold text-[#d4af37] flex items-center gap-1 mt-1">
+      <Zap className="h-3 w-3" />
+      Nog {timeLeft} — daarna €{89} (eenmalig)
+    </p>
   );
 }
 

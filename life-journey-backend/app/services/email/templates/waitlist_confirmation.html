@@ -19,6 +19,17 @@
     </p>
 </div>
 
+{% if guaranteed_discount_euros %}
+<div style="background-color: #FFF7ED; border-left: 4px solid #F97316; padding: 16px; border-radius: 8px; margin: 24px 0;">
+    <p style="margin: 0; font-weight: 700; color: #C2410C; font-size: 18px;">🎉 Early Bird garantie: €{{ guaranteed_discount_euros }} korting</p>
+    <p style="margin: 8px 0 0; color: #9A3412; font-size: 14px;">
+        Omdat je je nu aanmeldt, ontvang je bij de lancering in september automatisch
+        <strong>€{{ guaranteed_discount_euros }} korting</strong> op {{ package_name }}.
+        We sturen je dan een persoonlijke kortingscode.
+    </p>
+</div>
+{% endif %}
+
 <p>
     Terwijl je wacht: je kunt <strong>vandaag al beginnen</strong> met
     het vastleggen van herinneringen via Het Begin-pakket.

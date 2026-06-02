@@ -16,11 +16,45 @@ from app.schemas.orders import (
     PACKAGE_PRICES,
     CreatePaymentIntentRequest,
     CreatePaymentIntentResponse,
+    EarlyBirdStatus,
     OrderPublic,
 )
 from loguru import logger
 
 router = APIRouter()
+
+
+def _early_bird_discount_cents() -> int:
+    """Geeft de actieve early bird korting terug in eurocenten, of 0 als niet actief."""
+    from datetime import datetime, timezone
+    from dateutil.parser import parse as parse_dt
+    if not settings.early_bird_active:
+        return 0
+    try:
+        deadline = parse_dt(settings.early_bird_deadline)
+        if datetime.now(timezone.utc) <= deadline:
+            return settings.early_bird_begin_discount_cents
+    except Exception:
+        pass
+    return 0
+
+
+@router.get("/early-bird", response_model=EarlyBirdStatus)
+def get_early_bird_status() -> EarlyBirdStatus:
+    """Publiek endpoint — geeft de huidige early bird status terug."""
+    from datetime import datetime, timezone
+    from dateutil.parser import parse as parse_dt
+    try:
+        deadline = parse_dt(settings.early_bird_deadline)
+        active = settings.early_bird_active and datetime.now(timezone.utc) <= deadline
+    except Exception:
+        active = False
+    return EarlyBirdStatus(
+        active=active,
+        discount_cents=settings.early_bird_begin_discount_cents if active else 0,
+        deadline_iso=settings.early_bird_deadline,
+        waitlist_discount_cents=settings.early_bird_waitlist_discount_cents if active else 0,
+    )
 
 
 def _get_stripe():
@@ -57,7 +91,8 @@ def create_payment_intent(
         raise HTTPException(status_code=400, detail="Ongeldig pakket")
 
     addon_total = sum(ADDON_PRICES.get(a, 0) for a in set(payload.addons))
-    total_cents = package_price + addon_total
+    discount = _early_bird_discount_cents() if payload.package_type == "BEGIN" else 0
+    total_cents = max(package_price + addon_total - discount, 50)  # Stripe minimum €0.50
 
     # Contactemail: ingelogde gebruiker of gast-email
     contact_email = (
@@ -75,7 +110,8 @@ def create_payment_intent(
         user_id=current_user.id if current_user else None,
         guest_email=None if current_user else contact_email,
         package_type=payload.package_type,
-        price_paid=package_price,
+        price_paid=total_cents,
+        discount_cents=discount,
         addons=list(set(payload.addons)),
         addons_price=addon_total,
         recipient_name=payload.recipient_name,

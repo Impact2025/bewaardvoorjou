@@ -34,8 +34,27 @@ def join_waitlist(
             detail="Dit pakket is niet uitverkocht",
         )
 
+    from datetime import datetime, timezone
+    from dateutil.parser import parse as parse_dt
+    from app.core.config import settings as _s
+
     normalized_email = payload.email.lower().strip()
-    entry = WaitlistEntry(email=normalized_email, package_type=payload.package_type)
+
+    # Stel guaranteed_discount_cents in als early bird nog actief is
+    guaranteed_discount = 0
+    try:
+        if _s.early_bird_active:
+            deadline = parse_dt(_s.early_bird_deadline)
+            if datetime.now(timezone.utc) <= deadline:
+                guaranteed_discount = _s.early_bird_waitlist_discount_cents
+    except Exception:
+        pass
+
+    entry = WaitlistEntry(
+        email=normalized_email,
+        package_type=payload.package_type,
+        guaranteed_discount_cents=guaranteed_discount,
+    )
 
     try:
         db.add(entry)
@@ -51,21 +70,29 @@ def join_waitlist(
         email=normalized_email,
         package_name=package_meta["name"],
         available_from=package_meta["available_from"],
+        guaranteed_discount_cents=guaranteed_discount,
     )
 
     return WaitlistJoinResponse(
         message="Je staat op de wachtlijst! We laten je weten zodra het pakket beschikbaar is.",
         already_registered=False,
+        guaranteed_discount_cents=guaranteed_discount,
     )
 
 
-def _send_confirmation_email(email: str, package_name: str, available_from: str) -> None:
+def _send_confirmation_email(
+    email: str,
+    package_name: str,
+    available_from: str,
+    guaranteed_discount_cents: int = 0,
+) -> None:
     try:
-        from app.services.email.client import send_email, ResendError
+        from app.services.email.client import send_email
         from app.services.email.renderer import build_waitlist_confirmation_email
 
-        subject, html, text = build_waitlist_confirmation_email(email, package_name, available_from)
+        subject, html, text = build_waitlist_confirmation_email(
+            email, package_name, available_from, guaranteed_discount_cents
+        )
         send_email(to=email, subject=subject, html=html, text=text)
     except Exception as exc:
-        # Niet-fataal: aanmelding is geslaagd, e-mail is best-effort
         logger.warning(f"Wachtlijst bevestigingsmail mislukt voor {email}: {exc}")

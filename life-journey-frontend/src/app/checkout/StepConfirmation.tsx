@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CheckCircle, Package, Mail, Truck } from "lucide-react";
+import { CheckCircle, Mail, Package, Truck, Clock } from "lucide-react";
 import { PACKAGE_NAMES } from "@/lib/api/orders";
 import { type CheckoutState } from "./CheckoutContent";
 
@@ -11,10 +11,40 @@ interface Props {
 
 export default function StepConfirmation({ state }: Props) {
   const router = useRouter();
+  const hasRecipientEmail = !!state.recipientEmail;
+  const hasAddress = !state.skipShipping && !!state.shippingAddress.city;
+
+  const nextSteps = [
+    {
+      icon: Mail,
+      title: hasRecipientEmail
+        ? `Welkomstlink verstuurd naar ${state.recipientEmail}`
+        : "Bevestigingsmail verstuurd",
+      desc: hasRecipientEmail
+        ? "De ontvanger kan direct inloggen en beginnen met herinneringen vastleggen."
+        : "Check je inbox voor de bestelbevestiging en je digitale toegang.",
+    },
+    hasAddress
+      ? {
+          icon: Truck,
+          title: "Doos bezorging: september",
+          desc: `We sturen de fysieke doos naar ${state.shippingAddress.city} zodra de voorraad klaar is.`,
+        }
+      : {
+          icon: Clock,
+          title: "Doos-adres later invullen",
+          desc: "Je ontvangt een herinnering in september om je bezorgadres door te geven.",
+        },
+    {
+      icon: Package,
+      title: "Box wordt zorgvuldig ingepakt",
+      desc: "Elke box is uniek — ons team pakt hem persoonlijk in voor september.",
+    },
+  ];
 
   return (
     <div className="space-y-8 text-center">
-      {/* Succes icoon */}
+      {/* Succes */}
       <div className="flex flex-col items-center gap-4">
         <div className="w-20 h-20 bg-[#2d5016]/10 rounded-full flex items-center justify-center">
           <CheckCircle className="h-10 w-10 text-[#2d5016]" />
@@ -24,7 +54,9 @@ export default function StepConfirmation({ state }: Props) {
             Bedankt voor je bestelling!
           </h2>
           <p className="text-[#888]">
-            Je box wordt binnen 5 werkdagen bezorgd.
+            {hasRecipientEmail
+              ? `De digitale welkomstlink is verstuurd naar ${state.recipientEmail}.`
+              : "Je digitale toegang is direct actief."}
           </p>
         </div>
       </div>
@@ -50,8 +82,8 @@ export default function StepConfirmation({ state }: Props) {
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-[#aaa]">Bezorging</span>
-            <span>{state.shippingAddress.city}</span>
+            <span className="text-[#aaa]">Doos bezorging</span>
+            <span>{hasAddress ? `${state.shippingAddress.city} · september` : "Adres volgt (september)"}</span>
           </div>
         </div>
       </div>
@@ -60,23 +92,7 @@ export default function StepConfirmation({ state }: Props) {
       <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left">
         <h3 className="font-medium text-[#1a1a1a] mb-4">Wat gebeurt er nu?</h3>
         <div className="space-y-4">
-          {[
-            {
-              icon: Mail,
-              title: "Bevestigingsmail",
-              desc: "Je ontvangt direct een email met je bestelling en track & trace.",
-            },
-            {
-              icon: Package,
-              title: "Box wordt ingepakt",
-              desc: "Ons team pakt jouw box zorgvuldig in — elke box is uniek.",
-            },
-            {
-              icon: Truck,
-              title: "Bezorging binnen 5 werkdagen",
-              desc: "Je ontvangt een track & trace code zodra de box onderweg is.",
-            },
-          ].map((item, i) => {
+          {nextSteps.map((item, i) => {
             const Icon = item.icon;
             return (
               <div key={i} className="flex gap-3">
@@ -93,28 +109,39 @@ export default function StepConfirmation({ state }: Props) {
         </div>
       </div>
 
-      {/* Digitale toegang */}
-      <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
-        <h3 className="font-medium text-[#2d5016] mb-2">✓ Digitale toegang geactiveerd</h3>
-        <p className="text-sm text-[#555]">
-          Je digitale account is direct actief. Log in of maak een account aan om
-          alvast te beginnen — je kunt de app al gebruiken terwijl de box onderweg is.
-        </p>
-        <div className="mt-3 flex gap-2">
-          <button
-            onClick={() => router.push("/register")}
-            className="bg-[#2d5016] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#3a6620] transition-colors"
-          >
-            Account aanmaken
-          </button>
-          <button
-            onClick={() => router.push("/login")}
-            className="border border-[#2d5016] text-[#2d5016] text-sm px-4 py-2 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
-          >
-            Inloggen
-          </button>
+      {/* Cadeau bevestiging — ontvanger heeft welkomstlink gekregen */}
+      {hasRecipientEmail ? (
+        <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
+          <h3 className="font-medium text-[#2d5016] mb-2">✓ Cadeau verstuurd</h3>
+          <p className="text-sm text-[#555]">
+            {state.recipientName ? `${state.recipientName} heeft` : "De ontvanger heeft"} een
+            persoonlijke welkomstlink ontvangen op{" "}
+            <span className="font-medium">{state.recipientEmail}</span>.
+          </p>
         </div>
-      </div>
+      ) : (
+        <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
+          <h3 className="font-medium text-[#2d5016] mb-2">✓ Digitale toegang geactiveerd</h3>
+          <p className="text-sm text-[#555]">
+            Maak een account aan en begin direct met het vastleggen van herinneringen — de box
+            volgt in september.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => router.push("/register")}
+              className="bg-[#2d5016] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#3a6620] transition-colors"
+            >
+              Account aanmaken
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="border border-[#2d5016] text-[#2d5016] text-sm px-4 py-2 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
+            >
+              Inloggen
+            </button>
+          </div>
+        </div>
+      )}
 
       <button
         onClick={() => router.push("/")}

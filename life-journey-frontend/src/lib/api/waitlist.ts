@@ -5,6 +5,7 @@ export type WaitlistPackage = "ERFGOED" | "VOOR_ALTIJD";
 export interface WaitlistResponse {
   message: string;
   already_registered: boolean;
+  guaranteed_discount_cents: number;
 }
 
 export async function joinWaitlist(

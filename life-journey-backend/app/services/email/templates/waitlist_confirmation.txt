@@ -5,7 +5,11 @@ Zodra de dozen beschikbaar zijn, ben jij een van de eersten die we persoonlijk o
 
 Aangemeld voor: {{ package_name }}
 Beschikbaar vanaf: {{ available_from }}
-
+{% if guaranteed_discount_euros %}
+🎉 Early Bird garantie: €{{ guaranteed_discount_euros }} korting bij lancering
+   Omdat je je nu aanmeldt, ontvang je bij de lancering automatisch €{{ guaranteed_discount_euros }} korting.
+   We sturen je dan een persoonlijke kortingscode.
+{% endif %}
 Terwijl je wacht: je kunt vandaag al beginnen via Het Begin-pakket op {{ app_base_url }}/pricing
 
 We nemen contact op via dit e-mailadres zodra de lancering nadert.

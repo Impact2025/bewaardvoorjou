@@ -12,3 +12,4 @@ class WaitlistJoinRequest(BaseModel):
 class WaitlistJoinResponse(BaseModel):
     message: str
     already_registered: bool
+    guaranteed_discount_cents: int = 0

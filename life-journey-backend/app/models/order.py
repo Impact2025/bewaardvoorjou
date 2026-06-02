@@ -40,6 +40,9 @@ class Order(Base):
     # Verzendadres (JSON)
     shipping_address = Column(JSON, nullable=True)
 
+    # Korting (early bird of promo)
+    discount_cents = Column(Integer, nullable=False, default=0)
+
     # Tijdstempels
     created_at = Column(DateTime, default=utc_now, nullable=False)
     paid_at = Column(DateTime, nullable=True)

@@ -61,6 +61,7 @@ class OrderPublic(BaseModel):
     package_type: str
     status: str
     price_paid: int
+    discount_cents: int = 0
     addons: list[str]
     addons_price: int
     recipient_name: str | None
@@ -68,3 +69,10 @@ class OrderPublic(BaseModel):
     paid_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class EarlyBirdStatus(BaseModel):
+    active: bool
+    discount_cents: int
+    deadline_iso: str
+    waitlist_discount_cents: int

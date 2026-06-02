@@ -14,6 +14,7 @@ import {
   type AddonCode,
   type ShippingAddress,
 } from "@/lib/api/orders";
+import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
 import StepPersonalize from "./StepPersonalize";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
@@ -57,6 +58,9 @@ export default function CheckoutContent() {
     }
   }, [packageType, router]);
 
+  const [earlyBird, setEarlyBird] = useState<EarlyBirdStatus | null>(null);
+  useEffect(() => { getEarlyBirdStatus().then(setEarlyBird); }, []);
+
   const [step, setStep] = useState(0);
   const [state, setState] = useState<CheckoutState>({
     packageType,
@@ -85,7 +89,11 @@ export default function CheckoutContent() {
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons;
+  const earlyBirdDiscount =
+    earlyBird?.active && state.packageType === "BEGIN"
+      ? earlyBird.discount_cents / 100
+      : 0;
+  const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount;
 
   return (
     <div className="min-h-screen bg-[#f8f6f2]">
@@ -146,6 +154,7 @@ export default function CheckoutContent() {
         {step === 0 && (
           <StepSelectPlan
             state={state}
+            earlyBirdDiscount={earlyBirdDiscount}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onNext={() => setStep(1)}
           />
@@ -179,10 +188,12 @@ export default function CheckoutContent() {
 
 function StepSelectPlan({
   state,
+  earlyBirdDiscount,
   onChange,
   onNext,
 }: {
   state: CheckoutState;
+  earlyBirdDiscount: number;
   onChange: (updates: Partial<CheckoutState>) => void;
   onNext: () => void;
 }) {
@@ -190,7 +201,8 @@ function StepSelectPlan({
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const total = PACKAGE_PRICES[state.packageType] + totalAddons;
+  const discount = state.packageType === "BEGIN" ? earlyBirdDiscount : 0;
+  const total = PACKAGE_PRICES[state.packageType] + totalAddons - discount;
 
   const toggleAddon = (code: AddonCode) => {
     const addons = state.addons.includes(code)
@@ -208,34 +220,43 @@ function StepSelectPlan({
 
       {/* Pakket keuze */}
       <div className="space-y-3">
-        {(["BEGIN", "ERFGOED", "VOOR_ALTIJD"] as PackageType[]).map((pkg) => (
-          <label
-            key={pkg}
-            className={cn(
-              "flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors",
-              state.packageType === pkg
-                ? "border-[#d4af37] bg-[#d4af37]/10"
-                : "border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="package"
-                value={pkg}
-                checked={state.packageType === pkg}
-                onChange={() => onChange({ packageType: pkg })}
-                className="accent-[#d4af37]"
-              />
-              <div>
-                <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
-                {pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen</p>}
-                {pkg === "VOOR_ALTIJD" && <p className="text-xs text-[#888]">Launch aanbieding</p>}
+        {(["BEGIN", "ERFGOED", "VOOR_ALTIJD"] as PackageType[]).map((pkg) => {
+          const soldOut = SOLD_OUT_PACKAGES.has(pkg);
+          return (
+            <label
+              key={pkg}
+              className={cn(
+                "flex items-center justify-between p-4 rounded-xl border transition-colors",
+                soldOut
+                  ? "opacity-60 cursor-not-allowed border-[#e5e0d8] bg-[#f8f6f2]"
+                  : state.packageType === pkg
+                  ? "cursor-pointer border-[#d4af37] bg-[#d4af37]/10"
+                  : "cursor-pointer border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="package"
+                  value={pkg}
+                  checked={state.packageType === pkg}
+                  onChange={() => !soldOut && onChange({ packageType: pkg })}
+                  disabled={soldOut}
+                  className="accent-[#d4af37]"
+                />
+                <div>
+                  <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
+                  {soldOut && <p className="text-xs text-[#e07020] font-medium">Uitverkocht — wachtlijst via /pricing</p>}
+                  {!soldOut && pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen</p>}
+                  {!soldOut && pkg === "VOOR_ALTIJD" && <p className="text-xs text-[#888]">Launch aanbieding</p>}
+                </div>
               </div>
-            </div>
-            <span className="font-bold text-[#1a1a1a]">€{PACKAGE_PRICES[pkg]}</span>
-          </label>
-        ))}
+              <span className={cn("font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>
+                €{PACKAGE_PRICES[pkg]}
+              </span>
+            </label>
+          );
+        })}
       </div>
 
       {/* Add-ons */}
@@ -280,6 +301,12 @@ function StepSelectPlan({
           <div className="flex justify-between items-center mb-1">
             <span className="text-[#888] text-sm">Extra's ({state.addons.length})</span>
             <span className="text-[#333]">+€{totalAddons}</span>
+          </div>
+        )}
+        {discount > 0 && (
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[#2d5016] text-sm font-medium">⚡ Early Bird korting</span>
+            <span className="text-[#2d5016] font-medium">−€{discount}</span>
           </div>
         )}
         <div className="flex justify-between items-center font-bold text-[#1a1a1a] border-t border-[#f0ece6] pt-2 mt-2">

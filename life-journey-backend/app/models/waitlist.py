@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, Integer, String, UniqueConstraint
 
 from app.models.base import Base
 from app.models.order import utc_now
@@ -15,4 +15,6 @@ class WaitlistEntry(Base):
     email = Column(String(255), nullable=False, index=True)
     # ERFGOED | VOOR_ALTIJD
     package_type = Column(String(32), nullable=False)
+    # Garantiekorting bij lancering (0 = geen, 3000 = €30 early bird garantie)
+    guaranteed_discount_cents = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=utc_now, nullable=False)
