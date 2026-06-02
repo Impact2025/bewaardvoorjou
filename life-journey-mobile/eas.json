@@ -28,18 +28,5 @@
         "EXPO_PUBLIC_API_URL": "https://bewaardvoorjou-production.up.railway.app/api/v1"
       }
     }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "appleId": "info@bewaardvoorjou.nl",
-        "ascAppId": "",
-        "appleTeamId": ""
-      },
-      "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
-      }
-    }
   }
 }
