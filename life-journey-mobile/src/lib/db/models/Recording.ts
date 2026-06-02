@@ -3,7 +3,7 @@ import { field, readonly, date, relation } from '@nozbe/watermelondb/decorators'
 import type { Associations } from '@nozbe/watermelondb/Model';
 import type Journey from './Journey';
 
-export type RecordingType = 'audio' | 'video';
+export type RecordingType = 'audio' | 'video' | 'text';
 export type RecordingStatus = 'pending_upload' | 'uploading' | 'uploaded' | 'failed';
 
 export default class Recording extends Model {

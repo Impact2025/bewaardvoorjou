@@ -8,7 +8,7 @@ import { VideoRecorder } from '@/components/recorder/VideoRecorder';
 import { TextRecorder } from '@/components/recorder/TextRecorder';
 import { ModalitySelector, RecordingModality } from '@/components/recorder/ModalitySelector';
 import { getChapterById } from '@/lib/chapters';
-import { saveRecordingToDatabase } from '@/lib/storage/recordings-db';
+import { saveRecordingToDatabase, saveTextToDatabase } from '@/lib/storage/recordings-db';
 import { syncManager } from '@/lib/sync/manager';
 import { lightTheme } from '@/lib/theme';
 import { Toast } from '@/components/ui/Toast';
@@ -90,13 +90,16 @@ export default function RecordScreen() {
     try {
       setIsSaving(true);
 
-      // For text, we'll create a temporary text file to store the content
-      // This will be handled similar to audio/video uploads
-      // TODO: Implement text storage (could be direct to database or as text file)
+      const recording = await saveTextToDatabase(text, chapterId, session.primaryJourneyId);
+      console.log('Text story saved to database:', recording.id);
 
-      console.log('Text story saved:', text);
-
-      showSuccess('Verhaal opgeslagen! Het wordt automatisch gesynchroniseerd.');
+      const syncStatus = syncManager.getSyncStatus();
+      if (syncStatus.isOnline) {
+        showSuccess('Verhaal opgeslagen! De upload start automatisch.');
+        syncManager.triggerManualSync();
+      } else {
+        showSuccess('Verhaal opgeslagen (offline). Upload volgt zodra je online bent.');
+      }
       setTimeout(() => router.back(), 1500);
     } catch (error: any) {
       console.error('Failed to save text:', error);

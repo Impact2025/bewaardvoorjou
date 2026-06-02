@@ -35,7 +35,7 @@ export async function saveRecordingToDatabase(
 
     // Generate unique filename
     const timestamp = Date.now();
-    const extension = type === 'audio' ? 'm4a' : 'm4v';
+    const extension = type === 'audio' ? 'm4a' : type === 'text' ? 'txt' : 'm4v';
     const filename = `${chapterId}_${timestamp}.${extension}`;
     const newUri = RECORDINGS_DIR + filename;
 
@@ -235,6 +235,43 @@ export async function cleanupOldRecordings(daysOld: number = 30): Promise<number
     console.error('Failed to cleanup old recordings:', error);
     return 0;
   }
+}
+
+/**
+ * Write text content to a file and save it to WatermelonDB as a 'text' recording
+ */
+export async function saveTextToDatabase(
+  text: string,
+  chapterId: ChapterId,
+  journeyId: string
+): Promise<Recording> {
+  await initializeRecordingsDir();
+
+  const timestamp = Date.now();
+  const filename = `${chapterId}_${timestamp}.txt`;
+  const uri = RECORDINGS_DIR + filename;
+
+  await FileSystem.writeAsStringAsync(uri, text, { encoding: FileSystem.EncodingType.UTF8 });
+
+  const fileInfo = await FileSystem.getInfoAsync(uri);
+  const sizeBytes = fileInfo.exists && 'size' in fileInfo ? fileInfo.size : new TextEncoder().encode(text).byteLength;
+
+  const recording = await database.write(async () => {
+    return await database.get<Recording>('recordings').create((rec) => {
+      rec.journeyId = journeyId;
+      rec.chapterId = chapterId;
+      rec.localUri = uri;
+      rec.type = 'text';
+      rec.durationSeconds = 0;
+      rec.sizeBytes = sizeBytes;
+      rec.status = 'pending_upload';
+      rec.uploadAttempts = 0;
+      rec.isDeleted = false;
+    });
+  });
+
+  console.log('Saved text recording to database:', recording.id);
+  return recording;
 }
 
 /**

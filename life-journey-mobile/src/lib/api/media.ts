@@ -25,11 +25,11 @@ export interface MediaUploadResponse {
 export async function getUploadUrl(
   journeyId: string,
   chapterId: ChapterId,
-  fileType: 'audio' | 'video',
+  fileType: 'audio' | 'video' | 'text',
   token: string
 ): Promise<UploadUrlResponse> {
-  const extension = fileType === 'audio' ? 'm4a' : 'm4v';
-  const contentType = fileType === 'audio' ? 'audio/m4a' : 'video/mp4';
+  const extension = fileType === 'audio' ? 'm4a' : fileType === 'text' ? 'txt' : 'm4v';
+  const contentType = fileType === 'audio' ? 'audio/m4a' : fileType === 'text' ? 'text/plain' : 'video/mp4';
 
   const response = await apiFetch<UploadUrlResponse>(
     `/media/upload-url`,
@@ -114,7 +114,7 @@ export async function uploadRecording(
   journeyId: string,
   chapterId: ChapterId,
   localUri: string,
-  fileType: 'audio' | 'video',
+  fileType: 'audio' | 'video' | 'text',
   sizeBytes: number,
   durationSeconds: number,
   token: string,
@@ -130,7 +130,7 @@ export async function uploadRecording(
     );
 
     // Step 2: Upload to S3
-    const contentType = fileType === 'audio' ? 'audio/m4a' : 'video/mp4';
+    const contentType = fileType === 'audio' ? 'audio/m4a' : fileType === 'text' ? 'text/plain' : 'video/mp4';
     await uploadFileToS3(uploadUrl, localUri, contentType, onProgress);
 
     // Step 3: Confirm upload with backend
