@@ -34,6 +34,12 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
@@ -79,6 +85,12 @@
         "projectId": "81f5c8f7-6400-4dbb-84c4-710d059b4d3a"
       }
     },
-    "owner": "hermesimpact"
+    "owner": "hermesimpact",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/81f5c8f7-6400-4dbb-84c4-710d059b4d3a"
+    }
   }
 }
