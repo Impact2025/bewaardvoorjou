@@ -7,7 +7,7 @@ Tracks family relationships, roles, and access permissions.
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Enum as SQLEnum
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, JSON, String, Enum as SQLEnum, Text
 from sqlalchemy.orm import relationship
 import enum
 
@@ -107,3 +107,42 @@ class FamilyInvite(Base):
 
     # Relationships
     family_member = relationship("FamilyMember", backref="invites")
+
+
+class FamilyPod(Base):
+    """
+    A shared space where multiple family members can exchange messages.
+    """
+    __tablename__ = "familypod"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    journey_id = Column(String, ForeignKey("journey.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    created_by = Column(String, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    last_activity_at = Column(DateTime, default=utc_now, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    journey = relationship("Journey", backref="pods")
+    creator = relationship("User", foreign_keys=[created_by])
+    messages = relationship("PodMessage", back_populates="pod", cascade="all, delete-orphan", order_by="PodMessage.created_at")
+
+
+class PodMessage(Base):
+    """
+    A message posted inside a FamilyPod.
+    """
+    __tablename__ = "podmessage"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    pod_id = Column(String, ForeignKey("familypod.id", ondelete="CASCADE"), nullable=False, index=True)
+    author_id = Column(String, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
+    author_name = Column(String(120), nullable=False)
+    content = Column(Text, nullable=False)
+    reactions = Column(JSON, nullable=False, default=dict)  # {"❤️": ["user_id", ...]}
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+
+    pod = relationship("FamilyPod", back_populates="messages")
+    author = relationship("User", foreign_keys=[author_id])

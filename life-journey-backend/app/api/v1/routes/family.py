@@ -12,6 +12,7 @@ from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
 from app.models.journey import Journey
 from app.models.user import User
+from app.models.family import FamilyPod, PodMessage
 from app.schemas.family import (
     FamilyMemberCreateRequest,
     FamilyMemberUpdateRequest,
@@ -26,6 +27,11 @@ from app.schemas.family import (
     ROLE_METADATA,
     FamilyRole,
     AccessLevel,
+    PodCreateRequest,
+    PodMessageCreateRequest,
+    PodReactRequest,
+    PodResponse,
+    PodMessageResponse,
 )
 from app.services.family.manager import (
     list_family_members,
@@ -277,3 +283,184 @@ def decline_invitation(
 
     decline_invite(db, invite)
     return {"status": "declined"}
+
+
+# ── Family Pods ────────────────────────────────────────────────────────────────
+
+def _pod_to_response(pod: FamilyPod) -> PodResponse:
+    return PodResponse(
+        id=pod.id,
+        journey_id=pod.journey_id,
+        title=pod.title,
+        description=pod.description,
+        created_by=pod.created_by,
+        is_active=pod.is_active,
+        last_activity=pod.last_activity_at.isoformat(),
+        members=[pod.created_by] if pod.created_by else [],
+        created_at=pod.created_at,
+    )
+
+
+def _message_to_response(msg: PodMessage) -> PodMessageResponse:
+    return PodMessageResponse(
+        id=msg.id,
+        pod_id=msg.pod_id,
+        author_id=msg.author_id,
+        author_name=msg.author_name,
+        content=msg.content,
+        reactions=msg.reactions or {},
+        created_at=msg.created_at,
+    )
+
+
+@router.get("/{journey_id}/pods", response_model=list[PodResponse])
+@limiter.limit(RateLimits.READ_STANDARD)
+def list_pods(
+    request: Request,
+    journey_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[PodResponse]:
+    _ensure_journey_access(journey_id, db, current_user)
+    pods = db.query(FamilyPod).filter(
+        FamilyPod.journey_id == journey_id,
+        FamilyPod.is_active == True,
+    ).order_by(FamilyPod.last_activity_at.desc()).all()
+    return [_pod_to_response(p) for p in pods]
+
+
+@router.post("/{journey_id}/pods", response_model=PodResponse, status_code=201)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def create_pod(
+    request: Request,
+    journey_id: str,
+    payload: PodCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> PodResponse:
+    _ensure_journey_access(journey_id, db, current_user)
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    pod = FamilyPod(
+        journey_id=journey_id,
+        title=payload.title.strip(),
+        description=payload.description.strip() if payload.description else None,
+        created_by=current_user.id,
+        is_active=True,
+        last_activity_at=now,
+        created_at=now,
+    )
+    db.add(pod)
+    db.commit()
+    db.refresh(pod)
+    return _pod_to_response(pod)
+
+
+@router.delete("/{journey_id}/pods/{pod_id}", status_code=204)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def delete_pod(
+    request: Request,
+    journey_id: str,
+    pod_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    _ensure_journey_access(journey_id, db, current_user)
+    pod = db.query(FamilyPod).filter(
+        FamilyPod.id == pod_id,
+        FamilyPod.journey_id == journey_id,
+    ).first()
+    if not pod:
+        raise HTTPException(status_code=404, detail="Pod niet gevonden")
+    if pod.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Alleen de aanmaker kan een pod verwijderen")
+    db.delete(pod)
+    db.commit()
+
+
+@router.get("/{journey_id}/pods/{pod_id}/messages", response_model=list[PodMessageResponse])
+@limiter.limit(RateLimits.READ_STANDARD)
+def list_messages(
+    request: Request,
+    journey_id: str,
+    pod_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[PodMessageResponse]:
+    _ensure_journey_access(journey_id, db, current_user)
+    pod = db.query(FamilyPod).filter(
+        FamilyPod.id == pod_id,
+        FamilyPod.journey_id == journey_id,
+    ).first()
+    if not pod:
+        raise HTTPException(status_code=404, detail="Pod niet gevonden")
+    return [_message_to_response(m) for m in pod.messages]
+
+
+@router.post("/{journey_id}/pods/{pod_id}/messages", response_model=PodMessageResponse, status_code=201)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def post_message(
+    request: Request,
+    journey_id: str,
+    pod_id: str,
+    payload: PodMessageCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> PodMessageResponse:
+    _ensure_journey_access(journey_id, db, current_user)
+    pod = db.query(FamilyPod).filter(
+        FamilyPod.id == pod_id,
+        FamilyPod.journey_id == journey_id,
+        FamilyPod.is_active == True,
+    ).first()
+    if not pod:
+        raise HTTPException(status_code=404, detail="Pod niet gevonden")
+
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    msg = PodMessage(
+        pod_id=pod_id,
+        author_id=current_user.id,
+        author_name=current_user.display_name,
+        content=payload.content.strip(),
+        reactions={},
+        created_at=now,
+    )
+    pod.last_activity_at = now
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return _message_to_response(msg)
+
+
+@router.post("/{journey_id}/pods/{pod_id}/messages/{message_id}/react", response_model=PodMessageResponse)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def react_to_message(
+    request: Request,
+    journey_id: str,
+    pod_id: str,
+    message_id: str,
+    payload: PodReactRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> PodMessageResponse:
+    _ensure_journey_access(journey_id, db, current_user)
+    msg = db.query(PodMessage).filter(
+        PodMessage.id == message_id,
+        PodMessage.pod_id == pod_id,
+    ).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Bericht niet gevonden")
+
+    reactions = dict(msg.reactions or {})
+    users = list(reactions.get(payload.emoji, []))
+    if current_user.id in users:
+        users.remove(current_user.id)
+    else:
+        users.append(current_user.id)
+    reactions[payload.emoji] = users
+    msg.reactions = reactions
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return _message_to_response(msg)

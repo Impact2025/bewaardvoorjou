@@ -129,6 +129,51 @@ class RoleMetadata(BaseModel):
     icon: str
 
 
+# ── Family Pods ────────────────────────────────────────────────────────────────
+
+class PodCreateRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+
+class PodMessageCreateRequest(BaseModel):
+    content: str
+
+
+class PodReactRequest(BaseModel):
+    emoji: str
+
+
+class PodMessageResponse(BaseModel):
+    id: str
+    pod_id: str
+    author_id: Optional[str]
+    author_name: str
+    content: str
+    reactions: dict
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PodResponse(BaseModel):
+    id: str
+    journey_id: str
+    title: str
+    description: Optional[str]
+    created_by: Optional[str]
+    is_active: bool
+    last_activity: str        # ISO string, matches frontend interface
+    members: list[str]        # placeholder: list of user_ids
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ── Role metadata ──────────────────────────────────────────────────────────────
+
 ROLE_METADATA: dict[FamilyRole, RoleMetadata] = {
     FamilyRole.spouse: RoleMetadata(
         id=FamilyRole.spouse,
