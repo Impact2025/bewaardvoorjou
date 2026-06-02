@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, requestMagicLink } from "@/lib/auth-client";
 import { isApiError } from "@/lib/api-client";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountDeleted = searchParams.get("deleted") === "1";
@@ -237,5 +237,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: "#FAF7F2" }} />}>
+      <LoginContent />
+    </Suspense>
   );
 }
