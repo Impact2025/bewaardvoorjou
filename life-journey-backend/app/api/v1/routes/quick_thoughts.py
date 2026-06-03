@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
+import boto3
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 from sqlalchemy import func
@@ -115,11 +116,31 @@ def _thought_to_response(thought: QuickThought, media_url: Optional[str] = None)
 
 
 async def _get_media_url(object_key: str) -> Optional[str]:
-    """Generate a presigned URL for media playback."""
+    """Generate a playback URL: presigned GET from R2/S3 when configured, local endpoint otherwise."""
     if not object_key:
         return None
 
-    # For local storage, return the local endpoint
+    if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
+        try:
+            endpoint_url = settings.s3_endpoint_url
+            if not endpoint_url and settings.s3_region:
+                endpoint_url = f"https://s3.{settings.s3_region}.amazonaws.com"
+
+            client = boto3.client(
+                "s3",
+                region_name=settings.s3_region,
+                endpoint_url=endpoint_url,
+                aws_access_key_id=settings.aws_access_key_id,
+                aws_secret_access_key=settings.aws_secret_access_key,
+            )
+            return client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": settings.s3_bucket, "Key": object_key},
+                ExpiresIn=3600,
+            )
+        except Exception as exc:
+            logger.warning(f"Could not generate presigned GET URL for {object_key}: {exc}")
+
     return f"{settings.api_base_url}/api/v1/quick-thoughts/file/{object_key}"
 
 

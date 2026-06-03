@@ -64,7 +64,7 @@ function ResetForm() {
   if (done) {
     return (
       <div className="text-center space-y-4">
-        <div className="text-4xl">✅</div>
+
         <p className="text-sm text-medium">
           Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen.
         </p>

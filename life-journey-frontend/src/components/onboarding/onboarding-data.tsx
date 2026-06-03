@@ -36,12 +36,12 @@ export const onboardingSlides: OnboardingSlide[] = [
     id: "methods",
     title: "Kies hoe je wilt vastleggen",
     description: [
-      "✍️ Schrijf je gedachten uit in de tekst editor",
-      "🎥 Neem jezelf op camera op",
-      "🎤 Spreek je verhaal in met audio"
+      "Schrijf je gedachten uit in de teksteditor",
+      "Neem jezelf op camera op",
+      "Spreek je verhaal in met audio"
     ],
     icon: Video,
-    tip: "Tip: Combineer meerdere methoden voor een rijk verhaal!"
+    tip: "Combineer meerdere methoden voor een rijk verhaal"
   },
   {
     id: "ai-interviewer",
@@ -85,6 +85,6 @@ export const onboardingSlides: OnboardingSlide[] = [
       "Je kunt deze handleiding altijd opnieuw bekijken"
     ],
     icon: Sparkles,
-    highlight: "Veel plezier met het vastleggen van je levensverhaal! 🎉"
+    highlight: "Veel plezier met het vastleggen van je levensverhaal"
   }
 ];

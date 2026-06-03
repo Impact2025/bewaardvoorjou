@@ -54,9 +54,6 @@ function EmailBevestigenContent() {
 
           {state === "verifying" && (
             <>
-              <div className="flex justify-center mb-4">
-                <span className="text-5xl animate-spin">⏳</span>
-              </div>
               <CardTitle className="text-2xl text-heading font-serif">Bezig met verificatie…</CardTitle>
               <CardDescription className="text-medium">
                 Even geduld, we controleren je verificatielink.
@@ -66,9 +63,6 @@ function EmailBevestigenContent() {
 
           {state === "success" && (
             <>
-              <div className="flex justify-center mb-4">
-                <span className="text-5xl">🎉</span>
-              </div>
               <CardTitle className="text-2xl text-heading font-serif">E-mailadres bevestigd!</CardTitle>
               <CardDescription className="text-medium">
                 Je account is geactiveerd. Je wordt nu doorgestuurd…
@@ -78,9 +72,6 @@ function EmailBevestigenContent() {
 
           {state === "invalid" && (
             <>
-              <div className="flex justify-center mb-4">
-                <span className="text-5xl">❌</span>
-              </div>
               <CardTitle className="text-2xl text-heading font-serif">Ongeldige link</CardTitle>
               <CardDescription className="text-medium">
                 Deze verificatielink is ongeldig of al gebruikt.
@@ -90,9 +81,6 @@ function EmailBevestigenContent() {
 
           {state === "expired" && (
             <>
-              <div className="flex justify-center mb-4">
-                <span className="text-5xl">⏰</span>
-              </div>
               <CardTitle className="text-2xl text-heading font-serif">Link verlopen</CardTitle>
               <CardDescription className="text-medium">
                 Deze verificatielink is verlopen (geldig voor 24 uur).

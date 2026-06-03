@@ -42,7 +42,7 @@ export function OnboardingSlideComponent({ slide, isActive }: OnboardingSlidePro
       {slide.tip && (
         <div className={`rounded-xl border border-slate-200 bg-slate-50 px-6 py-3 transition-all duration-500 delay-200 ${isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
           <p className="text-center text-sm text-slate-600">
-            💡 {slide.tip}
+            {slide.tip}
           </p>
         </div>
       )}

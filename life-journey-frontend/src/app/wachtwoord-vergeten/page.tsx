@@ -58,7 +58,7 @@ export default function WachtwoordVergetenPage() {
         <CardContent>
           {submitted ? (
             <div className="text-center space-y-4">
-              <div className="text-4xl">📬</div>
+
               <p className="text-sm text-medium">
                 Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een resetlink.
                 Vergeet ook je spam-map te controleren.

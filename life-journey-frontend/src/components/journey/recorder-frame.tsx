@@ -434,8 +434,10 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
       }, 2000);
     } catch (error) {
       console.error("Upload error:", error);
-      const message =
-        error instanceof Error ? error.message : "Upload mislukt. Probeer opnieuw.";
+      const raw = error instanceof Error ? error.message : "";
+      const message = raw.toLowerCase().includes("fetch")
+        ? "Upload mislukt (netwerkfout). Controleer je verbinding en probeer opnieuw."
+        : raw || "Upload mislukt. Probeer opnieuw.";
       setUploadStatus(message);
     } finally {
       setIsUploading(false);
@@ -606,8 +608,10 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
       }, 2000);
     } catch (error) {
       console.error("Save error:", error);
-      const message =
-        error instanceof Error ? error.message : "Opslaan mislukt. Probeer opnieuw.";
+      const raw = error instanceof Error ? error.message : "";
+      const message = raw.toLowerCase().includes("fetch")
+        ? "Opslaan mislukt (netwerkfout). Controleer je verbinding en probeer opnieuw."
+        : raw || "Opslaan mislukt. Probeer opnieuw.";
       setUploadStatus(message);
     } finally {
       setIsUploading(false);

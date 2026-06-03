@@ -91,7 +91,7 @@ export default function UitnodigingPage({ params }: PageProps) {
 
           {state === "success" && (
             <>
-              <div className="text-6xl mb-6">🎉</div>
+
               <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
                 Welkom!
               </h2>
@@ -103,7 +103,7 @@ export default function UitnodigingPage({ params }: PageProps) {
 
           {(state === "invalid" || state === "expired") && (
             <>
-              <div className="text-6xl mb-6">{state === "expired" ? "⏰" : "😕"}</div>
+
               <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
                 {state === "expired" ? "Link verlopen" : "Ongeldige link"}
               </h2>

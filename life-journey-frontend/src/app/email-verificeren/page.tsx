@@ -38,9 +38,6 @@ function EmailVerificatieContent() {
               priority
             />
           </div>
-          <div className="flex justify-center mb-4">
-            <span className="text-5xl">📬</span>
-          </div>
           <CardTitle className="text-2xl text-heading font-serif">Controleer je inbox</CardTitle>
           <CardDescription className="text-medium">
             We hebben een verificatielink gestuurd naar{" "}
