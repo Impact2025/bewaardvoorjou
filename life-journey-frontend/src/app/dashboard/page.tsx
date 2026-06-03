@@ -17,6 +17,7 @@ import {
 import { CHAPTERS } from "@/lib/chapters";
 import { cn, formatDate } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/store/auth-context";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { OnboardingModal, hasSeenOnboarding } from "@/components/onboarding/onboarding-modal";
 import type { ChapterId } from "@/lib/types";
@@ -47,8 +48,15 @@ const Timeline = dynamic(
 
 function DashboardContent() {
   const router = useRouter();
+  const { session } = useAuth();
   const { journey, profile, isLoading, error } = useJourneyBootstrap();
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (session && !session.primaryJourneyId) {
+      router.replace("/onboarding");
+    }
+  }, [session, router]);
   const [milestonePulse, setMilestonePulse] = useState(false);
   const { triggerConfetti, ConfettiComponent } = useConfetti();
 

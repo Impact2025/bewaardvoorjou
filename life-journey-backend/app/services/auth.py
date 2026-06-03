@@ -90,15 +90,7 @@ def register_user(
     consent_marketing=consent_marketing,
     **user_kwargs,
   )
-  journey_title = user.display_name if getattr(user, "display_name", None) else "Mijn levensverhaal"
-  journey = Journey(
-    id=str(uuid4()),
-    title=f"Verhaal van {journey_title}",
-    user=user,
-    progress=_default_progress(),
-  )
   db.add(user)
-  db.add(journey)
   db.commit()
   db.refresh(user)
   return user
