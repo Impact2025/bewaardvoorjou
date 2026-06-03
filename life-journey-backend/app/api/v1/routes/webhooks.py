@@ -253,6 +253,11 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     payment_method = payment_intent.get("payment_method_types", ["card"])[0] if isinstance(payment_intent, dict) else None
     order.stripe_payment_method = payment_method
 
+    # Verhoog promo code gebruiksteller
+    if order.promo_code_used:
+        from app.api.v1.routes.promo_codes import increment_promo_usage
+        increment_promo_usage(db, order.promo_code_used)
+
     # Activeer digitale toegang voor bekende gebruiker
     user_id = metadata.get("user_id") or order.user_id
     if user_id:

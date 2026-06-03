@@ -37,6 +37,7 @@ export interface CreatePaymentIntentPayload {
   personal_message: string;
   shipping_address?: ShippingAddress;
   guest_email?: string;
+  promo_code?: string;
 }
 
 export interface CreatePaymentIntentResponse {

@@ -95,7 +95,19 @@ def create_payment_intent(
         raise HTTPException(status_code=400, detail="Ongeldig pakket")
 
     addon_total = sum(ADDON_PRICES.get(a, 0) for a in set(payload.addons))
-    discount = _early_bird_discount_cents(payload.package_type)
+    early_bird_discount = _early_bird_discount_cents(payload.package_type)
+
+    # Promo code validatie
+    promo_discount = 0
+    promo_code_used = None
+    if payload.promo_code:
+        from app.api.v1.routes.promo_codes import apply_promo_code
+        promo_discount, promo_error = apply_promo_code(db, payload.promo_code, payload.package_type)
+        if promo_error:
+            raise HTTPException(status_code=400, detail=promo_error)
+        promo_code_used = payload.promo_code.upper().strip()
+
+    discount = early_bird_discount + promo_discount
     total_cents = max(package_price + addon_total - discount, 50)  # Stripe minimum €0.50
 
     # Contactemail: ingelogde gebruiker of gast-email
@@ -124,6 +136,7 @@ def create_payment_intent(
         package_type=payload.package_type,
         price_paid=total_cents,
         discount_cents=discount,
+        promo_code_used=promo_code_used,
         addons=list(set(payload.addons)),
         addons_price=addon_total,
         recipient_name=payload.recipient_name,

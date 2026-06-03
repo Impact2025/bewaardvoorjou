@@ -14,6 +14,7 @@ import {
   type ShippingAddress,
 } from "@/lib/api/orders";
 import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
+import { validatePromoCode } from "@/lib/api/promo-codes";
 import StepPersonalize from "./StepPersonalize";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
@@ -34,6 +35,8 @@ export interface CheckoutState {
   guestEmail: string;
   orderId: string;
   paymentIntentId: string;
+  promoCode: string;
+  promoDiscountCents: number;
 }
 
 const DEFAULT_ADDRESS: ShippingAddress = {
@@ -75,6 +78,8 @@ export default function CheckoutContent() {
     guestEmail: "",
     orderId: "",
     paymentIntentId: "",
+    promoCode: "",
+    promoDiscountCents: 0,
   });
 
   // Lees return_url voor Stripe iDEAL redirect
@@ -98,7 +103,8 @@ export default function CheckoutContent() {
       ? (earlyBird.digitaal_discount_cents ?? 0) / 100
       : 0
     : 0;
-  const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount;
+  const promoDiscount = state.promoDiscountCents / 100;
+  const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount - promoDiscount;
 
   return (
     <div className="min-h-screen bg-[#f8f6f2]">
@@ -160,6 +166,7 @@ export default function CheckoutContent() {
           <StepSelectPlan
             state={state}
             earlyBirdDiscount={earlyBirdDiscount}
+            promoDiscount={promoDiscount}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onNext={() => setStep(1)}
           />
@@ -194,20 +201,55 @@ export default function CheckoutContent() {
 function StepSelectPlan({
   state,
   earlyBirdDiscount,
+  promoDiscount,
   onChange,
   onNext,
 }: {
   state: CheckoutState;
   earlyBirdDiscount: number;
+  promoDiscount: number;
   onChange: (updates: Partial<CheckoutState>) => void;
   onNext: () => void;
 }) {
+  const [promoInput, setPromoInput] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoApplied, setPromoApplied] = useState(!!state.promoCode);
+
   const totalAddons = state.addons.reduce((sum, code) => {
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const discount = ["BEGIN", "DIGITAAL"].includes(state.packageType) ? earlyBirdDiscount : 0;
-  const total = PACKAGE_PRICES[state.packageType] + totalAddons - discount;
+  const ebDiscount = ["BEGIN", "DIGITAAL"].includes(state.packageType) ? earlyBirdDiscount : 0;
+  const total = PACKAGE_PRICES[state.packageType] + totalAddons - ebDiscount - promoDiscount;
+
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoError(null);
+    try {
+      const result = await validatePromoCode(code, state.packageType);
+      if (result.valid) {
+        onChange({ promoCode: code, promoDiscountCents: result.discount_cents });
+        setPromoApplied(true);
+      } else {
+        setPromoError(result.error ?? "Ongeldige code");
+        onChange({ promoCode: "", promoDiscountCents: 0 });
+      }
+    } catch {
+      setPromoError("Validatie mislukt, probeer opnieuw");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoInput("");
+    setPromoApplied(false);
+    setPromoError(null);
+    onChange({ promoCode: "", promoDiscountCents: 0 });
+  };
 
   const toggleAddon = (code: AddonCode) => {
     const addons = state.addons.includes(code)
@@ -296,6 +338,47 @@ function StepSelectPlan({
         </div>
       </div>
 
+      {/* Kortingscode */}
+      <div>
+        <h3 className="font-medium text-[#1a1a1a] mb-3">Kortingscode</h3>
+        {promoApplied && state.promoCode ? (
+          <div className="flex items-center justify-between p-3 bg-[#2d5016]/5 border border-[#2d5016]/30 rounded-xl">
+            <div>
+              <span className="font-mono font-bold text-[#2d5016] text-sm">{state.promoCode}</span>
+              <span className="text-[#2d5016] text-sm ml-2">toegepast</span>
+            </div>
+            <button
+              onClick={handleRemovePromo}
+              className="text-xs text-[#888] hover:text-[#e04040] transition-colors underline"
+            >
+              Verwijder
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={promoInput}
+              onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(null); }}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+              placeholder="Voer code in"
+              maxLength={32}
+              className="flex-1 px-4 py-3 rounded-xl border border-[#e5e0d8] bg-white text-[#1a1a1a] font-mono text-sm focus:outline-none focus:border-[#d4af37] transition-colors"
+            />
+            <button
+              onClick={handleApplyPromo}
+              disabled={promoLoading || !promoInput.trim()}
+              className="px-5 py-3 bg-[#1a1a1a] text-white text-sm font-medium rounded-xl hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {promoLoading ? "..." : "Toepassen"}
+            </button>
+          </div>
+        )}
+        {promoError && (
+          <p className="text-red-600 text-xs mt-2">{promoError}</p>
+        )}
+      </div>
+
       {/* Totaal + CTA */}
       <div className="bg-white rounded-xl border border-[#e5e0d8] p-4">
         <div className="flex justify-between items-center mb-1">
@@ -308,10 +391,16 @@ function StepSelectPlan({
             <span className="text-[#333]">+€{totalAddons}</span>
           </div>
         )}
-        {discount > 0 && (
+        {ebDiscount > 0 && (
           <div className="flex justify-between items-center mb-1">
             <span className="text-[#2d5016] text-sm font-medium">⚡ Early Bird korting</span>
-            <span className="text-[#2d5016] font-medium">−€{discount}</span>
+            <span className="text-[#2d5016] font-medium">−€{ebDiscount}</span>
+          </div>
+        )}
+        {promoDiscount > 0 && (
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[#2d5016] text-sm font-medium">Kortingscode {state.promoCode}</span>
+            <span className="text-[#2d5016] font-medium">−€{promoDiscount}</span>
           </div>
         )}
         <div className="flex justify-between items-center font-bold text-[#1a1a1a] border-t border-[#f0ece6] pt-2 mt-2">

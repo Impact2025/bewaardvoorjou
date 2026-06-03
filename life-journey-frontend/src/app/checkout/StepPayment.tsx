@@ -35,6 +35,7 @@ export default function StepPayment({ state, totalPrice, onSuccess }: Props) {
           personal_message: state.personalMessage,
           shipping_address: state.skipShipping ? undefined : state.shippingAddress,
           guest_email: state.guestEmail || undefined,
+          promo_code: state.promoCode || undefined,
         });
         if (!cancelled) {
           setClientSecret(result.client_secret);

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { QuickThoughtFAB } from "@/components/quick-thoughts";
 import { MemoryLaneNavigation } from "@/components/MemoryLaneNavigation";
+import { PromoCodeRedeem } from "@/components/PromoCodeRedeem";
 
 const Timeline = dynamic(
   () => import("@/components/timeline/Timeline").then((mod) => mod.Timeline),
@@ -437,6 +438,9 @@ function DashboardContent() {
                   </div>
                 </div>
               </div>
+
+              {/* Promotiecode inwisselen */}
+              <PromoCodeRedeem />
             </div>
           </div>
         </div>

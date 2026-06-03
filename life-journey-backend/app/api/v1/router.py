@@ -23,6 +23,7 @@ from app.api.v1.routes import (
     gift_cards,
     waitlist,
     parent_interview,
+    promo_codes,
 )
 
 
@@ -49,3 +50,5 @@ api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(gift_cards.router, prefix="/gift-cards", tags=["gift-cards"])
 api_router.include_router(waitlist.router, prefix="/waitlist", tags=["waitlist"])
 api_router.include_router(parent_interview.router, tags=["parent-interview"])
+api_router.include_router(promo_codes.router, prefix="/promo-codes", tags=["promo-codes"])
+api_router.include_router(promo_codes.admin_router, prefix="/admin/promo-codes", tags=["admin-promo-codes"])

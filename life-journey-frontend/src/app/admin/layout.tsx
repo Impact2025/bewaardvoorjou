@@ -19,6 +19,7 @@ import {
   BookOpen,
   GraduationCap,
   ListOrdered,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +29,7 @@ const adminNavItems = [
   { href: "/admin/waitlist", label: "Wachtlijst", icon: ListOrdered },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
+  { href: "/admin/coupons", label: "Kortingscodes", icon: Tag },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/kennisbank", label: "Kennisbank", icon: GraduationCap },
   { href: "/admin/content", label: "Content", icon: FileText },

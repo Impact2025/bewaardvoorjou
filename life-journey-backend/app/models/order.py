@@ -46,6 +46,7 @@ class Order(Base):
 
     # Korting (early bird of promo)
     discount_cents = Column(Integer, nullable=False, default=0)
+    promo_code_used = Column(String(32), nullable=True)
 
     # Tijdstempels
     created_at = Column(DateTime, default=utc_now, nullable=False)
