@@ -3,41 +3,32 @@
 {% block title %}Je verhaal wacht op je{% endblock %}
 
 {% block content %}
-<h2>{{ display_name }}, je verhaal wacht op je 💛</h2>
+<h1 class="heading">{{ display_name }}, je verhaal wacht op je.</h1>
 
-<p>
-    Het is al {{ days_inactive }} dagen geleden dat je iets hebt verteld.
-    Dat is helemaal oké — het leven is druk. Maar we willen je laten weten
-    dat je verhalen er nog steeds op wachten.
+<p class="body-text">
+  Het is {{ days_inactive }} dagen geleden dat je iets hebt verteld. Dat is helemaal oké &mdash; het leven is druk. Maar je verhaal is er nog steeds, klaar wanneer jij dat bent.
 </p>
 
-<p style="color: #4A4239;">
-    Hier is een vraag die klaarstaat voor je:
-</p>
-
-<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); padding: 28px 24px; border-radius: 12px; margin: 24px 0; border-left: 5px solid #F97316;">
-    <p style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #9A8070; margin: 0 0 12px 0; font-weight: 600;">
-        Volgende stap: {{ next_chapter_name }}
-    </p>
-    <p style="font-size: 20px; color: #2C2416; font-weight: 600; margin: 0; line-height: 1.4; font-style: italic;">
-        "{{ next_question }}"
-    </p>
+<div class="accent-block" style="border-left-color: #B45309; background-color: #FEF3C7;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #92400E; font-weight: 600; margin-bottom: 8px;">
+    Volgende stap &mdash; {{ next_chapter_name }}
+  </p>
+  <p style="font-size: 16px; color: #1C1917; font-style: italic; line-height: 1.6; margin: 0;">
+    "{{ next_question }}"
+  </p>
 </div>
 
-<p>
-    Het hoeft niet lang — vijf minuten is genoeg voor een waardevol verhaal.
-    Jouw woorden zijn een geschenk voor de mensen die van je houden.
+<p class="body-text">
+  Vijf minuten is genoeg voor een waardevol verhaal. Spreek, typ of neem video op &mdash; jij kiest.
 </p>
 
-<div style="text-align: center; margin: 32px 0;">
-    <a href="{{ journey_url }}" class="cta-button" style="font-size: 18px; padding: 18px 40px;">
-        🎤 Vertel dit verhaal nu
-    </a>
+<div class="cta-wrap">
+  <a href="{{ journey_url }}" class="cta-button">Vertel dit verhaal nu</a>
 </div>
 
 <div class="divider"></div>
 
-<p style="font-size: 14px; color: #9A8070; text-align: center; margin: 0;">
-    Geen haast — begin gewoon wanneer het goed voelt.
+<p class="note" style="text-align: center;">
+  Geen haast &mdash; begin gewoon wanneer het goed voelt.
 </p>
 {% endblock %}

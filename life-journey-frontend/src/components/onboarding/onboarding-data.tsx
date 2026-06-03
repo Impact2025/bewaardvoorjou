@@ -13,7 +13,7 @@ export interface OnboardingSlide {
 export const onboardingSlides: OnboardingSlide[] = [
   {
     id: "welcome",
-    title: "Welkom bij Memories",
+    title: "Welkom bij BewaardVoorJou.nl",
     description: [
       "Bewaar je levensverhaal voor toekomstige generaties",
       "Een veilige plek voor je kostbaarste herinneringen"
@@ -25,7 +25,7 @@ export const onboardingSlides: OnboardingSlide[] = [
     id: "chapters",
     title: "Kies je eigen avontuur",
     description: [
-      "15 hoofdstukken over verschillende levensfases",
+      "30 hoofdstukken over verschillende levensfases",
       "Van je jeugd tot levenslessen en toekomstdromen",
       "Activeer alleen wat relevant voor jou is"
     ],
@@ -70,7 +70,7 @@ export const onboardingSlides: OnboardingSlide[] = [
     title: "Nooit meer iets kwijt",
     description: [
       "Alles wordt automatisch opgeslagen",
-      "Ook offline beschikbaar op je apparaat",
+      "Opnames worden lokaal opgeslagen en geüpload zodra je online bent",
       "Je kunt altijd terugkomen waar je was"
     ],
     icon: CloudUpload,

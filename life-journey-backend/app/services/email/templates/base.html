@@ -1,130 +1,224 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Bewaardvoorjou{% endblock %}</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #FAF8F3;
-            color: #2C2416;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #FFFFFF;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        .header {
-            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-            padding: 40px 30px;
-            text-align: center;
-        }
-        .header h1 {
-            margin: 0;
-            color: #FFFFFF;
-            font-size: 28px;
-            font-weight: 600;
-        }
-        .content {
-            padding: 40px 30px;
-        }
-        .content h2 {
-            color: #2C2416;
-            font-size: 22px;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        .content p {
-            margin: 16px 0;
-            color: #4A4239;
-            font-size: 16px;
-        }
-        .cta-button {
-            display: inline-block;
-            background-color: #F97316;
-            color: #FFFFFF !important;
-            text-decoration: none;
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            margin: 24px 0;
-            text-align: center;
-        }
-        .cta-button:hover {
-            background-color: #EA580C;
-        }
-        .footer {
-            background-color: #FAF8F3;
-            padding: 30px;
-            text-align: center;
-            color: #6B6456;
-            font-size: 14px;
-        }
-        .footer a {
-            color: #F97316;
-            text-decoration: none;
-        }
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        .divider {
-            height: 1px;
-            background-color: #E9E4DB;
-            margin: 24px 0;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #E9E4DB;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #F97316 0%, #EA580C 100%);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{% block title %}Bewaardvoorjou{% endblock %}</title>
+  <style>
+    /* Reset */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+    img { -ms-interpolation-mode: bicubic; border: 0; display: block; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F2EDE3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: #1C1917;
+    }
+
+    .wrapper {
+      width: 100%;
+      padding: 48px 16px;
+      background-color: #F2EDE3;
+    }
+
+    .card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* Logo area */
+    .logo-area {
+      padding: 36px 40px 28px;
+      text-align: center;
+      border-bottom: 1px solid #EDE8DF;
+    }
+
+    .logo-img {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+    }
+
+    .brand-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400E;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    /* Content */
+    .content {
+      padding: 40px 40px 32px;
+    }
+
+    .heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1C1917;
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+
+    .body-text {
+      font-size: 15px;
+      color: #57534E;
+      margin: 0 0 14px;
+      line-height: 1.75;
+    }
+
+    /* CTA Button */
+    .cta-wrap {
+      margin: 32px 0;
+      text-align: center;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: #B45309;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      padding: 13px 34px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.1px;
+      line-height: 1;
+    }
+
+    /* Accent block */
+    .accent-block {
+      background-color: #FEF3C7;
+      border-left: 3px solid #D97706;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 20px 0;
+    }
+
+    .accent-block p {
+      font-size: 14px;
+      color: #78350F;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background-color: #F5F0E8;
+      border-radius: 100px;
+      height: 6px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #B45309;
+      border-radius: 100px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background-color: #EDE8DF;
+      margin: 28px 0;
+    }
+
+    /* Notes */
+    .note {
+      font-size: 13px;
+      color: #A8A29E;
+      line-height: 1.65;
+      margin: 0 0 10px;
+    }
+
+    .url-fallback {
+      font-size: 12px;
+      color: #C4B5A0;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 22px 40px 28px;
+      background-color: #FAFAF9;
+      border-top: 1px solid #EDE8DF;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #A8A29E;
+      margin: 4px 0;
+      line-height: 1.6;
+    }
+
+    .footer a {
+      color: #A8A29E;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #B45309;
+    }
+
+    .footer-brand {
+      font-size: 12px;
+      font-weight: 600;
+      color: #C4B5A0;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img
-                src="{{ app_base_url }}/Logo_Bewaardvoorjou.png"
-                alt="Bewaardvoorjou Logo"
-                width="80"
-                height="80"
-                style="margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;"
-            />
-            <h1>Bewaardvoorjou</h1>
-        </div>
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
-        <div class="footer">
-            <p style="margin: 8px 0;">
-                Met warme groet,<br>
-                Het Bewaardvoorjou team
-            </p>
-            <div class="divider"></div>
-            <p style="margin: 8px 0; font-size: 12px;">
-                Deze email ontvang je omdat je een account hebt aangemaakt bij Bewaardvoorjou.<br>
-                {% if unsubscribe_token %}
-                Emails niet meer ontvangen? <a href="{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}">Voorkeuren wijzigen</a>
-                {% endif %}
-            </p>
-        </div>
+  <div class="wrapper">
+    <div class="card">
+
+      <!-- Logo -->
+      <div class="logo-area">
+        <img
+          src="{{ app_base_url }}/Logo_Bewaardvoorjou.png"
+          alt="Bewaardvoorjou"
+          class="logo-img"
+          width="48"
+          height="48"
+        >
+        <p class="brand-name">Bewaardvoorjou</p>
+      </div>
+
+      <!-- Content block -->
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p class="footer-brand">Bewaardvoorjou</p>
+        <p class="footer-text">
+          <a href="{{ app_base_url }}">bewaardvoorjou.nl</a>
+          &nbsp;&middot;&nbsp;
+          <a href="mailto:support@bewaardvoorjou.nl">support@bewaardvoorjou.nl</a>
+        </p>
+        {% if unsubscribe_token %}
+        <p class="footer-text" style="margin-top: 10px;">
+          <a href="{{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}">Afmelden voor e-mails</a>
+        </p>
+        {% endif %}
+      </div>
+
     </div>
+  </div>
 </body>
 </html>

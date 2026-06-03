@@ -3,29 +3,24 @@
 {% block title %}Bevestig je e-mailadres{% endblock %}
 
 {% block content %}
-<h2>Welkom, {{ display_name }}!</h2>
+<h1 class="heading">Welkom, {{ display_name }}!</h1>
 
-<p>
-    Bedankt voor het aanmaken van je account bij <strong>Bewaard voor jou</strong>.
-    Klik op de knop hieronder om je e-mailadres te bevestigen en te beginnen met het vastleggen van je levensverhaal.
+<p class="body-text">
+  Bedankt voor het aanmaken van je account bij Bewaardvoorjou. Klik op de knop hieronder om je e-mailadres te bevestigen en te beginnen met het vastleggen van je levensverhaal.
 </p>
 
-<p>
-    Deze link is <strong>24 uur geldig</strong>.
-</p>
-
-<a href="{{ verification_url }}" class="cta-button">
-    Bevestig mijn e-mailadres →
-</a>
+<div class="cta-wrap">
+  <a href="{{ verification_url }}" class="cta-button">Bevestig mijn e-mailadres</a>
+</div>
 
 <div class="divider"></div>
 
-<p style="font-size: 14px; color: #6B7280;">
-    Heb jij dit account niet aangemaakt? Dan hoef je niets te doen — je kunt deze e-mail veilig negeren.
+<p class="note">
+  Deze link is 24 uur geldig. Heb jij dit account niet aangemaakt? Dan hoef je niets te doen &mdash; je kunt deze e-mail veilig negeren.
 </p>
 
-<p style="font-size: 14px; color: #6B7280;">
-    Of kopieer deze link in je browser:<br>
-    <span style="word-break: break-all; color: #F97316;">{{ verification_url }}</span>
+<p class="url-fallback">
+  Knop werkt niet? Kopieer dit in je browser:<br>
+  {{ verification_url }}
 </p>
 {% endblock %}

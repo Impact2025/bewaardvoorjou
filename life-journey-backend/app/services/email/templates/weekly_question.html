@@ -3,36 +3,32 @@
 {% block title %}Jouw vraag van deze week{% endblock %}
 
 {% block content %}
-<h2>Dag {{ display_name }} 👋</h2>
+<h1 class="heading">Een vraag voor jou, {{ display_name }}.</h1>
 
-<p>
-    We hebben een vraag voor je bewaard. Neem gerust de tijd —
-    er is geen haast. Jouw verhaal is het waard.
+<p class="body-text">
+  We hebben een vraag voor je bewaard. Neem gerust de tijd &mdash; er is geen haast. Jouw verhaal is het waard.
 </p>
 
-<div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); padding: 28px 24px; border-radius: 12px; margin: 28px 0; border-left: 5px solid #F97316;">
-    <p style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #9A8070; margin: 0 0 12px 0; font-weight: 600;">
-        Hoofdstuk: {{ chapter_name }}
-    </p>
-    <p style="font-size: 22px; color: #2C2416; font-weight: 600; margin: 0; line-height: 1.4; font-style: italic;">
-        "{{ question_text }}"
-    </p>
+<div class="accent-block" style="border-left-color: #B45309; background-color: #FEF3C7;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #92400E; font-weight: 600; margin-bottom: 8px;">
+    Hoofdstuk &mdash; {{ chapter_name }}
+  </p>
+  <p style="font-size: 17px; color: #1C1917; font-style: italic; line-height: 1.6; margin: 0;">
+    "{{ question_text }}"
+  </p>
 </div>
 
-<p style="color: #4A4239;">
-    Klik op de knop hieronder en vertel je antwoord in je eigen woorden —
-    in je eigen tempo. Spreek, typ of neem video op. Jij kiest.
+<p class="body-text">
+  Spreek, typ of neem video op. Jij kiest het tempo.
 </p>
 
-<div style="text-align: center; margin: 32px 0;">
-    <a href="{{ journey_url }}" class="cta-button" style="font-size: 18px; padding: 18px 40px;">
-        🎤 Beantwoord deze vraag
-    </a>
+<div class="cta-wrap">
+  <a href="{{ journey_url }}" class="cta-button">Beantwoord deze vraag</a>
 </div>
 
 <div class="divider"></div>
 
-<p style="font-size: 14px; color: #9A8070; text-align: center; margin: 0;">
-    Geen tijd deze week? Geen probleem — de vraag wacht op je.
+<p class="note" style="text-align: center;">
+  Geen tijd deze week? Geen probleem &mdash; de vraag wacht op je.
 </p>
 {% endblock %}

@@ -3,60 +3,43 @@
 {% block title %}Hoofdstuk voltooid: {{ chapter_name }}{% endblock %}
 
 {% block content %}
-<h2>Gefeliciteerd, {{ display_name }}!</h2>
+<h1 class="heading">Goed gedaan, {{ display_name }}.</h1>
 
-<p>
-    Je hebt zojuist het hoofdstuk <strong>"{{ chapter_name }}"</strong> voltooid.
-    Wat een mooie stap!
+<p class="body-text">
+  Je hebt zojuist het hoofdstuk <strong>"{{ chapter_name }}"</strong> voltooid. Elke herinnering die je vastlegt is een cadeau voor de mensen na jou.
 </p>
 
-<p>
-    Elke herinnering die je vastlegt, is een cadeau voor de toekomst.
-    Je bent bezig iets waardevols te creëren.
+<p class="body-text" style="font-weight: 600; color: #1C1917; margin-bottom: 8px;">
+  Voortgang &mdash; {{ completed_count }} van {{ total_count }} hoofdstukken
 </p>
 
-<div class="divider"></div>
-
-<p style="font-weight: 600; color: #2C2416;">
-    Je voortgang:
-</p>
-
-<div style="margin: 20px 0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="color: #4A4239; font-size: 14px;">{{ completed_count }} van {{ total_count }} hoofdstukken</span>
-        <span style="color: #F97316; font-weight: 600; font-size: 16px;">{{ progress_percentage }}%</span>
-    </div>
-    <div class="progress-bar">
-        <div class="progress-fill" style="width: {{ progress_percentage }}%;"></div>
-    </div>
+<div class="progress-wrap">
+  <div class="progress-fill" style="width: {{ progress_percentage }}%;"></div>
 </div>
+
+<p class="note" style="text-align: right; margin-top: 6px;">{{ progress_percentage }}% voltooid</p>
 
 {% if next_chapter_name %}
 <div class="divider"></div>
 
-<p style="font-weight: 600; color: #2C2416;">
-    Wat nu?
+<p class="body-text">
+  Je volgende hoofdstuk is <strong>"{{ next_chapter_name }}"</strong>. Klaar voor de volgende stap?
 </p>
 
-<p>
-    Je volgende hoofdstuk is <strong>"{{ next_chapter_name }}"</strong>.
-    Klaar voor de volgende stap in je verhaal?
-</p>
+<div class="cta-wrap">
+  <a href="{{ app_base_url }}/dashboard" class="cta-button">Ga verder</a>
+</div>
 
-<a href="{{ app_base_url }}/dashboard" class="cta-button">
-    Ga verder met je verhaal →
-</a>
 {% else %}
+
 <div class="divider"></div>
 
-<p style="background-color: #FEF3C7; padding: 16px; border-radius: 8px; border-left: 4px solid #F59E0B; margin: 24px 0;">
-    <strong style="color: #2C2416;">🎉 Geweldig!</strong><br>
-    Je hebt alle hoofdstukken voltooid! Je levensverhaal is compleet.
-    Neem de tijd om terug te kijken op alles wat je hebt gedeeld.
-</p>
+<div class="accent-block">
+  <p><strong>Geweldig!</strong> Je hebt alle hoofdstukken voltooid. Je levensverhaal is compleet &mdash; neem de tijd om terug te kijken op alles wat je hebt gedeeld.</p>
+</div>
 
-<a href="{{ app_base_url }}/timeline" class="cta-button">
-    Bekijk je tijdlijn →
-</a>
+<div class="cta-wrap">
+  <a href="{{ app_base_url }}/timeline" class="cta-button">Bekijk je tijdlijn</a>
+</div>
 {% endif %}
 {% endblock %}
