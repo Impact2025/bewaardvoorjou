@@ -117,6 +117,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   const isRecording = recordingState === "recording";
   const isPreviewing = recordingState === "previewing";
   const isIdle = recordingState === "idle";
+  const isUploading = recordingState === "uploading";
 
   const nextChapterId = getNextChapterId(chapterId);
   const hasNextChapter = !!nextChapterId;
