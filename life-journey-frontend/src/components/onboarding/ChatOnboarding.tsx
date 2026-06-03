@@ -339,7 +339,8 @@ export function ChatOnboarding() {
     startedRef.current = true;
 
     const prefill = session?.user?.displayName ?? "";
-    if (prefill && prefill !== session?.user?.email) {
+    const hasPrefilledName = Boolean(prefill && prefill !== session?.user?.email);
+    if (hasPrefilledName) {
       setTextInput(prefill);
     }
 
@@ -376,11 +377,15 @@ export function ChatOnboarding() {
         }
       }
 
+      const nameQuestion = hasPrefilledName
+        ? `Je hebt je geregistreerd als "${prefill}". Klopt deze naam, of wil je liever een andere gebruiken?`
+        : "Hoe mag ik je noemen?";
+
       await showGuideMessages(
         [
           "Hoi! Welkom bij Bewaard voor jou.",
           "Ik ga je in een paar vragen helpen je reis te starten. Het duurt maar twee minuten.",
-          "Hoe mag ik je noemen?",
+          nameQuestion,
         ],
         650,
       );

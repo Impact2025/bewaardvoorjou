@@ -9,26 +9,6 @@ import { registerUser } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const PRIVACY_OPTIONS = [
-  {
-    value: "private",
-    label: "Alleen voor mij",
-    description: "Jouw verhaal blijft privé — alleen jij kunt het bekijken.",
-  },
-  {
-    value: "trusted",
-    label: "Gedeeld met familie",
-    description: "Je kunt specifieke familieleden uitnodigen om mee te kijken.",
-  },
-  {
-    value: "legacy",
-    label: "Bewaard voor later",
-    description: "Je verhaal wordt bewaard voor je kinderen en kleinkinderen.",
-  },
-];
-
-const BIRTH_YEARS = Array.from({ length: 86 }, (_, i) => 2005 - i); // 2005 → 1920
-
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length < 4) return 0;
   if (pw.length < 8) return 1;
@@ -45,8 +25,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("Nederland");
-  const [privacyLevel, setPrivacyLevel] = useState(PRIVACY_OPTIONS[0].value);
-  const [birthYear, setBirthYear] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,8 +44,6 @@ export default function RegisterPage() {
         email,
         password,
         country,
-        privacyLevel,
-        birthYear: birthYear ? Number(birthYear) : undefined,
         consentTerms,
         consentSpecialCategories,
         consentMarketing,
@@ -190,23 +166,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-label" htmlFor="birthYear">
-                Geboortejaar (optioneel)
-              </label>
-              <select
-                id="birthYear"
-                value={birthYear}
-                onChange={(event) => setBirthYear(event.target.value)}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
-              >
-                <option value="">— Kies een jaar —</option>
-                {BIRTH_YEARS.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-
             <div className="space-y-2 md:col-span-2">
               <label className="block text-sm font-medium text-label" htmlFor="promoCode">
                 Promotiecode <span className="text-slate-400 font-normal">(optioneel)</span>
@@ -221,40 +180,6 @@ export default function RegisterPage() {
                 className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input font-mono shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
               />
               <p className="text-xs text-slate-400">Heb je een code ontvangen? Vul hem hier in — je account wordt direct geactiveerd.</p>
-            </div>
-
-            <div className="space-y-3 md:col-span-2">
-              <span className="block text-sm font-medium text-label">
-                Voor wie bewaar je je verhaal?
-              </span>
-              <div className="space-y-2">
-                {PRIVACY_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
-                      privacyLevel === option.value
-                        ? "border-warm-amber bg-warm-amber/5"
-                        : "border-input-border hover:border-warm-amber/40"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="privacyLevel"
-                      value={option.value}
-                      checked={privacyLevel === option.value}
-                      onChange={() => setPrivacyLevel(option.value)}
-                      className="mt-0.5 accent-warm-amber"
-                    />
-                    <div>
-                      <p className="font-medium text-slate-900">{option.label}</p>
-                      <p className="text-sm text-medium mt-0.5">{option.description}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-              <p className="text-sm text-medium">
-                Je kunt dit later in je instellingen veranderen.
-              </p>
             </div>
 
             {/* AVG Toestemmingen */}
@@ -335,7 +260,6 @@ export default function RegisterPage() {
                   !displayName ||
                   !email ||
                   !password ||
-                  !country ||
                   !consentTerms ||
                   !consentSpecialCategories
                 }
