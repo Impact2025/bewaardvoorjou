@@ -50,6 +50,32 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
     consent_marketing=payload.consent_marketing,
   )
 
+  # Promo code toepassen (indien meegegeven en geldig voor gratis pakket-activatie)
+  promo_message = None
+  if payload.promo_code:
+    try:
+      from app.api.v1.routes.promo_codes import _validate_code, increment_promo_usage
+      from datetime import datetime, timezone
+      _PACKAGE_SETTINGS = {
+        "BEGIN": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
+        "ERFGOED": {"package_tier": "ERFGOED", "max_family_members": 5, "max_chapters": None, "storage_years": 10},
+        "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10, "max_chapters": None, "storage_years": 999},
+      }
+      result = _validate_code(db, payload.promo_code, "BEGIN")
+      if result.valid and result.grants_package:
+        pkg = _PACKAGE_SETTINGS.get(result.grants_package, {})
+        now = datetime.now(timezone.utc)
+        user.package_tier = pkg.get("package_tier", "BEGIN")
+        user.package_activated_at = now
+        user.max_family_members = pkg.get("max_family_members", 0)
+        user.max_chapters = pkg.get("max_chapters")
+        user.storage_years = pkg.get("storage_years", 0)
+        increment_promo_usage(db, payload.promo_code)
+        db.flush()
+        promo_message = f"Kortingscode toegepast — je account is direct geactiveerd."
+    except Exception as e:
+      logger.warning(f"Promo code toepassing mislukt bij registratie: {e}")
+
   try:
     verification_url = f"{settings.app_base_url}/email-bevestigen?token={user.email_verification_token}"
     trigger_email_verification(db, user.id, verification_url)
@@ -57,7 +83,7 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
     logger.warning(f"Failed to queue verification email for user {user.id}: {e}")
 
   return RegisterResponse(
-    message="Account aangemaakt. Controleer je inbox om je e-mailadres te bevestigen.",
+    message=promo_message or "Account aangemaakt. Controleer je inbox om je e-mailadres te bevestigen.",
     email=user.email,
   )
 

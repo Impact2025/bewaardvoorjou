@@ -53,6 +53,7 @@ export default function RegisterPage() {
   const [consentTerms, setConsentTerms] = useState(false);
   const [consentSpecialCategories, setConsentSpecialCategories] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,6 +71,7 @@ export default function RegisterPage() {
         consentTerms,
         consentSpecialCategories,
         consentMarketing,
+        promoCode: promoCode.trim() || undefined,
       });
       router.push(`/email-verificeren?email=${encodeURIComponent(result.email)}`);
     } catch (cause) {
@@ -203,6 +205,22 @@ export default function RegisterPage() {
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="block text-sm font-medium text-label" htmlFor="promoCode">
+                Promotiecode <span className="text-slate-400 font-normal">(optioneel)</span>
+              </label>
+              <input
+                id="promoCode"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="Bijv. WELKOM2026"
+                maxLength={32}
+                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input font-mono shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+              />
+              <p className="text-xs text-slate-400">Heb je een code ontvangen? Vul hem hier in — je account wordt direct geactiveerd.</p>
             </div>
 
             <div className="space-y-3 md:col-span-2">

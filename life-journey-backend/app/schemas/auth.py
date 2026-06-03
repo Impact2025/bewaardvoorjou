@@ -31,6 +31,7 @@ class RegisterRequest(BaseModel):
   consent_terms: bool = Field(default=False)
   consent_special_categories: bool = Field(default=False)
   consent_marketing: bool = Field(default=False)
+  promo_code: str | None = Field(default=None, max_length=32)
 
 
 class RegisterResponse(BaseModel):

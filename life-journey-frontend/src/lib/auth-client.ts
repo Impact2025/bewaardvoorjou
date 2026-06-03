@@ -37,6 +37,7 @@ export interface RegisterPayload {
   consentTerms: boolean;
   consentSpecialCategories: boolean;
   consentMarketing: boolean;
+  promoCode?: string;
 }
 
 export interface LoginPayload {
@@ -86,6 +87,9 @@ export async function registerUser(payload: RegisterPayload): Promise<RegisterRe
 
   if (payload.birthYear) {
     body.birth_year = payload.birthYear;
+  }
+  if (payload.promoCode) {
+    body.promo_code = payload.promoCode.trim().toUpperCase();
   }
 
   const response = await apiFetch<RegisterResponseDto>("/auth/register", {
