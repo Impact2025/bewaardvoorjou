@@ -32,6 +32,7 @@ type Phase =
   | "privacy"
   | "tempo"
   | "ai_assistance"
+  | "promo_code"
   | "summary"
   | "submitting"
   | "done";
@@ -44,6 +45,8 @@ interface CollectedData {
   privacyLevel: "private" | "trusted" | "legacy";
   challenge: string;
   aiAssistance: "full" | "minimal" | "none";
+  promoCode?: string;
+  promoApplied?: boolean;
 }
 
 // ─── Script data ──────────────────────────────────────────────────────────────
@@ -223,6 +226,7 @@ const PHASE_ORDER: Phase[] = [
   "privacy",
   "tempo",
   "ai_assistance",
+  "promo_code",
   "summary",
 ];
 
@@ -323,7 +327,7 @@ export function ChatOnboarding() {
 
   // Focus text input when relevant
   useEffect(() => {
-    if (phase === "name" || phase === "birth_year") {
+    if (phase === "name" || phase === "birth_year" || phase === "promo_code") {
       const t = setTimeout(() => inputRef.current?.focus(), 100);
       return () => clearTimeout(t);
     }
@@ -490,9 +494,49 @@ export function ChatOnboarding() {
     });
 
     await showGuideMessages([
-      "Dan zetten we alles klaar voor je.",
-      "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+      "Bijna klaar!",
+      "Heb je een promotiecode ontvangen? Vul hem hieronder in — anders sla je gewoon over.",
     ]);
+    setPhase("promo_code");
+  };
+
+  const handlePromoCode = async (skip = false) => {
+    if (skip || !textInput.trim()) {
+      addMessage("user", "Geen code");
+      setTextInput("");
+      await showGuideMessages([
+        "Dan zetten we alles klaar voor je.",
+        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+      ]);
+      setPhase("summary");
+      return;
+    }
+
+    const code = textInput.trim().toUpperCase();
+    addMessage("user", code);
+    setTextInput("");
+
+    try {
+      const { redeemPromoCode } = await import("@/lib/api/promo-codes");
+      const result = await redeemPromoCode(code);
+      if (result.success) {
+        setData((prev) => ({ ...prev, promoCode: code, promoApplied: true }));
+        await showGuideMessages([
+          `Gelukt! ${result.message}`,
+          "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+        ]);
+      } else {
+        await showGuideMessages([
+          "Die code herken ik niet. We gaan verder zonder.",
+          "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+        ]);
+      }
+    } catch {
+      await showGuideMessages([
+        "Code kon niet worden gecontroleerd. We gaan verder.",
+        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+      ]);
+    }
     setPhase("summary");
   };
 
@@ -591,34 +635,47 @@ export function ChatOnboarding() {
       {!isTyping && phase !== "init" && phase !== "done" && (
         <div className="flex-shrink-0 pt-4 border-t border-neutral-sand/60">
           {/* Text input phases */}
-          {(phase === "name" || phase === "birth_year") && (
+          {(phase === "name" || phase === "birth_year" || phase === "promo_code") && (
             <div className="flex gap-2">
               <input
                 ref={inputRef}
                 type={phase === "birth_year" ? "number" : "text"}
                 value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
+                onChange={(e) => setTextInput(phase === "promo_code" ? e.target.value.toUpperCase() : e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     if (phase === "name") handleName();
-                    else handleBirthYear(false);
+                    else if (phase === "birth_year") handleBirthYear(false);
+                    else handlePromoCode(false);
                   }
                 }}
-                placeholder={phase === "name" ? "Je naam of alias..." : "Bijv. 1958"}
+                placeholder={
+                  phase === "name" ? "Je naam of alias..." :
+                  phase === "birth_year" ? "Bijv. 1958" :
+                  "Bijv. WELKOM2026"
+                }
                 min={phase === "birth_year" ? 1900 : undefined}
                 max={phase === "birth_year" ? new Date().getFullYear() : undefined}
-                className="flex-1 rounded-full border border-input-border bg-white px-5 py-3 text-sm text-foreground shadow-sm focus:border-warm-amber focus:outline-none focus:ring-2 focus:ring-warm-amber/30 transition-colors"
+                maxLength={phase === "promo_code" ? 32 : undefined}
+                className={cn(
+                  "flex-1 rounded-full border border-input-border bg-white px-5 py-3 text-sm text-foreground shadow-sm focus:border-warm-amber focus:outline-none focus:ring-2 focus:ring-warm-amber/30 transition-colors",
+                  phase === "promo_code" && "font-mono tracking-wide"
+                )}
               />
-              {phase === "birth_year" && (
+              {(phase === "birth_year" || phase === "promo_code") && (
                 <button
-                  onClick={() => handleBirthYear(true)}
+                  onClick={() => phase === "birth_year" ? handleBirthYear(true) : handlePromoCode(true)}
                   className="whitespace-nowrap px-4 py-2.5 text-sm text-foreground/60 hover:text-foreground border border-neutral-sand rounded-full hover:border-warm-amber/40 transition-colors"
                 >
                   Sla over
                 </button>
               )}
               <button
-                onClick={() => (phase === "name" ? handleName() : handleBirthYear(false))}
+                onClick={() => {
+                  if (phase === "name") handleName();
+                  else if (phase === "birth_year") handleBirthYear(false);
+                  else handlePromoCode(false);
+                }}
                 disabled={phase === "name" && !textInput.trim()}
                 className="w-11 h-11 flex items-center justify-center bg-warm-amber text-slate-900 rounded-full font-bold text-lg disabled:opacity-40 hover:bg-warm-amber/90 transition-colors shadow-sm flex-shrink-0"
                 aria-label="Verstuur"
@@ -657,6 +714,7 @@ export function ChatOnboarding() {
                   { label: "Privacy", value: PRIVACY_LABELS[data.privacyLevel ?? ""] ?? data.privacyLevel },
                   { label: "Tempo", value: data.challenge },
                   { label: "AI-begeleiding", value: AI_LABELS[data.aiAssistance ?? ""] ?? data.aiAssistance },
+                  data.promoApplied ? { label: "Promotiecode", value: `${data.promoCode} toegepast` } : null,
                 ]
                   .filter(Boolean)
                   .map((row) => (
