@@ -60,6 +60,13 @@ interface UserDetail {
     chapters_started: number;
     chapters_completed: number;
   };
+  journey_progress: {
+    percent_complete: number;
+    completed_chapters: number;
+    available_chapters: number;
+    total_chapters: number;
+    phases: Array<{ name: string; total: number; completed: number }>;
+  } | null;
   recent_activity: Array<{
     type: string;
     timestamp: string | null;
@@ -513,12 +520,51 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
+              {/* Journey progress */}
+              {selectedUser.journey_progress ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-slate-700">Voortgang verhaal</span>
+                    <span className="font-bold text-amber-600">
+                      {selectedUser.journey_progress.completed_chapters}/{selectedUser.journey_progress.total_chapters} hoofdstukken
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-3 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all"
+                      style={{ width: `${selectedUser.journey_progress.percent_complete}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 text-right">
+                    {selectedUser.journey_progress.percent_complete}% voltooid
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {selectedUser.journey_progress.phases.map((phase) => (
+                      <div key={phase.name} className="flex items-center justify-between bg-slate-50 rounded px-2 py-1.5">
+                        <span className="text-xs text-slate-600 truncate">{phase.name}</span>
+                        <div className="flex items-center gap-1 ml-2 shrink-0">
+                          {Array.from({ length: phase.total }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "w-2 h-2 rounded-full",
+                                i < phase.completed ? "bg-amber-500" : "bg-slate-200"
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">Nog geen journey gestart</p>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Opnames", value: selectedUser.metrics.recordings.total },
                   { label: "Transcripties", value: selectedUser.metrics.transcripts.total },
-                  { label: "Hoofdstukken gestart", value: selectedUser.metrics.chapters_started },
-                  { label: "Hoofdstukken klaar", value: selectedUser.metrics.chapters_completed },
                   { label: "AI-prompts", value: selectedUser.metrics.prompts.total },
                   { label: "Gedeeld", value: selectedUser.metrics.shares.total },
                 ].map(({ label, value }) => (

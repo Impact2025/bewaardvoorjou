@@ -111,6 +111,14 @@ def get_user_detail(
     recent_activity = []
     chapter_progress = {}
 
+    journey_progress_data = {
+        "percent_complete": 0,
+        "completed_chapters": 0,
+        "available_chapters": 0,
+        "total_chapters": 30,
+        "phases": [],
+    }
+
     if journey:
         rec_total, rec_duration, rec_storage = db.query(
             func.count(MediaAsset.id),
@@ -137,14 +145,43 @@ def get_user_detail(
             ShareGrant.journey_id == journey.id
         ).scalar() or 0
 
-        if journey.progress:
-            chapter_progress = journey.progress
-            for progress in journey.progress.values():
-                if isinstance(progress, dict):
-                    if progress.get("recordings", 0) > 0:
-                        metrics["chapters_started"] += 1
-                    if progress.get("completed", False):
-                        metrics["chapters_completed"] += 1
+        # Accurate progress via MediaAsset counts
+        from app.services.journey_progress import get_journey_progress, get_all_chapter_statuses, CHAPTER_ORDER
+        progress_stats = get_journey_progress(db, journey.id)
+        chapter_statuses = get_all_chapter_statuses(db, journey.id)
+
+        metrics["chapters_started"] = sum(
+            1 for s in chapter_statuses.values() if s["mediaCount"] > 0
+        )
+        metrics["chapters_completed"] = progress_stats["completedChapters"]
+
+        # Build per-phase breakdown
+        phases_def = [
+            ("Voorbereiding", ["intro-reflection", "intro-intention", "intro-uniqueness"]),
+            ("Vroege Jaren", ["youth-favorite-place", "youth-sounds", "youth-hero"]),
+            ("Liefde & Relaties", ["love-connection", "love-lessons", "love-symbol"]),
+            ("Werk & Passies", ["work-dream-job", "work-passion", "work-challenge"]),
+            ("Toekomst", ["future-message", "future-dream", "future-gratitude"]),
+            ("Bonus", ["bonus-funny", "bonus-relive", "bonus-culture"]),
+            ("Verborgen", [c for c in CHAPTER_ORDER if c.startswith("deep-")]),
+        ]
+        phases = []
+        for phase_name, chapter_ids in phases_def:
+            completed = sum(1 for cid in chapter_ids if chapter_statuses.get(cid, {}).get("status") == "completed")
+            phases.append({
+                "name": phase_name,
+                "total": len(chapter_ids),
+                "completed": completed,
+            })
+
+        journey_progress_data = {
+            "percent_complete": progress_stats["percentComplete"],
+            "completed_chapters": progress_stats["completedChapters"],
+            "available_chapters": progress_stats["availableChapters"],
+            "total_chapters": progress_stats["totalChapters"],
+            "phases": phases,
+        }
+        chapter_progress = {cid: s for cid, s in chapter_statuses.items()}
 
         for rec in db.query(MediaAsset).filter(MediaAsset.journey_id == journey.id).order_by(
             desc(MediaAsset.recorded_at)
@@ -188,6 +225,7 @@ def get_user_detail(
         },
         "journey_id": journey.id if journey else None,
         "metrics": metrics,
+        "journey_progress": journey_progress_data,
         "chapter_progress": chapter_progress,
         "recent_activity": recent_activity[:15],
     }
