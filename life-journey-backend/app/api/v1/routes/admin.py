@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.models.audit_log import AuditLog
+from app.models.email import EmailEvent, EmailPreference
 from app.models.family import FamilyMember
 from app.models.journey import Journey
 from app.models.user import User
@@ -174,8 +175,16 @@ def delete_user(
     if user.id == admin.id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Je kunt je eigen account niet verwijderen")
 
-    # FamilyMember.created_by heeft geen ondelete → handmatig verwijderen voor cascade
+    # Verwijder gerelateerde records die geen DB-level CASCADE hebben
     db.query(FamilyMember).filter(FamilyMember.created_by == user_id).delete(synchronize_session=False)
+    db.query(EmailEvent).filter(EmailEvent.user_id == user_id).delete(synchronize_session=False)
+    db.query(EmailPreference).filter(EmailPreference.user_id == user_id).delete(synchronize_session=False)
+
+    # Journeys (en hun children) via CASCADE in DB, maar ook expliciet voor zekerheid
+    journeys = db.query(Journey).filter(Journey.user_id == user_id).all()
+    for journey in journeys:
+        db.delete(journey)
+    db.flush()
 
     _audit(db, admin, "delete_user", target=user)
     db.delete(user)
