@@ -23,6 +23,7 @@ export interface PromoCode {
   expires_at: string | null;
   is_active: boolean;
   created_at: string;
+  grants_package: string | null;
 }
 
 export interface ValidatePromoResponse {
