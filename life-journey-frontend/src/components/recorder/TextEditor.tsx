@@ -10,7 +10,7 @@ interface TextEditorProps {
 
 export function TextEditor({ onGetAISuggestion }: TextEditorProps) {
   const { state, setTextContent, setAiSuggestion } = useRecorder();
-  const { textContent, wordCount, aiSuggestion, isGettingAISuggestion, currentQuestion } = state;
+  const { textContent, wordCount, aiSuggestion, isGettingAISuggestion } = state;
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextContent(e.target.value);
@@ -22,15 +22,6 @@ export function TextEditor({ onGetAISuggestion }: TextEditorProps) {
 
   return (
     <div className="w-full h-full flex flex-col p-4">
-      {/* Current AI Question - integrated into editor */}
-      {currentQuestion && (
-        <div className="mb-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-400 rounded-r-lg">
-          <p className="text-sm font-medium text-slate-700 leading-relaxed">
-            {currentQuestion}
-          </p>
-        </div>
-      )}
-
       <div className="flex-1 flex flex-col">
         <label htmlFor="story-text" className="sr-only">
           Schrijf je verhaal
