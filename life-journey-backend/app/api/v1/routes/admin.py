@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.models.audit_log import AuditLog
+from app.models.family import FamilyMember
 from app.models.journey import Journey
 from app.models.user import User
 from app.schemas.admin import (
@@ -172,6 +173,9 @@ def delete_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gebruiker niet gevonden")
     if user.id == admin.id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Je kunt je eigen account niet verwijderen")
+
+    # FamilyMember.created_by heeft geen ondelete → handmatig verwijderen voor cascade
+    db.query(FamilyMember).filter(FamilyMember.created_by == user_id).delete(synchronize_session=False)
 
     _audit(db, admin, "delete_user", target=user)
     db.delete(user)
