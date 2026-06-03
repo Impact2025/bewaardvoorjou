@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { useRecorder } from "./RecorderContext";
 import { logger } from "@/lib/logger";
-import { apiFetch } from "@/lib/api-client";
+import { apiFetch, isApiError } from "@/lib/api-client";
 import { useAuth } from "@/store/auth-context";
 import { CHAPTERS } from "@/lib/chapters";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
@@ -11,6 +11,20 @@ import { startConversationSession, continueConversation, endConversationSession 
 import { useConfetti } from "@/components/Confetti";
 
 const log = logger.forComponent("useRecorderActions");
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (isApiError(error)) return error.message;
+  if (error instanceof Error) return error.message;
+  return fallback;
+}
+
+function handleApiError(error: unknown, setUploadStatus: (msg: string | null) => void, fallback: string) {
+  const message = extractErrorMessage(error, fallback);
+  setUploadStatus(message);
+  if (isApiError(error) && error.status === 401) {
+    setTimeout(() => { window.location.href = "/login"; }, 2500);
+  }
+}
 
 interface UseRecorderActionsProps {
   chapterId?: string;
@@ -416,8 +430,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       }
     } catch (error) {
       log.error("Upload error", error);
-      const message = error instanceof Error ? error.message : "Upload mislukt. Probeer opnieuw.";
-      setUploadStatus(message);
+      handleApiError(error, setUploadStatus, "Upload mislukt. Probeer opnieuw.");
       setRecordingState("completed");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -762,8 +775,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       }
     } catch (error) {
       log.error("Save error", error);
-      const message = error instanceof Error ? error.message : "Opslaan mislukt. Probeer opnieuw.";
-      setUploadStatus(message);
+      handleApiError(error, setUploadStatus, "Opslaan mislukt. Probeer opnieuw.");
       setRecordingState("idle");
     }
   }, [state.textContent, session, chapterId, setRecordingState, setUploadStatus, showNextChapter, conversationSessionId, conversationComplete, dispatch, triggerConfetti]);
