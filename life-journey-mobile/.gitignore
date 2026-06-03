@@ -8,6 +8,10 @@ node_modules/
 dist/
 web-build/
 
+# Native generated folders (expo prebuild output — not committed for managed workflow)
+android/
+ios/
+
 # Native
 *.orig.*
 *.jks
