@@ -35,7 +35,11 @@ class Order(Base):
 
     # Personalisatie
     recipient_name = Column(String(255), nullable=True)
+    recipient_email = Column(String(255), nullable=True)  # e-mail begiftigde (DIGITAAL)
     personal_message = Column(Text, nullable=True)
+
+    # Gift card
+    gift_card_code = Column(String(32), nullable=True, unique=True, index=True)
 
     # Verzendadres (JSON)
     shipping_address = Column(JSON, nullable=True)

@@ -299,6 +299,23 @@ def build_waitlist_confirmation_email(
     return subject, html, text
 
 
+def build_gift_card_buyer_email(
+    buyer_email: str,
+    recipient_name: str,
+    gift_card_url: str,
+    voucher_code: str,
+) -> tuple[str, str, str]:
+    subject = "Je Vaderdag cadeaukaart staat klaar! 🎁"
+    context = {
+        "recipient_name": recipient_name,
+        "gift_card_url": gift_card_url,
+        "voucher_code": voucher_code,
+    }
+    html, text = render_email("gift_card_buyer", context)
+    logger.info(f"Built gift_card_buyer email for {buyer_email}")
+    return subject, html, text
+
+
 def build_export_ready_email(
     user_display_name: str,
     download_url: str,

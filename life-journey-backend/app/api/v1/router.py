@@ -20,6 +20,7 @@ from app.api.v1.routes import (
     blog,
     webhooks,
     orders,
+    gift_cards,
     waitlist,
     parent_interview,
 )
@@ -45,5 +46,6 @@ api_router.include_router(quick_thoughts.router, prefix="/quick-thoughts", tags=
 api_router.include_router(blog.router, prefix="/blog", tags=["blog"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
+api_router.include_router(gift_cards.router, prefix="/gift-cards", tags=["gift-cards"])
 api_router.include_router(waitlist.router, prefix="/waitlist", tags=["waitlist"])
 api_router.include_router(parent_interview.router, tags=["parent-interview"])

@@ -24,7 +24,7 @@ from loguru import logger
 router = APIRouter()
 
 
-def _early_bird_discount_cents() -> int:
+def _early_bird_discount_cents(package_type: str) -> int:
     """Geeft de actieve early bird korting terug in eurocenten, of 0 als niet actief."""
     from datetime import datetime, timezone
     from dateutil.parser import parse as parse_dt
@@ -33,7 +33,10 @@ def _early_bird_discount_cents() -> int:
     try:
         deadline = parse_dt(settings.early_bird_deadline)
         if datetime.now(timezone.utc) <= deadline:
-            return settings.early_bird_begin_discount_cents
+            if package_type == "BEGIN":
+                return settings.early_bird_begin_discount_cents
+            if package_type == "DIGITAAL":
+                return settings.early_bird_digitaal_discount_cents
     except Exception:
         pass
     return 0
@@ -54,6 +57,7 @@ def get_early_bird_status() -> EarlyBirdStatus:
         discount_cents=settings.early_bird_begin_discount_cents if active else 0,
         deadline_iso=settings.early_bird_deadline,
         waitlist_discount_cents=settings.early_bird_waitlist_discount_cents if active else 0,
+        digitaal_discount_cents=settings.early_bird_digitaal_discount_cents if active else 0,
     )
 
 
@@ -91,7 +95,7 @@ def create_payment_intent(
         raise HTTPException(status_code=400, detail="Ongeldig pakket")
 
     addon_total = sum(ADDON_PRICES.get(a, 0) for a in set(payload.addons))
-    discount = _early_bird_discount_cents() if payload.package_type == "BEGIN" else 0
+    discount = _early_bird_discount_cents(payload.package_type)
     total_cents = max(package_price + addon_total - discount, 50)  # Stripe minimum €0.50
 
     # Contactemail: ingelogde gebruiker of gast-email
@@ -105,6 +109,14 @@ def create_payment_intent(
             detail="E-mailadres vereist voor niet-ingelogde gebruikers",
         )
 
+    # Genereer cadeaukaartcode voor digitaal pakket
+    import secrets as _secrets
+    gift_card_code = (
+        _secrets.token_urlsafe(8)[:10].upper()
+        if payload.package_type == "DIGITAAL"
+        else None
+    )
+
     # Maak order aan in DB
     order = Order(
         user_id=current_user.id if current_user else None,
@@ -115,8 +127,10 @@ def create_payment_intent(
         addons=list(set(payload.addons)),
         addons_price=addon_total,
         recipient_name=payload.recipient_name,
+        recipient_email=str(payload.recipient_email) if payload.recipient_email else None,
         personal_message=payload.personal_message,
         shipping_address=payload.shipping_address.model_dump() if payload.shipping_address else None,
+        gift_card_code=gift_card_code,
         status="PENDING",
     )
     db.add(order)

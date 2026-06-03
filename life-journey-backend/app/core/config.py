@@ -84,6 +84,7 @@ class Settings(BaseSettings):
   early_bird_deadline: str = "2026-06-10T23:59:59+00:00"   # ISO-8601 UTC
   early_bird_begin_discount_cents: int = 2000                # €20 op BEGIN
   early_bird_waitlist_discount_cents: int = 3000             # €30 garantie op wachtlijst
+  early_bird_digitaal_discount_cents: int = 1000             # €10 op DIGITAAL
 
   # SEO Indexing
   site_url: str = "https://bewaardvoorjou.nl"

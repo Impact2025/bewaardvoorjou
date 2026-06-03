@@ -187,6 +187,7 @@ _PACKAGE_SETTINGS = {
     "BEGIN": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
     "ERFGOED": {"package_tier": "ERFGOED", "max_family_members": 5, "max_chapters": None, "storage_years": 10},
     "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10, "max_chapters": None, "storage_years": 999},
+    "DIGITAAL": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
 }
 
 
@@ -268,12 +269,40 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     db.commit()
     logger.info(f"Order {order.id} succesvol verwerkt (€{order.price_paid / 100:.2f})")
 
-    # Gift flow: stuur magic link naar begiftigde storyteller
     recipient_email = metadata.get("recipient_email")
     recipient_name = metadata.get("recipient_name")
-    if recipient_email and recipient_name:
-        gifter_email = metadata.get("contact_email") or order.guest_email or ""
-        _send_storyteller_magic_link(db, recipient_email, recipient_name, gifter_email)
+    contact_email = metadata.get("contact_email") or order.guest_email or ""
+
+    if order.package_type == "DIGITAAL":
+        # Digitale cadeaukaart: stuur koper een email met de kaartlink
+        _send_gift_card_buyer_email(order, contact_email)
+    elif recipient_email and recipient_name:
+        # Fysiek pakket cadeau: stuur magic link naar begiftigde storyteller
+        _send_storyteller_magic_link(db, recipient_email, recipient_name, contact_email)
+
+
+def _send_gift_card_buyer_email(order: "OrderModel", buyer_email: str) -> None:
+    """Stuur de koper een e-mail met de cadeaukaart link en upgradevoucher."""
+    from app.services.email.renderer import build_gift_card_buyer_email
+    from app.services.email.client import send_email
+    from app.core.config import settings as _settings
+
+    if not buyer_email or not order.gift_card_code:
+        logger.warning(f"Gift card email overgeslagen voor order {order.id}: geen email of code")
+        return
+
+    try:
+        gift_card_url = f"{_settings.app_base_url}/cadeau/{order.gift_card_code}"
+        subject, html, text = build_gift_card_buyer_email(
+            buyer_email=buyer_email,
+            recipient_name=order.recipient_name or "je geliefde",
+            gift_card_url=gift_card_url,
+            voucher_code="UPGRADE30",
+        )
+        send_email(to=buyer_email, subject=subject, html=html, text=text)
+        logger.info(f"Gift card email verstuurd naar koper {buyer_email} voor order {order.id}")
+    except Exception as exc:
+        logger.error(f"Kon gift card email niet sturen voor order {order.id}: {exc}")
 
 
 def _send_storyteller_magic_link(
