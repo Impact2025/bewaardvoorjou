@@ -46,6 +46,18 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "newArchEnabled": false,
+            "kotlinVersion": "1.9.0"
+          },
+          "ios": {
+            "newArchEnabled": false
+          }
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "Bewaardvoorjou gebruikt je camera om videoverhalen vast te leggen.",
