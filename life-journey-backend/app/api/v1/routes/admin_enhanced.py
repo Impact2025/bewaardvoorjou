@@ -204,7 +204,10 @@ def get_user_detail(
                 "description": f"{user.display_name} heeft AI hulp gevraagd",
             })
 
-    metrics["memos"]["total"] = db.query(func.count(Memo.id)).filter(Memo.user_id == user_id).scalar() or 0
+    metrics["memos"]["total"] = (
+        db.query(func.count(Memo.id)).filter(Memo.journey_id == journey.id).scalar() or 0
+        if journey else 0
+    )
     recent_activity.sort(key=lambda x: x.get("timestamp") or "", reverse=True)
 
     return {
