@@ -92,10 +92,19 @@ def get_user_detail(
     admin: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
+    import traceback
     from fastapi import HTTPException, status
+    from fastapi.responses import JSONResponse
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gebruiker niet gevonden")
+    try:
+        return _get_user_detail_inner(user_id, user, db)
+    except Exception as exc:
+        return JSONResponse(status_code=500, content={"error": str(exc), "trace": traceback.format_exc()})
+
+
+def _get_user_detail_inner(user_id: str, user: User, db):
 
     journey = db.query(Journey).filter(Journey.user_id == user_id).first()
     metrics = {
