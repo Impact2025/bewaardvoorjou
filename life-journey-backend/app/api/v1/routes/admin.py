@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin_user, get_db
 from app.models.audit_log import AuditLog
 from app.models.email import EmailEvent, EmailPreference
-from app.models.family import FamilyMember
+from app.models.family import FamilyMember, FamilyPod
 from app.models.journey import Journey
+from app.models.quick_thought import QuickThought
 from app.models.user import User
 from app.schemas.admin import (
     CreateUserRequest,
@@ -175,12 +176,31 @@ def delete_user(
     if user.id == admin.id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Je kunt je eigen account niet verwijderen")
 
-    # Verwijder gerelateerde records die geen DB-level CASCADE hebben
-    db.query(FamilyMember).filter(FamilyMember.created_by == user_id).delete(synchronize_session=False)
+    # EmailEvent / EmailPreference hebben DB-level CASCADE — expliciet voor zekerheid
     db.query(EmailEvent).filter(EmailEvent.user_id == user_id).delete(synchronize_session=False)
     db.query(EmailPreference).filter(EmailPreference.user_id == user_id).delete(synchronize_session=False)
 
-    # Journeys (en hun children) via CASCADE in DB, maar ook expliciet voor zekerheid
+    # Haal journey-IDs op zodat we child-records kunnen opschonen
+    journey_ids = [
+        row[0] for row in db.query(Journey.id).filter(Journey.user_id == user_id).all()
+    ]
+
+    if journey_ids:
+        # FamilyMember, FamilyPod en QuickThought hebben een backref naar Journey
+        # zonder passive_deletes — SQLAlchemy probeert journey_id op NULL te zetten
+        # (nullable=False) waardoor een IntegrityError volgt. Verwijder ze expliciet eerst.
+        db.query(FamilyMember).filter(FamilyMember.journey_id.in_(journey_ids)).delete(synchronize_session=False)
+        db.query(FamilyPod).filter(FamilyPod.journey_id.in_(journey_ids)).delete(synchronize_session=False)
+        db.query(QuickThought).filter(QuickThought.journey_id.in_(journey_ids)).delete(synchronize_session=False)
+
+    # FamilyMembers aangemaakt door deze gebruiker in andermans journeys
+    # (created_by FK heeft geen ondelete-clause)
+    db.query(FamilyMember).filter(FamilyMember.created_by == user_id).delete(synchronize_session=False)
+
+    db.flush()
+
+    # Verwijder journeys; overige children (media, highlights, etc.) hebben
+    # cascade="all, delete-orphan" op de Journey-relatie en worden automatisch meegenomen
     journeys = db.query(Journey).filter(Journey.user_id == user_id).all()
     for journey in journeys:
         db.delete(journey)
