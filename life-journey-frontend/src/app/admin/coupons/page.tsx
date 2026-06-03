@@ -278,7 +278,7 @@ export default function AdminCouponsPage() {
                 <Button type="submit" disabled={saving}>
                   {saving ? "Opslaan..." : "Aanmaken"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setLimitPackages(false); }}>
+                <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setLimitPackages(false); }}>
                   Annuleer
                 </Button>
               </div>
