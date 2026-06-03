@@ -85,6 +85,12 @@ export async function apiFetch<T>(
           details,
         };
 
+        // On 401: clear stored session so the user is visibly logged out
+        if (response.status === 401 && typeof window !== "undefined") {
+          window.localStorage.removeItem("life-journey.auth");
+          document.cookie = "ljauth=; path=/; max-age=0";
+        }
+
         // Only retry on network errors or 5xx errors
         if (response.status >= 500 && attempt < retries) {
           lastError = error;

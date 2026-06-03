@@ -96,7 +96,7 @@ class Settings(BaseSettings):
   # For production, this MUST be set to a secure, persistent value
   jwt_secret_key: str | None = None
   jwt_algorithm: str = "HS256"
-  jwt_access_token_expires_minutes: int = 60  # 60 minutes
+  jwt_access_token_expires_minutes: int = 1440  # 24 hours — matches auth cookie lifetime
 
   @model_validator(mode='after')
   def strip_localhost_in_production(self) -> 'Settings':
