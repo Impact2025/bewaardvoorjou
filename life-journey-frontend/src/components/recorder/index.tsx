@@ -27,7 +27,6 @@ import { RecorderPreview } from "./RecorderPreview";
 import { TextEditor } from "./TextEditor";
 import { UploadStatus } from "./UploadStatus";
 import { PermissionError } from "./PermissionError";
-import { ConversationProgress } from "./ConversationProgress";
 import { useRecorderActions } from "./useRecorderActions";
 
 function getDefaultModeForChapter(chapterId?: string): RecordingMode {
@@ -152,9 +151,18 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
       {/* AI-vraag — prominent bovenaan, verborgen na opslaan */}
       {currentQuestion && !showNextChapterPrompt && (
         <div className="rounded-xl border border-warm-amber/30 bg-warm-amber/5 px-5 py-4">
-          <p className="text-xs font-medium text-warm-amber uppercase tracking-wide mb-1">
-            Jouw vraag voor dit hoofdstuk
-          </p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-medium text-warm-amber uppercase tracking-wide">
+              {conversationSessionId && conversationTurnNumber > 0
+                ? `Vervolgvraag ${conversationTurnNumber}`
+                : "Jouw vraag voor dit hoofdstuk"}
+            </p>
+            {conversationSessionId && conversationTurnNumber > 0 && (
+              <span className="text-xs text-warm-amber/70 font-medium">
+                Vraag {conversationTurnNumber} van 3–7
+              </span>
+            )}
+          </div>
           <p className="text-base text-slate-800 leading-relaxed font-medium">
             {currentQuestion}
           </p>
@@ -245,18 +253,6 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
               )}
             </div>
 
-            {/* AI-gesprekvoortgang tijdens multi-turn */}
-            {!!conversationSessionId && !conversationComplete && (
-              <div className="border-t border-slate-100 px-4 py-3">
-                <ConversationProgress
-                  turnNumber={conversationTurnNumber}
-                  storyDepth={conversationStoryDepth}
-                  currentQuestion={currentQuestion}
-                  isActive={true}
-                />
-              </div>
-            )}
-
             {/* Knoppen-balk */}
             <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
               <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
@@ -330,7 +326,6 @@ export { RecorderPreview } from "./RecorderPreview";
 export { TextEditor } from "./TextEditor";
 export { UploadStatus } from "./UploadStatus";
 export { PermissionError } from "./PermissionError";
-export { ConversationProgress } from "./ConversationProgress";
 export { useRecorderActions } from "./useRecorderActions";
 
 export default RecorderFrame;
