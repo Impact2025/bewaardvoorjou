@@ -218,66 +218,93 @@ async def local_upload(
   db: Session = Depends(get_db),
 ) -> dict[str, str]:
   """
-  Local storage upload endpoint (for development without S3)
+  Upload endpoint: proxies to S3/R2 when configured, falls back to local storage.
 
   Security features:
   - File type validation (only allowed extensions)
-  - File size limits (500MB video, 100MB audio, 10MB text)
   - Filename sanitization
   - Path traversal protection
   """
-  import logging
   import io
-  logger = logging.getLogger(__name__)
+  from app.core.config import settings as app_settings
 
   try:
-    logger.info(f"Local upload attempt - object_key: {object_key}")
+    logger.info(f"Upload attempt - object_key: {object_key}")
 
-    # Check if this is a multipart form upload
+    # Read body — handle both raw and multipart/form-data
     content_type = request.headers.get("content-type", "")
-
     if "multipart/form-data" in content_type:
-      # Parse FormData and extract the file
       form = await request.form()
       file = form.get("file")
       if file and hasattr(file, "read"):
         body = await file.read()
+        # Detect content type from the uploaded file part
+        file_content_type = getattr(file, "content_type", None) or "application/octet-stream"
       else:
         raise HTTPException(status_code=400, detail="No file in form data")
     else:
-      # Read raw body
       body = await request.body()
+      file_content_type = content_type or "application/octet-stream"
 
     logger.info(f"Received {len(body)} bytes")
 
-    # Extract filename from object_key (last part of path)
     filename = object_key.split("/")[-1]
-    logger.info(f"Extracted filename: {filename}")
-
-    # Validate extension
     validate_file_extension(filename)
-
-    # Validate and sanitize object key (prevent path traversal)
     safe_object_key = validate_object_key(object_key)
 
-    # Save file to local storage (wrap bytes in BytesIO for compatibility)
+    # Determine asset_id (format: journey_id/chapter_id/asset_id/filename)
+    parts = safe_object_key.split("/")
+    asset_id_from_key = parts[2] if len(parts) >= 3 else None
+
+    # --- Upload to S3/R2 server-side when configured ---
+    if app_settings.s3_bucket and app_settings.aws_access_key_id and app_settings.aws_secret_access_key:
+      try:
+        endpoint_url = app_settings.s3_endpoint_url
+        if not endpoint_url and app_settings.s3_region:
+          endpoint_url = f"https://s3.{app_settings.s3_region}.amazonaws.com"
+
+        s3 = boto3.client(
+          "s3",
+          region_name=app_settings.s3_region,
+          endpoint_url=endpoint_url,
+          aws_access_key_id=app_settings.aws_access_key_id,
+          aws_secret_access_key=app_settings.aws_secret_access_key,
+        )
+        s3.put_object(
+          Bucket=app_settings.s3_bucket,
+          Key=safe_object_key,
+          Body=body,
+          ContentType=file_content_type,
+        )
+        logger.info(f"Uploaded {len(body)} bytes to R2/S3: {safe_object_key}")
+
+        if asset_id_from_key:
+          asset = db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id_from_key).first()
+          if asset:
+            asset.storage_state = "ready"
+            db.add(asset)
+            db.commit()
+
+        return {"status": "uploaded", "object_key": safe_object_key}
+      except (BotoCoreError, NoCredentialsError) as exc:
+        logger.warning(f"S3 credentials error, falling back to local storage: {exc}")
+      except Exception as exc:
+        logger.warning(f"S3 upload failed, falling back to local storage: {exc}")
+
+    # --- Fallback: local storage ---
     file_like = io.BytesIO(body)
     stored_key = local_storage.save_file(safe_object_key, file_like)
 
-    # Update asset status
-    # Extract asset_id from object_key (format: journey_id/chapter_id/asset_id/filename)
-    parts = safe_object_key.split("/")
-    if len(parts) >= 3:
-      asset_id = parts[2]
-      asset = db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id).first()
+    if asset_id_from_key:
+      asset = db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id_from_key).first()
       if asset:
         asset.storage_state = "ready"
         db.add(asset)
         db.commit()
 
     return {"status": "uploaded", "object_key": stored_key}
+
   except HTTPException as e:
-    # Log and re-raise validation errors
     logger.error(f"Validation error in local_upload: {e.detail}")
     raise
   except Exception as e:

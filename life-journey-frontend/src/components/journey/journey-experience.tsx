@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RecorderFrame } from "@/components/recorder";
-import { ThoughtsForChapter, QuickThoughtFAB } from "@/components/quick-thoughts";
+import { ThoughtsForChapter } from "@/components/quick-thoughts";
 import { CHAPTERS } from "@/lib/chapters";
 import type { Highlight } from "@/lib/types";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
@@ -109,8 +109,6 @@ export function JourneyExperience() {
         <HighlightsPanel highlights={journey.highlights} />
       )}
 
-      {/* Quick Thought FAB */}
-      <QuickThoughtFAB chapterId={journey.activeChapterId} />
     </div>
   );
 }
