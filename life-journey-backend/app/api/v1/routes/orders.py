@@ -141,7 +141,7 @@ def create_payment_intent(
         intent = stripe.PaymentIntent.create(
             amount=total_cents,
             currency="eur",
-            payment_method_types=["ideal", "card", "klarna"],
+            automatic_payment_methods={"enabled": True},
             metadata=metadata,
             receipt_email=contact_email,
             description=f"Bewaardvoorjou — {payload.package_type} pakket",
