@@ -66,6 +66,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     conversationComplete,
     currentQuestion,
     showNextChapterPrompt,
+    uploadStatus,
   } = state;
 
   const actions = useRecorderActions({ chapterId });
@@ -169,8 +170,8 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
         </div>
       )}
 
-      {/* Modus kiezen — groot als idle, compact tijdens opname, verborgen na opslaan */}
-      {showNextChapterPrompt ? null : isIdle ? (
+      {/* Modus kiezen — groot als idle, compact tijdens opname, verborgen na opslaan of tijdens tekstupload */}
+      {showNextChapterPrompt || (isUploading && mode === "text") ? null : isIdle ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-slate-600">
@@ -243,7 +244,21 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
                 mode === "text" ? "min-h-[360px]" : "aspect-video max-w-2xl mx-auto"
               )}
             >
-              {mode === "text" ? (
+              {mode === "text" && isUploading ? (
+                /* Loading overlay tijdens opslaan + AI-analyse */
+                <div className="flex flex-col items-center justify-center gap-5 h-full min-h-[360px] px-6 py-12 text-center">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-4 border-orange/20" />
+                    <div className="absolute inset-0 rounded-full border-4 border-t-orange border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-slate-800">Even geduld...</p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {uploadStatus ?? "Verhaal wordt bewaard"}
+                    </p>
+                  </div>
+                </div>
+              ) : mode === "text" ? (
                 <TextEditor onGetAISuggestion={actions.getAISuggestion} />
               ) : (
                 <RecorderPreview
@@ -253,35 +268,37 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
               )}
             </div>
 
-            {/* Knoppen-balk */}
-            <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
-              <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
-              <div className="flex items-center gap-2">
-                {isIdle && (
-                  <Button
-                    onClick={() => setAssistantChatOpen(true)}
-                    variant="ghost"
-                    className="text-orange hover:text-orange-dark h-9 px-3 flex items-center gap-1.5"
-                    aria-label="Open AI assistent"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    <span className="text-sm hidden sm:inline">Hulp nodig?</span>
-                  </Button>
-                )}
-                <RecorderControls
-                  onStartPreview={() => requireConsent(actions.startPreview)}
-                  onStopPreview={actions.stopPreview}
-                  onStartRecording={() => requireConsent(actions.startRecording)}
-                  onStopRecording={actions.stopRecording}
-                  onTogglePause={actions.togglePause}
-                  onUpload={actions.uploadRecording}
-                  onReset={actions.resetRecording}
-                  onSaveText={actions.saveTextContent}
-                  onNavigateNext={handleNavigateNext}
-                  hasNextChapter={hasNextChapter}
-                />
+            {/* Knoppen-balk — verborgen tijdens tekstupload */}
+            {!(isUploading && mode === "text") && (
+              <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
+                <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
+                <div className="flex items-center gap-2">
+                  {isIdle && (
+                    <Button
+                      onClick={() => setAssistantChatOpen(true)}
+                      variant="ghost"
+                      className="text-orange hover:text-orange-dark h-9 px-3 flex items-center gap-1.5"
+                      aria-label="Open AI assistent"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-sm hidden sm:inline">Hulp nodig?</span>
+                    </Button>
+                  )}
+                  <RecorderControls
+                    onStartPreview={() => requireConsent(actions.startPreview)}
+                    onStopPreview={actions.stopPreview}
+                    onStartRecording={() => requireConsent(actions.startRecording)}
+                    onStopRecording={actions.stopRecording}
+                    onTogglePause={actions.togglePause}
+                    onUpload={actions.uploadRecording}
+                    onReset={actions.resetRecording}
+                    onSaveText={actions.saveTextContent}
+                    onNavigateNext={handleNavigateNext}
+                    hasNextChapter={hasNextChapter}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
