@@ -45,6 +45,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "@nozbe/watermelondb/expo-plugin",
       [
         "expo-build-properties",
         {
