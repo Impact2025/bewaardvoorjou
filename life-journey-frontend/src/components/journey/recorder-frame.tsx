@@ -625,6 +625,26 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Notify backend that the user is done with this chapter, then navigate
+  const handleChapterComplete = async (nextChapter: string | null) => {
+    if (session?.primaryJourneyId && chapterId) {
+      try {
+        await apiFetch(
+          `/journeys/${session.primaryJourneyId}/chapters/${chapterId}/complete`,
+          { method: "POST" },
+          { token: session.token },
+        );
+      } catch {
+        // Non-blocking — navigation proceeds regardless
+      }
+    }
+    if (nextChapter) {
+      router.push(`/chapter/${nextChapter}`);
+    } else {
+      router.push("/chapters");
+    }
+  };
+
   // Handle mode changes - stop preview when switching modes
   useEffect(() => {
     if (showPreview && !isRecording) {
@@ -962,14 +982,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
                       Blijf hier
                     </Button>
                     <Button
-                      onClick={() => {
-                        const nextChapter = getNextChapterId(chapterId);
-                        if (nextChapter) {
-                          router.push(`/chapter/${nextChapter}`);
-                        } else {
-                          router.push("/chapters");
-                        }
-                      }}
+                      onClick={() => handleChapterComplete(getNextChapterId(chapterId))}
                       className="btn-primary flex items-center gap-2"
                     >
                       Ga naar volgend hoofdstuk
@@ -1026,14 +1039,7 @@ export function RecorderFrame({ chapterId, mode: initialMode }: RecorderFramePro
                       Blijf hier
                     </Button>
                     <Button
-                      onClick={() => {
-                        const nextChapter = getNextChapterId(chapterId);
-                        if (nextChapter) {
-                          router.push(`/chapter/${nextChapter}`);
-                        } else {
-                          router.push("/chapters");
-                        }
-                      }}
+                      onClick={() => handleChapterComplete(getNextChapterId(chapterId))}
                       className="btn-primary flex items-center gap-2"
                     >
                       Ga naar volgend hoofdstuk

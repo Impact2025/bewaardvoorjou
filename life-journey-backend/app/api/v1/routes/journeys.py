@@ -14,6 +14,7 @@ from app.schemas.user import UserProfile as UserProfileSchema, AccessibilitySett
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.services.journey_progress import get_all_chapter_statuses, get_next_available_chapter, CHAPTER_ORDER
+from app.services.email.events import trigger_chapter_complete_email
 
 
 router = APIRouter()
@@ -372,3 +373,26 @@ def submit_text_answer(
   db.commit()
 
   return {"asset_id": asset_id, "status": "saved"}
+
+
+@router.post("/{journey_id}/chapters/{chapter_id}/complete", status_code=200)
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def mark_chapter_complete(
+  request: Request,
+  journey_id: str,
+  chapter_id: str,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+  """Trigger chapter-completion email. Call when the user explicitly leaves a chapter."""
+  journey = db.query(JourneyModel).filter(JourneyModel.id == journey_id).first()
+  if not journey or journey.user_id != current_user.id:
+    raise HTTPException(status_code=403, detail="Geen toegang tot deze journey")
+
+  try:
+    trigger_chapter_complete_email(db, current_user.id, journey_id, chapter_id)
+  except Exception as e:
+    from loguru import logger
+    logger.warning(f"Chapter-complete email failed for {chapter_id}: {e}")
+
+  return {"status": "ok"}

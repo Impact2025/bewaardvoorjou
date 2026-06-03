@@ -146,12 +146,10 @@ def trigger_chapter_complete_email(
         logger.error(f"User {user_id} not found")
         return None
 
-    from app.services.journey_progress import CHAPTER_ORDER
+    from app.services.journey_progress import CHAPTER_ORDER, get_journey_progress
     total_chapters = len(CHAPTER_ORDER)
-    completed_chapters = db.query(MediaAssetModel).filter(
-        MediaAssetModel.journey_id == journey_id,
-        MediaAssetModel.storage_state.in_(["stored", "processing"]),
-    ).count()
+    progress = get_journey_progress(db, journey_id)
+    completed_chapters = progress["completedChapters"]
 
     try:
         current_index = CHAPTER_ORDER.index(chapter_id)
