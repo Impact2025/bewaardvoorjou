@@ -10,6 +10,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+
+def _utcnow() -> datetime:
+    """Return current UTC time as a naive datetime (matches DB storage)."""
+    return datetime.utcnow()
+
 from loguru import logger
 from sqlalchemy.orm import Session
 
@@ -52,7 +57,10 @@ def get_invite_status(member: FamilyMember) -> InviteStatus:
     if latest_invite:
         if latest_invite.declined_at:
             return InviteStatus.declined
-        if latest_invite.expires_at < datetime.now(timezone.utc):
+        expires = latest_invite.expires_at
+        if expires.tzinfo is not None:
+            expires = expires.replace(tzinfo=None)
+        if expires < _utcnow():
             return InviteStatus.expired
 
     return InviteStatus.pending
@@ -160,7 +168,53 @@ def create_family_member(
 
     logger.info(f"Created family member {member.id} for journey {journey_id}")
 
+    if invite and request.send_invite:
+        _send_invite_email(db, member, invite, creator_id)
+
     return member, invite
+
+
+_ROLE_LABELS: dict[str, str] = {
+    "spouse": "Partner",
+    "child": "Kind",
+    "parent": "Ouder",
+    "sibling": "Broer/Zus",
+    "grandchild": "Kleinkind",
+    "extended": "Familie",
+    "friend": "Vriend",
+    "owner": "Eigenaar",
+}
+
+
+def _send_invite_email(
+    db: Session,
+    member: "FamilyMember",
+    invite: "FamilyInvite",
+    creator_id: str,
+) -> None:
+    """Fire-and-forget: stuur uitnodigingsmail naar het familielid."""
+    from app.models.user import User
+    from app.services.email.events import trigger_family_invite_email
+
+    creator = db.query(User).filter(User.id == creator_id).first()
+    inviter_name = creator.display_name if creator else "Iemand"
+
+    role_label = _ROLE_LABELS.get(member.role.value, member.role.value.capitalize())
+
+    try:
+        expires_date = invite.expires_at.strftime("%d %B %Y").lstrip("0")
+    except Exception:
+        expires_date = "7 dagen"
+
+    trigger_family_invite_email(
+        db=db,
+        recipient_email=member.email,
+        recipient_name=member.name,
+        inviter_name=inviter_name,
+        role_label=role_label,
+        invite_url=get_invite_url(invite.token),
+        expires_date=expires_date,
+    )
 
 
 def update_family_member(
@@ -204,7 +258,7 @@ def create_invite(
 ) -> FamilyInvite:
     """Create a new invitation for a family member."""
     token = generate_invite_token()
-    expires_at = datetime.now(timezone.utc) + timedelta(days=expires_days)
+    expires_at = _utcnow() + timedelta(days=expires_days)
 
     invite = FamilyInvite(
         family_member_id=member.id,
@@ -215,7 +269,7 @@ def create_invite(
 
     # Update member's invite token
     member.invite_token = token
-    member.invite_sent_at = datetime.now(timezone.utc)
+    member.invite_sent_at = _utcnow()
 
     db.add(invite)
     db.flush()
@@ -223,6 +277,12 @@ def create_invite(
     logger.info(f"Created invite {invite.id} for family member {member.id}")
 
     return invite
+
+
+def get_invite_url(token: str) -> str:
+    """Build the full invite URL using the configured app base URL."""
+    from app.core.config import settings
+    return f"{settings.app_base_url}/family/accept/{token}"
 
 
 def get_invite_by_token(db: Session, token: str) -> Optional[FamilyInvite]:
@@ -244,10 +304,13 @@ def accept_invite(
 
     If user_id is provided, links the family member to that user account.
     """
-    now = datetime.now(timezone.utc)
+    now = _utcnow()
 
     # Check if invite is expired
-    if invite.expires_at < now:
+    expires = invite.expires_at
+    if expires.tzinfo is not None:
+        expires = expires.replace(tzinfo=None)
+    if expires < now:
         raise ValueError("Deze uitnodiging is verlopen")
 
     # Check if already accepted
@@ -275,7 +338,7 @@ def accept_invite(
 
 def decline_invite(db: Session, invite: FamilyInvite) -> None:
     """Decline a family invitation."""
-    invite.declined_at = datetime.now(timezone.utc)
+    invite.declined_at = _utcnow()
     db.commit()
     logger.info(f"Declined invite {invite.id}")
 

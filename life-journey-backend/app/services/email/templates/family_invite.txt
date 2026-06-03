@@ -1,0 +1,13 @@
+Dag {{ recipient_name }},
+
+{{ inviter_name }} nodigt je uit om hun levensverhaal te bekijken via Bewaard voor jou.
+
+Jouw rol: {{ role_label }}
+
+Klik op de link hieronder om de uitnodiging te accepteren (geldig tot {{ expires_date }}):
+{{ invite_url }}
+
+Heb je vragen? Mail ons op hallo@bewaardvoorjou.nl
+
+Met warme groet,
+Het Bewaardvoorjou team

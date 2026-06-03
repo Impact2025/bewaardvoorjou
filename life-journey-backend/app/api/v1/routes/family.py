@@ -33,6 +33,7 @@ from app.schemas.family import (
     PodResponse,
     PodMessageResponse,
 )
+from app.core.config import settings
 from app.services.family.manager import (
     list_family_members,
     get_family_member,
@@ -41,6 +42,7 @@ from app.services.family.manager import (
     delete_family_member,
     create_invite,
     get_invite_by_token,
+    get_invite_url,
     accept_invite,
     decline_invite,
     get_family_stats,
@@ -110,8 +112,7 @@ def add_member(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Generate invite URL
-    invite_url = f"https://life-journey.app/family/accept/{invite.token}" if invite else ""
+    invite_url = get_invite_url(invite.token) if invite else ""
 
     return FamilyInviteResponse(
         member_id=member.id,
@@ -205,12 +206,10 @@ def resend_invitation(
     invite = create_invite(db, member)
     db.commit()
 
-    invite_url = f"https://life-journey.app/family/accept/{invite.token}"
-
     return FamilyInviteResponse(
         member_id=member.id,
         invite_sent=True,
-        invite_url=invite_url,
+        invite_url=get_invite_url(invite.token),
         expires_at=invite.expires_at,
     )
 

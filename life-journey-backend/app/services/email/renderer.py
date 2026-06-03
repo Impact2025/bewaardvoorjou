@@ -249,6 +249,26 @@ def build_progress_milestone_email(
     return subject, html, text
 
 
+def build_family_invite_email(
+    recipient_name: str,
+    inviter_name: str,
+    role_label: str,
+    invite_url: str,
+    expires_date: str,
+) -> tuple[str, str, str]:
+    subject = f"{inviter_name} nodigt je uit voor hun levensverhaal"
+    context = {
+        "recipient_name": recipient_name,
+        "inviter_name": inviter_name,
+        "role_label": role_label,
+        "invite_url": invite_url,
+        "expires_date": expires_date,
+    }
+    html, text = render_email("family_invite", context)
+    logger.info(f"Built family_invite email for {recipient_name}")
+    return subject, html, text
+
+
 def build_family_notification_email(
     recipient_name: str,
     storyteller_name: str,

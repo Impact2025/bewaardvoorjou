@@ -374,6 +374,40 @@ def trigger_progress_milestone_email(
     return enqueue_email_job(event.id)
 
 
+def trigger_family_invite_email(
+    db: Session,
+    recipient_email: str,
+    recipient_name: str,
+    inviter_name: str,
+    role_label: str,
+    invite_url: str,
+    expires_date: str,
+) -> Optional[str]:
+    """Stuur een uitnodigingsemail naar een familielid (geen account vereist)."""
+    from app.services.email.renderer import build_family_invite_email
+    from app.services.email.client import send_email
+
+    user = db.query(UserModel).filter(UserModel.email == recipient_email).first()
+
+    if user and getattr(user, "email_bounced", False):
+        logger.warning(f"Skipping family invite to bounced address {recipient_email}")
+        return None
+
+    try:
+        subject, html, text = build_family_invite_email(
+            recipient_name=recipient_name,
+            inviter_name=inviter_name,
+            role_label=role_label,
+            invite_url=invite_url,
+            expires_date=expires_date,
+        )
+        send_email(to=recipient_email, subject=subject, html=html, text=text)
+        logger.info(f"Family invite email sent to {recipient_email}")
+    except Exception as e:
+        logger.error(f"Family invite email failed for {recipient_email}: {e}")
+    return None
+
+
 def trigger_family_notification_email(
     db: Session,
     recipient_email: str,
