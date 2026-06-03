@@ -1,0 +1,14 @@
+# Reduce archive size — EAS installs dependencies fresh on build servers
+node_modules/
+
+# Dev/test files
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Local dev files
+.env.local
+android/
+ios/
