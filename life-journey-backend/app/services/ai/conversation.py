@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.quick_thought import QuickThought
+from app.models.conversation import ConversationSessionRecord
 from app.schemas.common import ChapterId
 from app.services.ai.interviewer import CHAPTER_CONTEXTS, get_system_prompt, clean_ai_question
 from app.services.ai.memory import get_personalized_prompt_context
@@ -625,9 +626,97 @@ Genereer nu één vervolgvraag:"""
 
 # =============================================================================
 # Conversation Manager - Handles session lifecycle
+# DB is the source of truth; _active_conversations is a write-through cache.
 # =============================================================================
 
 _active_conversations: dict[str, ConversationSession] = {}
+
+
+def _turns_to_json(turns: list[ConversationTurn]) -> list[dict]:
+    return [
+        {
+            "turn_number": t.turn_number,
+            "question": t.question,
+            "user_response": t.user_response,
+            "analysis": t.analysis,
+            "timestamp": t.timestamp.isoformat(),
+        }
+        for t in turns
+    ]
+
+
+def _turns_from_json(data: list[dict]) -> list[ConversationTurn]:
+    turns = []
+    for d in data:
+        turn = ConversationTurn(
+            turn_number=d["turn_number"],
+            question=d["question"],
+            user_response=d.get("user_response"),
+            analysis=d.get("analysis"),
+            timestamp=datetime.fromisoformat(d["timestamp"]) if d.get("timestamp") else None,
+        )
+        turns.append(turn)
+    return turns
+
+
+def _persist_session(db: Session, session_id: str, conversation: ConversationSession, is_complete: bool = False) -> None:
+    record = db.query(ConversationSessionRecord).filter(
+        ConversationSessionRecord.id == session_id
+    ).first()
+
+    now = datetime.now(timezone.utc)
+    turns_json = _turns_to_json(conversation.turns)
+
+    if record:
+        record.turns = turns_json
+        record.is_complete = is_complete
+        record.updated_at = now
+    else:
+        record = ConversationSessionRecord(
+            id=session_id,
+            journey_id=conversation.journey_id,
+            chapter_id=conversation.chapter_id,
+            asset_id=conversation.asset_id,
+            turns=turns_json,
+            is_complete=is_complete,
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(record)
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to persist conversation session {session_id}: {e}")
+
+
+def _load_session_from_db(db: Session, session_id: str) -> Optional[ConversationSession]:
+    record = db.query(ConversationSessionRecord).filter(
+        ConversationSessionRecord.id == session_id,
+        ConversationSessionRecord.is_complete == False,  # noqa: E712
+    ).first()
+    if not record:
+        return None
+
+    conversation = ConversationSession(
+        db=db,
+        journey_id=record.journey_id,
+        chapter_id=ChapterId(record.chapter_id),
+        asset_id=record.asset_id,
+    )
+    conversation.turns = _turns_from_json(record.turns or [])
+    logger.info(f"Loaded conversation session {session_id} from DB ({len(conversation.turns)} turns)")
+    return conversation
+
+
+def _get_or_load_conversation(db: Session, session_id: str) -> Optional[ConversationSession]:
+    if session_id in _active_conversations:
+        return _active_conversations[session_id]
+    conversation = _load_session_from_db(db, session_id)
+    if conversation:
+        _active_conversations[session_id] = conversation
+    return conversation
 
 
 def start_conversation_session(
@@ -637,13 +726,7 @@ def start_conversation_session(
     asset_id: str,
 ) -> tuple[str, str]:
     """
-    Start a new conversation session.
-
-    Args:
-        db: Database session
-        journey_id: Journey ID
-        chapter_id: Chapter being recorded
-        asset_id: Media asset ID
+    Start a new conversation session and persist it immediately.
 
     Returns:
         Tuple of (session_id, opening_question)
@@ -660,26 +743,73 @@ def start_conversation_session(
     opening_question = conversation.start_conversation()
 
     _active_conversations[session_id] = conversation
+    _persist_session(db, session_id, conversation)
 
     logger.info(f"Started conversation session {session_id}")
     return session_id, opening_question
 
 
+def resume_conversation_session(
+    db: Session,
+    journey_id: str,
+    chapter_id: str,
+) -> Optional[tuple[str, str, int, bool]]:
+    """
+    Resume the most recent incomplete session for this journey+chapter.
+
+    Returns:
+        Tuple of (session_id, current_question, turn_number, conversation_complete),
+        or None if no resumable session exists.
+    """
+    record = (
+        db.query(ConversationSessionRecord)
+        .filter(
+            ConversationSessionRecord.journey_id == journey_id,
+            ConversationSessionRecord.chapter_id == chapter_id,
+            ConversationSessionRecord.is_complete == False,  # noqa: E712
+        )
+        .order_by(ConversationSessionRecord.created_at.desc())
+        .first()
+    )
+
+    if not record or not record.turns:
+        return None
+
+    turns = _turns_from_json(record.turns)
+    last_turn = turns[-1]
+
+    # The current question is the last one that hasn't been answered yet,
+    # or the last one if all have been answered (waiting for user to submit)
+    current_question = last_turn.question
+    turn_number = last_turn.turn_number
+
+    # Restore into cache
+    if record.id not in _active_conversations:
+        conversation = ConversationSession(
+            db=db,
+            journey_id=record.journey_id,
+            chapter_id=ChapterId(record.chapter_id),
+            asset_id=record.asset_id,
+        )
+        conversation.turns = turns
+        _active_conversations[record.id] = conversation
+
+    logger.info(f"Resumed session {record.id} for chapter {chapter_id}, turn {turn_number}")
+    return record.id, current_question, turn_number, False
+
+
 def add_response_to_conversation(
+    db: Session,
     session_id: str,
     response_text: str,
 ) -> Optional[str]:
     """
-    Add user response and get next question.
-
-    Args:
-        session_id: Active conversation session ID
-        response_text: User's response transcript
+    Add user response and get next question. Persists after every turn.
 
     Returns:
         Next question, or None if conversation complete
     """
-    conversation = _active_conversations.get(session_id)
+    conversation = _get_or_load_conversation(db, session_id)
     if not conversation:
         logger.warning(f"No active conversation for session {session_id}")
         return None
@@ -687,32 +817,39 @@ def add_response_to_conversation(
     conversation.add_user_response(response_text)
     next_question = conversation.generate_next_question()
 
-    if next_question is None:
-        # Conversation complete
+    is_complete = next_question is None
+    _persist_session(db, session_id, conversation, is_complete=is_complete)
+
+    if is_complete:
         summary = conversation.get_conversation_summary()
         logger.info(f"Conversation complete: {summary}")
-        # Clean up
-        del _active_conversations[session_id]
+        _active_conversations.pop(session_id, None)
 
     return next_question
 
 
-def end_conversation_session(session_id: str) -> dict:
+def end_conversation_session(db: Session, session_id: str) -> dict:
     """
-    End conversation session and get summary.
-
-    Args:
-        session_id: Conversation session ID
-
-    Returns:
-        Conversation summary
+    End conversation session, mark complete in DB, and return summary.
     """
-    conversation = _active_conversations.get(session_id)
+    conversation = _get_or_load_conversation(db, session_id)
     if not conversation:
+        # Still mark DB record complete if it exists
+        record = db.query(ConversationSessionRecord).filter(
+            ConversationSessionRecord.id == session_id
+        ).first()
+        if record:
+            record.is_complete = True
+            record.updated_at = datetime.now(timezone.utc)
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
         return {}
 
     summary = conversation.get_conversation_summary()
-    del _active_conversations[session_id]
+    _persist_session(db, session_id, conversation, is_complete=True)
+    _active_conversations.pop(session_id, None)
 
     logger.info(f"Ended conversation session {session_id}")
     return summary

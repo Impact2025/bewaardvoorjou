@@ -102,6 +102,43 @@ export async function continueConversation(
   };
 }
 
+export interface ResumedConversation {
+  sessionId: string;
+  currentQuestion: string;
+  turnNumber: number;
+  conversationComplete: boolean;
+}
+
+/**
+ * Resume the most recent incomplete conversation session for a chapter.
+ * Returns null if there is no session to resume.
+ */
+export async function resumeConversationSession(
+  token: string,
+  journeyId: string,
+  chapterId: string,
+): Promise<ResumedConversation | null> {
+  const response = await apiFetch<{
+    session_id: string | null;
+    current_question: string | null;
+    turn_number: number;
+    conversation_complete: boolean;
+  }>(
+    `/assistant/conversation/resume/${journeyId}/${chapterId}`,
+    { method: 'GET' },
+    { token },
+  );
+
+  if (!response.session_id || !response.current_question) return null;
+
+  return {
+    sessionId: response.session_id,
+    currentQuestion: response.current_question,
+    turnNumber: response.turn_number,
+    conversationComplete: response.conversation_complete,
+  };
+}
+
 /**
  * End the conversation session and get summary
  */

@@ -33,6 +33,7 @@ from app.services.ai.conversational_assistant import (
 )
 from app.services.ai.conversation import (
     start_conversation_session,
+    resume_conversation_session,
     add_response_to_conversation,
     end_conversation_session,
 )
@@ -243,12 +244,41 @@ def start_conversation(
   )
 
 
+@router.get("/conversation/resume/{journey_id}/{chapter_id}", summary="Resume conversation after refresh")
+@limiter.limit(RateLimits.READ_HEAVY)
+def resume_conversation(
+  request: Request,
+  journey_id: str,
+  chapter_id: str,
+  current_user: User = Depends(get_current_user),
+  db: Session = Depends(get_db),
+):
+  """
+  Resume the most recent incomplete conversation session for this chapter.
+
+  Returns the active session so the frontend can pick up exactly where
+  the user left off after a page refresh or reconnect.
+  """
+  result = resume_conversation_session(db=db, journey_id=journey_id, chapter_id=chapter_id)
+  if not result:
+    return {"session_id": None, "current_question": None, "turn_number": 0, "conversation_complete": False}
+
+  session_id, current_question, turn_number, conversation_complete = result
+  return {
+    "session_id": session_id,
+    "current_question": current_question,
+    "turn_number": turn_number,
+    "conversation_complete": conversation_complete,
+  }
+
+
 @router.post("/conversation/continue", response_model=ContinueConversationResponse, summary="Continue conversation")
 @limiter.limit(RateLimits.AI_PROMPT)
 def continue_conversation(
   request: Request,
   payload: ContinueConversationRequest,
   current_user: User = Depends(get_current_user),
+  db: Session = Depends(get_db),
 ) -> ContinueConversationResponse:
   """
   Continue the conversation with user's response.
@@ -258,29 +288,21 @@ def continue_conversation(
 
   Returns None for next_question when the conversation feels complete.
   """
-  from app.services.ai.conversation import _active_conversations
-
-  conversation = _active_conversations.get(payload.session_id)
-  if not conversation:
-    # Session expired or invalid
-    return ContinueConversationResponse(
-      next_question=None,
-      turn_number=0,
-      conversation_complete=True,
-      story_depth=None,
-    )
+  from app.services.ai.conversation import _active_conversations, _get_or_load_conversation
 
   next_question = add_response_to_conversation(
+    db=db,
     session_id=payload.session_id,
     response_text=payload.response_text,
   )
 
   conversation_complete = next_question is None
-  turn_number = len(conversation.turns)
 
-  # Get story depth from last turn's analysis
+  # Get turn number and story depth from the (possibly restored) session
+  conversation = _get_or_load_conversation(db, payload.session_id)
+  turn_number = len(conversation.turns) if conversation else 0
   story_depth = None
-  if conversation.turns and conversation.turns[-1].analysis:
+  if conversation and conversation.turns and conversation.turns[-1].analysis:
     story_depth = conversation.turns[-1].analysis.get("story_depth")
 
   return ContinueConversationResponse(
@@ -297,6 +319,7 @@ def end_conversation(
   request: Request,
   payload: EndConversationRequest,
   current_user: User = Depends(get_current_user),
+  db: Session = Depends(get_db),
 ) -> EndConversationResponse:
   """
   End the conversation session and get summary.
@@ -308,7 +331,7 @@ def end_conversation(
   - Key themes discovered
   - People mentioned
   """
-  summary = end_conversation_session(payload.session_id)
+  summary = end_conversation_session(db=db, session_id=payload.session_id)
 
   return EndConversationResponse(
     total_turns=summary.get("total_turns", 0),

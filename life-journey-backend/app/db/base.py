@@ -8,3 +8,4 @@ from app.models.consent import ConsentLog  # noqa: F401
 from app.models.preferences import ChapterPreference  # noqa: F401
 from app.models.memo import Memo  # noqa: F401
 from app.models.family import FamilyMember, FamilyInvite  # noqa: F401
+from app.models.conversation import ConversationSessionRecord  # noqa: F401

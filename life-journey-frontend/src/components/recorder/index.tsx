@@ -17,6 +17,7 @@ const AIAssistantChat = dynamic(
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
 import { fetchAssistantPrompt } from "@/lib/assistant";
+import { resumeConversationSession } from "@/lib/conversation-client";
 
 import { ContextHelp } from "@/components/ui/context-help";
 import { RecorderProvider, useRecorder, RecordingMode } from "./RecorderContext";
@@ -101,18 +102,55 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     pendingAction.current = null;
   }, []);
 
-  // Haal de eerste AI-vraag op bij het laden
+  // Laad de actuele vraag bij het (her)laden van de pagina:
+  // 1. Probeer eerst een lopende gespreksessie te hervatten vanuit de DB
+  // 2. Valt terug op een verse openingsvraag als er geen sessie is
   useEffect(() => {
-    if (!currentQuestion && chapterId && session?.token && conversationTurnNumber === 0) {
-      fetchAssistantPrompt(chapterId as any, [], session.token, journey?.id)
-        .then((prompt) => {
-          dispatch({ type: "SET_CURRENT_QUESTION", payload: prompt });
-        })
-        .catch((err) => {
-          console.error("Failed to fetch initial question:", err);
-        });
+    if (currentQuestion || !chapterId || !session?.token || !journey?.id) return;
+
+    let cancelled = false;
+
+    async function loadQuestion() {
+      try {
+        const resumed = await resumeConversationSession(session!.token, journey!.id, chapterId!);
+        if (cancelled) return;
+
+        if (resumed) {
+          // First restore the session ID, then override with the correct turn number
+          dispatch({
+            type: "START_CONVERSATION",
+            payload: { sessionId: resumed.sessionId, question: resumed.currentQuestion },
+          });
+          dispatch({
+            type: "UPDATE_CONVERSATION",
+            payload: {
+              question: resumed.currentQuestion,
+              turnNumber: resumed.turnNumber,
+              depth: null,
+              complete: resumed.conversationComplete,
+            },
+          });
+          return;
+        }
+      } catch {
+        // No session to resume — fall through to initial question
+      }
+
+      if (cancelled) return;
+
+      try {
+        const prompt = await fetchAssistantPrompt(chapterId as any, [], session!.token, journey!.id);
+        if (!cancelled) dispatch({ type: "SET_CURRENT_QUESTION", payload: prompt });
+      } catch (err) {
+        console.error("Failed to fetch initial question:", err);
+      }
     }
-  }, [chapterId, session?.token, journey?.id, currentQuestion, conversationTurnNumber, dispatch]);
+
+    loadQuestion();
+    return () => { cancelled = true; };
+  // currentQuestion intentionally omitted: we only run once when data arrives
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterId, session?.token, journey?.id, dispatch]);
 
   const isRecording = recordingState === "recording";
   const isPreviewing = recordingState === "previewing";
