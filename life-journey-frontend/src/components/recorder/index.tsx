@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { MessageCircle, HelpCircle } from "lucide-react";
+import { MessageCircle, HelpCircle, CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CHAPTERS } from "@/lib/chapters";
@@ -66,6 +66,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     conversationStoryDepth,
     conversationComplete,
     currentQuestion,
+    showNextChapterPrompt,
   } = state;
 
   const actions = useRecorderActions({ chapterId });
@@ -148,8 +149,8 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   return (
     <div className="space-y-4">
 
-      {/* AI-vraag — prominent bovenaan, altijd zichtbaar */}
-      {currentQuestion && (
+      {/* AI-vraag — prominent bovenaan, verborgen na opslaan */}
+      {currentQuestion && !showNextChapterPrompt && (
         <div className="rounded-xl border border-warm-amber/30 bg-warm-amber/5 px-5 py-4">
           <p className="text-xs font-medium text-warm-amber uppercase tracking-wide mb-1">
             Jouw vraag voor dit hoofdstuk
@@ -160,8 +161,8 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
         </div>
       )}
 
-      {/* Modus kiezen — grote kaarten als nog niet gestart, compact tijdens opname */}
-      {isIdle ? (
+      {/* Modus kiezen — groot als idle, compact tijdens opname, verborgen na opslaan */}
+      {showNextChapterPrompt ? null : isIdle ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-slate-600">
@@ -197,64 +198,96 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
 
       {/* Opname-interface */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div
-          className={cn(
-            "relative w-full",
-            mode === "text" ? "min-h-[360px]" : "aspect-video max-w-2xl mx-auto"
-          )}
-        >
-          {mode === "text" ? (
-            <TextEditor onGetAISuggestion={actions.getAISuggestion} />
-          ) : (
-            <RecorderPreview
-              ref={videoRef}
-              onStartPreview={actions.startPreview}
-            />
-          )}
-        </div>
-
-        {/* AI-gesprekvoortgang tijdens multi-turn */}
-        {!!conversationSessionId && !conversationComplete && (
-          <div className="border-t border-slate-100 px-4 py-3">
-            <ConversationProgress
-              turnNumber={conversationTurnNumber}
-              storyDepth={conversationStoryDepth}
-              currentQuestion={currentQuestion}
-              isActive={true}
-            />
+        {showNextChapterPrompt ? (
+          /* Success-panel: prominent na opslaan */
+          <div className="flex flex-col items-center justify-center gap-5 py-10 px-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="h-10 w-10 text-green-600" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900">Verhaal opgeslagen!</h3>
+              <p className="text-sm text-slate-500 mt-1.5">
+                Je herinneringen zijn bewaard voor de volgende generaties.
+              </p>
+            </div>
+            <Button
+              onClick={handleNavigateNext}
+              className="btn-primary px-8 py-3 text-base font-semibold flex items-center gap-2"
+            >
+              {hasNextChapter ? "Doorgaan naar volgend hoofdstuk" : "Terug naar overzicht"}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <button
+              onClick={() => {
+                dispatch({ type: "SET_SHOW_NEXT_CHAPTER", payload: false });
+                dispatch({ type: "SET_TEXT_CONTENT", payload: "" });
+              }}
+              className="text-sm text-slate-400 hover:text-slate-600 underline underline-offset-2"
+            >
+              Nog iets toevoegen
+            </button>
           </div>
-        )}
+        ) : (
+          <>
+            <div
+              className={cn(
+                "relative w-full",
+                mode === "text" ? "min-h-[360px]" : "aspect-video max-w-2xl mx-auto"
+              )}
+            >
+              {mode === "text" ? (
+                <TextEditor onGetAISuggestion={actions.getAISuggestion} />
+              ) : (
+                <RecorderPreview
+                  ref={videoRef}
+                  onStartPreview={actions.startPreview}
+                />
+              )}
+            </div>
 
-        {/* Knoppen-balk */}
-        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
-          <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
-          <div className="flex items-center gap-2">
-            {/* Hulp-knop ook zichtbaar tijdens idle */}
-            {isIdle && (
-              <Button
-                onClick={() => setAssistantChatOpen(true)}
-                variant="ghost"
-                className="text-orange hover:text-orange-dark h-9 px-3 flex items-center gap-1.5"
-                aria-label="Open AI assistent"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className="text-sm hidden sm:inline">Hulp nodig?</span>
-              </Button>
+            {/* AI-gesprekvoortgang tijdens multi-turn */}
+            {!!conversationSessionId && !conversationComplete && (
+              <div className="border-t border-slate-100 px-4 py-3">
+                <ConversationProgress
+                  turnNumber={conversationTurnNumber}
+                  storyDepth={conversationStoryDepth}
+                  currentQuestion={currentQuestion}
+                  isActive={true}
+                />
+              </div>
             )}
-            <RecorderControls
-              onStartPreview={() => requireConsent(actions.startPreview)}
-              onStopPreview={actions.stopPreview}
-              onStartRecording={() => requireConsent(actions.startRecording)}
-              onStopRecording={actions.stopRecording}
-              onTogglePause={actions.togglePause}
-              onUpload={actions.uploadRecording}
-              onReset={actions.resetRecording}
-              onSaveText={actions.saveTextContent}
-              onNavigateNext={handleNavigateNext}
-              hasNextChapter={hasNextChapter}
-            />
-          </div>
-        </div>
+
+            {/* Knoppen-balk */}
+            <div className="flex items-center justify-between border-t border-slate-100 px-4 py-4 bg-slate-50 gap-3 flex-wrap">
+              <span className="text-sm text-slate-500 font-medium">{chapterTitle}</span>
+              <div className="flex items-center gap-2">
+                {isIdle && (
+                  <Button
+                    onClick={() => setAssistantChatOpen(true)}
+                    variant="ghost"
+                    className="text-orange hover:text-orange-dark h-9 px-3 flex items-center gap-1.5"
+                    aria-label="Open AI assistent"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="text-sm hidden sm:inline">Hulp nodig?</span>
+                  </Button>
+                )}
+                <RecorderControls
+                  onStartPreview={() => requireConsent(actions.startPreview)}
+                  onStopPreview={actions.stopPreview}
+                  onStartRecording={() => requireConsent(actions.startRecording)}
+                  onStopRecording={actions.stopRecording}
+                  onTogglePause={actions.togglePause}
+                  onUpload={actions.uploadRecording}
+                  onReset={actions.resetRecording}
+                  onSaveText={actions.saveTextContent}
+                  onNavigateNext={handleNavigateNext}
+                  hasNextChapter={hasNextChapter}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <PermissionError />
