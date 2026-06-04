@@ -124,7 +124,7 @@ export default function AcceptInvitePage() {
                 </p>
               </div>
               <Button
-                variant="outline"
+                variant="secondary"
                 className="w-full border-[#E6E2DD]"
                 onClick={() => router.push("/")}
               >
