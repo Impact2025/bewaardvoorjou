@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { ArrowUpRight, Info, X } from "lucide-react";
 import {
   Card,
@@ -19,6 +20,10 @@ import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 export function JourneyExperience() {
   const { journey, profile, isLoading, error } = useJourneyBootstrap();
   const [showInfo, setShowInfo] = useState(false);
+  // Gebruik URL als bron van waarheid — de store wordt na de API-fetch overschreven
+  // waardoor journey.activeChapterId niet altijd overeenkomt met de huidige pagina.
+  const params = useParams();
+  const chapterId = (params?.id as string) || journey?.activeChapterId || "";
 
   const activatedChapterDefinitions = useMemo(() => {
     if (!journey?.chapterStatuses) return [];
@@ -56,7 +61,7 @@ export function JourneyExperience() {
     return null;
   }
 
-  const currentChapter = CHAPTERS.find((ch) => ch.id === journey.activeChapterId) || CHAPTERS[0];
+  const currentChapter = CHAPTERS.find((ch) => ch.id === chapterId) || CHAPTERS[0];
 
   return (
     <div className="space-y-4">
@@ -113,9 +118,9 @@ export function JourneyExperience() {
       )}
 
       {/* Quick Thoughts Context - Shows user's previous thoughts for this chapter */}
-      {journey.activeChapterId && (
+      {chapterId && (
         <ThoughtsForChapter
-          chapterId={journey.activeChapterId}
+          chapterId={chapterId}
           onThoughtUsed={(thought) => {
             console.log("Thought used in interview:", thought.id);
           }}
@@ -123,13 +128,13 @@ export function JourneyExperience() {
       )}
 
       {/* Recording Interface */}
-      <RecorderFrame mode="text" chapterId={journey.activeChapterId} />
+      <RecorderFrame mode="text" chapterId={chapterId} />
 
       {/* Progress Summary - Only show if there's content */}
       {journey.media.length > 0 && (
         <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg text-sm">
           <span className="text-slate-600">
-            {journey.media.filter(m => m.chapterId === journey.activeChapterId).length} opnames in dit hoofdstuk
+            {journey.media.filter(m => m.chapterId === chapterId).length} opnames in dit hoofdstuk
           </span>
           <Button variant="ghost" className="text-orange p-0 h-auto" asChild>
             <a href="/recordings">Bekijk alle opnames</a>
