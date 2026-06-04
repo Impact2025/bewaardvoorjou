@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.core.rate_limiter import RateLimits, limiter
+from app.core.rate_limiter import limiter
 from app.db.session import get_db
 from app.models.family import FamilyMember
 from app.models.journey import Journey

@@ -33,7 +33,6 @@ from app.schemas.family import (
     PodResponse,
     PodMessageResponse,
 )
-from app.core.config import settings
 from app.services.family.manager import (
     list_family_members,
     get_family_member,
@@ -323,7 +322,7 @@ def list_pods(
     _ensure_journey_access(journey_id, db, current_user)
     pods = db.query(FamilyPod).filter(
         FamilyPod.journey_id == journey_id,
-        FamilyPod.is_active == True,
+        FamilyPod.is_active == True,  # noqa: E712 — SQLAlchemy ORM requires == True
     ).order_by(FamilyPod.last_activity_at.desc()).all()
     return [_pod_to_response(p) for p in pods]
 
@@ -410,7 +409,7 @@ def post_message(
     pod = db.query(FamilyPod).filter(
         FamilyPod.id == pod_id,
         FamilyPod.journey_id == journey_id,
-        FamilyPod.is_active == True,
+        FamilyPod.is_active == True,  # noqa: E712 — SQLAlchemy ORM requires == True
     ).first()
     if not pod:
         raise HTTPException(status_code=404, detail="Pod niet gevonden")

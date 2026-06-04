@@ -295,7 +295,7 @@ def continue_conversation(
 
   Returns None for next_question when the conversation feels complete.
   """
-  from app.services.ai.conversation import _active_conversations, _get_or_load_conversation
+  from app.services.ai.conversation import _get_or_load_conversation
 
   next_question = add_response_to_conversation(
     db=db,

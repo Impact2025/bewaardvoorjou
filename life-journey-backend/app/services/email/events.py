@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from app.models.email import EmailEvent as EmailEventModel
 from app.models.user import User as UserModel
 from app.models.journey import Journey as JourneyModel
-from app.models.media import MediaAsset as MediaAssetModel
 from app.services.email.preferences import should_send_email
 from app.services.email.processor import enqueue_email_job
 

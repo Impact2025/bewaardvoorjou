@@ -148,7 +148,7 @@ Geef alleen de vragen terug, genummerd 1-7, zonder inleiding of uitleg."""
             },
         )
         raw = response.choices[0].message.content or ""
-        lines = [l.strip() for l in raw.strip().splitlines() if l.strip()]
+        lines = [ln.strip() for ln in raw.strip().splitlines() if ln.strip()]
         questions = []
         for line in lines:
             # Strip leading number+dot

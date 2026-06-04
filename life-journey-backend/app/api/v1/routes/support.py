@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db, get_optional_user
-from app.core.rate_limiter import RateLimits, limiter
+from app.core.rate_limiter import limiter
 from app.models.support_ticket import SupportTicket, TicketMessage
 from app.models.user import User
 from app.schemas.support import (

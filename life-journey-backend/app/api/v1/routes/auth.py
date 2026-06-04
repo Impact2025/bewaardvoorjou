@@ -72,7 +72,7 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
         user.storage_years = pkg.get("storage_years", 0)
         increment_promo_usage(db, payload.promo_code)
         db.flush()
-        promo_message = f"Kortingscode toegepast — je account is direct geactiveerd."
+        promo_message = "Kortingscode toegepast — je account is direct geactiveerd."
     except Exception as e:
       logger.warning(f"Promo code toepassing mislukt bij registratie: {e}")
 
