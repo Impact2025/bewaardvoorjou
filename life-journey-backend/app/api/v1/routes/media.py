@@ -340,12 +340,11 @@ async def serve_local_file(request: Request, object_key: str) -> FileResponse:
 async def serve_file(request: Request, object_key: str):
   """
   Serve files from S3 (production) or local storage (development).
-  Returns presigned URL as JSON for S3, or serves file directly for local.
+  Text files (.txt) are proxied server-side to avoid browser CORS issues with R2.
+  Audio/video files return a presigned URL for direct browser playback.
   """
-  # Try S3 first if configured
   if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
     try:
-      # Use explicit endpoint URL for the region, or construct it from region
       endpoint_url = settings.s3_endpoint_url
       if not endpoint_url and settings.s3_region:
         endpoint_url = f"https://s3.{settings.s3_region}.amazonaws.com"
@@ -358,33 +357,31 @@ async def serve_file(request: Request, object_key: str):
         aws_secret_access_key=settings.aws_secret_access_key,
       )
 
-      # Generate presigned GET URL (valid for 1 hour)
-      # Add ResponseContentType to ensure proper audio/video playback
-      params = {
-        "Bucket": settings.s3_bucket,
-        "Key": object_key,
-      }
+      # Text files: proxy content server-side so the browser never touches R2 directly
+      if object_key.endswith(".txt"):
+        try:
+          s3_response = client.get_object(Bucket=settings.s3_bucket, Key=object_key)
+          content = s3_response["Body"].read().decode("utf-8")
+          logger.info(f"Proxied text content from S3 for {object_key}")
+          return {"content": content, "type": "local"}
+        except Exception as exc:
+          logger.warning(f"Text file not in S3 ({object_key}): {exc}")
+          # Fall through to local storage
+      else:
+        params: dict = {"Bucket": settings.s3_bucket, "Key": object_key}
+        if object_key.endswith((".webm", ".mp4", ".m4a")):
+          params["ResponseContentType"] = "video/webm" if object_key.endswith(".webm") else "audio/mp4"
+        elif object_key.endswith((".mp3", ".wav", ".ogg")):
+          params["ResponseContentType"] = "audio/mpeg" if object_key.endswith(".mp3") else f"audio/{object_key.split('.')[-1]}"
 
-      # Set Content-Type based on file extension for proper playback
-      if object_key.endswith(('.webm', '.mp4', '.m4a')):
-        params["ResponseContentType"] = "video/webm" if object_key.endswith('.webm') else "audio/mp4"
-      elif object_key.endswith(('.mp3', '.wav', '.ogg')):
-        params["ResponseContentType"] = "audio/mpeg" if object_key.endswith('.mp3') else f"audio/{object_key.split('.')[-1]}"
-
-      presigned_url = client.generate_presigned_url(
-        "get_object",
-        Params=params,
-        ExpiresIn=3600,
-      )
-
-      logger.info(f"Generated S3 presigned URL for {object_key}")
-      # Return presigned URL as JSON instead of redirect (avoids CORS issues)
-      return {"url": presigned_url, "type": "s3"}
+        presigned_url = client.generate_presigned_url("get_object", Params=params, ExpiresIn=3600)
+        logger.info(f"Generated S3 presigned URL for {object_key}")
+        return {"url": presigned_url, "type": "s3"}
 
     except (BotoCoreError, NoCredentialsError) as exc:
       logger.warning(f"S3 not available, trying local storage: {exc}")
     except Exception as exc:
-      logger.warning(f"Error generating S3 presigned URL: {exc}")
+      logger.warning(f"Error with S3 for {object_key}: {exc}")
 
   # Fallback to local storage
   file_path = local_storage.get_file_path(object_key)
@@ -392,14 +389,12 @@ async def serve_file(request: Request, object_key: str):
   if not file_path.exists():
     raise HTTPException(status_code=404, detail="File not found")
 
-  # For text files, return content as JSON
   suffix = file_path.suffix.lower()
   if suffix == ".txt":
     with open(file_path, "r", encoding="utf-8") as f:
       content = f.read()
     return {"content": content, "type": "local"}
 
-  # For other files, return FileResponse
   media_type_map = {
     ".webm": "video/webm",
     ".mp4": "video/mp4",

@@ -198,25 +198,41 @@ function RecordingsContent() {
     document.body.removeChild(link);
   };
 
+  const loadTextContent = async (recording: Recording): Promise<string> => {
+    // Primary: transcript endpoint — always works for interview text answers (stored in DB)
+    if (session?.token) {
+      try {
+        const transcript = await apiFetch<{ ready: boolean; text: string | null }>(
+          `/media/${recording.id}/transcript`,
+          {},
+          { token: session.token }
+        );
+        if (transcript.ready && transcript.text) {
+          return transcript.text;
+        }
+      } catch {
+        // Transcript not available; fall through to file endpoint
+      }
+    }
+
+    // Fallback: file endpoint — backend now proxies .txt content from S3 server-side
+    const url = getMediaUrl(recording);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Server fout: ${response.status}`);
+    const data = await response.json();
+
+    if (data.content) return data.content;
+    if (data.type === "s3" && data.url) {
+      const s3Response = await fetch(data.url);
+      return await s3Response.text();
+    }
+    return typeof data === "string" ? data : JSON.stringify(data);
+  };
+
   const handleViewText = async (recording: Recording) => {
     try {
-      const url = getMediaUrl(recording);
-      const response = await fetch(url);
-      const data = await response.json();
-
-      // If S3, fetch from the presigned URL
-      if (data.type === "s3" && data.url) {
-        const s3Response = await fetch(data.url);
-        const text = await s3Response.text();
-        setViewingText({ recording, content: text });
-      } else if (data.type === "local" && data.content) {
-        // Local storage returns content directly
-        setViewingText({ recording, content: data.content });
-      } else {
-        // Fallback: try to get text directly
-        const text = typeof data === "string" ? data : JSON.stringify(data);
-        setViewingText({ recording, content: text });
-      }
+      const content = await loadTextContent(recording);
+      setViewingText({ recording, content });
     } catch (err) {
       console.error("Failed to load text:", err);
       alert("Kon tekst niet laden");
@@ -225,23 +241,8 @@ function RecordingsContent() {
 
   const handleEditText = async (recording: Recording) => {
     try {
-      const url = getMediaUrl(recording);
-      const response = await fetch(url);
-      const data = await response.json();
-
-      // If S3, fetch from the presigned URL
-      if (data.type === "s3" && data.url) {
-        const s3Response = await fetch(data.url);
-        const text = await s3Response.text();
-        setEditingText({ recording, content: text });
-      } else if (data.type === "local" && data.content) {
-        // Local storage returns content directly
-        setEditingText({ recording, content: data.content });
-      } else {
-        // Fallback: try to get text directly
-        const text = typeof data === "string" ? data : JSON.stringify(data);
-        setEditingText({ recording, content: text });
-      }
+      const content = await loadTextContent(recording);
+      setEditingText({ recording, content });
     } catch (err) {
       console.error("Failed to load text:", err);
       alert("Kon tekst niet laden");
