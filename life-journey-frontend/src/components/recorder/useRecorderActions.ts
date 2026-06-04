@@ -640,7 +640,6 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
       );
 
       setUploadStatus("Tekst opgeslagen!");
-      setRecordingState("idle");
 
       log.debug("Text saved successfully, starting AI conversation flow");
 
@@ -662,9 +661,12 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
 
           if (!journeyId) {
             log.warn("No journey ID available, skipping conversation");
+            setRecordingState("idle");
             showNextChapter();
             return;
           }
+
+          setUploadStatus("AI analyseert je verhaal...");
 
           const conversationSession = await startConversationSession(
             session.token,
@@ -683,8 +685,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
             },
           });
 
-          // Now continue with the text they just saved
-          setUploadStatus("AI analyseert je verhaal...");
+          setUploadStatus("AI stelt vervolgvraag...");
 
           const response = await continueConversation(
             session.token,
@@ -701,6 +702,8 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
               complete: response.conversationComplete,
             },
           });
+
+          setRecordingState("idle");
 
           if (response.conversationComplete) {
             setUploadStatus(`Mooi verhaal! ${response.turnNumber} delen gedeeld`);
@@ -720,6 +723,7 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
             message: error?.message,
             status: error?.status,
           });
+          setRecordingState("idle");
           setUploadStatus(null);
           showNextChapter();
         }
@@ -744,6 +748,8 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
             },
           });
 
+          setRecordingState("idle");
+
           if (response.conversationComplete) {
             setUploadStatus(`Gesprek compleet! ${response.turnNumber} verhalen verteld`);
             triggerConfetti(5000, 150);
@@ -763,11 +769,13 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
           }
         } catch (error) {
           log.error("Failed to continue text conversation", error);
+          setRecordingState("idle");
           setUploadStatus(null);
           showNextChapter();
         }
       } else {
         // Conversation already complete, just show success
+        setRecordingState("idle");
         setTimeout(() => {
           setUploadStatus(null);
           showNextChapter();
