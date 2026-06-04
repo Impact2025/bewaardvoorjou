@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { ArrowUpRight, Info } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowUpRight, Info, X } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 
 export function JourneyExperience() {
   const { journey, profile, isLoading, error } = useJourneyBootstrap();
+  const [showInfo, setShowInfo] = useState(false);
 
   const activatedChapterDefinitions = useMemo(() => {
     if (!journey?.chapterStatuses) return [];
@@ -72,12 +73,44 @@ export function JourneyExperience() {
         <Button
           variant="ghost"
           className="text-slate-500 hover:text-slate-700 flex-shrink-0 h-9 px-3 py-2"
-          onClick={() => window.history.back()}
+          onClick={() => setShowInfo(true)}
         >
           <Info className="h-4 w-4 mr-1" />
           Info
         </Button>
       </div>
+
+      {/* Info Modal */}
+      {showInfo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setShowInfo(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowInfo(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <p className="text-xs font-medium text-orange uppercase tracking-wide mb-1">
+              {currentChapter.phaseTitle}
+            </p>
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              {currentChapter.title}
+            </h2>
+            <p className="text-sm text-slate-600 mb-4">
+              {currentChapter.description}
+            </p>
+            <p className="text-sm text-slate-700 italic border-l-2 border-orange pl-3">
+              {currentChapter.question}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Quick Thoughts Context - Shows user's previous thoughts for this chapter */}
       {journey.activeChapterId && (
