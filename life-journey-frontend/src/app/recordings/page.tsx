@@ -1,18 +1,37 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/toast";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useJourneyBootstrap } from "@/hooks/use-journey-bootstrap";
 import { useAuth } from "@/store/auth-context";
-import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api-client";
-import { Video, Mic, Download, PlayCircle, FileText, Edit2, Eye, Trash2, ArrowUpDown } from "lucide-react";
-import { Select } from "@/components/ui/select";
-import { CHAPTERS } from "@/lib/chapters";
-import { isApiError } from "@/lib/api-client";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { apiFetch, isApiError } from "@/lib/api-client";
 import { API_BASE_URL } from "@/lib/config";
+import { CHAPTERS } from "@/lib/chapters";
+import {
+  Video,
+  Mic,
+  Download,
+  PlayCircle,
+  FileText,
+  Edit2,
+  Eye,
+  Trash2,
+  Search,
+  X,
+  Clock,
+  HardDrive,
+  RefreshCw,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Recording {
   id: string;
@@ -26,6 +45,10 @@ interface Recording {
   object_key?: string;
 }
 
+type TabFilter = "all" | "text" | "video" | "audio";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -33,892 +56,935 @@ function formatFileSize(bytes: number): string {
 }
 
 function formatDuration(seconds?: number): string {
-  if (!seconds) return "Onbekend";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  if (!seconds) return "";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
+
+function formatTotalDuration(totalSeconds: number): string {
+  if (!totalSeconds) return "0 min";
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  if (h > 0) return `${h} uur ${m} min`;
+  return `${m} min`;
+}
+
+function formatRelativeDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Vandaag";
+  if (diffDays === 1) return "Gisteren";
+  if (diffDays < 7) return `${diffDays} dagen geleden`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weken geleden`;
+  return date.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
+}
+
+function estimateWordCount(sizeBytes: number): number {
+  return Math.max(1, Math.round(sizeBytes / 5.5));
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function RecordingListSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-3 p-3 rounded-xl border border-neutral-sand bg-cream"
+        >
+          <Skeleton variant="rectangular" className="h-10 w-10 rounded-lg flex-shrink-0" />
+          <div className="flex-1 space-y-2 min-w-0">
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <div className="flex gap-1.5 flex-shrink-0">
+            <Skeleton variant="rectangular" className="h-9 w-9 rounded-xl" />
+            <Skeleton variant="rectangular" className="h-9 w-9 rounded-xl" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Recording Card ───────────────────────────────────────────────────────────
+
+const MODALITY_CONFIG = {
+  text: {
+    icon: FileText,
+    color: "text-warm-amber",
+    bg: "bg-warm-amber/15",
+    border: "hover:border-warm-amber/50",
+    actionBg: "bg-amber-50 text-amber-600 hover:bg-amber-100",
+  },
+  video: {
+    icon: Video,
+    color: "text-teal",
+    bg: "bg-teal/15",
+    border: "hover:border-teal/50",
+    actionBg: "bg-teal-50 text-teal-600 hover:bg-teal-100",
+  },
+  audio: {
+    icon: Mic,
+    color: "text-orange",
+    bg: "bg-orange/15",
+    border: "hover:border-orange/50",
+    actionBg: "bg-orange-50 text-orange-500 hover:bg-orange-100",
+  },
+};
+
+interface RecordingCardProps {
+  recording: Recording;
+  isDeleting: boolean;
+  onPlay: (r: Recording) => void;
+  onView: (r: Recording) => void;
+  onEdit: (r: Recording) => void;
+  onDownload: (r: Recording) => void;
+  onDelete: (r: Recording) => void;
+}
+
+function RecordingCard({
+  recording,
+  isDeleting,
+  onPlay,
+  onView,
+  onEdit,
+  onDownload,
+  onDelete,
+}: RecordingCardProps) {
+  const chapter = CHAPTERS.find((ch) => ch.id === recording.chapter_id);
+  const cfg = MODALITY_CONFIG[recording.modality];
+  const Icon = cfg.icon;
+
+  return (
+    <div
+      className={`flex items-center gap-3 p-3 rounded-xl border border-neutral-sand bg-cream transition-colors ${cfg.border}`}
+    >
+      {/* Icon */}
+      <div
+        className={`flex-shrink-0 h-10 w-10 rounded-lg ${cfg.bg} flex items-center justify-center`}
+      >
+        <Icon className={`h-5 w-5 ${cfg.color}`} />
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h4 className="font-medium text-slate-900 truncate text-sm">
+            {chapter?.title || recording.chapter_id}
+          </h4>
+          {chapter?.phaseTitle && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium whitespace-nowrap shrink-0">
+              {chapter.phaseTitle.split(":")[0]}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
+          {recording.modality === "text" ? (
+            <span>~{estimateWordCount(recording.size_bytes)} woorden</span>
+          ) : recording.duration_seconds ? (
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-3 w-3" />
+              {formatDuration(recording.duration_seconds)}
+            </span>
+          ) : null}
+          {(recording.modality === "text" || recording.duration_seconds) && <span>·</span>}
+          <span className="flex items-center gap-0.5">
+            <HardDrive className="h-3 w-3" />
+            {formatFileSize(recording.size_bytes)}
+          </span>
+          <span>·</span>
+          <span>{formatRelativeDate(recording.recorded_at)}</span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {recording.modality === "text" ? (
+          <>
+            <ActionButton
+              label="Bekijken"
+              className={cfg.actionBg}
+              onClick={() => onView(recording)}
+            >
+              <Eye className="h-4 w-4" />
+            </ActionButton>
+            <ActionButton
+              label="Bewerken"
+              className={cfg.actionBg}
+              onClick={() => onEdit(recording)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </ActionButton>
+          </>
+        ) : (
+          <>
+            <ActionButton
+              label="Afspelen"
+              className={cfg.actionBg}
+              onClick={() => onPlay(recording)}
+            >
+              <PlayCircle className="h-4 w-4" />
+            </ActionButton>
+            <ActionButton
+              label="Downloaden"
+              className="bg-slate-100 text-slate-600 hover:bg-slate-200"
+              onClick={() => onDownload(recording)}
+            >
+              <Download className="h-4 w-4" />
+            </ActionButton>
+          </>
+        )}
+        <ActionButton
+          label="Verwijderen"
+          className="bg-red-50 text-red-500 hover:bg-red-100 disabled:opacity-40"
+          onClick={() => onDelete(recording)}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </ActionButton>
+      </div>
+    </div>
+  );
+}
+
+function ActionButton({
+  label,
+  className,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  className: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors active:scale-95 ${className}`}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+function EmptyState({
+  filter,
+  hasSearch,
+}: {
+  filter: TabFilter;
+  hasSearch: boolean;
+}) {
+  const Icon =
+    filter === "video" ? Video : filter === "audio" ? Mic : filter === "text" ? FileText : Video;
+
+  if (hasSearch) {
+    return (
+      <div className="py-16 text-center">
+        <Search className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+        <p className="text-slate-500 font-medium">Geen resultaten gevonden</p>
+        <p className="text-sm text-slate-400 mt-1">Probeer een andere zoekterm</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-16 text-center">
+      <Icon className="h-12 w-12 mx-auto text-slate-200 mb-4" />
+      <h3 className="font-semibold text-slate-700 mb-1">
+        {filter === "all" ? "Nog geen opnames" : `Nog geen ${filter === "text" ? "teksten" : filter === "video" ? "video's" : "audio opnames"}`}
+      </h3>
+      <p className="text-sm text-slate-400 mb-6">
+        Ga naar een hoofdstuk om je eerste verhaal vast te leggen
+      </p>
+      <Button asChild className="btn-primary">
+        <a href="/chapters">Verhaal starten</a>
+      </Button>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 function RecordingsContent() {
   const { journey, isLoading: journeyLoading } = useJourneyBootstrap();
   const { session } = useAuth();
+  const toast = useToast();
+
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [playingRecording, setPlayingRecording] = useState<Recording | null>(null);
-  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
-  const [viewingText, setViewingText] = useState<{ recording: Recording; content: string } | null>(null);
-  const [editingText, setEditingText] = useState<{ recording: Recording; content: string } | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  // Sorting state
-  const [textSort, setTextSort] = useState<string>("date-desc");
-  const [videoSort, setVideoSort] = useState<string>("date-desc");
-  const [audioSort, setAudioSort] = useState<string>("date-desc");
-
-  // Sort options
-  const textSortOptions = [
-    { value: "date-desc", label: "Nieuwste eerst" },
-    { value: "date-asc", label: "Oudste eerst" },
-    { value: "chapter-asc", label: "Vraag (A-Z)" },
-    { value: "chapter-desc", label: "Vraag (Z-A)" },
-    { value: "size-desc", label: "Grootste eerst" },
-    { value: "size-asc", label: "Kleinste eerst" },
-  ];
-
-  const mediaSortOptions = [
-    { value: "date-desc", label: "Nieuwste eerst" },
-    { value: "date-asc", label: "Oudste eerst" },
-    { value: "chapter-asc", label: "Vraag (A-Z)" },
-    { value: "chapter-desc", label: "Vraag (Z-A)" },
-    { value: "duration-desc", label: "Langste eerst" },
-    { value: "duration-asc", label: "Kortste eerst" },
-    { value: "size-desc", label: "Grootste eerst" },
-    { value: "size-asc", label: "Kleinste eerst" },
-  ];
-
-  useEffect(() => {
-    if (!journey?.id || !session?.token) return;
-
-    const fetchRecordings = async () => {
-      try {
-        setIsLoading(true);
-        const data = await apiFetch<Recording[]>(
-          `/media/${journey.id}`,
-          {},
-          { token: session.token }
-        );
-        setRecordings(data);
-      } catch (err) {
-        console.error("Failed to fetch recordings:", err);
-        setError("Kon opnames niet laden");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRecordings();
-  }, [journey?.id, session?.token]);
-
-  // Fetch actual media URL when starting playback
-  useEffect(() => {
-    if (!playingRecording) {
-      setPlayingUrl(null);
-      return;
-    }
-
-    const fetchUrl = async () => {
-      const url = await getActualMediaUrl(playingRecording);
-      setPlayingUrl(url);
-    };
-
-    fetchUrl();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playingRecording]);
-
-  const getChapterInfo = (chapterId: string) => {
-    return CHAPTERS.find((ch) => ch.id === chapterId);
-  };
-
-  const sortRecordings = (recs: Recording[], sortBy: string): Recording[] => {
-    const sorted = [...recs];
-
-    switch (sortBy) {
-      case "date-desc":
-        return sorted.sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
-      case "date-asc":
-        return sorted.sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
-      case "chapter-asc":
-        return sorted.sort((a, b) => {
-          const chapterA = getChapterInfo(a.chapter_id)?.title || a.chapter_id;
-          const chapterB = getChapterInfo(b.chapter_id)?.title || b.chapter_id;
-          return chapterA.localeCompare(chapterB);
-        });
-      case "chapter-desc":
-        return sorted.sort((a, b) => {
-          const chapterA = getChapterInfo(a.chapter_id)?.title || a.chapter_id;
-          const chapterB = getChapterInfo(b.chapter_id)?.title || b.chapter_id;
-          return chapterB.localeCompare(chapterA);
-        });
-      case "size-desc":
-        return sorted.sort((a, b) => b.size_bytes - a.size_bytes);
-      case "size-asc":
-        return sorted.sort((a, b) => a.size_bytes - b.size_bytes);
-      case "duration-desc":
-        return sorted.sort((a, b) => (b.duration_seconds || 0) - (a.duration_seconds || 0));
-      case "duration-asc":
-        return sorted.sort((a, b) => (a.duration_seconds || 0) - (b.duration_seconds || 0));
-      default:
-        return sorted;
-    }
-  };
-
-  const getMediaUrl = (recording: Recording) => {
-    // Use object_key for both S3 and local storage
-    const objectKey = recording.object_key || `${journey?.id}/${recording.chapter_id}/${recording.id}/${recording.filename}`;
-    return `${API_BASE_URL}/media/file/${objectKey}`;
-  };
-
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
 
-  const getActualMediaUrl = async (recording: Recording): Promise<string> => {
-    // Check cache first
-    if (mediaUrls[recording.id]) {
-      return mediaUrls[recording.id];
-    }
+  // Player
+  const [playingRecording, setPlayingRecording] = useState<Recording | null>(null);
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
+  const [playingTranscript, setPlayingTranscript] = useState<string | null>(null);
 
-    const url = getMediaUrl(recording);
+  // Text viewer
+  const [viewingRecording, setViewingRecording] = useState<Recording | null>(null);
+  const [viewingContent, setViewingContent] = useState<string>("");
+  const [viewingLoading, setViewingLoading] = useState(false);
 
+  // Text editor
+  const [editingRecording, setEditingRecording] = useState<Recording | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Delete confirmation
+  const [deleteCandidate, setDeleteCandidate] = useState<Recording | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // ── Fetch recordings ───────────────────────────────────────────────────────
+
+  const fetchRecordings = useCallback(async () => {
+    if (!journey?.id || !session?.token) return;
+    setIsLoading(true);
+    setLoadError(null);
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-
-      // If S3, use the presigned URL
-      if (data.type === "s3" && data.url) {
-        setMediaUrls(prev => ({ ...prev, [recording.id]: data.url }));
-        return data.url;
-      }
-    } catch (err) {
-      // If JSON parsing fails, it's probably a direct FileResponse (local storage)
-      // Just use the original URL
-    }
-
-    // Fallback to original URL for local storage FileResponse
-    return url;
-  };
-
-  const handleDownload = async (recording: Recording) => {
-    const url = await getActualMediaUrl(recording);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = recording.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const loadTextContent = async (recording: Recording): Promise<string> => {
-    // Primary: transcript endpoint — always works for interview text answers (stored in DB)
-    if (session?.token) {
-      try {
-        const transcript = await apiFetch<{ ready: boolean; text: string | null }>(
-          `/media/${recording.id}/transcript`,
-          {},
-          { token: session.token }
-        );
-        if (transcript.ready && transcript.text) {
-          return transcript.text;
-        }
-      } catch {
-        // Transcript not available; fall through to file endpoint
-      }
-    }
-
-    // Fallback: file endpoint — backend now proxies .txt content from S3 server-side
-    const url = getMediaUrl(recording);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Server fout: ${response.status}`);
-    const data = await response.json();
-
-    if (data.content) return data.content;
-    if (data.type === "s3" && data.url) {
-      const s3Response = await fetch(data.url);
-      return await s3Response.text();
-    }
-    return typeof data === "string" ? data : JSON.stringify(data);
-  };
-
-  const handleViewText = async (recording: Recording) => {
-    try {
-      const content = await loadTextContent(recording);
-      setViewingText({ recording, content });
-    } catch (err) {
-      console.error("Failed to load text:", err);
-      alert("Kon tekst niet laden");
-    }
-  };
-
-  const handleEditText = async (recording: Recording) => {
-    try {
-      const content = await loadTextContent(recording);
-      setEditingText({ recording, content });
-    } catch (err) {
-      console.error("Failed to load text:", err);
-      alert("Kon tekst niet laden");
-    }
-  };
-
-  const handleDeleteRecording = async (recording: Recording) => {
-    if (!session?.token) return;
-
-    const confirmed = confirm(
-      `Weet je zeker dat je deze ${recording.modality === "text" ? "tekst" : "opname"} wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`
-    );
-
-    if (!confirmed) return;
-
-    setDeletingId(recording.id);
-    try {
-      console.log("Deleting recording:", recording.id);
-      const response = await apiFetch(
-        `/media/${recording.id}`,
-        { method: "DELETE" },
+      const data = await apiFetch<Recording[]>(
+        `/media/${journey.id}`,
+        {},
         { token: session.token }
       );
-      console.log("Delete response:", response);
-
-      // Remove from local state
-      setRecordings(recordings.filter(r => r.id !== recording.id));
-
-      // Close modals if this recording was being viewed
-      if (playingRecording?.id === recording.id) {
-        setPlayingRecording(null);
-      }
-      if (viewingText?.recording.id === recording.id) {
-        setViewingText(null);
-      }
-      if (editingText?.recording.id === recording.id) {
-        setEditingText(null);
-      }
-
-      console.log("Recording deleted successfully");
-    } catch (err) {
-      console.error("Failed to delete recording:", err);
-
-      let errorMessage = "Onbekende fout";
-      if (isApiError(err)) {
-        errorMessage = err.message;
-        console.error("API Error:", {
-          status: err.status,
-          code: err.code,
-          message: err.message,
-          details: err.details
-        });
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-
-      alert(`Verwijderen mislukt: ${errorMessage}. Probeer het opnieuw.`);
+      setRecordings(data);
+    } catch {
+      setLoadError("Kon opnames niet laden. Controleer je verbinding en probeer opnieuw.");
     } finally {
-      setDeletingId(null);
+      setIsLoading(false);
     }
-  };
+  }, [journey?.id, session?.token]);
 
-  const handleSaveText = async () => {
-    if (!editingText || !session?.token) return;
+  useEffect(() => {
+    fetchRecordings();
+  }, [fetchRecordings]);
 
+  // ── Media URL resolution ───────────────────────────────────────────────────
+
+  const getMediaUrl = useCallback(
+    (recording: Recording) => {
+      const key =
+        recording.object_key ||
+        `${journey?.id}/${recording.chapter_id}/${recording.id}/${recording.filename}`;
+      return `${API_BASE_URL}/media/file/${key}`;
+    },
+    [journey?.id]
+  );
+
+  const resolveMediaUrl = useCallback(
+    async (recording: Recording): Promise<string> => {
+      if (mediaUrls[recording.id]) return mediaUrls[recording.id];
+      const url = getMediaUrl(recording);
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.type === "s3" && data.url) {
+          setMediaUrls((prev) => ({ ...prev, [recording.id]: data.url }));
+          return data.url;
+        }
+      } catch {
+        // Direct FileResponse (local storage) — use original URL
+      }
+      return url;
+    },
+    [mediaUrls, getMediaUrl]
+  );
+
+  // ── Load text content ──────────────────────────────────────────────────────
+
+  const loadTextContent = useCallback(
+    async (recording: Recording): Promise<string> => {
+      if (session?.token) {
+        try {
+          const transcript = await apiFetch<{ ready: boolean; text: string | null }>(
+            `/media/${recording.id}/transcript`,
+            {},
+            { token: session.token }
+          );
+          if (transcript.ready && transcript.text) return transcript.text;
+        } catch {
+          // fall through
+        }
+      }
+      const url = getMediaUrl(recording);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      if (data.content) return data.content;
+      if (data.type === "s3" && data.url) return await (await fetch(data.url)).text();
+      return typeof data === "string" ? data : JSON.stringify(data);
+    },
+    [session?.token, getMediaUrl]
+  );
+
+  // ── Play ───────────────────────────────────────────────────────────────────
+
+  const handlePlay = useCallback(
+    async (recording: Recording) => {
+      setPlayingRecording(recording);
+      setPlayingUrl(null);
+      setPlayingTranscript(null);
+      const [url, transcript] = await Promise.allSettled([
+        resolveMediaUrl(recording),
+        session?.token
+          ? apiFetch<{ ready: boolean; text: string | null }>(
+              `/media/${recording.id}/transcript`,
+              {},
+              { token: session.token }
+            ).then((t) => (t.ready && t.text ? t.text : null))
+          : Promise.resolve(null),
+      ]);
+      setPlayingUrl(url.status === "fulfilled" ? url.value : null);
+      setPlayingTranscript(
+        transcript.status === "fulfilled" ? transcript.value : null
+      );
+    },
+    [resolveMediaUrl, session?.token]
+  );
+
+  const closePlayer = useCallback(() => {
+    setPlayingRecording(null);
+    setPlayingUrl(null);
+    setPlayingTranscript(null);
+  }, []);
+
+  // ── View text ──────────────────────────────────────────────────────────────
+
+  const handleView = useCallback(
+    async (recording: Recording) => {
+      setViewingRecording(recording);
+      setViewingContent("");
+      setViewingLoading(true);
+      try {
+        const content = await loadTextContent(recording);
+        setViewingContent(content);
+      } catch {
+        setViewingRecording(null);
+        toast.error("Kon tekst niet laden", "Controleer je verbinding en probeer opnieuw.");
+      } finally {
+        setViewingLoading(false);
+      }
+    },
+    [loadTextContent, toast]
+  );
+
+  // ── Edit text ──────────────────────────────────────────────────────────────
+
+  const handleEdit = useCallback(
+    async (recording: Recording) => {
+      setEditingRecording(recording);
+      setEditContent("");
+      setEditLoading(true);
+      try {
+        const content = await loadTextContent(recording);
+        setEditContent(content);
+      } catch {
+        setEditingRecording(null);
+        toast.error("Kon tekst niet laden", "Controleer je verbinding en probeer opnieuw.");
+      } finally {
+        setEditLoading(false);
+      }
+    },
+    [loadTextContent, toast]
+  );
+
+  const handleSaveText = useCallback(async () => {
+    if (!editingRecording || !session?.token || !journey?.id) return;
     setIsSaving(true);
     try {
-      // Create a new text blob with updated content
-      const textBlob = new Blob([editingText.content], { type: 'text/plain' });
-
-      // Upload using the same presign flow
-      const presignResponse = await apiFetch<{
+      const blob = new Blob([editContent], { type: "text/plain" });
+      const presign = await apiFetch<{
         upload_url: string;
         asset_id: string;
         upload_method: "POST" | "PUT";
-        fields?: Record<string, string>;
       }>(
         "/media/presign",
         {
           method: "POST",
           body: JSON.stringify({
-            journey_id: journey?.id,
-            chapter_id: editingText.recording.chapter_id,
+            journey_id: journey.id,
+            chapter_id: editingRecording.chapter_id,
             modality: "text",
-            filename: editingText.recording.filename,
-            size_bytes: textBlob.size,
+            filename: editingRecording.filename,
+            size_bytes: blob.size,
             checksum: "",
           }),
         },
-        { token: session.token },
-      );
-
-      // Upload the updated text
-      if (presignResponse.upload_url.includes("/media/local-upload/")) {
-        const formData = new FormData();
-        formData.append("file", textBlob, editingText.recording.filename);
-        await fetch(presignResponse.upload_url, {
-          method: "PUT",
-          body: formData,
-        });
-      }
-
-      // Complete the upload
-      await apiFetch(
-        `/media/${presignResponse.asset_id}/complete`,
-        { method: "POST" },
-        { token: session.token },
-      );
-
-      alert("Tekst succesvol bijgewerkt!");
-      setEditingText(null);
-
-      // Refresh recordings
-      const data = await apiFetch<Recording[]>(
-        `/media/${journey?.id}`,
-        {},
         { token: session.token }
       );
-      setRecordings(data);
-    } catch (err) {
-      console.error("Failed to save text:", err);
-      alert("Opslaan mislukt");
+
+      if (presign.upload_url.includes("/media/local-upload/")) {
+        const fd = new FormData();
+        fd.append("file", blob, editingRecording.filename);
+        await fetch(presign.upload_url, { method: "PUT", body: fd });
+      }
+
+      await apiFetch(
+        `/media/${presign.asset_id}/complete`,
+        { method: "POST" },
+        { token: session.token }
+      );
+
+      setEditingRecording(null);
+      toast.success("Opgeslagen", "Je tekst is succesvol bijgewerkt.");
+      fetchRecordings();
+    } catch {
+      toast.error("Opslaan mislukt", "Probeer het opnieuw.");
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [editingRecording, editContent, session?.token, journey?.id, fetchRecordings, toast]);
 
-  if (journeyLoading || isLoading) {
+  // ── Download ───────────────────────────────────────────────────────────────
+
+  const handleDownload = useCallback(
+    async (recording: Recording) => {
+      try {
+        const url = await resolveMediaUrl(recording);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = recording.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        toast.error("Download mislukt", "Probeer het opnieuw.");
+      }
+    },
+    [resolveMediaUrl, toast]
+  );
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteCandidate || !session?.token) return;
+    setIsDeleting(true);
+    setDeletingId(deleteCandidate.id);
+    try {
+      await apiFetch(
+        `/media/${deleteCandidate.id}`,
+        { method: "DELETE" },
+        { token: session.token }
+      );
+      setRecordings((prev) => prev.filter((r) => r.id !== deleteCandidate.id));
+      if (playingRecording?.id === deleteCandidate.id) closePlayer();
+      if (viewingRecording?.id === deleteCandidate.id) setViewingRecording(null);
+      if (editingRecording?.id === deleteCandidate.id) setEditingRecording(null);
+      toast.success("Verwijderd", "De opname is permanent verwijderd.");
+    } catch (err) {
+      let msg = "Probeer het opnieuw.";
+      if (isApiError(err)) msg = err.message;
+      else if (err instanceof Error) msg = err.message;
+      toast.error("Verwijderen mislukt", msg);
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
+      setDeleteCandidate(null);
+    }
+  }, [deleteCandidate, session?.token, playingRecording, viewingRecording, editingRecording, closePlayer, toast]);
+
+  // ── Filtering ──────────────────────────────────────────────────────────────
+
+  const filtered = useMemo(() => {
+    let list = recordings;
+    if (activeTab !== "all") list = list.filter((r) => r.modality === activeTab);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((r) => {
+        const chapter = CHAPTERS.find((ch) => ch.id === r.chapter_id);
+        return (
+          (chapter?.title || r.chapter_id).toLowerCase().includes(q) ||
+          (chapter?.phaseTitle || "").toLowerCase().includes(q)
+        );
+      });
+    }
+    return [...list].sort(
+      (a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()
+    );
+  }, [recordings, activeTab, searchQuery]);
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+
+  const stats = useMemo(() => {
+    const totalDuration = recordings
+      .filter((r) => r.modality !== "text")
+      .reduce((sum, r) => sum + (r.duration_seconds || 0), 0);
+    const totalSize = recordings.reduce((sum, r) => sum + r.size_bytes, 0);
+    return { totalDuration, totalSize };
+  }, [recordings]);
+
+  const counts = useMemo(
+    () => ({
+      text: recordings.filter((r) => r.modality === "text").length,
+      video: recordings.filter((r) => r.modality === "video").length,
+      audio: recordings.filter((r) => r.modality === "audio").length,
+    }),
+    [recordings]
+  );
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (journeyLoading) {
     return (
-      <AppShell title="Mijn Opnames" description="Al je herinneringen op één plek" activeHref="/recordings">
-        <Card className="bg-card border-neutral-sand">
-          <CardHeader>
-            <CardTitle>Bezig met laden…</CardTitle>
-            <CardDescription>We halen je opnames op.</CardDescription>
-          </CardHeader>
-        </Card>
+      <AppShell title="Mijn Opnames" activeHref="/recordings">
+        <div className="space-y-4">
+          <Skeleton className="h-20 w-full rounded-xl" />
+          <RecordingListSkeleton />
+        </div>
       </AppShell>
     );
   }
-
-  if (error) {
-    return (
-      <AppShell title="Mijn Opnames" description="Al je herinneringen op één plek" activeHref="/recordings">
-        <Card className="bg-card border-neutral-sand">
-          <CardHeader>
-            <CardTitle>Fout bij laden</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-        </Card>
-      </AppShell>
-    );
-  }
-
-  const videoRecordings = sortRecordings(
-    recordings.filter((r) => r.modality === "video"),
-    videoSort
-  );
-  const audioRecordings = sortRecordings(
-    recordings.filter((r) => r.modality === "audio"),
-    audioSort
-  );
-  const textRecordings = sortRecordings(
-    recordings.filter((r) => r.modality === "text"),
-    textSort
-  );
 
   return (
-    <AppShell
-      title="Mijn Opnames"
-      description="Bekijk al je video's en audio opnames"
-      activeHref="/recordings"
-    >
-      <div className="space-y-8">
-        {/* Statistics */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Card className="bg-card border-neutral-sand">
-            <CardHeader className="pb-3">
-              <CardDescription>Totaal</CardDescription>
-              <CardTitle className="text-3xl text-teal">{recordings.length}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-medium">opnames</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-neutral-sand">
-            <CardHeader className="pb-3">
-              <CardDescription>Tekst</CardDescription>
-              <CardTitle className="text-3xl text-warm-amber">{textRecordings.length}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-medium">tekst opnames</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-neutral-sand">
-            <CardHeader className="pb-3">
-              <CardDescription>Video's</CardDescription>
-              <CardTitle className="text-3xl text-teal">{videoRecordings.length}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-medium">video opnames</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-neutral-sand">
-            <CardHeader className="pb-3">
-              <CardDescription>Audio</CardDescription>
-              <CardTitle className="text-3xl text-orange">{audioRecordings.length}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-medium">audio opnames</p>
-            </CardContent>
-          </Card>
-        </div>
+    <AppShell title="Mijn Opnames" description="Al je herinneringen op één plek" activeHref="/recordings">
+      <div className="space-y-5">
 
-        {/* Recordings List */}
-        {recordings.length === 0 ? (
-          <Card className="bg-card border-neutral-sand">
-            <CardContent className="py-12 text-center">
-              <Video className="h-12 w-12 mx-auto text-neutral-sand mb-4" />
-              <h3 className="text-heading text-xl mb-2">Nog geen opnames</h3>
-              <p className="text-medium mb-6">
-                Ga naar een hoofdstuk om je eerste verhaal op te nemen
-              </p>
-              <Button asChild className="btn-primary">
-                <a href="/chapters">Start opname</a>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {/* Text Recordings */}
-            {textRecordings.length > 0 && (
-              <Card className="bg-card border-neutral-sand">
-                <CardHeader>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-warm-amber" />
-                        <CardTitle>Tekst Opnames</CardTitle>
-                      </div>
-                      <CardDescription>{textRecordings.length} teksten</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      <Select
-                        options={textSortOptions}
-                        value={textSort}
-                        onChange={setTextSort}
-                        className="flex-1 sm:w-[180px]"
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {textRecordings.map((recording) => {
-                      const chapter = getChapterInfo(recording.chapter_id);
-                      const words = Math.ceil(recording.size_bytes / 5); // Rough estimate: 5 bytes per word
-                      return (
-                        <div
-                          key={recording.id}
-                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-warm-amber/40 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-warm-amber/20 flex items-center justify-center">
-                              <FileText className="h-5 w-5 text-warm-amber" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="font-medium text-slate-900 truncate text-sm">
-                                {chapter?.title || recording.chapter_id}
-                              </h4>
-                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
-                                <span>~{words} wrd</span>
-                                <span>·</span>
-                                <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>·</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors hover:bg-amber-100 active:scale-95"
-                              onClick={() => handleViewText(recording)}
-                              aria-label="Bekijken"
-                            >
-                              <Eye className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors hover:bg-amber-100 active:scale-95"
-                              onClick={() => handleEditText(recording)}
-                              aria-label="Bewerken"
-                            >
-                              <Edit2 className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
-                              onClick={() => handleDeleteRecording(recording)}
-                              disabled={deletingId === recording.id}
-                              aria-label="Verwijderen"
-                            >
-                              <Trash2 className="h-4.5 w-4.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Video Recordings */}
-            {videoRecordings.length > 0 && (
-              <Card className="bg-card border-neutral-sand">
-                <CardHeader>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Video className="h-5 w-5 text-teal" />
-                        <CardTitle>Video Opnames</CardTitle>
-                      </div>
-                      <CardDescription>{videoRecordings.length} video&apos;s</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      <Select
-                        options={mediaSortOptions}
-                        value={videoSort}
-                        onChange={setVideoSort}
-                        className="flex-1 sm:w-[180px]"
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {videoRecordings.map((recording) => {
-                      const chapter = getChapterInfo(recording.chapter_id);
-                      return (
-                        <div
-                          key={recording.id}
-                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-teal/40 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-teal/20 flex items-center justify-center">
-                              <Video className="h-5 w-5 text-teal" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="font-medium text-slate-900 truncate text-sm">
-                                {chapter?.title || recording.chapter_id}
-                              </h4>
-                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
-                                <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>·</span>
-                                <span>{formatDuration(recording.duration_seconds)}</span>
-                                <span>·</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 transition-colors hover:bg-teal-100 active:scale-95"
-                              onClick={() => setPlayingRecording(recording)}
-                              aria-label="Afspelen"
-                            >
-                              <PlayCircle className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
-                              onClick={() => handleDownload(recording)}
-                              aria-label="Downloaden"
-                            >
-                              <Download className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
-                              onClick={() => handleDeleteRecording(recording)}
-                              disabled={deletingId === recording.id}
-                              aria-label="Verwijderen"
-                            >
-                              <Trash2 className="h-4.5 w-4.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Audio Recordings */}
-            {audioRecordings.length > 0 && (
-              <Card className="bg-card border-neutral-sand">
-                <CardHeader>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Mic className="h-5 w-5 text-orange" />
-                        <CardTitle>Audio Opnames</CardTitle>
-                      </div>
-                      <CardDescription>{audioRecordings.length} audio fragmenten</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      <Select
-                        options={mediaSortOptions}
-                        value={audioSort}
-                        onChange={setAudioSort}
-                        className="flex-1 sm:w-[180px]"
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {audioRecordings.map((recording) => {
-                      const chapter = getChapterInfo(recording.chapter_id);
-                      return (
-                        <div
-                          key={recording.id}
-                          className="flex items-center justify-between gap-2 p-3 rounded-lg border border-neutral-sand bg-cream hover:border-orange/40 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-orange/20 flex items-center justify-center">
-                              <Mic className="h-5 w-5 text-orange" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="font-medium text-slate-900 truncate text-sm">
-                                {chapter?.title || recording.chapter_id}
-                              </h4>
-                              <div className="flex items-center gap-1.5 text-xs text-medium mt-0.5 flex-wrap">
-                                <span>{formatFileSize(recording.size_bytes)}</span>
-                                <span>·</span>
-                                <span>{formatDuration(recording.duration_seconds)}</span>
-                                <span>·</span>
-                                <span>{new Date(recording.recorded_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-500 transition-colors hover:bg-orange-100 active:scale-95"
-                              onClick={() => setPlayingRecording(recording)}
-                              aria-label="Afspelen"
-                            >
-                              <PlayCircle className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
-                              onClick={() => handleDownload(recording)}
-                              aria-label="Downloaden"
-                            >
-                              <Download className="h-4.5 w-4.5" />
-                            </button>
-                            <button
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition-colors hover:bg-red-100 active:scale-95 disabled:opacity-40"
-                              onClick={() => handleDeleteRecording(recording)}
-                              disabled={deletingId === recording.id}
-                              aria-label="Verwijderen"
-                            >
-                              <Trash2 className="h-4.5 w-4.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* Stats bar */}
+        {recordings.length > 0 && (
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Opnames", value: recordings.length.toString() },
+              { label: "Opgenomen", value: formatTotalDuration(stats.totalDuration) },
+              { label: "Opgeslagen", value: formatFileSize(stats.totalSize) },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-xl border border-neutral-sand bg-cream p-3 text-center"
+              >
+                <div className="text-xl font-bold text-teal">{value}</div>
+                <div className="text-xs text-medium mt-0.5">{label}</div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Player Modal */}
-        {playingRecording && (
-          <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setPlayingRecording(null)}
-          >
-            <div
-              className="bg-card rounded-card p-6 max-w-2xl w-full card-shadow-hover"
-              onClick={(e) => e.stopPropagation()}
+        {/* Error state */}
+        {loadError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-800">{loadError}</p>
+            </div>
+            <button
+              onClick={fetchRecordings}
+              className="flex items-center gap-1.5 text-sm text-red-600 hover:text-red-800 font-medium"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-heading text-xl">
-                    {getChapterInfo(playingRecording.chapter_id)?.title || playingRecording.chapter_id}
-                  </h3>
-                  <p className="text-sm text-medium">
-                    {new Date(playingRecording.recorded_at).toLocaleDateString("nl-NL")} • {formatFileSize(playingRecording.size_bytes)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setPlayingRecording(null)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              <RefreshCw className="h-4 w-4" />
+              Opnieuw
+            </button>
+          </div>
+        )}
 
-              {playingRecording.modality === "video" ? (
-                playingUrl ? (
-                  <video
-                    controls
-                    autoPlay
-                    className="w-full rounded-lg bg-black"
-                    src={playingUrl}
-                  >
-                    Je browser ondersteunt geen video playback.
-                  </video>
-                ) : (
-                  <div className="w-full aspect-video rounded-lg bg-black flex items-center justify-center">
-                    <p className="text-white">Laden...</p>
-                  </div>
-                )
+        {/* Tabs + search */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabFilter)}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <TabsList className="bg-cream border border-neutral-sand w-full sm:w-auto">
+              <TabsTrigger value="all" className="flex-1 sm:flex-none text-xs">
+                Alle {recordings.length > 0 && <span className="ml-1 text-slate-400">({recordings.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="text" className="flex-1 sm:flex-none text-xs">
+                Tekst {counts.text > 0 && <span className="ml-1 text-slate-400">({counts.text})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="video" className="flex-1 sm:flex-none text-xs">
+                Video {counts.video > 0 && <span className="ml-1 text-slate-400">({counts.video})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="audio" className="flex-1 sm:flex-none text-xs">
+                Audio {counts.audio > 0 && <span className="ml-1 text-slate-400">({counts.audio})</span>}
+              </TabsTrigger>
+            </TabsList>
+
+            {recordings.length > 0 && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="search"
+                  placeholder="Zoek op hoofdstuk…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-52 pl-9 pr-4 py-2 text-sm rounded-lg border border-neutral-sand bg-cream focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal placeholder:text-slate-400"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* List */}
+          {(["all", "text", "video", "audio"] as TabFilter[]).map((tab) => (
+            <TabsContent key={tab} value={tab} className="mt-4">
+              {isLoading ? (
+                <RecordingListSkeleton />
+              ) : filtered.length === 0 ? (
+                <EmptyState filter={activeTab} hasSearch={searchQuery.trim().length > 0} />
               ) : (
-                <div className="bg-cream p-8 rounded-lg">
-                  <div className="flex items-center justify-center mb-6">
-                    <Mic className="h-16 w-16 text-orange" />
-                  </div>
-                  {playingUrl ? (
-                    <audio
-                      controls
-                      autoPlay
-                      className="w-full"
-                      src={playingUrl}
-                      onError={(e) => {
-                        const audio = e.currentTarget;
-                        console.error("Audio playback error:", {
-                          error: audio.error,
-                          src: playingUrl,
-                          networkState: audio.networkState,
-                          readyState: audio.readyState,
-                        });
-                      }}
-                      onLoadedMetadata={() => {
-                        console.log("Audio metadata loaded successfully");
-                      }}
-                    >
-                      Je browser ondersteunt geen audio playback.
-                    </audio>
-                  ) : (
-                    <p className="text-center text-medium">Laden...</p>
-                  )}
+                <div className="space-y-2.5">
+                  {filtered.map((recording) => (
+                    <RecordingCard
+                      key={recording.id}
+                      recording={recording}
+                      isDeleting={deletingId === recording.id}
+                      onPlay={handlePlay}
+                      onView={handleView}
+                      onEdit={handleEdit}
+                      onDownload={handleDownload}
+                      onDelete={setDeleteCandidate}
+                    />
+                  ))}
                 </div>
               )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+
+      {/* ── Player Modal ─────────────────────────────────────────────────── */}
+      <Modal
+        isOpen={!!playingRecording}
+        onClose={closePlayer}
+        size="xl"
+        title={
+          playingRecording
+            ? CHAPTERS.find((c) => c.id === playingRecording.chapter_id)?.title ||
+              playingRecording.chapter_id
+            : ""
+        }
+        description={
+          playingRecording
+            ? `${formatRelativeDate(playingRecording.recorded_at)} · ${formatFileSize(playingRecording.size_bytes)}`
+            : ""
+        }
+      >
+        {playingRecording && (
+          <div className="space-y-4">
+            {playingRecording.modality === "video" ? (
+              playingUrl ? (
+                <video
+                  controls
+                  autoPlay
+                  className="w-full rounded-xl bg-black aspect-video"
+                  src={playingUrl}
+                />
+              ) : (
+                <div className="w-full aspect-video rounded-xl bg-slate-100 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
+                </div>
+              )
+            ) : (
+              <div className="bg-cream rounded-xl p-6">
+                <div className="flex justify-center mb-5">
+                  <div className="h-16 w-16 rounded-full bg-orange/15 flex items-center justify-center">
+                    <Mic className="h-8 w-8 text-orange" />
+                  </div>
+                </div>
+                {playingUrl ? (
+                  <audio controls autoPlay className="w-full" src={playingUrl} />
+                ) : (
+                  <div className="flex justify-center">
+                    <Loader2 className="h-6 w-6 text-slate-400 animate-spin" />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {playingTranscript && (
+              <div className="rounded-xl border border-neutral-sand bg-cream p-4">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                  Transcriptie
+                </p>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {playingTranscript}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* ── View Text Modal ──────────────────────────────────────────────── */}
+      <Modal
+        isOpen={!!viewingRecording}
+        onClose={() => setViewingRecording(null)}
+        size="xl"
+        title={
+          viewingRecording
+            ? CHAPTERS.find((c) => c.id === viewingRecording.chapter_id)?.title ||
+              viewingRecording.chapter_id
+            : ""
+        }
+        description={
+          viewingRecording ? formatRelativeDate(viewingRecording.recorded_at) : ""
+        }
+      >
+        {viewingRecording && (
+          <div className="space-y-4">
+            {viewingLoading ? (
+              <div className="space-y-2 py-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+            ) : (
+              <div className="bg-cream rounded-xl p-5">
+                <p className="text-slate-700 leading-relaxed whitespace-pre-wrap text-[15px]">
+                  {viewingContent}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setViewingRecording(null)}>
+                Sluiten
+              </Button>
+              <Button
+                className="btn-primary"
+                onClick={() => {
+                  setViewingRecording(null);
+                  handleEdit(viewingRecording);
+                }}
+                disabled={viewingLoading}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Bewerken
+              </Button>
             </div>
           </div>
         )}
+      </Modal>
 
-        {/* View Text Modal */}
-        {viewingText && (
-          <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setViewingText(null)}
-          >
-            <div
-              className="bg-card rounded-card p-6 max-w-3xl w-full card-shadow-hover max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-heading text-xl">
-                    {getChapterInfo(viewingText.recording.chapter_id)?.title || viewingText.recording.chapter_id}
-                  </h3>
-                  <p className="text-sm text-medium">
-                    {new Date(viewingText.recording.recorded_at).toLocaleDateString("nl-NL")} • {formatFileSize(viewingText.recording.size_bytes)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setViewingText(null)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+      {/* ── Edit Text Modal ──────────────────────────────────────────────── */}
+      <Modal
+        isOpen={!!editingRecording}
+        onClose={() => !isSaving && setEditingRecording(null)}
+        size="xl"
+        title="Tekst bewerken"
+        description={
+          editingRecording
+            ? CHAPTERS.find((c) => c.id === editingRecording.chapter_id)?.title ||
+              editingRecording.chapter_id
+            : ""
+        }
+        closeOnOverlayClick={!isSaving}
+      >
+        {editingRecording && (
+          <div className="space-y-4">
+            {editLoading ? (
+              <div className="space-y-2 py-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
               </div>
-
-              <div className="bg-cream p-6 rounded-lg">
-                <div className="prose prose-slate max-w-none">
-                  <p className="whitespace-pre-wrap text-slate-700 leading-relaxed">
-                    {viewingText.content}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4">
+            ) : (
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                disabled={isSaving}
+                rows={12}
+                className="w-full resize-none rounded-xl border-2 border-input-border bg-cream px-4 py-3 text-base leading-relaxed focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/30 disabled:opacity-50"
+                placeholder="Schrijf hier je tekst…"
+                autoFocus
+              />
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-medium">
+                {editContent.trim().split(/\s+/).filter(Boolean).length} woorden
+              </span>
+              <div className="flex gap-3">
                 <Button
                   variant="ghost"
-                  onClick={() => setViewingText(null)}
+                  onClick={() => setEditingRecording(null)}
+                  disabled={isSaving}
                 >
-                  Sluiten
+                  Annuleren
                 </Button>
                 <Button
                   className="btn-primary"
-                  onClick={() => {
-                    handleEditText(viewingText.recording);
-                    setViewingText(null);
-                  }}
+                  onClick={handleSaveText}
+                  disabled={isSaving || editLoading || !editContent.trim()}
                 >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Bewerken
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Opslaan…
+                    </>
+                  ) : (
+                    "Opslaan"
+                  )}
                 </Button>
               </div>
             </div>
           </div>
         )}
+      </Modal>
 
-        {/* Edit Text Modal */}
-        {editingText && (
-          <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => !isSaving && setEditingText(null)}
-          >
-            <div
-              className="bg-card rounded-card p-6 max-w-3xl w-full card-shadow-hover max-h-[80vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-heading text-xl">
-                    Tekst bewerken
-                  </h3>
-                  <p className="text-sm text-medium">
-                    {getChapterInfo(editingText.recording.chapter_id)?.title || editingText.recording.chapter_id}
-                  </p>
-                </div>
-                <button
-                  onClick={() => !isSaving && setEditingText(null)}
-                  disabled={isSaving}
-                  className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <textarea
-                value={editingText.content}
-                onChange={(e) => setEditingText({ ...editingText, content: e.target.value })}
-                disabled={isSaving}
-                className="flex-1 w-full resize-none rounded-xl border-2 border-input-border bg-cream px-4 py-3 text-input text-base leading-relaxed focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/30 disabled:opacity-50"
-                placeholder="Schrijf hier je tekst..."
-              />
-
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-sm text-medium">
-                  {editingText.content.trim().split(/\s+/).filter(w => w.length > 0).length} woorden
-                </span>
-                <div className="flex gap-3">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setEditingText(null)}
-                    disabled={isSaving}
-                  >
-                    Annuleren
-                  </Button>
-                  <Button
-                    className="btn-primary"
-                    onClick={handleSaveText}
-                    disabled={isSaving || !editingText.content.trim()}
-                  >
-                    {isSaving ? "Opslaan..." : "Opslaan"}
-                  </Button>
-                </div>
-              </div>
+      {/* ── Delete Confirmation Modal ────────────────────────────────────── */}
+      <Modal
+        isOpen={!!deleteCandidate}
+        onClose={() => !isDeleting && setDeleteCandidate(null)}
+        size="sm"
+        title="Opname verwijderen"
+        closeOnOverlayClick={!isDeleting}
+      >
+        {deleteCandidate && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-red-50 border border-red-100">
+              <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">
+                Weet je zeker dat je{" "}
+                <span className="font-semibold">
+                  {CHAPTERS.find((c) => c.id === deleteCandidate.chapter_id)?.title ||
+                    deleteCandidate.chapter_id}
+                </span>{" "}
+                wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setDeleteCandidate(null)}
+                disabled={isDeleting}
+              >
+                Annuleren
+              </Button>
+              <Button
+                className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Verwijderen…
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Definitief verwijderen
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         )}
-      </div>
+      </Modal>
     </AppShell>
   );
 }
