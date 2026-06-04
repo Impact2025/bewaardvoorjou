@@ -26,8 +26,8 @@ function ChapterContent({ params }: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     params.then((resolved) => {
       setChapterId(resolved.id);
-      // Update the active chapter in the journey store
       updateJourney({ activeChapterId: resolved.id as import("@/lib/types").ChapterId });
+      window.scrollTo({ top: 0, behavior: "instant" });
     });
   }, [params, updateJourney]);
 
