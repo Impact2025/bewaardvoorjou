@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-function ResetForm() {
+function ResetForm({ onDone }: { onDone: () => void }) {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
 
@@ -38,6 +38,7 @@ function ResetForm() {
       }
 
       setDone(true);
+      onDone();
     } catch (cause) {
       setError(
         typeof cause === "object" && cause && "message" in cause
@@ -130,6 +131,8 @@ function ResetForm() {
 }
 
 export default function WachtwoordResettenPage() {
+  const [done, setDone] = useState(false);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-6 py-16">
       <Card className="w-full max-w-md border-card bg-card shadow-lg">
@@ -145,13 +148,15 @@ export default function WachtwoordResettenPage() {
             />
           </div>
           <CardTitle className="text-2xl text-heading font-serif">Nieuw wachtwoord</CardTitle>
-          <CardDescription className="text-medium">
-            Kies een nieuw wachtwoord van minimaal 8 tekens.
-          </CardDescription>
+          {!done && (
+            <CardDescription className="text-medium">
+              Kies een nieuw wachtwoord van minimaal 8 tekens.
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <Suspense fallback={<p className="text-sm text-medium text-center">Laden...</p>}>
-            <ResetForm />
+            <ResetForm onDone={() => setDone(true)} />
           </Suspense>
         </CardContent>
       </Card>
