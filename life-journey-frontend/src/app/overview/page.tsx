@@ -170,7 +170,8 @@ function OverviewContent() {
                         {chapter.media.length > 0 && (
                           <div className="mt-3 space-y-2">
                             {chapter.media.map((media) => {
-                              const MediaIcon = media.type === "video" ? Video : Mic;
+                              const MediaIcon = media.type === "video" ? Video : media.type === "text" ? FileText : Mic;
+                              const label = media.type === "video" ? "Video opname" : media.type === "text" ? "Tekst invoer" : "Audio opname";
 
                               return (
                                 <div
@@ -179,11 +180,19 @@ function OverviewContent() {
                                 >
                                   <MediaIcon className="h-4 w-4 text-slate-600" />
                                   <span className="flex-1 text-slate-700">
-                                    {media.type === "video" ? "Video opname" : "Audio opname"}
+                                    {label}
                                   </span>
                                   <span className="text-xs text-slate-500">
                                     {formatDate(media.recordedAt)}
                                   </span>
+                                  {media.type === "text" && (
+                                    <Link
+                                      href="/recordings"
+                                      className="text-xs text-orange hover:underline ml-1"
+                                    >
+                                      Bewerken
+                                    </Link>
+                                  )}
                                 </div>
                               );
                             })}

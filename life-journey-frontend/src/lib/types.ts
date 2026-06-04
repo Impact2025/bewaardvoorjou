@@ -110,7 +110,7 @@ export interface PromptRun {
 export interface MediaAsset {
   id: string;
   chapterId: ChapterId;
-  type: "video" | "audio";
+  type: "video" | "audio" | "text";
   filename: string;
   durationSeconds: number;
   resolution?: string;

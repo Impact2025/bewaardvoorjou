@@ -22,7 +22,7 @@ interface JourneyDetailDto {
   media: Array<{
     id: string;
     chapter_id: ChapterId;
-    modality: "audio" | "video";
+    modality: "audio" | "video" | "text";
     filename: string;
     duration_seconds: number;
     size_bytes: number;
