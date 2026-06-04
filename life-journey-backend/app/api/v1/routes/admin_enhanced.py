@@ -94,12 +94,15 @@ def get_user_detail(
 ):
     import traceback
     from fastapi import HTTPException, status
+    from fastapi.encoders import jsonable_encoder
     from fastapi.responses import JSONResponse
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gebruiker niet gevonden")
     try:
-        return _get_user_detail_inner(user_id, user, db)
+        result = _get_user_detail_inner(user_id, user, db)
+        # Serialize inside try-catch so serialization errors are also captured
+        return JSONResponse(content=jsonable_encoder(result))
     except Exception as exc:
         return JSONResponse(status_code=500, content={"error": str(exc), "trace": traceback.format_exc()})
 
