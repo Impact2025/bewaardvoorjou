@@ -96,6 +96,20 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(
+      `${API_BASE}/blog/public/list?section=blog&limit=200`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const articles: { slug: string }[] = await res.json();
+    return articles.map((a) => ({ slug: a.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {

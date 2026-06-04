@@ -3,22 +3,14 @@
 
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /chapters
-Disallow: /privacy
-Disallow: /onboarding
+Disallow: /dashboard/
+Disallow: /chapters/
+Disallow: /onboarding/
+Disallow: /admin/
 Disallow: /api/
-
-# Allow only public pages
-Allow: /$
-Allow: /login
-Allow: /register
 
 # Sitemap
 Sitemap: https://bewaardvoorjou.nl/sitemap.xml
-
-# Crawl-delay for all bots
-Crawl-delay: 10
 
 # Block AI scrapers from training on user content
 User-agent: GPTBot

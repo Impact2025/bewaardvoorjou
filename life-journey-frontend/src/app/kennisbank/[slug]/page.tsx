@@ -38,6 +38,20 @@ async function getArticle(slug: string): Promise<BlogPost | null> {
   }
 }
 
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(
+      `${API_BASE}/blog/public/list?section=knowledge&limit=200`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const articles: { slug: string }[] = await res.json();
+    return articles.map((a) => ({ slug: a.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
