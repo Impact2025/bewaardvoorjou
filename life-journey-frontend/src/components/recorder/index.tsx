@@ -71,6 +71,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   } = state;
 
   const actions = useRecorderActions({ chapterId });
+  const questionRef = useRef<HTMLDivElement>(null);
 
   // AVG Art. 9 — eenmalige consent voor audio/video opnamen
   const { consentGiven, giveConsent, isReady } = useRecordingConsent(session?.user.id);
@@ -152,6 +153,17 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapterId, session?.token, journey?.id, dispatch]);
 
+  // Scroll naar de vraag zodra een vervolgvraag binnenkomt (niet bij initieel laden)
+  const isFirstQuestion = useRef(true);
+  useEffect(() => {
+    if (!currentQuestion) return;
+    if (isFirstQuestion.current) {
+      isFirstQuestion.current = false;
+      return;
+    }
+    questionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [currentQuestion]);
+
   const isRecording = recordingState === "recording";
   const isPreviewing = recordingState === "previewing";
   const isIdle = recordingState === "idle";
@@ -190,7 +202,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
 
       {/* AI-vraag — prominent bovenaan, verborgen na opslaan */}
       {currentQuestion && !showNextChapterPrompt && (
-        <div className="rounded-xl border border-warm-amber/30 bg-warm-amber/5 px-5 py-4">
+        <div ref={questionRef} className="rounded-xl border border-warm-amber/30 bg-warm-amber/5 px-5 py-4">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-medium text-warm-amber uppercase tracking-wide">
               {conversationSessionId && conversationTurnNumber > 0
