@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, text
 
 from app.models.base import Base
 
@@ -17,8 +17,13 @@ def generate_uuid() -> str:
 class SupportTicket(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
 
-    # Auto-increment human-readable number (BVJ-0001)
-    ticket_number = Column(Integer, nullable=False, unique=True, autoincrement=True)
+    # Human-readable number (BVJ-0001) — driven by a PostgreSQL sequence
+    ticket_number = Column(
+        Integer,
+        nullable=False,
+        unique=True,
+        server_default=text("nextval('supportticket_ticket_number_seq'::regclass)"),
+    )
 
     # Ingelogde gebruiker (optioneel — gasten hebben geen user_id)
     user_id = Column(String, ForeignKey("user.id", ondelete="SET NULL"), nullable=True, index=True)

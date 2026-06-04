@@ -15,10 +15,12 @@ import sqlalchemy as sa
 
 
 def upgrade() -> None:
+    op.execute(sa.text("CREATE SEQUENCE IF NOT EXISTS supportticket_ticket_number_seq START 1"))
     op.create_table(
         'supportticket',
         sa.Column('id', sa.String(), nullable=False),
-        sa.Column('ticket_number', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('ticket_number', sa.Integer(), nullable=False,
+                  server_default=sa.text("nextval('supportticket_ticket_number_seq'::regclass)")),
         sa.Column('user_id', sa.String(), nullable=True),
         sa.Column('guest_name', sa.String(length=128), nullable=True),
         sa.Column('guest_email', sa.String(length=255), nullable=True),
@@ -67,3 +69,4 @@ def downgrade() -> None:
     op.drop_index('ix_supportticket_created_at', table_name='supportticket')
     op.drop_index('ix_supportticket_category', table_name='supportticket')
     op.drop_table('supportticket')
+    op.execute(sa.text("DROP SEQUENCE IF EXISTS supportticket_ticket_number_seq"))

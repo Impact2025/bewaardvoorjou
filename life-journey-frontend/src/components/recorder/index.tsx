@@ -56,7 +56,7 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
   const router = useRouter();
   const { session } = useAuth();
   const { journey } = useJourneyBootstrap();
-  const { state, refs, setAssistantChatOpen, dispatch } = useRecorder();
+  const { state, refs, setAssistantChatOpen, setTextContent, dispatch } = useRecorder();
   const {
     mode,
     state: recordingState,
@@ -68,10 +68,44 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
     currentQuestion,
     showNextChapterPrompt,
     uploadStatus,
+    textContent,
   } = state;
 
   const actions = useRecorderActions({ chapterId });
   const questionRef = useRef<HTMLDivElement>(null);
+
+  // Draft persistence — herstel concept na tabblad wisselen
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftKey = chapterId ? `draft-chapter-${chapterId}` : null;
+
+  // Herstel concept bij (her)laden van het hoofdstuk
+  useEffect(() => {
+    if (!draftKey) return;
+    const saved = localStorage.getItem(draftKey);
+    if (saved) {
+      setTextContent(saved);
+      setDraftRestored(true);
+    }
+  // Alleen uitvoeren bij wisselen van hoofdstuk
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey]);
+
+  // Auto-save concept bij elke toetsaanslag
+  useEffect(() => {
+    if (!draftKey) return;
+    if (textContent) {
+      localStorage.setItem(draftKey, textContent);
+    } else {
+      localStorage.removeItem(draftKey);
+    }
+  }, [draftKey, textContent]);
+
+  // Verberg de herstelmelding na 6 seconden
+  useEffect(() => {
+    if (!draftRestored) return;
+    const t = setTimeout(() => setDraftRestored(false), 6000);
+    return () => clearTimeout(t);
+  }, [draftRestored]);
 
   // AVG Art. 9 — eenmalige consent voor audio/video opnamen
   const { consentGiven, giveConsent, isReady } = useRecordingConsent(session?.user.id);
@@ -218,6 +252,21 @@ function RecorderFrameInner({ chapterId }: { chapterId?: string }) {
           <p className="text-base text-slate-800 leading-relaxed font-medium">
             {currentQuestion}
           </p>
+        </div>
+      )}
+
+      {/* Herstelmelding na tabblad wisselen */}
+      {draftRestored && mode === "text" && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-teal-50 border border-teal-200 rounded-lg text-sm text-teal-800">
+          <span>✏️</span>
+          <span>Je concept is hersteld — ga verder waar je gebleven was.</span>
+          <button
+            onClick={() => setDraftRestored(false)}
+            className="ml-auto text-teal-500 hover:text-teal-700 text-xs"
+            aria-label="Sluit melding"
+          >
+            ✕
+          </button>
         </div>
       )}
 

@@ -641,6 +641,9 @@ export function useRecorderActions({ chapterId }: UseRecorderActionsProps) {
 
       setUploadStatus("Tekst opgeslagen!");
 
+      // Verwijder het lokale concept — tekst is succesvol opgeslagen
+      if (chapterId) localStorage.removeItem(`draft-chapter-${chapterId}`);
+
       log.debug("Text saved successfully, starting AI conversation flow");
 
       // AI Interviewer 2.0: Handle conversation for text mode

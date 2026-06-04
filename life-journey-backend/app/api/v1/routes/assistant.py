@@ -39,6 +39,7 @@ from app.services.ai.conversation import (
 )
 from app.models.user import User
 from app.services.journey_progress import get_previous_chapters_summary
+from loguru import logger
 
 
 router = APIRouter()
@@ -259,9 +260,15 @@ def resume_conversation(
   Returns the active session so the frontend can pick up exactly where
   the user left off after a page refresh or reconnect.
   """
-  result = resume_conversation_session(db=db, journey_id=journey_id, chapter_id=chapter_id)
+  _empty = {"session_id": None, "current_question": None, "turn_number": 0, "conversation_complete": False}
+  try:
+    result = resume_conversation_session(db=db, journey_id=journey_id, chapter_id=chapter_id)
+  except Exception as exc:
+    logger.warning(f"resume_conversation_session failed ({journey_id}/{chapter_id}): {exc}")
+    return _empty
+
   if not result:
-    return {"session_id": None, "current_question": None, "turn_number": 0, "conversation_complete": False}
+    return _empty
 
   session_id, current_question, turn_number, conversation_complete = result
   return {
