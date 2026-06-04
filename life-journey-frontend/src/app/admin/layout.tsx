@@ -20,11 +20,13 @@ import {
   GraduationCap,
   ListOrdered,
   Tag,
+  Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/support", label: "Support", icon: Headphones },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/waitlist", label: "Wachtlijst", icon: ListOrdered },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },

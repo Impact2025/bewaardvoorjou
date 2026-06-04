@@ -3,8 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getOpenTicketCount } from "@/lib/api/support";
+import { HelpButton } from "@/components/support/HelpButton";
 import { AccountActions } from "@/components/account-actions";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { cn } from "@/lib/utils";
@@ -20,7 +22,7 @@ const navItems = [
   { href: "/family", label: "Familie" },
   { href: "/recordings", label: "Mijn Opnames" },
   { href: "/memos", label: "Memo's" },
-  { href: "/instellingen", label: "Instellingen" },
+  { href: "/dashboard/support", label: "Hulp" },
 ];
 
 interface AppShellProps {
@@ -37,6 +39,7 @@ const settingsItems = [
   { href: "/admin", label: "Admin Dashboard" },
   { href: "/onboarding", label: "Profiel aanvullen" },
   { href: "#handleiding", label: "Handleiding" },
+  { href: "/dashboard/support", label: "Stel een vraag" },
   { href: "/about", label: "Over" },
   { href: "/privacy", label: "Privacy" },
   { href: "/security", label: "Veiligheid" },
@@ -55,7 +58,14 @@ export function AppShell({
   const { largeText, highContrast, toggleLargeText, toggleHighContrast } = useAccessibility();
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [openTicketCount, setOpenTicketCount] = useState(0);
   const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      getOpenTicketCount().then(setOpenTicketCount);
+    }
+  }, [session]);
 
   const userInitial =
     session?.user?.displayName?.[0]?.toUpperCase() ||
@@ -251,22 +261,30 @@ export function AppShell({
               aria-label="Hoofdnavigatie"
             >
               <div className="flex items-center gap-1 overflow-x-auto text-sm text-slate-600">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center rounded-full px-4 py-2 transition-colors whitespace-nowrap",
-                      "focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2",
-                      activeHref === item.href
-                        ? "bg-orange/10 text-orange font-medium"
-                        : "hover:bg-gray-100 hover:text-slate-900",
-                    )}
-                    aria-current={activeHref === item.href ? "page" : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  const isSupport = item.href === "/dashboard/support";
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 transition-colors whitespace-nowrap",
+                        "focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2",
+                        activeHref === item.href
+                          ? "bg-orange/10 text-orange font-medium"
+                          : "hover:bg-gray-100 hover:text-slate-900",
+                      )}
+                      aria-current={activeHref === item.href ? "page" : undefined}
+                    >
+                      {item.label}
+                      {isSupport && openTicketCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                          {openTicketCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </nav>
           )}
@@ -282,6 +300,7 @@ export function AppShell({
         {children}
       </main>
 
+      <HelpButton />
       <MobileBottomNav />
     </div>
   );

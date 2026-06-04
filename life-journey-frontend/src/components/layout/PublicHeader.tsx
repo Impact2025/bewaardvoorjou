@@ -18,6 +18,7 @@ export function PublicHeader() {
     { href: "/blog", label: "Blog" },
     { href: "/pricing", label: "Prijzen" },
     { href: "/about", label: "Over ons" },
+    { href: "/contact", label: "Hulp" },
   ];
 
   return (

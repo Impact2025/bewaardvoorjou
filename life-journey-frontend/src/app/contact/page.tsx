@@ -1,21 +1,12 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import { Mail, MessageCircle, Clock, HelpCircle } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Neem contact op met BewaardVoorJou.nl. We helpen je graag verder met vragen over het platform, je account of het bewaren van je levensverhaal.",
-  openGraph: {
-    title: "Contact | BewaardVoorJou.nl",
-    description:
-      "Neem contact op met BewaardVoorJou.nl. We helpen je graag verder met vragen over het platform, je account of het bewaren van je levensverhaal.",
-    url: "https://bewaardvoorjou.nl/contact",
-  },
-  alternates: { canonical: "https://bewaardvoorjou.nl/contact" },
-};
+import { Mail, MessageCircle, Clock, HelpCircle, CheckCircle, Loader2 } from "lucide-react";
+import { createTicket, type TicketCategory } from "@/lib/api/support";
+import { FaqPrescreen } from "@/components/support/FaqPrescreen";
 
 const contactOptions = [
   {
@@ -67,7 +58,46 @@ const faqSnippets = [
   },
 ];
 
+const CATEGORY_OPTIONS: { value: TicketCategory; label: string }[] = [
+  { value: "overig", label: "Kies een onderwerp..." },
+  { value: "overig", label: "Algemene vraag" },
+  { value: "account", label: "Vraag over mijn account" },
+  { value: "technisch", label: "Technisch probleem" },
+  { value: "privacy", label: "Privacy of gegevensvraag" },
+  { value: "abonnement", label: "Abonnement of betaling" },
+];
+
 export default function ContactPage() {
+  const [naam, setNaam] = useState("");
+  const [email, setEmail] = useState("");
+  const [category, setCategory] = useState<TicketCategory>("overig");
+  const [bericht, setBericht] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ ticketNumber: number } | null>(null);
+  const [prescreenDismissed, setPrescreenDismissed] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const ticket = await createTicket({
+        guest_name: naam,
+        guest_email: email,
+        category,
+        subject: `Vraag van ${naam}`,
+        message: bericht,
+      });
+      setSuccess({ ticketNumber: ticket.ticket_number });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Er ging iets mis. Probeer het opnieuw.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-cream">
       <PublicHeader />
@@ -115,7 +145,7 @@ export default function ContactPage() {
             })}
           </div>
 
-          {/* Contactformulier */}
+          {/* Formulier + FAQ */}
           <div className="grid lg:grid-cols-[1fr_1.1fr] gap-10 items-start">
             {/* FAQ snippets */}
             <div>
@@ -152,90 +182,149 @@ export default function ContactPage() {
 
             {/* Formulier */}
             <div className="bg-white rounded-2xl border border-neutral-sand p-8 shadow-sm">
-              <h2 className="text-xl font-serif font-bold text-slate-900 mb-2">
-                Stuur ons een bericht
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                We reageren doorgaans binnen 1–2 werkdagen.
-              </p>
-              <form className="space-y-5" action="mailto:info@bewaardvoorjou.nl" method="GET">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="naam" className="block text-sm font-medium text-slate-700 mb-1.5">
-                      Naam <span className="text-orange">*</span>
-                    </label>
-                    <input
-                      id="naam"
-                      name="naam"
-                      required
-                      placeholder="Je naam"
-                      className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
-                    />
+              {success ? (
+                /* Bevestiging */
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                      E-mailadres <span className="text-orange">*</span>
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="jouw@email.nl"
-                      className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="onderwerp" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Onderwerp <span className="text-orange">*</span>
-                  </label>
-                  <select
-                    id="onderwerp"
-                    name="onderwerp"
-                    required
-                    className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
+                  <h2 className="text-xl font-serif font-bold text-slate-900 mb-2">
+                    We hebben je vraag ontvangen!
+                  </h2>
+                  <p className="text-slate-600 mb-4">
+                    Je vraag is geregistreerd onder nummer{" "}
+                    <strong className="text-orange">BVJ-{String(success.ticketNumber).padStart(4, "0")}</strong>.
+                  </p>
+                  <p className="text-sm text-slate-500 mb-6">
+                    Je ontvangt een bevestiging per e-mail. We reageren binnen 1–2 werkdagen.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSuccess(null);
+                      setNaam("");
+                      setEmail("");
+                      setBericht("");
+                      setCategory("overig");
+                    }}
+                    className="text-sm text-orange hover:underline"
                   >
-                    <option value="">Kies een onderwerp...</option>
-                    <option value="algemeen">Algemene vraag</option>
-                    <option value="account">Vraag over mijn account</option>
-                    <option value="technisch">Technisch probleem</option>
-                    <option value="privacy">Privacy of gegevensvraag</option>
-                    <option value="abonnement">Abonnement of betaling</option>
-                    <option value="anders">Anders</option>
-                  </select>
+                    Nog een vraag stellen
+                  </button>
                 </div>
+              ) : (
+                /* Formulier */
+                <>
+                  <h2 className="text-xl font-serif font-bold text-slate-900 mb-2">
+                    Stel een vraag
+                  </h2>
+                  <p className="text-sm text-slate-500 mb-6">
+                    We reageren doorgaans binnen 1–2 werkdagen.
+                  </p>
 
-                <div>
-                  <label htmlFor="bericht" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Bericht <span className="text-orange">*</span>
-                  </label>
-                  <textarea
-                    id="bericht"
-                    name="bericht"
-                    required
-                    rows={5}
-                    placeholder="Vertel ons hoe we je kunnen helpen..."
-                    className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition resize-none"
-                  />
-                </div>
+                  {error && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                      {error}
+                    </div>
+                  )}
 
-                <button
-                  type="submit"
-                  className="w-full bg-orange hover:bg-orange/90 text-white font-semibold py-3 rounded-full transition-colors shadow-md hover:shadow-lg"
-                >
-                  Verstuur bericht
-                </button>
+                  <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="naam" className="block text-sm font-medium text-slate-700 mb-1.5">
+                          Naam <span className="text-orange">*</span>
+                        </label>
+                        <input
+                          id="naam"
+                          required
+                          value={naam}
+                          onChange={(e) => setNaam(e.target.value)}
+                          placeholder="Je naam"
+                          className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+                          E-mailadres <span className="text-orange">*</span>
+                        </label>
+                        <input
+                          id="email"
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="jouw@email.nl"
+                          className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
+                        />
+                      </div>
+                    </div>
 
-                <p className="text-xs text-slate-400 text-center">
-                  Door te versturen ga je akkoord met ons{" "}
-                  <Link href="/privacy" className="underline hover:text-slate-600">
-                    privacybeleid
-                  </Link>
-                  .
-                </p>
-              </form>
+                    <div>
+                      <label htmlFor="onderwerp" className="block text-sm font-medium text-slate-700 mb-1.5">
+                        Waar gaat je vraag over? <span className="text-orange">*</span>
+                      </label>
+                      <select
+                        id="onderwerp"
+                        required
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as TicketCategory)}
+                        className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition"
+                      >
+                        <option value="overig">Kies een onderwerp...</option>
+                        <option value="overig">Algemene vraag</option>
+                        <option value="account">Vraag over mijn account</option>
+                        <option value="technisch">Technisch probleem</option>
+                        <option value="privacy">Privacy of gegevensvraag</option>
+                        <option value="abonnement">Abonnement of betaling</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="bericht" className="block text-sm font-medium text-slate-700 mb-1.5">
+                        Jouw vraag of bericht <span className="text-orange">*</span>
+                      </label>
+                      <textarea
+                        id="bericht"
+                        required
+                        rows={5}
+                        value={bericht}
+                        onChange={(e) => { setBericht(e.target.value); setPrescreenDismissed(false); }}
+                        placeholder="Vertel ons hoe we je kunnen helpen..."
+                        className="w-full rounded-xl border border-neutral-sand bg-cream px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange focus:border-transparent transition resize-none"
+                      />
+                    </div>
+
+                    {!prescreenDismissed && (
+                      <FaqPrescreen
+                        query={bericht}
+                        onDismiss={() => setPrescreenDismissed(true)}
+                      />
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-orange hover:bg-orange/90 disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Versturen...
+                        </>
+                      ) : (
+                        "Verstuur mijn vraag"
+                      )}
+                    </button>
+
+                    <p className="text-xs text-slate-400 text-center">
+                      Door te versturen ga je akkoord met ons{" "}
+                      <Link href="/privacy" className="underline hover:text-slate-600">
+                        privacybeleid
+                      </Link>
+                      .
+                    </p>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>
