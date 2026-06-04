@@ -23,18 +23,28 @@ function EmailBevestigenContent() {
       return;
     }
 
+    let cancelled = false;
+    let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+
     verifyEmail(token)
       .then((session) => {
+        if (cancelled) return;
         setSession(session);
         setState("success");
-        setTimeout(() => {
+        redirectTimer = setTimeout(() => {
           router.push(session.primaryJourneyId ? "/dashboard" : "/onboarding");
         }, 2000);
       })
       .catch((err: { message?: string }) => {
+        if (cancelled) return;
         const msg = err?.message ?? "";
         setState(msg.includes("verlopen") ? "expired" : "invalid");
       });
+
+    return () => {
+      cancelled = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
   }, [searchParams, setSession, router]);
 
   return (

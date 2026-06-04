@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -47,42 +48,37 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setIsLoading(false);
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => {
-    const setSession = (newSession: AuthSession) => {
-      const normalized: AuthSession = {
-        ...newSession,
-        // Ensure the user object has all required properties
-        user: {
-          ...newSession.user,
-          displayName: newSession.user.displayName || newSession.user.email || "User"
-        },
-        primaryJourneyId: newSession.primaryJourneyId ?? null,
-      };
-      setSessionState(normalized);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-        // Sync JWT token to cookie for middleware validation
-        const secure = location.protocol === "https:" ? "; Secure" : "";
-        document.cookie = `ljauth=${newSession.token}; path=/; SameSite=Strict; max-age=86400${secure}`;
-      }
+  const setSession = useCallback((newSession: AuthSession) => {
+    const normalized: AuthSession = {
+      ...newSession,
+      user: {
+        ...newSession.user,
+        displayName: newSession.user.displayName || newSession.user.email || "User"
+      },
+      primaryJourneyId: newSession.primaryJourneyId ?? null,
     };
+    setSessionState(normalized);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      const secure = location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `ljauth=${newSession.token}; path=/; SameSite=Strict; max-age=86400${secure}`;
+    }
+  }, []);
 
-    const clearSession = () => {
-      setSessionState(null);
-      if (typeof window !== "undefined") {
-        window.localStorage.removeItem(STORAGE_KEY);
-        // Clear auth cookie
-        document.cookie = "ljauth=; path=/; max-age=0";
-      }
-    };
+  const clearSession = useCallback(() => {
+    setSessionState(null);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY);
+      document.cookie = "ljauth=; path=/; max-age=0";
+    }
+  }, []);
 
-    return {
-      session,
-      setSession,
-      clearSession,
-      isLoading,
-    };
-  }, [session, isLoading]);
+  const value = useMemo<AuthContextValue>(() => ({
+    session,
+    setSession,
+    clearSession,
+    isLoading,
+  }), [session, isLoading, setSession, clearSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
