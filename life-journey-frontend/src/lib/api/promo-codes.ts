@@ -31,6 +31,7 @@ export interface ValidatePromoResponse {
   discount_cents: number;
   discount_type: string | null;
   discount_value: number | null;
+  grants_package?: string | null;
   error: string | null;
 }
 

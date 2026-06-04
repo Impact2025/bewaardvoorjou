@@ -498,6 +498,17 @@ export function ChatOnboarding() {
       return merged;
     });
 
+    // Skip promo code step if user already has an active package (applied during registration)
+    if (session?.user?.packageTier && session.user.packageTier !== "NONE") {
+      await showGuideMessages([
+        "Bijna klaar!",
+        "Dan zetten we alles klaar voor je.",
+        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
+      ]);
+      setPhase("summary");
+      return;
+    }
+
     await showGuideMessages([
       "Bijna klaar!",
       "Heb je een promotiecode ontvangen? Vul hem hieronder in — anders sla je gewoon over.",

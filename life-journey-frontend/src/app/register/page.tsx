@@ -3,11 +3,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { registerUser } from "@/lib/auth-client";
+import { validatePromoCode } from "@/lib/api/promo-codes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+const PACKAGE_NAMES: Record<string, string> = {
+  BEGIN: "Het Begin",
+  ERFGOED: "De Erfgoed Box",
+  VOOR_ALTIJD: "Voor Altijd",
+  DIGITAAL: "Digitaal",
+};
 
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length < 4) return 0;
@@ -32,6 +40,38 @@ export default function RegisterPage() {
   const [consentSpecialCategories, setConsentSpecialCategories] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
   const [promoCode, setPromoCode] = useState("");
+  const [promoValidation, setPromoValidation] = useState<{ valid: boolean; message: string } | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+
+  useEffect(() => {
+    const trimmed = promoCode.trim();
+    if (trimmed.length < 4) {
+      setPromoValidation(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsValidatingPromo(true);
+      try {
+        const result = await validatePromoCode(trimmed, "BEGIN");
+        if (result.valid) {
+          const pkgName = result.grants_package ? PACKAGE_NAMES[result.grants_package] : null;
+          setPromoValidation({
+            valid: true,
+            message: pkgName
+              ? `Geldige code — je account wordt direct geactiveerd met het ${pkgName} pakket.`
+              : "Geldige code! De korting wordt automatisch toegepast.",
+          });
+        } else {
+          setPromoValidation({ valid: false, message: result.error ?? "Ongeldige promotiecode" });
+        }
+      } catch {
+        setPromoValidation(null);
+      } finally {
+        setIsValidatingPromo(false);
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [promoCode]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -170,16 +210,36 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium text-label" htmlFor="promoCode">
                 Promotiecode <span className="text-slate-400 font-normal">(optioneel)</span>
               </label>
-              <input
-                id="promoCode"
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                placeholder="Bijv. WELKOM2026"
-                maxLength={32}
-                className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input font-mono shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
-              />
-              <p className="text-xs text-slate-400">Heb je een code ontvangen? Vul hem hier in — je account wordt direct geactiveerd.</p>
+              <div className="relative">
+                <input
+                  id="promoCode"
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="Bijv. WELKOM2026"
+                  maxLength={32}
+                  className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 pr-10 text-input font-mono shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+                />
+                {promoCode.trim().length >= 4 && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isValidatingPromo ? (
+                      <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />
+                    ) : promoValidation?.valid ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : promoValidation ? (
+                      <XCircle className="h-4 w-4 text-red-400" />
+                    ) : null}
+                  </span>
+                )}
+              </div>
+              {promoValidation && (
+                <p className={`text-xs flex items-center gap-1.5 ${promoValidation.valid ? "text-green-600" : "text-red-500"}`}>
+                  {promoValidation.message}
+                </p>
+              )}
+              {!promoValidation && (
+                <p className="text-xs text-slate-400">Heb je een code ontvangen? Vul hem hier in — je account wordt direct geactiveerd.</p>
+              )}
             </div>
 
             {/* AVG Toestemmingen */}
