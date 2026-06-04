@@ -97,7 +97,7 @@ def test_create_magic_link_token_sets_token_on_user():
     assert user.magic_link_token == token
 
 
-def test_create_magic_link_token_expires_in_7_days():
+def test_create_magic_link_token_expires_in_24_hours():
     db = _FakeDb()
     user = _make_user()
     db.users.append(user)
@@ -107,7 +107,7 @@ def test_create_magic_link_token_expires_in_7_days():
     if expires.tzinfo is None:
         expires = expires.replace(tzinfo=timezone.utc)
     delta = expires - now
-    assert timedelta(days=6) < delta <= timedelta(days=7, seconds=5)
+    assert timedelta(hours=23) < delta <= timedelta(hours=24, seconds=5)
 
 
 # ── verify_magic_link_token ──────────────────────────────────────────────────

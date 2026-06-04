@@ -36,7 +36,7 @@ jobs:
         env:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-test-secret-key-for-testing-only-32chars
-          DATABASE_URL: sqlite+aiosqlite:///./test.db
+          DATABASE_URL: sqlite:///./test.db
         run: pytest tests/ -v --tb=short
 
   frontend:

@@ -63,6 +63,7 @@ class _Order:
     status: str = "PENDING"
     paid_at: datetime | None = None
     stripe_payment_method: str | None = None
+    promo_code_used: str | None = None
 
 
 class _FakeQuery:
