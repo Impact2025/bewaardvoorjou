@@ -38,6 +38,11 @@ export default function StepPayment({ state, totalPrice, onSuccess }: Props) {
           promo_code: state.promoCode || undefined,
         });
         if (!cancelled) {
+          if (result.amount_cents === 0) {
+            // Gratis order — geen Stripe nodig, direct bevestigen
+            onSuccess(result.order_id);
+            return;
+          }
           setClientSecret(result.client_secret);
           setPublishableKey(result.publishable_key);
           setOrderId(result.order_id);
@@ -218,7 +223,7 @@ function PaymentForm({
         ) : (
           <>
             <Lock className="h-4 w-4" />
-            Betaal €{totalPrice} →
+            {totalPrice === 0 ? "Bevestig gratis bestelling →" : `Betaal €${totalPrice} →`}
           </>
         )}
       </button>

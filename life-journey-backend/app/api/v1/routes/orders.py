@@ -108,7 +108,56 @@ def create_payment_intent(
         promo_code_used = payload.promo_code.upper().strip()
 
     discount = early_bird_discount + promo_discount
-    total_cents = max(package_price + addon_total - discount, 50)  # Stripe minimum €0.50
+    total_cents = package_price + addon_total - discount
+
+    # Gratis order — promo maakt het volledig gratis, geen Stripe nodig
+    if total_cents <= 0:
+        contact_email = (
+            current_user.email if current_user
+            else (str(payload.guest_email) if payload.guest_email else None)
+        )
+        if not contact_email:
+            raise HTTPException(
+                status_code=400,
+                detail="E-mailadres vereist voor niet-ingelogde gebruikers",
+            )
+        import secrets as _secrets_free
+        gift_card_code = (
+            _secrets_free.token_urlsafe(8)[:10].upper()
+            if payload.package_type == "DIGITAAL"
+            else None
+        )
+        order = Order(
+            user_id=current_user.id if current_user else None,
+            guest_email=None if current_user else contact_email,
+            package_type=payload.package_type,
+            price_paid=0,
+            discount_cents=discount,
+            promo_code_used=promo_code_used,
+            addons=list(set(payload.addons)),
+            addons_price=addon_total,
+            recipient_name=payload.recipient_name,
+            recipient_email=str(payload.recipient_email) if payload.recipient_email else None,
+            personal_message=payload.personal_message,
+            shipping_address=payload.shipping_address.model_dump() if payload.shipping_address else None,
+            gift_card_code=gift_card_code,
+            status="PAID",
+        )
+        db.add(order)
+        db.commit()
+        db.refresh(order)
+        logger.info(f"Gratis order aangemaakt: {order.id} ({payload.package_type}, promo={promo_code_used})")
+        return CreatePaymentIntentResponse(
+            client_secret="",
+            payment_intent_id="",
+            order_id=order.id,
+            amount_cents=0,
+            publishable_key=settings.stripe_publishable_key or "",
+        )
+
+    # Stripe minimum €0.50
+    if total_cents < 50:
+        total_cents = 50
 
     # Contactemail: ingelogde gebruiker of gast-email
     contact_email = (

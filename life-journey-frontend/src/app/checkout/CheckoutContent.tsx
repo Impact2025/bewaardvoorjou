@@ -104,7 +104,9 @@ export default function CheckoutContent() {
       : 0
     : 0;
   const promoDiscount = state.promoDiscountCents / 100;
-  const totalPrice = PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount - promoDiscount;
+  const baseAfterEarlyBird = Math.max(0, PACKAGE_PRICES[state.packageType] + totalAddons - earlyBirdDiscount);
+  const effectivePromoDiscount = Math.min(promoDiscount, baseAfterEarlyBird);
+  const totalPrice = Math.max(0, baseAfterEarlyBird - effectivePromoDiscount);
 
   return (
     <div className="min-h-screen bg-[#f8f6f2]">
@@ -122,7 +124,7 @@ export default function CheckoutContent() {
             <p className="text-xs text-[#888]">Bewaardvoorjou</p>
           </div>
           <div className="text-right">
-            <p className="font-bold text-[#1a1a1a]">€{totalPrice}</p>
+            <p className="font-bold text-[#1a1a1a]">{totalPrice === 0 ? "Gratis" : `€${totalPrice}`}</p>
             <p className="text-xs text-[#888]">eenmalig</p>
           </div>
         </div>
@@ -166,7 +168,7 @@ export default function CheckoutContent() {
           <StepSelectPlan
             state={state}
             earlyBirdDiscount={earlyBirdDiscount}
-            promoDiscount={promoDiscount}
+            promoDiscount={effectivePromoDiscount}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onNext={() => setStep(1)}
           />
@@ -221,7 +223,7 @@ function StepSelectPlan({
     return sum + (opt?.price ?? 0);
   }, 0);
   const ebDiscount = ["BEGIN", "DIGITAAL"].includes(state.packageType) ? earlyBirdDiscount : 0;
-  const total = PACKAGE_PRICES[state.packageType] + totalAddons - ebDiscount - promoDiscount;
+  const total = Math.max(0, PACKAGE_PRICES[state.packageType] + totalAddons - ebDiscount - promoDiscount);
 
   const handleApplyPromo = async () => {
     const code = promoInput.trim().toUpperCase();
@@ -405,7 +407,7 @@ function StepSelectPlan({
         )}
         <div className="flex justify-between items-center font-bold text-[#1a1a1a] border-t border-[#f0ece6] pt-2 mt-2">
           <span>Totaal</span>
-          <span>€{total}</span>
+          <span>{total === 0 ? "Gratis 🎉" : `€${total}`}</span>
         </div>
         <p className="text-xs text-[#888] mt-1">Inclusief gratis verzending</p>
       </div>
