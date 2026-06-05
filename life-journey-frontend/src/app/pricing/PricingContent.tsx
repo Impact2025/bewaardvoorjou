@@ -243,10 +243,9 @@ export default function PricingContent() {
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-[#d4af37] text-2xl mb-4">⭐⭐⭐⭐⭐</div>
           <blockquote className="font-serif text-xl md:text-2xl leading-relaxed mb-6">
-            "Mijn moeder was 78 en had kanker. Dit gaf ons de tijd om rustig te praten over haar
-            leven. Drie maanden later overleed ze. Ik ben zo dankbaar dat we dit hebben."
+            "Eindelijk een plek waar je jouw leven kunt vastleggen — niet als een droog CV, maar als een echt verhaal. Voor de mensen die na jou komen."
           </blockquote>
-          <p className="text-[#d4af37] font-medium">— Robert, Amsterdam</p>
+          <p className="text-[#d4af37] font-medium">— Ben van Munster, eerste gebruiker</p>
         </div>
       </section>
 
