@@ -61,6 +61,11 @@ export function PostListPage({ section }: PostListPageProps) {
       } else {
         await blogApi.publish(post.id);
       }
+      await fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: post.slug }),
+      });
       await loadPosts();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Actie mislukt");

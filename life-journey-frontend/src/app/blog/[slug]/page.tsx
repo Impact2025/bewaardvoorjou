@@ -119,7 +119,8 @@ export async function generateMetadata({
   const article = await getArticle(slug);
   if (!article) return { title: "Artikel niet gevonden" };
 
-  const images = article.og_image ?? article.header_image_url ?? undefined;
+  const DEFAULT_OG = "https://bewaardvoorjou.nl/Header-Image-min.png";
+  const ogImage = article.og_image ?? article.header_image_url ?? DEFAULT_OG;
 
   return {
     title: article.meta_title ?? `${article.title} | BewaardVoorJou.nl`,
@@ -134,7 +135,7 @@ export async function generateMetadata({
       url: `https://bewaardvoorjou.nl/blog/${slug}`,
       type: "article",
       publishedTime: article.published_at ?? article.created_at,
-      ...(images ? { images: [{ url: images }] } : {}),
+      images: [{ url: ogImage }],
     },
   };
 }
@@ -178,9 +179,7 @@ export default async function BlogArtikelPage({
     },
     mainEntityOfPage: `https://bewaardvoorjou.nl/blog/${slug}`,
     keywords: article.keywords ?? undefined,
-    ...(article.og_image || article.header_image_url
-      ? { image: article.og_image ?? article.header_image_url }
-      : {}),
+    image: article.og_image ?? article.header_image_url ?? "https://bewaardvoorjou.nl/Header-Image-min.png",
   };
 
   return (
