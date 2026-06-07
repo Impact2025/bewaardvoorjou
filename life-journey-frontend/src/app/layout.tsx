@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     siteName: "Bewaard voor jou",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/Logo_Bewaardvoorjou.png",
         width: 1200,
         height: 630,
         alt: "Bewaard voor jou - Bewaar je levensverhaal",
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     title: "Bewaard voor jou – Bewaar je verhaal",
     description:
       "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
-    images: ["/og-image.jpg"],
+    images: ["/Logo_Bewaardvoorjou.png"],
     creator: "@bewaardvoorjou",
   },
   manifest: "/manifest.json",

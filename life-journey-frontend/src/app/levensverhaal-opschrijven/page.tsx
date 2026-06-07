@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "BewaardVoorJou.nl",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/Logo_Bewaardvoorjou.png",
         width: 1200,
         height: 630,
         alt: "Levensverhaal opschrijven met BewaardVoorJou.nl",
