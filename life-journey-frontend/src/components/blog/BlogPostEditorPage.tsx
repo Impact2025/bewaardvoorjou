@@ -83,6 +83,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
         setPost(p);
         setTitle(p.title);
         setContent(p.content);
+        latestContentRef.current = p.content;
         setSeo({
           slug: p.slug ?? "",
           excerpt: p.excerpt ?? "",
@@ -340,6 +341,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
             ref={editorRef}
             content={content}
             onChange={(html) => {
+              latestContentRef.current = html;
               setContent(html);
               setIsDirty(true);
             }}
