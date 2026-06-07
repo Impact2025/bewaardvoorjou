@@ -25,6 +25,7 @@ from app.api.v1.routes import (
     parent_interview,
     promo_codes,
     support,
+    helpdesk,
 )
 
 
@@ -55,3 +56,4 @@ api_router.include_router(promo_codes.router, prefix="/promo-codes", tags=["prom
 api_router.include_router(promo_codes.admin_router, prefix="/admin/promo-codes", tags=["admin-promo-codes"])
 api_router.include_router(support.router, prefix="/support", tags=["support"])
 api_router.include_router(support.admin_router, prefix="/admin", tags=["admin-support"])
+api_router.include_router(helpdesk.router, prefix="/helpdesk", tags=["helpdesk"])
