@@ -146,8 +146,9 @@ def chat_with_helpdesk(
         Dict met: message, escalate, suggested_questions, action_links
     """
     if not settings.openai_api_key:
-        logger.warning("OpenRouter API key niet geconfigureerd voor helpdesk")
-        return _fallback_response()
+        logger.warning("OpenRouter API key niet geconfigureerd — gebruik lokale FAQ lookup")
+        local = _local_faq_lookup(user_message)
+        return local if local is not None else _fallback_response()
 
     try:
         client = OpenAI(
@@ -188,15 +189,107 @@ def chat_with_helpdesk(
 
     except json.JSONDecodeError as e:
         logger.error(f"Helpdesk AI returneerde ongeldige JSON: {e}")
-        return _fallback_response()
+        local = _local_faq_lookup(user_message)
+        return local if local is not None else _fallback_response()
     except Exception as e:
         logger.error(f"Helpdesk AI fout: {e}")
-        return _fallback_response()
+        local = _local_faq_lookup(user_message)
+        return local if local is not None else _fallback_response()
+
+
+_LOCAL_FAQ: list[dict] = [
+    {
+        "triggers": ["start opname", "opname starten", "hoe opname", "hoe start", "beginnen", "hoe doe ik", "interview starten"],
+        "answer": "Ga naar 'Hoofdstukken' in je dashboard, kies een hoofdstuk en klik op 'Start opname'. De AI-interviewer stelt je vragen die je via je microfoon beantwoordt. Je browser vraagt eenmalig om microfoontoestemming.",
+        "links": [{"label": "Ga naar Hoofdstukken", "href": "/chapters"}],
+        "suggestions": ["Mijn microfoon werkt niet", "Hoe werkt de AI-interviewer?"],
+    },
+    {
+        "triggers": ["microfoon", "geluid", "audio", "geen geluid", "opname werkt niet", "hoor niets"],
+        "answer": "Klik op het slotje naast de URL-balk en zet microfoon op 'Toestaan'. Ververs daarna de pagina. Werkt het dan nog niet? Probeer Chrome of Firefox.",
+        "links": [],
+        "suggestions": ["Hoe start ik een opname?", "Het werkt nog steeds niet"],
+    },
+    {
+        "triggers": ["wachtwoord vergeten", "kan niet inloggen", "inloggen", "wachtwoord reset", "login"],
+        "answer": "Ga naar de inlogpagina en klik op 'Wachtwoord vergeten'. Je ontvangt een e-mail met een resetlink. Controleer ook je spammap.",
+        "links": [{"label": "Wachtwoord vergeten", "href": "/auth/forgot-password"}],
+        "suggestions": ["Ik heb geen bevestigingsmail ontvangen"],
+    },
+    {
+        "triggers": ["abonnement opzeggen", "opzeggen", "annuleren", "stoppen met betalen", "abonnement beheren"],
+        "answer": "Ga naar 'Instellingen' en klik op 'Abonnement beheren'. Daar kun je je abonnement per direct of aan het einde van de betaalperiode opzeggen. Je behoudt altijd toegang tot je verhalen.",
+        "links": [{"label": "Ga naar Instellingen", "href": "/settings"}],
+        "suggestions": ["Is BewaardVoorJou.nl gratis?"],
+    },
+    {
+        "triggers": ["gratis", "kosten", "prijs", "betalen", "premium", "abonnement"],
+        "answer": "Je kunt gratis starten en alle basisfuncties gebruiken. Premium pakketten zijn beschikbaar voor uitgebreide opslag en familie-toegang.",
+        "links": [{"label": "Bekijk pakketten", "href": "/pricing"}],
+        "suggestions": ["Hoe zeg ik mijn abonnement op?"],
+    },
+    {
+        "triggers": ["veilig", "privacy", "encryptie", "beveiliging", "gdpr", "avg", "data"],
+        "answer": "Alle data wordt versleuteld opgeslagen met AES-256, zowel tijdens verzending als opslag. Onze servers staan in Europa en voldoen volledig aan de GDPR. Alleen jij hebt toegang tot je verhalen.",
+        "links": [{"label": "Meer over veiligheid", "href": "/security"}],
+        "suggestions": ["Wie kan mijn verhalen zien?", "Kan ik mijn data verwijderen?"],
+    },
+    {
+        "triggers": ["verwijderen", "account verwijderen", "data wissen", "recht op vergetelheid"],
+        "answer": "Ga naar Instellingen → Account → 'Account verwijderen'. Dit verwijdert al je data permanent en is volledig gratis. Dit voldoet aan je rechten onder de GDPR.",
+        "links": [{"label": "Ga naar Instellingen", "href": "/settings"}],
+        "suggestions": ["Kan ik mijn data exporteren?"],
+    },
+    {
+        "triggers": ["exporteren", "download", "backup", "kopie", "data exporteren"],
+        "answer": "Via 'Instellingen' kun je een volledige export aanvragen van al je data (opnames, transcripties, notities). Je ontvangt een downloadlink per e-mail.",
+        "links": [{"label": "Ga naar Instellingen", "href": "/settings"}],
+        "suggestions": [],
+    },
+    {
+        "triggers": ["familie", "familielid", "uitnodigen", "delen", "toegang geven"],
+        "answer": "Ga naar 'Familie' in je dashboard, klik op 'Familielid uitnodigen' en voer hun e-mailadres in. Jij bepaalt welke verhalen ze mogen zien.",
+        "links": [{"label": "Ga naar Familie", "href": "/family"}],
+        "suggestions": [],
+    },
+    {
+        "triggers": ["email", "mail", "bevestiging", "verificatie", "niet ontvangen"],
+        "answer": "Controleer je spammap. Voeg info@bewaardvoorjou.nl toe aan je contacten. Je kunt vanuit de inlogpagina ook een nieuwe verificatiemail aanvragen.",
+        "links": [],
+        "suggestions": ["Ik kan niet inloggen"],
+    },
+    {
+        "triggers": ["tablet", "telefoon", "mobiel", "app", "iphone", "android", "ipad"],
+        "answer": "BewaardVoorJou.nl werkt op elke moderne browser — Chrome, Safari, Firefox, Edge. Geen app-installatie nodig, zowel op tablet, telefoon als computer.",
+        "links": [],
+        "suggestions": [],
+    },
+    {
+        "triggers": ["opname kwijt", "opname verdwenen", "niet opgeslagen", "verloren"],
+        "answer": "Controleer je internetverbinding — een onderbroken verbinding kan opslaan voorkomen. Ga naar 'Mijn Opnames' om te kijken of de opname daar staat.",
+        "links": [{"label": "Ga naar Mijn Opnames", "href": "/recordings"}],
+        "suggestions": ["Mijn opname is echt weg"],
+    },
+]
+
+
+def _local_faq_lookup(user_message: str) -> dict | None:
+    """Keyword-gebaseerde FAQ-opzoeker als fallback wanneer de AI niet beschikbaar is."""
+    msg = user_message.lower()
+    for entry in _LOCAL_FAQ:
+        if any(trigger in msg for trigger in entry["triggers"]):
+            return {
+                "message": entry["answer"],
+                "escalate": False,
+                "suggested_questions": entry["suggestions"],
+                "action_links": entry["links"],
+            }
+    return None
 
 
 def _fallback_response() -> dict:
     return {
-        "message": "Ik kan je vraag op dit moment helaas niet verwerken. Ons team staat voor je klaar — stuur ons een bericht en we antwoorden binnen 24 uur.",
+        "message": "Ik kan je vraag op dit moment helaas niet verwerken. Ons team staat voor je klaar en antwoordt binnen 24 uur.",
         "escalate": True,
         "suggested_questions": [],
         "action_links": [],
