@@ -172,6 +172,13 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     published_at: publishedAt ? new Date(publishedAt).toISOString() : undefined,
   });
 
+  const revalidate = (slug: string) =>
+    fetch("/api/revalidate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug }),
+    }).catch(() => null);
+
   const handleSave = async (contentOverride?: string): Promise<BlogPost | null> => {
     if (!title.trim() || !seo.slug) {
       showToast("error", "Titel en slug zijn verplicht");
@@ -191,6 +198,7 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
         const updated = await blogApi.update(post!.id, buildPayload(contentOverride));
         setPost(updated);
         setIsDirty(false);
+        await revalidate(updated.slug);
         showToast("success", "Opgeslagen");
         return updated;
       }
@@ -213,10 +221,12 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
       if (currentPost!.status === "published") {
         const updated = await blogApi.unpublish(currentPost!.id);
         setPost(updated);
+        await revalidate(updated.slug);
         showToast("success", "Terug naar concept gezet");
       } else {
         const updated = await blogApi.publish(currentPost!.id);
         setPost(updated);
+        await revalidate(updated.slug);
         showToast("success", "Gepubliceerd! Zoekmachines worden geïnformeerd.");
       }
     } catch (err) {
