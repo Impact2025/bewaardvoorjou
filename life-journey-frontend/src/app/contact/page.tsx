@@ -108,20 +108,10 @@ export default function ContactPage() {
           <h1 className="text-4xl md:text-6xl font-serif font-bold text-slate-900 mb-6">
             Hoe kunnen we<br className="hidden sm:block" /> je helpen?
           </h1>
-          <p className="text-lg md:text-xl text-slate-700 leading-relaxed max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-slate-700 leading-relaxed max-w-2xl mx-auto">
             We helpen je graag verder — of je nu een vraag hebt over het platform,
             je account, of gewoon wil weten hoe het werkt.
           </p>
-          {/* Widget call-to-action */}
-          <div className="inline-flex items-center gap-3 bg-white border-2 border-orange/30 rounded-2xl px-6 py-4 shadow-md">
-            <div className="w-10 h-10 rounded-full bg-orange flex items-center justify-center shrink-0">
-              <MessageCircle className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold text-slate-900 text-sm">Probeer onze slimme helpdesk</p>
-              <p className="text-xs text-slate-500">Klik op de oranje knop rechts onderaan — direct antwoord via AI</p>
-            </div>
-          </div>
         </div>
       </section>
 
