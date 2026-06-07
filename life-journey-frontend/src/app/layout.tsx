@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { HelpdeskWidget } from "@/components/helpdesk/HelpdeskWidget";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
 import "./globals.css";
@@ -169,6 +170,7 @@ export default function RootLayout({
         </a>
         <Providers>
           <main id="main-content">{children}</main>
+          <HelpdeskWidget />
         </Providers>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-WXQQ6NTRYZ"

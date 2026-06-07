@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getOpenTicketCount } from "@/lib/api/support";
-import { HelpdeskWidget } from "@/components/helpdesk/HelpdeskWidget";
 import { AccountActions } from "@/components/account-actions";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { cn } from "@/lib/utils";
@@ -300,7 +299,6 @@ export function AppShell({
         {children}
       </main>
 
-      <HelpdeskWidget />
       <MobileBottomNav />
     </div>
   );
