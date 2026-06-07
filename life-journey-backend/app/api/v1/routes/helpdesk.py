@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, Request
 
-from app.api.deps import get_db, get_optional_user
+from app.api.deps import get_optional_user
 from app.core.rate_limiter import limiter
 from app.models.user import User
 from app.schemas.helpdesk import HelpdeskChatRequest, HelpdeskChatResponse, HelpdeskActionLink
