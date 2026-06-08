@@ -11,11 +11,13 @@ import {
   updateEmailPreferences,
   requestDataExport,
   deleteAccount,
+  downloadBackup,
   type EmailPreferences,
 } from "@/lib/settings-client";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 type ExportState = "idle" | "loading" | "sent" | "error";
+type BackupState = "idle" | "downloading" | "done" | "error";
 type DeleteState = "idle" | "confirm" | "deleting" | "error";
 
 function Toggle({
@@ -64,6 +66,162 @@ function Toggle({
         />
       </button>
     </label>
+  );
+}
+
+const BACKUP_LS_KEY = "bvj_last_backup";
+
+function BackupSection({
+  token,
+  journeyId,
+}: {
+  token: string;
+  journeyId: string;
+}) {
+  const [quickState, setQuickState] = useState<BackupState>("idle");
+  const [fullState, setFullState] = useState<BackupState>("idle");
+  const [lastBackup, setLastBackup] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastBackup(localStorage.getItem(BACKUP_LS_KEY));
+  }, []);
+
+  const handleDownload = useCallback(
+    async (type: "quick" | "full") => {
+      const setter = type === "quick" ? setQuickState : setFullState;
+      setter("downloading");
+      try {
+        await downloadBackup(type, token);
+        setter("done");
+        const now = new Date().toLocaleDateString("nl-NL", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        localStorage.setItem(BACKUP_LS_KEY, now);
+        setLastBackup(now);
+        setTimeout(() => setter("idle"), 4000);
+      } catch {
+        setter("error");
+        setTimeout(() => setter("idle"), 4000);
+      }
+    },
+    [token],
+  );
+
+  const busy = quickState === "downloading" || fullState === "downloading";
+
+  return (
+    <section>
+      <h2 className="text-xl font-serif font-semibold mb-1" style={{ color: "#2C2416" }}>
+        Mijn backup
+      </h2>
+      <p className="text-sm mb-4" style={{ color: "#6B6456" }}>
+        Download je verhalen direct naar je computer. Geen e-mail nodig — het ZIP-bestand staat binnen seconden op je scherm.
+      </p>
+
+      <div
+        className="rounded-2xl overflow-hidden divide-y"
+        style={{ background: "#FFFFFF", border: "1px solid #E9E4DB" }}
+      >
+        {/* Tussentijdse backup */}
+        <div className="px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <p className="font-semibold" style={{ color: "#2C2416" }}>
+                Tussentijdse backup
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: "#6B6456" }}>
+                Al je opnames (.mp3) met transcripties en notities als ZIP. Klaar in ~30 seconden.
+              </p>
+            </div>
+            <button
+              onClick={() => handleDownload("quick")}
+              disabled={busy}
+              className="flex-shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+              style={{ background: quickState === "done" ? "#22C55E" : "#F97316", minWidth: "130px" }}
+            >
+              {quickState === "downloading" ? (
+                <span className="flex items-center gap-2 justify-center">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Bezig…
+                </span>
+              ) : quickState === "done" ? (
+                "✓ Gedownload"
+              ) : quickState === "error" ? (
+                "Probeer opnieuw"
+              ) : (
+                "⬇ Download"
+              )}
+            </button>
+          </div>
+          <ul className="mt-3 text-xs space-y-0.5" style={{ color: "#9C8E82" }}>
+            <li>✔ Audio-opnames (.mp3)</li>
+            <li>✔ Transcripties als tekst (.txt)</li>
+            <li>✔ Notities en memo&#39;s</li>
+          </ul>
+        </div>
+
+        {/* Eindversie */}
+        <div className="px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <p className="font-semibold" style={{ color: "#2C2416" }}>
+                Eindversie — USB-kopie
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: "#6B6456" }}>
+                Identiek aan de USB-stick die wij versturen: levensboek (PDF), opnames, en offline dashboard. Duurt ~2 minuten.
+              </p>
+            </div>
+            <button
+              onClick={() => handleDownload("full")}
+              disabled={busy}
+              className="flex-shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition-opacity disabled:opacity-50"
+              style={{
+                background: fullState === "done" ? "#22C55E" : "transparent",
+                border: fullState === "done" ? "none" : "2px solid #F97316",
+                color: fullState === "done" ? "#FFFFFF" : "#F97316",
+                minWidth: "130px",
+              }}
+            >
+              {fullState === "downloading" ? (
+                <span className="flex items-center gap-2 justify-center">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Bezig…
+                </span>
+              ) : fullState === "done" ? (
+                "✓ Gedownload"
+              ) : fullState === "error" ? (
+                "Probeer opnieuw"
+              ) : (
+                "⬇ Download"
+              )}
+            </button>
+          </div>
+          <ul className="mt-3 text-xs space-y-0.5" style={{ color: "#9C8E82" }}>
+            <li>✔ Levensboek als PDF</li>
+            <li>✔ Alle audio-opnames</li>
+            <li>✔ Offline HTML-dashboard</li>
+            <li>✔ Zelfde inhoud als uw USB-stick</li>
+          </ul>
+        </div>
+
+        {/* Laatste backup */}
+        {lastBackup && (
+          <div className="px-6 py-3">
+            <p className="text-xs" style={{ color: "#9C8E82" }}>
+              Laatste download: {lastBackup}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -263,6 +421,11 @@ function SettingsContent() {
             </div>
           )}
         </section>
+
+        {/* Backup */}
+        {session?.token && journey?.id && (
+          <BackupSection token={session.token} journeyId={journey.id} />
+        )}
 
         {/* Data export */}
         <section>

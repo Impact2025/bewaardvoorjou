@@ -67,6 +67,27 @@ export async function requestDataExport(journeyId: string, token: string): Promi
   }, { token });
 }
 
+export async function downloadBackup(
+  type: "quick" | "full",
+  token: string,
+): Promise<void> {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
+  const res = await fetch(`${base}/account/backup?type=${type}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Backup mislukt (${res.status})`);
+  const blob = await res.blob();
+  const disposition = res.headers.get("Content-Disposition") ?? "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match?.[1] ?? `backup_${type}.zip`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function deleteAccount(password: string, token: string): Promise<void> {
   await apiFetch<void>("/account/me", {
     method: "DELETE",

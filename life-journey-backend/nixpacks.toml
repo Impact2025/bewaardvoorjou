@@ -1,5 +1,8 @@
 [phases.setup]
-nixPkgs = ["python311", "python311Packages.pip", "python311Packages.virtualenv"]
+nixPkgs = [
+  "python311", "python311Packages.pip", "python311Packages.virtualenv",
+  "pango", "cairo", "gdk-pixbuf", "libffi", "fontconfig", "freetype"
+]
 
 [phases.install]
 cmds = [
