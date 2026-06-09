@@ -340,6 +340,27 @@ def build_gift_card_buyer_email(
     return subject, html, text
 
 
+def build_gift_buyer_confirmation_email(
+    buyer_email: str,
+    recipient_name: str,
+    recipient_email: str,
+    package_name: str,
+    order_id_short: str,
+    shipping_city: str | None = None,
+) -> tuple[str, str, str]:
+    subject = f"Bedankt! Je cadeau voor {recipient_name} is verstuurd 🎁"
+    context = {
+        "recipient_name": recipient_name,
+        "recipient_email": recipient_email,
+        "package_name": package_name,
+        "order_id_short": order_id_short,
+        "shipping_city": shipping_city,
+    }
+    html, text = render_email("gift_buyer_confirmation", context)
+    logger.info(f"Built gift_buyer_confirmation email for {buyer_email}")
+    return subject, html, text
+
+
 def build_export_ready_email(
     user_display_name: str,
     download_url: str,

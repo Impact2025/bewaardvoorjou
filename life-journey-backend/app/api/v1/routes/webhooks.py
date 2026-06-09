@@ -284,6 +284,9 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     elif recipient_email and recipient_name:
         # Fysiek pakket cadeau: stuur magic link naar begiftigde storyteller
         _send_storyteller_magic_link(db, recipient_email, recipient_name, contact_email)
+        # Stuur koper een bevestigingsmail
+        if contact_email:
+            _send_gift_buyer_confirmation(order, contact_email, recipient_name, recipient_email)
 
 
 def _send_gift_card_buyer_email(order: "OrderModel", buyer_email: str) -> None:
@@ -330,6 +333,43 @@ def _send_storyteller_magic_link(
         logger.info(f"Magic link verstuurd naar begiftigde storyteller {recipient_email}")
     except Exception as exc:
         logger.error(f"Kon magic link niet sturen naar {recipient_email}: {exc}")
+
+
+_PACKAGE_NAMES = {
+    "BEGIN": "Het Begin",
+    "ERFGOED": "De Erfgoed Box",
+    "VOOR_ALTIJD": "Voor Altijd",
+    "DIGITAAL": "Digitaal cadeau",
+}
+
+
+def _send_gift_buyer_confirmation(
+    order: "OrderModel",
+    buyer_email: str,
+    recipient_name: str,
+    recipient_email: str,
+) -> None:
+    """Stuur de koper een bevestigingsmail nadat de magic link naar de ontvanger is gestuurd."""
+    from app.services.email.renderer import build_gift_buyer_confirmation_email
+    from app.services.email.client import send_email
+
+    shipping_city: str | None = None
+    if order.shipping_address and isinstance(order.shipping_address, dict):
+        shipping_city = order.shipping_address.get("city")
+
+    try:
+        subject, html, text = build_gift_buyer_confirmation_email(
+            buyer_email=buyer_email,
+            recipient_name=recipient_name,
+            recipient_email=recipient_email,
+            package_name=_PACKAGE_NAMES.get(order.package_type, order.package_type),
+            order_id_short=order.id[:8].upper(),
+            shipping_city=shipping_city,
+        )
+        send_email(to=buyer_email, subject=subject, html=html, text=text)
+        logger.info(f"Koper-bevestiging verstuurd naar {buyer_email} voor order {order.id}")
+    except Exception as exc:
+        logger.error(f"Kon koper-bevestiging niet sturen voor order {order.id}: {exc}")
 
 
 def _handle_payment_failed(db: Session, payment_intent: dict) -> None:

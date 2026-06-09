@@ -1,0 +1,29 @@
+Bedankt voor je mooie cadeau!
+
+Wat een lief gebaar — je hebt {{ package_name }} gekocht voor {{ recipient_name }}.
+Dit is een cadeau dat voor altijd bewaard blijft.
+
+JOUW BESTELLING
+---------------
+Pakket:       {{ package_name }}
+Voor:         {{ recipient_name }}
+Bestelnummer: {{ order_id_short }}
+
+We hebben {{ recipient_name }} een persoonlijke uitnodiging gestuurd op {{ recipient_email }}.
+Ze kunnen direct inloggen en beginnen met het vastleggen van hun levensverhaal.
+
+TIP: stuur zelf ook een berichtje
+De uitnodigingsmail is verstuurd, maar een persoonlijk berichtje van jou maakt het extra
+bijzonder. Vertel {{ recipient_name }} waarom je dit cadeau hebt gekocht — dat is het mooiste
+begin van hun verhaal.
+
+{% if shipping_city %}
+FYSIEKE DOOS
+De BewaardVoorJou doos wordt naar {{ shipping_city }} gestuurd zodra onze eerste voorraad
+gereed is (verwacht: september 2026). Je ontvangt dan automatisch een e-mail met de track & trace.
+{% endif %}
+
+Vragen over je bestelling? Mail naar support@bewaardvoorjou.nl met bestelnummer {{ order_id_short }}.
+
+Met warme groet,
+Het Bewaardvoorjou team

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Bedankt voor je bestelling — Bewaardvoorjou{% endblock %}
+
+{% block content %}
+<h1 class="heading">Bedankt voor je mooie cadeau!</h1>
+
+<p class="body-text">
+  Wat een lief gebaar — je hebt <strong>{{ package_name }}</strong> gekocht voor
+  <strong>{{ recipient_name }}</strong>. Dit is een cadeau dat voor altijd bewaard blijft.
+</p>
+
+<div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 16px; padding: 28px; margin: 28px 0;">
+  <p style="margin: 0 0 4px 0; color: #d4af37; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Jouw bestelling</p>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 14px;">
+    <tr>
+      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Pakket</td>
+      <td style="color: #fff; font-size: 14px; font-weight: 600; text-align: right; padding: 4px 0;">{{ package_name }}</td>
+    </tr>
+    <tr>
+      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Voor</td>
+      <td style="color: #fff; font-size: 14px; font-weight: 600; text-align: right; padding: 4px 0;">{{ recipient_name }}</td>
+    </tr>
+    <tr>
+      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Bestelnummer</td>
+      <td style="color: #d4af37; font-size: 13px; font-family: monospace; text-align: right; padding: 4px 0;">{{ order_id_short }}</td>
+    </tr>
+  </table>
+</div>
+
+<p class="body-text">
+  We hebben <strong>{{ recipient_name }}</strong> een persoonlijke uitnodiging gestuurd op
+  <strong>{{ recipient_email }}</strong>. Ze kunnen direct inloggen en beginnen met het vastleggen van hun levensverhaal.
+</p>
+
+<div style="background: #fdf8ef; border: 1px solid #e8d8a0; border-radius: 12px; padding: 20px; margin: 24px 0;">
+  <p style="margin: 0 0 8px 0; font-weight: 700; color: #8B6914; font-size: 15px;">💬 Tip: stuur zelf ook een berichtje</p>
+  <p style="margin: 0; color: #6B6456; font-size: 14px; line-height: 1.6;">
+    De uitnodigingsmail is verstuurd, maar een persoonlijk berichtje van jou maakt het extra bijzonder.
+    Vertel {{ recipient_name }} waarom je dit cadeau hebt gekocht — dat is het mooiste begin van hun verhaal.
+  </p>
+</div>
+
+{% if shipping_city %}
+<div class="divider"></div>
+<p class="body-text" style="font-size: 14px; color: #6B6456;">
+  <strong>Fysieke doos:</strong> De BewaardVoorJou doos wordt naar <strong>{{ shipping_city }}</strong> gestuurd zodra onze eerste voorraad gereed is (verwacht: september 2026). Je ontvangt dan automatisch een e-mail met de track &amp; trace.
+</p>
+{% endif %}
+
+<div class="divider"></div>
+
+<p class="note">
+  Vragen over je bestelling? Stuur een e-mail naar
+  <a href="mailto:support@bewaardvoorjou.nl" style="color: #8B6914;">support@bewaardvoorjou.nl</a>
+  met je bestelnummer <strong>{{ order_id_short }}</strong>.
+</p>
+{% endblock %}
