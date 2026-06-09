@@ -356,7 +356,8 @@ function StepSelectPlan({
 
       {/* Kortingscode */}
       <div>
-        <h3 className="font-medium text-[#1a1a1a] mb-3">Kortingscode</h3>
+        <h3 className="font-medium text-[#1a1a1a] mb-1">Uitnodigingscode</h3>
+        <p className="text-xs text-[#888] mb-3">Vereist om door te gaan — heb je er geen? Neem contact op.</p>
         {promoApplied && state.promoCode ? (
           <div className="flex items-center justify-between p-3 bg-[#2d5016]/5 border border-[#2d5016]/30 rounded-xl">
             <div>
@@ -426,9 +427,16 @@ function StepSelectPlan({
         <p className="text-xs text-[#888] mt-1">Inclusief gratis verzending</p>
       </div>
 
+      {!promoApplied && (
+        <p className="text-center text-sm text-[#888]">
+          Je hebt een uitnodigingscode nodig om door te gaan.
+        </p>
+      )}
+
       <button
         onClick={onNext}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
+        disabled={!promoApplied}
+        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] disabled:bg-[#e5e0d8] disabled:text-[#aaa] disabled:cursor-not-allowed text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
       >
         Volgende: Personaliseer →
       </button>
