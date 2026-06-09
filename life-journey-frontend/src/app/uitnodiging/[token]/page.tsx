@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { verifyMagicLink, requestMagicLink } from "@/lib/auth-client";
 import { useAuth } from "@/store/auth-context";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type VerifyState = "verifying" | "success" | "invalid" | "expired";
 
@@ -43,7 +46,6 @@ export default function UitnodigingPage({ params }: PageProps) {
       .then((session) => {
         setSession(session);
         setState("success");
-        // Nieuwe gebruiker (geen journey) → onboarding; terugkerend → vertel
         const destination = session.primaryJourneyId ? "/vertel" : "/onboarding";
         setTimeout(() => {
           router.push(destination);
@@ -56,75 +58,76 @@ export default function UitnodigingPage({ params }: PageProps) {
   }, [token, setSession, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 py-16" style={{ background: "#FAF7F2" }}>
-      <div
-        className="w-full max-w-md rounded-2xl shadow-lg text-center overflow-hidden"
-        style={{ background: "#FFFFFF" }}
-      >
-        {/* Header */}
-        <div
-          className="px-8 py-10"
-          style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)" }}
-        >
-          <Image
-            src="/Logo_Bewaardvoorjou.png"
-            alt="Bewaardvoorjou"
-            width={72}
-            height={72}
-            className="mx-auto mb-4"
-            priority
-          />
-          <h1 className="text-white text-2xl font-semibold">Bewaardvoorjou</h1>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-cream px-6 py-16">
+      <Card className="w-full max-w-md border-card bg-card shadow-lg">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/Logo_Bewaardvoorjou.png"
+              alt="Bewaardvoorjou"
+              width={80}
+              height={80}
+              className="w-20 h-20"
+              priority
+            />
+          </div>
 
-        {/* Content */}
-        <div className="px-8 py-10">
           {state === "verifying" && (
             <>
-              <div className="text-6xl mb-6 animate-pulse">✨</div>
-              <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
-                Even geduld…
-              </h2>
-              <p className="text-lg" style={{ color: "#4A4239" }}>
-                We openen jouw persoonlijke vertelomgeving.
-              </p>
+              <CardTitle className="text-2xl text-heading font-serif">Even geduld…</CardTitle>
+              <CardDescription className="text-medium">
+                We openen jouw persoonlijke omgeving.
+              </CardDescription>
             </>
           )}
 
           {state === "success" && (
             <>
-              <div className="text-5xl mb-4">🎉</div>
-              <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
-                Welkom!
-              </h2>
-              <p className="text-base mb-2" style={{ color: "#4A4239" }}>
+              <CardTitle className="text-2xl text-heading font-serif">Welkom! 🎉</CardTitle>
+              <CardDescription className="text-medium">
                 Je bent ingelogd. We zetten alles klaar voor je.
-              </p>
-              <p className="text-sm" style={{ color: "#9C8B77" }}>
-                Even geduld — je wordt zo doorgestuurd…
-              </p>
+              </CardDescription>
             </>
+          )}
+
+          {state === "invalid" && (
+            <>
+              <CardTitle className="text-2xl text-heading font-serif">Ongeldige link</CardTitle>
+              <CardDescription className="text-medium">
+                Deze uitnodigingslink is ongeldig of al eerder gebruikt. Heb je al een account? Vraag een nieuwe toegangslink aan.
+              </CardDescription>
+            </>
+          )}
+
+          {state === "expired" && (
+            <>
+              <CardTitle className="text-2xl text-heading font-serif">Link verlopen</CardTitle>
+              <CardDescription className="text-medium">
+                Deze uitnodigingslink is verlopen. Vul je e-mailadres in en we sturen je een nieuwe link.
+              </CardDescription>
+            </>
+          )}
+        </CardHeader>
+
+        <CardContent>
+          {state === "verifying" && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-8 w-8 animate-spin text-warm-amber" />
+            </div>
+          )}
+
+          {state === "success" && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-8 w-8 animate-spin text-warm-amber" />
+            </div>
           )}
 
           {(state === "invalid" || state === "expired") && (
             <>
-
-              <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
-                {state === "expired" ? "Link verlopen" : "Ongeldige link"}
-              </h2>
-              <p className="text-lg mb-6" style={{ color: "#4A4239" }}>
-                {state === "expired"
-                  ? "Deze uitnodigingslink is verlopen. Vul je e-mailadres in en we sturen je een nieuwe link."
-                  : "Deze uitnodigingslink is ongeldig of al eerder gebruikt. Heb je al een account? Vraag een nieuwe toegangslink aan."}
-              </p>
-
               {newLinkSent ? (
-                <div
-                  className="rounded-xl p-4 text-sm text-center mb-4"
-                  style={{ background: "#FFF7ED", border: "1px solid #F97316" }}
-                >
-                  <p className="font-semibold mb-1" style={{ color: "#2C2416" }}>Controleer je inbox</p>
-                  <p style={{ color: "#4A4239" }}>
+                <div className="rounded-xl border border-warm-amber/40 bg-warm-amber/10 p-4 text-sm text-center mb-4">
+                  <p className="font-medium text-heading mb-1">Controleer je inbox</p>
+                  <p className="text-medium">
                     Als dit e-mailadres bij ons bekend is, ontvang je een nieuwe toegangslink.
                   </p>
                 </div>
@@ -137,35 +140,27 @@ export default function UitnodigingPage({ params }: PageProps) {
                     placeholder="jouw@email.nl"
                     value={newLinkEmail}
                     onChange={(e) => setNewLinkEmail(e.target.value)}
-                    className="w-full rounded-xl border px-4 py-3 text-base focus:outline-none focus:ring-2"
-                    style={{
-                      borderColor: "#D4C9B8",
-                      background: "#FAF7F2",
-                      color: "#2C2416",
-                    }}
+                    className="w-full rounded-xl border border-input-border bg-input-background px-4 py-3 text-input shadow-inner focus:border-input-focus focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
                   />
-                  <button
+                  <Button
                     type="submit"
+                    className="w-full justify-center bg-warm-amber hover:bg-warm-amber/90 text-slate-900"
                     disabled={isSendingNewLink || !newLinkEmail}
-                    className="block w-full rounded-xl px-6 py-4 text-center font-semibold text-white transition-opacity disabled:opacity-50"
-                    style={{ background: "#F97316" }}
                   >
                     {isSendingNewLink ? "Bezig met versturen…" : "Stuur nieuwe toegangslink"}
-                  </button>
+                  </Button>
                 </form>
               )}
 
-              <Link
-                href="/login"
-                className="text-sm"
-                style={{ color: "#9C8B77" }}
-              >
-                Inloggen met wachtwoord →
-              </Link>
+              <p className="text-center text-sm text-medium mt-2">
+                <Link href="/login" className="text-warm-amber hover:text-warm-amber/80 font-medium">
+                  Inloggen met wachtwoord →
+                </Link>
+              </p>
             </>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
