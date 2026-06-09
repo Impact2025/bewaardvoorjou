@@ -19,6 +19,7 @@ interface AuthResponseDto {
     updated_at?: string | null;
   };
   primary_journey_id?: string | null;
+  onboarding_completed?: boolean;
 }
 
 interface RegisterResponseDto {
@@ -55,6 +56,7 @@ function mapAuthResponse(payload: AuthResponseDto): AuthSession {
     token: payload.access_token,
     tokenType: payload.token_type,
     primaryJourneyId: payload.primary_journey_id ?? null,
+    onboardingCompleted: payload.onboarding_completed ?? false,
     user: {
       id: payload.user.id,
       displayName: payload.user.display_name,

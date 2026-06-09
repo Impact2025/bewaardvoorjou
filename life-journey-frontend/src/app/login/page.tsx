@@ -49,7 +49,7 @@ function LoginContent() {
       setSession(session);
       if (session.user.isAdmin) {
         router.push("/admin");
-      } else if (!session.primaryJourneyId) {
+      } else if (!session.onboardingCompleted) {
         router.push("/onboarding");
       } else {
         router.push("/dashboard");

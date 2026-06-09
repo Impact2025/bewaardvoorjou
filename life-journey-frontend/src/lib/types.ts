@@ -277,4 +277,5 @@ export interface AuthSession {
   tokenType: string;
   user: AuthUser;
   primaryJourneyId: string | null;
+  onboardingCompleted: boolean;
 }

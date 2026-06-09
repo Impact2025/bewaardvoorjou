@@ -104,6 +104,7 @@ def verify_email(request: Request, payload: VerifyEmailRequest, db: Session = De
     access_token=token,
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
+    onboarding_completed=user.onboarding_completed_at is not None,
   )
 
 
@@ -178,6 +179,7 @@ def verify_magic_link(request: Request, token: str, db: Session = Depends(get_db
     access_token=access_token,
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
+    onboarding_completed=user.onboarding_completed_at is not None,
   )
 
 
@@ -194,4 +196,5 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
     access_token=token,
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
+    onboarding_completed=user.onboarding_completed_at is not None,
   )

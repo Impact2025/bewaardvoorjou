@@ -49,6 +49,7 @@ class AuthResponse(BaseModel):
   token_type: str = Field(default="bearer")
   user: UserPublic
   primary_journey_id: str | None = None
+  onboarding_completed: bool = False
 
 
 class ForgotPasswordRequest(BaseModel):

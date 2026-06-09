@@ -46,7 +46,7 @@ export default function UitnodigingPage({ params }: PageProps) {
       .then((session) => {
         setSession(session);
         setState("success");
-        const destination = session.primaryJourneyId ? "/vertel" : "/onboarding";
+        const destination = session.onboardingCompleted ? "/vertel" : "/onboarding";
         setTimeout(() => {
           router.push(destination);
         }, 1800);
