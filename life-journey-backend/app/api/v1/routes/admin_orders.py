@@ -7,9 +7,8 @@ import io
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
@@ -235,7 +234,6 @@ def resend_order_emails(
     from app.api.v1.routes.webhooks import (
         _send_gift_buyer_confirmation,
         _send_storyteller_magic_link,
-        _PACKAGE_NAMES,
     )
 
     order = db.query(Order).filter(Order.id == order_id).first()
