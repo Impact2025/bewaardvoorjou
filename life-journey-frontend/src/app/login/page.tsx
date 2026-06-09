@@ -58,11 +58,9 @@ function LoginContent() {
       if (isApiError(cause) && cause.code === "EMAIL_NOT_VERIFIED") {
         setEmailNotVerified(true);
       } else {
-        const message =
-          typeof cause === "object" && cause && "message" in cause
-            ? String((cause as { message: string }).message)
-            : "Inloggen is mislukt. Controleer je gegevens.";
-        setError(message);
+        setError("Inloggen mislukt. Geen wachtwoord ingesteld? Gebruik de toegangslink hieronder.");
+        setShowMagicLink(true);
+        setMagicLinkEmail(email);
       }
     } finally {
       setIsSubmitting(false);
@@ -90,7 +88,7 @@ function LoginContent() {
           </div>
           <CardTitle className="text-2xl text-heading font-serif">Welkom terug</CardTitle>
           <CardDescription className="text-medium">
-            Log in met je e-mailadres en wachtwoord om verder te gaan met je verhaal.
+            Log in om verder te gaan met je verhaal.
           </CardDescription>
         </CardHeader>
         <CardContent>
