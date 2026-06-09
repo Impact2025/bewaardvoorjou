@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Star, Phone, Shield, Truck, Mail, Loader2, Zap } from "lucide-react";
+import { Check, X, Phone, Shield, Truck, Mail, Loader2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { joinWaitlist, type WaitlistPackage } from "@/lib/api/waitlist";
 import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
@@ -20,7 +20,6 @@ const packages = [
     badge: null,
     ctaLabel: "Bestel Het Begin",
     perfectFor: ["Verjaardagscadeau (60-75 jaar)", '"Ik wil het eerst proberen"', "Budget €50-100"],
-    socialProof: "234 families begonnen hier",
     features: [
       "Elegante matzwarte geschenkdoos",
       "USB-stick 16GB",
@@ -51,7 +50,6 @@ const packages = [
     badge: "MEEST GEKOZEN",
     ctaLabel: "Bestel De Erfgoed Box",
     perfectFor: ["70e verjaardag, jubileum, pensioen", '"Dit is een bijzonder moment"', "Budget €150-300"],
-    socialProof: "862 families kozen deze",
     features: [
       // Ritueel
       "Premium magneetdoos met goudfolie",
@@ -93,7 +91,6 @@ const packages = [
     badge: null,
     ctaLabel: "Bestel Voor Altijd",
     perfectFor: ['"Once in a lifetime" moment', "Pensioen, ernstige ziekte", "Estate planning"],
-    socialProof: "138 families investeerden in levenslang",
     features: [
       "Alles van De Erfgoed Box, plus:",
       "XL premium doos (family tree gravering)",
@@ -408,12 +405,6 @@ function PackageCard({
               </>
             )}
           </div>
-
-          {/* Social proof */}
-          <p className="text-xs text-[#888] mb-4 flex items-center gap-1">
-            <Star className="h-3 w-3 fill-[#d4af37] text-[#d4af37]" />
-            {pkg.socialProof}
-          </p>
 
           {/* CTA: sold-out wachtlijst OF bestelknop */}
           {soldOut ? (
