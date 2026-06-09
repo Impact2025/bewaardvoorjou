@@ -169,7 +169,8 @@ _HTML_TMPL = """<!DOCTYPE html>
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
       color: var(--text-1);
-      line-height: 1.6;
+      line-height: 1.7;
+      font-size: 18px;
     }
 
     /* ── Hero ── */
@@ -218,10 +219,10 @@ _HTML_TMPL = """<!DOCTYPE html>
       background: var(--accent);
       color: var(--primary);
       text-decoration: none;
-      padding: 13px 26px;
+      padding: 17px 34px;
       border-radius: 50px;
       font-weight: 700;
-      font-size: .93rem;
+      font-size: 1.05rem;
       transition: transform .15s, box-shadow .15s;
       position: relative;
       z-index: 1;
@@ -277,7 +278,7 @@ _HTML_TMPL = """<!DOCTYPE html>
       padding: 15px 18px;
       color: var(--text-3);
       text-decoration: none;
-      font-size: .88rem;
+      font-size: 1rem;
       font-weight: 500;
       border-bottom: 2px solid transparent;
       white-space: nowrap;
@@ -328,7 +329,7 @@ _HTML_TMPL = """<!DOCTYPE html>
     .phase-label { flex: 1; }
     .phase-title {
       font-family: Georgia, "Palatino Linotype", Palatino, serif;
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: normal;
       color: var(--primary);
       line-height: 1.2;
@@ -381,8 +382,8 @@ _HTML_TMPL = """<!DOCTYPE html>
 
     /* Play button */
     .pbtn {
-      width: 44px;
-      height: 44px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: var(--primary);
       border: none;
@@ -393,33 +394,33 @@ _HTML_TMPL = """<!DOCTYPE html>
       flex-shrink: 0;
       color: #fff;
       transition: background .15s, transform .1s, box-shadow .15s;
-      box-shadow: 0 2px 8px rgba(107,58,31,.3);
+      box-shadow: 0 2px 10px rgba(107,58,31,.35);
     }
     .pbtn:hover { background: var(--primary-lt); transform: scale(1.06); }
     .pbtn:active { transform: scale(.94); }
-    .pbtn svg { width: 18px; height: 18px; fill: currentColor; }
+    .pbtn svg { width: 24px; height: 24px; fill: currentColor; }
 
     .pcard-meta { flex: 1; min-width: 0; }
     .pcard-title {
       font-weight: 600;
-      font-size: .95rem;
+      font-size: 1.05rem;
       color: var(--text-1);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .pcard-time {
-      font-size: .79rem;
+      font-size: .9rem;
       color: var(--text-3);
-      margin-top: 3px;
+      margin-top: 4px;
       font-variant-numeric: tabular-nums;
     }
 
     /* Progress */
     .pbar {
-      height: 4px;
+      height: 7px;
       background: var(--accent-bg);
-      border-radius: 2px;
+      border-radius: 4px;
       cursor: pointer;
       overflow: hidden;
     }
@@ -482,9 +483,10 @@ _HTML_TMPL = """<!DOCTYPE html>
       margin-top: 16px;
       display: inline-block;
       background: var(--accent-bg);
-      padding: 10px 20px;
+      padding: 14px 24px;
       border-radius: 8px;
-      font-size: .81rem;
+      font-size: .95rem;
+      line-height: 1.6;
     }
 
     /* ── Animations ── */
@@ -698,7 +700,7 @@ def _fase_block(fase_folder: str, items: list[dict]) -> str:
         )
         body = f'<div class="tracks">\n{tracks_html}</div>'
     else:
-        body = f'<div class="empty">Nog geen opnames in deze fase</div>'
+        body = '<div class="empty">Nog geen opnames in deze fase</div>'
 
     badge = f'<span class="phase-badge">{count} verhaal{"" if count == 1 else "s"}</span>'
     return (
@@ -795,31 +797,184 @@ _AUTORUN_INF = """\
 [AutoRun]
 Action=Mijn Levensboek openen
 Label=MijnErfgoed
-ShellExecute=04_Start_Hier_Offline\\index.html
+ShellExecute=index.html
 """
 
+_ROOT_WELCOME_HTML = """\
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="4;url=04_Start_Hier_Offline/index.html">
+  <title>Welkom — Bewaardvoorjou</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      background: linear-gradient(160deg, #f9f5f0 0%, #f0e8db 100%);
+      color: #2d1a0e;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 56px 64px 52px;
+      max-width: 620px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 56px rgba(45,26,14,.13);
+      border: 1px solid #e5d4bf;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+    .brand-logo { width: 56px; height: 56px; flex-shrink: 0; }
+    .brand-name {
+      font-size: 1.35rem;
+      letter-spacing: .06em;
+      color: #6b3a1f;
+      font-style: italic;
+      font-weight: normal;
+    }
+    .divider {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c9963a, transparent);
+      margin: 0 auto 36px;
+    }
+    .welkom {
+      font-size: 1.3rem;
+      color: #9a7a60;
+      font-weight: normal;
+      margin-bottom: 8px;
+    }
+    .naam {
+      font-size: 3.2rem;
+      color: #6b3a1f;
+      line-height: 1.15;
+      font-weight: normal;
+      margin-bottom: 20px;
+    }
+    .sub {
+      font-size: 1.2rem;
+      color: #5c3d2b;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #7a4428 0%, #6b3a1f 100%);
+      color: #fff;
+      text-decoration: none;
+      padding: 22px 60px;
+      border-radius: 50px;
+      font-size: 1.3rem;
+      font-family: inherit;
+      line-height: 1;
+      box-shadow: 0 6px 28px rgba(107,58,31,.4);
+      transition: transform .15s, box-shadow .15s;
+      letter-spacing: .01em;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 36px rgba(107,58,31,.5);
+    }
+    .hint {
+      margin-top: 28px;
+      font-size: .95rem;
+      color: #b09880;
+      font-style: italic;
+    }
+    .dot { display: inline-block; animation: knipoog 1.4s infinite; }
+    .dot:nth-child(2) { animation-delay: .25s; }
+    .dot:nth-child(3) { animation-delay: .5s; }
+    @keyframes knipoog { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+    .footer-url {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #f0e8db;
+      font-size: .85rem;
+      color: #c9b49a;
+      letter-spacing: .03em;
+    }
+    @media (max-width: 540px) {
+      .card { padding: 40px 28px 36px; }
+      .naam { font-size: 2.4rem; }
+      .btn  { padding: 20px 40px; font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#D4AF37"/>
+            <stop offset="50%"  stop-color="#F4D03F"/>
+            <stop offset="100%" stop-color="#C5A028"/>
+          </linearGradient>
+        </defs>
+        <path d="M256 448C248 448 240 445 234 439C180 390 134 348 98 308C54 260 32 216 32 168C32 100 86 44 154 44C190 44 224 62 246 92L256 106L266 92C288 62 322 44 358 44C426 44 480 100 480 168C480 216 458 260 414 308C378 348 332 390 278 439C272 445 264 448 256 448Z" fill="url(#hg)" stroke="url(#hg)" stroke-width="12"/>
+        <path d="M256 408C250 408 244 406 240 402C196 362 158 328 129 296C95 257 78 223 78 185C78 134 120 92 171 92C199 92 226 105 244 128L256 144L268 128C286 105 313 92 341 92C392 92 434 134 434 185C434 223 417 257 383 296C354 328 316 362 272 402C268 406 262 408 256 408Z" fill="none" stroke="url(#hg)" stroke-width="16"/>
+        <path d="M256 368C252 368 248 366 245 363C210 332 180 306 158 282C133 254 120 229 120 202C120 168 146 140 180 140C201 140 221 150 234 168L256 196L278 168C291 150 311 140 332 140C366 140 392 168 392 202C392 229 379 254 354 282C332 306 302 332 267 363C264 366 260 368 256 368Z" fill="none" stroke="url(#hg)" stroke-width="20"/>
+        <path d="M256 256L246 236C242 228 234 224 226 224C214 224 204 234 204 246C204 254 208 262 214 268L256 310L298 268C304 262 308 254 308 246C308 234 298 224 286 224C278 224 270 228 266 236L256 256Z" fill="url(#hg)"/>
+      </svg>
+      <span class="brand-name">Bewaardvoorjou</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="welkom">Welkom,</p>
+    <h1 class="naam">TMPL_NAAM</h1>
+    <p class="sub">
+      Uw levensverhaal staat klaar.<br>
+      Audio-herinneringen, uw persoonlijk levensboek en foto&#x27;s.
+    </p>
+
+    <a class="btn" href="04_Start_Hier_Offline/index.html">
+      Open mijn levensverhaal
+    </a>
+
+    <p class="hint">
+      Wordt automatisch geopend
+      <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+    </p>
+
+    <div class="footer-url">www.bewaardvoorjou.nl</div>
+
+  </div>
+</body>
+</html>"""
+
 _README = """\
-Bewaardvoorjou - Uw Digitale Familiebibliotheek
-================================================
+WELKOM, TMPL_NAAM
+=================
 
-Welkom, TMPL_NAAM!
+Op deze stick staat uw complete levensverhaal.
 
-STAP 1  Open de map 04_Start_Hier_Offline
-        Dubbelklik op 'index.html' om uw persoonlijke
-        welkomstpagina te openen in de browser.
-        Geen internet nodig.
+Dubbelklik op het bestand  index.html  op deze stick.
+Uw persoonlijke welkomstpagina opent dan vanzelf.
 
-STAP 2  In die pagina vindt u uw levensfasen,
-        audio-fragmenten en uw PDF-levensboek.
+WERKT HET NIET?
+  Open de map 05_Software en start VLC.
+  VLC speelt alle audiofragmenten af.
 
-STAP 3  Geen werkende browser?
-        Open de map 05_Software en start VLC.
-        VLC speelt alle audiofragmenten af, ook
-        als browsers en besturingssystemen
-        veranderd zijn.
-
-Bewaar deze stick op een koele, droge plek.
-Maak eens per jaar een digitale kopie.
+TIP: Bewaar deze stick op een koele, droge plek
+     en maak eens per jaar een extra kopie.
 
 Met warme groet,
 Het team van Bewaardvoorjou
@@ -843,6 +998,197 @@ Meer informatie: www.videolan.org/vlc
 LETTERTYPEN
   De map Lettertypen/ bevat Open Sans als reservekopie.
   Installeer via dubbelklik als tekst er vreemd uitziet.
+"""
+
+
+# ─── Zelf-bijwerken bestanden (op de stick voor de klant) ────────────────────
+
+_ACCOUNT_CONFIG = """\
+# Bewaardvoorjou — Mijn account
+# ================================
+#
+# Dit bestand bevat uw persoonlijke inloggegevens.
+# Bewaar deze USB-stick altijd op een veilige plek.
+#
+# Hulp nodig?  www.bewaardvoorjou.nl
+
+E-mailadres:  TMPL_EMAIL
+Wachtwoord:
+Website:      TMPL_WEBSITE
+"""
+
+_UPDATER_BAT = """\
+@echo off
+chcp 65001 > nul
+title Bewaardvoorjou - Verhalen Bijwerken
+powershell -ExecutionPolicy Bypass -File "%~dp0updater.ps1"
+if %errorlevel% neq 0 pause
+"""
+
+_UPDATER_PS1 = """\
+#Requires -Version 5.0
+# Bewaardvoorjou - Verhalen Bijwerken
+# Haalt uw nieuwste verhalen op en zet ze op deze stick.
+
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+Write-Host ""
+Write-Host ("=" * 52)
+Write-Host "  Bewaardvoorjou  -  Verhalen Bijwerken"
+Write-Host ("=" * 52)
+Write-Host ""
+
+# ── Config lezen ──────────────────────────────────────
+$koppelPad = Join-Path $PSScriptRoot "koppelbestand.txt"
+$configPad = Join-Path $PSScriptRoot "mijn_account.txt"
+$website   = "https://api.bewaardvoorjou.nl"
+$token     = ""
+
+# ── Koppelbestand (geen wachtwoord nodig) ─────────────
+if (Test-Path $koppelPad) {
+    Write-Host "  Koppelbestand gevonden."
+    Get-Content $koppelPad | ForEach-Object {
+        $regel = $_.Trim()
+        if ($regel -and -not $regel.StartsWith("#")) {
+            $delen = $regel -split ":", 2
+            if ($delen.Count -eq 2) {
+                $s = $delen[0].Trim().ToUpper(); $w = $delen[1].Trim()
+                switch ($s) {
+                    "TOKEN"   { $token   = $w }
+                    "WEBSITE" { $website = $w }
+                }
+            }
+        }
+    }
+    if (-not $token) {
+        Write-Host "  Koppelbestand is leeg of beschadigd."
+        Write-Host "  Genereer een nieuw bestand via bewaardvoorjou.nl/instellingen"
+        Read-Host "`n  Druk op Enter om af te sluiten"
+        exit 1
+    }
+    Write-Host "  Verbonden zonder wachtwoord."
+
+# ── Fallback: e-mail + wachtwoord ─────────────────────
+} elseif (Test-Path $configPad) {
+    $email = ""; $wachtwoord = ""
+    Get-Content $configPad | ForEach-Object {
+        $regel = $_.Trim()
+        if ($regel -and -not $regel.StartsWith("#")) {
+            $delen = $regel -split ":", 2
+            if ($delen.Count -eq 2) {
+                $s = $delen[0].Trim().ToLower(); $w = $delen[1].Trim()
+                switch ($s) {
+                    "e-mailadres" { $email      = $w }
+                    "wachtwoord"  { $wachtwoord = $w }
+                    "website"     { $website    = $w }
+                }
+            }
+        }
+    }
+    if (-not $email -or -not $wachtwoord) {
+        Write-Host "  Uw gegevens zijn niet ingevuld in 'mijn_account.txt'."
+        Write-Host "  Of genereer een koppelbestand via bewaardvoorjou.nl/instellingen"
+        Write-Host "  — dan heeft u nooit meer een wachtwoord nodig."
+        Read-Host "`n  Druk op Enter om af te sluiten"
+        exit 1
+    }
+    Write-Host "  Inloggen als $email..."
+    try {
+        $body    = @{ email = $email; password = $wachtwoord } | ConvertTo-Json
+        $result  = Invoke-RestMethod -Uri "$website/api/v1/auth/login" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 30
+        $token   = $result.access_token
+    } catch {
+        $code = $_.Exception.Response.StatusCode.value__
+        if ($code -eq 401) {
+            Write-Host "  Inloggen mislukt. Controleer uw wachtwoord in 'mijn_account.txt'."
+        } elseif ($_.Exception.Message -match "connect|network") {
+            Write-Host "  Geen internetverbinding. Zorg dat uw computer online is."
+        } else {
+            Write-Host "  Fout: $($_.Exception.Message)"
+        }
+        Write-Host "  Hulp nodig?  www.bewaardvoorjou.nl"
+        Read-Host "`n  Druk op Enter om af te sluiten"
+        exit 1
+    }
+    Write-Host "  Gelukt!"
+
+} else {
+    Write-Host "  Er staat geen koppelbestand op deze stick."
+    Write-Host ""
+    Write-Host "  Ga naar bewaardvoorjou.nl/instellingen"
+    Write-Host "  Klik op 'USB-stick koppelen'"
+    Write-Host "  Kopieer koppelbestand.txt naar deze stick"
+    Read-Host "`n  Druk op Enter om af te sluiten"
+    exit 1
+}
+
+Write-Host "  Gelukt! U bent ingelogd."
+Write-Host ""
+Write-Host "  Uw verhalen worden opgehaald van bewaardvoorjou.nl"
+Write-Host "  Dit duurt 1 a 2 minuten. Even geduld..."
+Write-Host ""
+
+# ── Downloaden ────────────────────────────────────────
+$zipPad = Join-Path $env:TEMP "bvj_backup.zip"
+
+try {
+    $ProgressPreference = "SilentlyContinue"
+    Invoke-WebRequest -Uri "$website/api/v1/account/backup?type=full" `
+                      -Headers @{ Authorization = "Bearer $token" } `
+                      -OutFile $zipPad `
+                      -TimeoutSec 600
+    $ProgressPreference = "Continue"
+} catch {
+    Write-Host "  Downloaden mislukt: $($_.Exception.Message)"
+    Write-Host "  Probeer het opnieuw of neem contact op via www.bewaardvoorjou.nl"
+    Read-Host "`n  Druk op Enter om af te sluiten"
+    exit 1
+}
+
+$mb = [Math]::Round((Get-Item $zipPad).Length / 1MB, 1)
+Write-Host "  $mb MB opgehaald."
+Write-Host ""
+Write-Host "  Verhalen op stick zetten..."
+
+# ── Uitpakken (eigen bestanden worden niet overschreven) ──
+$BEWAAR = @("updater.ps1", "Verhalen bijwerken.bat", "mijn_account.txt")
+
+try {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPad)
+
+    foreach ($item in $zip.Entries) {
+        if ($item.FullName.EndsWith("/"))       { continue }
+        if ($BEWAAR -contains $item.Name)       { continue }
+
+        $doel = Join-Path $PSScriptRoot $item.FullName
+        $map  = Split-Path $doel -Parent
+        if (-not (Test-Path $map)) {
+            New-Item -ItemType Directory -Path $map -Force | Out-Null
+        }
+        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($item, $doel, $true)
+    }
+    $zip.Dispose()
+} catch {
+    Write-Host "  Fout bij uitpakken: $($_.Exception.Message)"
+    Read-Host "`n  Druk op Enter om af te sluiten"
+    exit 1
+} finally {
+    if ($zip) { try { $zip.Dispose() } catch {} }
+    Remove-Item $zipPad -ErrorAction SilentlyContinue
+}
+
+# ── Klaar ─────────────────────────────────────────────
+Write-Host ""
+Write-Host ("=" * 52)
+Write-Host "  Uw verhalen zijn bijgewerkt!"
+Write-Host ("=" * 52)
+Write-Host ""
+Write-Host "  U kunt de stick nu veilig verwijderen."
+Write-Host "  Dubbelklik op 'index.html' om uw verhalen te bekijken."
+Write-Host ""
+Read-Host "  Druk op Enter om dit venster te sluiten"
 """
 
 
@@ -927,12 +1273,25 @@ def download_usb_package(
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
 
-        # autorun.inf — Windows biedt automatisch 'Mijn Levensboek openen' aan
+        # autorun.inf — Windows AutoPlay toont "Mijn Levensboek openen"
         zf.writestr("autorun.inf", _AUTORUN_INF.encode("utf-8"))
 
-        # Welkomst README
+        # Welkomstscherm op root — dubbelklik direct zichtbaar in Verkenner
+        welcome = _ROOT_WELCOME_HTML.replace("TMPL_NAAM", naam)
+        zf.writestr("index.html", welcome.encode("utf-8"))
+
+        # Welkomst README (tekstversie als browser niet beschikbaar)
         readme = _README.replace("TMPL_NAAM", naam)
         zf.writestr("KLIK_HIER_EERST.txt", readme.encode("utf-8"))
+
+        # Zelf-bijwerken bestanden — klant kan stick zelf bijwerken
+        customer_email = (user.email if user else "") or ""
+        config = (_ACCOUNT_CONFIG
+                  .replace("TMPL_EMAIL",   customer_email)
+                  .replace("TMPL_WEBSITE", settings.app_base_url.rstrip("/").replace("/app", "") if hasattr(settings, "app_base_url") else "https://api.bewaardvoorjou.nl"))
+        zf.writestr("mijn_account.txt",        config.encode("utf-8"))
+        zf.writestr("updater.ps1",             _UPDATER_PS1.encode("utf-8"))
+        zf.writestr("Verhalen bijwerken.bat",  _UPDATER_BAT.encode("utf-8"))
 
         # 01 PDF — gegenereerd met WeasyPrint (valt terug op HTML als WeasyPrint ontbreekt)
         if journey and user:
@@ -996,7 +1355,7 @@ def download_usb_package(
         # 03 Foto's (worden handmatig toegevoegd of via een toekomstige fotodienst)
         zf.writestr(
             "03_Mijn_Fotogalerij/LEESMIJ.txt",
-            f"Uw foto's worden hier geplaatst door het Bewaardvoorjou-team.\n"
+            "Uw foto's worden hier geplaatst door het Bewaardvoorjou-team.\n"
             "Neem contact op via www.bewaardvoorjou.nl bij vragen.\n".encode("utf-8"),
         )
 

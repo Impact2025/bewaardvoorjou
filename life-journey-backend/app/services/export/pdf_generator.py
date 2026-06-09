@@ -22,7 +22,6 @@ from typing import Optional
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from app.models.journey import Journey
 from app.models.media import MediaAsset, TranscriptSegment, PromptRun
 from app.models.memo import Memo
 from app.models.sharing import Highlight
@@ -597,7 +596,7 @@ def _memo_block(title: str, content: str) -> str:
 
 
 def _chapter_html(ch: ChapterContent) -> str:
-    parts = [f'<div class="chapter">']
+    parts = ['<div class="chapter">']
     parts.append(f'<h2 class="chapter-name">{_h(ch.name)}</h2>')
     parts.append('<div class="chapter-rule"></div>')
 

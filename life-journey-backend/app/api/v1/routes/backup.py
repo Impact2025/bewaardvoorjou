@@ -10,7 +10,7 @@ from __future__ import annotations
 import io
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 
 import boto3
@@ -24,7 +24,7 @@ from app.api.deps import get_current_user, get_db
 from app.core.config import settings
 from app.core.rate_limiter import limiter
 from app.models.journey import Journey
-from app.models.media import MediaAsset, TranscriptSegment, PromptRun
+from app.models.media import MediaAsset, TranscriptSegment
 from app.models.memo import Memo
 from app.models.user import User
 from app.services.export.pdf_generator import generate_pdf_bytes, generate_pdf_html
@@ -265,8 +265,12 @@ def _build_full_zip(journey: Journey, user: User, db: Session) -> io.BytesIO:
         _safe_name,
         _AUTORUN_INF,
         _README,
+        _ROOT_WELCOME_HTML,
         _SOFTWARE_README,
         _FASE_CONFIG,
+        _ACCOUNT_CONFIG,
+        _UPDATER_PS1,
+        _UPDATER_BAT,
     )
 
     naam      = user.display_name or user.email.split("@")[0]
@@ -292,7 +296,15 @@ def _build_full_zip(journey: Journey, user: User, db: Session) -> io.BytesIO:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("autorun.inf", _AUTORUN_INF.encode("utf-8"))
+        welcome = _ROOT_WELCOME_HTML.replace("TMPL_NAAM", naam)
+        zf.writestr("index.html", welcome.encode("utf-8"))
         zf.writestr("KLIK_HIER_EERST.txt", _README.replace("TMPL_NAAM", naam).encode("utf-8"))
+        config = (_ACCOUNT_CONFIG
+                  .replace("TMPL_EMAIL",   user.email)
+                  .replace("TMPL_WEBSITE", "https://api.bewaardvoorjou.nl"))
+        zf.writestr("mijn_account.txt",       config.encode("utf-8"))
+        zf.writestr("updater.ps1",            _UPDATER_PS1.encode("utf-8"))
+        zf.writestr("Verhalen bijwerken.bat", _UPDATER_BAT.encode("utf-8"))
 
         # 01 PDF
         try:
@@ -338,6 +350,57 @@ def _build_full_zip(journey: Journey, user: User, db: Session) -> io.BytesIO:
 
     buf.seek(0)
     return buf
+
+
+# ─── USB koppeltoken ─────────────────────────────────────────────────────────
+
+@router.post("/usb-token")
+@limiter.limit("10/day")
+def generate_usb_token(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> StreamingResponse:
+    """
+    Genereert een persoonlijk koppelbestand voor de USB-stick.
+    Het bestand bevat een token dat 1 jaar geldig is — geen wachtwoord nodig op de stick.
+    """
+    from app.services.auth import create_access_token
+
+    token = create_access_token(
+        subject=current_user.id,
+        expires_delta=timedelta(days=365),
+    )
+
+    api_url = str(request.base_url).rstrip("/")
+    naam    = current_user.display_name or current_user.email.split("@")[0]
+    datum   = datetime.now(timezone.utc)
+    geldig  = datum + timedelta(days=365)
+
+    inhoud = (
+        f"# Bewaardvoorjou — Koppelbestand voor USB-stick\n"
+        f"# ================================================\n"
+        f"#\n"
+        f"# Naam:      {naam}\n"
+        f"# Aangemaakt: {datum.strftime('%d-%m-%Y')}\n"
+        f"# Geldig tot: {geldig.strftime('%d-%m-%Y')}\n"
+        f"#\n"
+        f"# Zet dit bestand op uw USB-stick.\n"
+        f"# De stick werkt dan zonder wachtwoord.\n"
+        f"#\n"
+        f"# Kwijt? Genereer een nieuw bestand via bewaardvoorjou.nl/instellingen\n"
+        f"\n"
+        f"TOKEN:    {token}\n"
+        f"WEBSITE:  {api_url}\n"
+    )
+
+    logger.info(f"USB koppeltoken aangemaakt voor {current_user.email}")
+
+    return StreamingResponse(
+        iter([inhoud.encode("utf-8")]),
+        media_type="text/plain; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="koppelbestand.txt"'},
+    )
 
 
 # ─── Endpoint ────────────────────────────────────────────────────────────────
