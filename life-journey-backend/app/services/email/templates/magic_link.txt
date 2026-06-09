@@ -3,7 +3,12 @@ Lieve {{ user_display_name }},
 {% if gifter_name %}
 {{ gifter_name }} heeft je iets heel bijzonders gegeven: de kans om jouw levensverhaal vast te leggen — voor je kinderen, kleinkinderen, en iedereen die van je houdt.
 
+{% if personal_message %}
+Persoonlijk bericht van {{ gifter_name }}:
+"{{ personal_message }}"
+{% else %}
 "Jouw verhalen zijn de mooiste erfenis die je kunt achterlaten."
+{% endif %}
 
 Bewaardvoorjou is een veilige, Nederlandse plek waar jij op jouw eigen tempo herinneringen vertelt — via warme vragen, in jouw eigen woorden. Geen technische kennis nodig.
 

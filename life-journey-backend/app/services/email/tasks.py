@@ -258,6 +258,7 @@ def _build_email(
             user_display_name=user.display_name,
             magic_link_url=ctx["magic_link_url"],
             gifter_name=ctx.get("gifter_name"),
+            personal_message=ctx.get("personal_message"),
         )
 
     if email_event.email_type == "export_ready":

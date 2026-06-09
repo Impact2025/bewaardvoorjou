@@ -291,9 +291,10 @@ def build_magic_link_email(
     user_display_name: str,
     magic_link_url: str,
     gifter_name: str | None = None,
+    personal_message: str | None = None,
 ) -> tuple[str, str, str]:
     subject = (
-        f"{gifter_name} heeft je iets bijzonders gegeven 🎁"
+        f"{gifter_name} heeft je iets bijzonders gegeven"
         if gifter_name
         else "Je persoonlijke toegangslink – Bewaardvoorjou"
     )
@@ -301,6 +302,7 @@ def build_magic_link_email(
         "display_name": user_display_name,
         "magic_link_url": magic_link_url,
         "gifter_name": gifter_name,
+        "personal_message": personal_message,
     }
     html, text = render_email("magic_link", context)
     return subject, html, text

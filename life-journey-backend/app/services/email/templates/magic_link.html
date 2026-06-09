@@ -11,9 +11,16 @@
   <strong>{{ gifter_name }}</strong> heeft je iets heel bijzonders gegeven: de kans om jouw levensverhaal vast te leggen — voor je kinderen, kleinkinderen, en iedereen die van je houdt.
 </p>
 
+{% if personal_message %}
+<div style="background: #fdf8ef; border-left: 4px solid #d4af37; border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+  <p style="margin: 0 0 6px 0; font-size: 12px; color: #8B6914; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Persoonlijk bericht van {{ gifter_name }}</p>
+  <p style="margin: 0; font-size: 15px; color: #3B3028; line-height: 1.6; font-style: italic;">&ldquo;{{ personal_message }}&rdquo;</p>
+</div>
+{% else %}
 <div class="accent-block">
   <p><em>&ldquo;Jouw verhalen zijn de mooiste erfenis die je kunt achterlaten.&rdquo;</em></p>
 </div>
+{% endif %}
 
 <p class="body-text">
   <strong>Bewaardvoorjou</strong> is een veilige, Nederlandse plek waar jij op jouw eigen tempo herinneringen vertelt &mdash; via warme vragen, in jouw eigen woorden. Geen technische kennis nodig. Gewoon beginnen.

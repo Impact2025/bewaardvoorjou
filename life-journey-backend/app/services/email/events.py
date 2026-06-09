@@ -464,6 +464,7 @@ def trigger_magic_link_email(
     user_id: str,
     magic_link_url: str,
     gifter_name: Optional[str] = None,
+    personal_message: Optional[str] = None,
 ) -> Optional[str]:
     """Queue een magic link email voor passwordless login."""
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
@@ -478,6 +479,7 @@ def trigger_magic_link_email(
         context_data={
             "magic_link_url": magic_link_url,
             "gifter_name": gifter_name,
+            "personal_message": personal_message,
         },
     )
 

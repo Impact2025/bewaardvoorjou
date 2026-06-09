@@ -283,7 +283,10 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
         _send_gift_card_buyer_email(order, contact_email)
     elif recipient_email and recipient_name:
         # Fysiek pakket cadeau: stuur magic link naar begiftigde storyteller
-        _send_storyteller_magic_link(db, recipient_email, recipient_name, contact_email)
+        _send_storyteller_magic_link(
+            db, recipient_email, recipient_name, contact_email,
+            personal_message=order.personal_message,
+        )
         # Stuur koper een bevestigingsmail
         if contact_email:
             _send_gift_buyer_confirmation(order, contact_email, recipient_name, recipient_email)
@@ -318,6 +321,7 @@ def _send_storyteller_magic_link(
     recipient_email: str,
     recipient_name: str,
     gifter_email: str,
+    personal_message: str | None = None,
 ) -> None:
     """Create (or fetch) a pending storyteller account and send them a magic link."""
     from app.services.auth import get_or_create_storyteller, create_magic_link_token
@@ -328,8 +332,13 @@ def _send_storyteller_magic_link(
         user = get_or_create_storyteller(db, email=recipient_email, display_name=recipient_name)
         token = create_magic_link_token(db, user=user)
         magic_link_url = f"{_settings.app_base_url}/uitnodiging/{token}"
-        gifter_name = gifter_email.split("@")[0] if gifter_email else "iemand die van je houdt"
-        trigger_magic_link_email(db, user.id, magic_link_url, gifter_name=gifter_name)
+        raw_name = gifter_email.split("@")[0] if gifter_email else ""
+        gifter_name = raw_name.capitalize() if raw_name else "iemand die van je houdt"
+        trigger_magic_link_email(
+            db, user.id, magic_link_url,
+            gifter_name=gifter_name,
+            personal_message=personal_message,
+        )
         logger.info(f"Magic link verstuurd naar begiftigde storyteller {recipient_email}")
     except Exception as exc:
         logger.error(f"Kon magic link niet sturen naar {recipient_email}: {exc}")
