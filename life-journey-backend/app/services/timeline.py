@@ -227,7 +227,7 @@ def get_chapter_detail(
     db: Session, journey_id: str, chapter_id: ChapterId
 ) -> TimelineChapterDetail:
     """Get detailed information for a specific chapter."""
-    from app.services.ai.interviewer import CHAPTER_CONFIGS
+    from app.services.ai.interviewer import CHAPTER_CONTEXTS as CHAPTER_CONFIGS
 
     journey = db.query(Journey).filter(Journey.id == journey_id).first()
     if not journey:
