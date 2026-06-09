@@ -147,6 +147,16 @@ def create_payment_intent(
         db.commit()
         db.refresh(order)
         logger.info(f"Gratis order aangemaakt: {order.id} ({payload.package_type}, promo={promo_code_used})")
+
+        # Email versturen (zelfde logica als in de Stripe webhook)
+        _trigger_order_email_free(
+            db=db,
+            order=order,
+            contact_email=contact_email,
+            recipient_name=str(payload.recipient_name) if payload.recipient_name else None,
+            recipient_email=str(payload.recipient_email) if payload.recipient_email else None,
+        )
+
         return CreatePaymentIntentResponse(
             client_secret="",
             payment_intent_id="",
@@ -239,6 +249,40 @@ def create_payment_intent(
         amount_cents=total_cents,
         publishable_key=settings.stripe_publishable_key,
     )
+
+
+def _trigger_order_email_free(
+    db: Session,
+    order: Order,
+    contact_email: str,
+    recipient_name: str | None,
+    recipient_email: str | None,
+) -> None:
+    """Verstuurt de juiste email na een gratis order (spiegelt de Stripe webhook logica)."""
+    try:
+        if order.package_type == "DIGITAAL" and order.gift_card_code:
+            from app.services.email.renderer import build_gift_card_buyer_email
+            from app.services.email.client import send_email
+            gift_card_url = f"{settings.app_base_url}/cadeau/{order.gift_card_code}"
+            subject, html, text = build_gift_card_buyer_email(
+                buyer_email=contact_email,
+                recipient_name=recipient_name or "je geliefde",
+                gift_card_url=gift_card_url,
+                voucher_code="UPGRADE30",
+            )
+            send_email(to=contact_email, subject=subject, html=html, text=text)
+            logger.info(f"Gift card email verstuurd naar {contact_email} voor gratis order {order.id}")
+        elif recipient_email and recipient_name:
+            from app.services.auth import get_or_create_storyteller, create_magic_link_token
+            from app.services.email.events import trigger_magic_link_email
+            user = get_or_create_storyteller(db, email=recipient_email, display_name=recipient_name)
+            token = create_magic_link_token(db, user=user)
+            magic_link_url = f"{settings.app_base_url}/uitnodiging/{token}"
+            gifter_name = contact_email.split("@")[0] if contact_email else "iemand die van je houdt"
+            trigger_magic_link_email(db, user.id, magic_link_url, gifter_name=gifter_name)
+            logger.info(f"Magic link verstuurd naar begiftigde {recipient_email} voor gratis order {order.id}")
+    except Exception as exc:
+        logger.error(f"Kon email niet sturen voor gratis order {order.id}: {exc}")
 
 
 @router.get("/my-orders", response_model=list[OrderPublic])

@@ -18,11 +18,11 @@ export default function StepConfirmation({ state }: Props) {
     {
       icon: Mail,
       title: hasRecipientEmail
-        ? `Welkomstlink verstuurd naar ${state.recipientEmail}`
-        : "Bevestigingsmail verstuurd",
+        ? `Welkomstlink onderweg naar ${state.recipientEmail}`
+        : "Bevestigingsmail onderweg",
       desc: hasRecipientEmail
-        ? "De ontvanger kan direct inloggen en beginnen met herinneringen vastleggen."
-        : "Check je inbox voor de bestelbevestiging en je digitale toegang.",
+        ? "De ontvanger ontvangt een persoonlijke link om direct in te loggen. Check ook de spam-map."
+        : "Check je inbox (en spam) voor de bestelbevestiging en je digitale toegang.",
     },
     hasAddress
       ? {
@@ -55,7 +55,7 @@ export default function StepConfirmation({ state }: Props) {
           </h2>
           <p className="text-[#888]">
             {hasRecipientEmail
-              ? `De digitale welkomstlink is verstuurd naar ${state.recipientEmail}.`
+              ? `De welkomstlink is onderweg naar ${state.recipientEmail}.`
               : "Je digitale toegang is direct actief."}
           </p>
         </div>
