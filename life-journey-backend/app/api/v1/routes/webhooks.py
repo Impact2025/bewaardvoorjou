@@ -285,6 +285,7 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
         # Fysiek pakket cadeau: stuur magic link naar begiftigde storyteller
         _send_storyteller_magic_link(
             db, recipient_email, recipient_name, contact_email,
+            package_type=order.package_type,
             personal_message=order.personal_message,
         )
         # Stuur koper een bevestigingsmail
@@ -321,15 +322,30 @@ def _send_storyteller_magic_link(
     recipient_email: str,
     recipient_name: str,
     gifter_email: str,
+    package_type: str = "BEGIN",
     personal_message: str | None = None,
 ) -> None:
-    """Create (or fetch) a pending storyteller account and send them a magic link."""
+    """Create (or fetch) a storyteller account, activate their package, and send a magic link."""
+    from datetime import datetime, timezone
     from app.services.auth import get_or_create_storyteller, create_magic_link_token
     from app.services.email.events import trigger_magic_link_email
     from app.core.config import settings as _settings
 
     try:
         user = get_or_create_storyteller(db, email=recipient_email, display_name=recipient_name)
+
+        # Activeer het cadeau-pakket op het account van de ontvanger
+        pkg_settings = _PACKAGE_SETTINGS.get(package_type, _PACKAGE_SETTINGS["BEGIN"])
+        now = datetime.now(timezone.utc)
+        user.package_tier = pkg_settings["package_tier"]
+        user.package_activated_at = now
+        user.max_family_members = pkg_settings["max_family_members"]
+        user.max_chapters = pkg_settings["max_chapters"]
+        user.storage_years = pkg_settings["storage_years"]
+        db.add(user)
+        db.commit()
+        logger.info(f"Pakket {package_type} geactiveerd voor ontvanger {recipient_email} (user {user.id})")
+
         token = create_magic_link_token(db, user=user)
         magic_link_url = f"{_settings.app_base_url}/uitnodiging/{token}"
         raw_name = gifter_email.split("@")[0] if gifter_email else ""
