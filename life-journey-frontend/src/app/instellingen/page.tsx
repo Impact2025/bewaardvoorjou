@@ -12,13 +12,15 @@ import {
   requestDataExport,
   deleteAccount,
   downloadBackup,
+  downloadUsbToken,
   type EmailPreferences,
 } from "@/lib/settings-client";
 
-type SaveState = "idle" | "saving" | "saved" | "error";
-type ExportState = "idle" | "loading" | "sent" | "error";
-type BackupState = "idle" | "downloading" | "done" | "error";
-type DeleteState = "idle" | "confirm" | "deleting" | "error";
+type SaveState    = "idle" | "saving"     | "saved"  | "error";
+type ExportState  = "idle" | "loading"    | "sent"   | "error";
+type BackupState  = "idle" | "downloading"| "done"   | "error";
+type DeleteState  = "idle" | "confirm"    | "deleting"| "error";
+type KoppelState  = "idle" | "loading"    | "done"   | "error";
 
 function Toggle({
   label,
@@ -80,6 +82,7 @@ function BackupSection({
 }) {
   const [quickState, setQuickState] = useState<BackupState>("idle");
   const [fullState, setFullState] = useState<BackupState>("idle");
+  const [koppelState, setKoppelState] = useState<KoppelState>("idle");
   const [lastBackup, setLastBackup] = useState<string | null>(null);
 
   useEffect(() => {
@@ -108,6 +111,18 @@ function BackupSection({
     },
     [token],
   );
+
+  const handleKoppel = useCallback(async () => {
+    setKoppelState("loading");
+    try {
+      await downloadUsbToken(token);
+      setKoppelState("done");
+      setTimeout(() => setKoppelState("idle"), 5000);
+    } catch {
+      setKoppelState("error");
+      setTimeout(() => setKoppelState("idle"), 4000);
+    }
+  }, [token]);
 
   const busy = quickState === "downloading" || fullState === "downloading";
 
@@ -220,6 +235,44 @@ function BackupSection({
             </p>
           </div>
         )}
+      </div>
+
+      {/* USB koppelen */}
+      <div
+        className="rounded-2xl p-6 mt-4"
+        style={{ background: "#FDFAF6", border: "1px solid #E9E4DB" }}
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 mt-0.5 text-2xl">🔗</div>
+          <div className="flex-1">
+            <p className="font-semibold" style={{ color: "#2C2416" }}>
+              USB-stick koppelen
+            </p>
+            <p className="text-sm mt-1" style={{ color: "#6B6456" }}>
+              Genereer een koppelbestand en zet het op uw USB-stick. Daarna werkt
+              <strong> Verhalen bijwerken.bat</strong> zonder wachtwoord — ook over jaren.
+            </p>
+            <ol className="text-sm mt-3 space-y-1" style={{ color: "#9C8E82" }}>
+              <li>1. Klik op &ldquo;Download koppelbestand&rdquo;</li>
+              <li>2. Kopieer <strong>koppelbestand.txt</strong> naar uw USB-stick</li>
+              <li>3. Klaar — dubbelklik voortaan op <strong>Verhalen bijwerken.bat</strong></li>
+            </ol>
+          </div>
+        </div>
+        <button
+          onClick={handleKoppel}
+          disabled={koppelState === "loading"}
+          className="mt-5 w-full rounded-xl py-3 font-semibold text-sm transition-opacity disabled:opacity-50"
+          style={{
+            background: koppelState === "done" ? "#22C55E" : "#F97316",
+            color: "#fff",
+          }}
+        >
+          {koppelState === "loading" ? "Bestand aanmaken…" :
+           koppelState === "done"    ? "✓ koppelbestand.txt gedownload" :
+           koppelState === "error"   ? "Probeer opnieuw" :
+                                       "🔗 Download koppelbestand"}
+        </button>
       </div>
     </section>
   );

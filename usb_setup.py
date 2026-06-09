@@ -208,28 +208,68 @@ def create_structure(drive_path: str) -> None:
                 os.makedirs(os.path.join(drive_path, parent, sub), exist_ok=True)
                 dim(f"📂 {parent}/{sub}")
 
+        _write_autorun(drive_path)
         _write_readme(drive_path)
+        _write_welcome_placeholder(drive_path)
         _write_dashboard_placeholder(drive_path)
         ok("Structuur klaar.")
     except OSError as e:
         err(f"Aanmaken van mappen mislukt: {e}")
 
 
+def _write_autorun(drive_path: str) -> None:
+    with open(os.path.join(drive_path, "autorun.inf"), "w", encoding="utf-8") as f:
+        f.write(
+            "[AutoRun]\n"
+            "Action=Mijn Levensboek openen\n"
+            "Label=MijnErfgoed\n"
+            "ShellExecute=index.html\n"
+        )
+    dim("📄 autorun.inf")
+
+
 def _write_readme(drive_path: str) -> None:
     with open(os.path.join(drive_path, "KLIK_HIER_EERST.txt"), "w", encoding="utf-8") as f:
         f.write(
-            "Bewaardvoorjou — Uw Digitale Familiebibliotheek\n"
-            "=" * 50 + "\n\n"
-            "STAP 1  Open de map 04_Start_Hier_Offline\n"
-            "        Dubbelklik op 'index.html' om uw persoonlijke\n"
-            "        welkomstpagina te openen. Geen internet nodig.\n\n"
-            "STAP 2  In die pagina vindt u uw levensfasen,\n"
-            "        audio-fragmenten en uw PDF-levensboek.\n\n"
-            "STAP 3  Geen werkende browser? Open de map 05_Software\n"
-            "        en start VLC voor de audiofragmenten.\n\n"
+            "WELKOM\n"
+            "======\n\n"
+            "Dubbelklik op het bestand  index.html  op deze stick.\n"
+            "Uw persoonlijke welkomstpagina opent dan vanzelf.\n\n"
+            "WERKT HET NIET?\n"
+            "  Open de map 05_Software en start VLC.\n"
+            "  VLC speelt alle audiofragmenten af.\n\n"
             "Met warme groet,\nHet team van Bewaardvoorjou\nwww.bewaardvoorjou.nl\n"
         )
     dim("📄 KLIK_HIER_EERST.txt")
+
+
+def _write_welcome_placeholder(drive_path: str) -> None:
+    html = (
+        "<!DOCTYPE html><html lang='nl'><head><meta charset='UTF-8'>"
+        "<title>Bewaardvoorjou</title>"
+        "<style>"
+        "body{font-family:Georgia,serif;background:#f9f5f0;color:#2d1a0e;"
+        "display:flex;justify-content:center;align-items:center;"
+        "min-height:100vh;margin:0;padding:24px}"
+        ".card{background:#fff;border-radius:24px;padding:56px 64px;"
+        "max-width:600px;width:100%;text-align:center;"
+        "box-shadow:0 8px 48px rgba(45,26,14,.12);border:1px solid #e5d4bf}"
+        ".logo{font-size:1rem;letter-spacing:.18em;text-transform:uppercase;"
+        "color:#c9963a;font-weight:600;margin-bottom:36px}"
+        "h1{font-size:3rem;color:#6b3a1f;font-weight:normal;margin-bottom:24px}"
+        "p{font-size:1.25rem;color:#5c3d2b;line-height:1.65}"
+        "</style></head><body>"
+        "<div class='card'>"
+        "<div class='logo'>Bewaardvoorjou</div>"
+        "<h1>Uw levensboek wordt hier geladen</h1>"
+        "<p>Dit bestand wordt ingevuld zodra uw verhalen zijn overgedragen.<br><br>"
+        "Hulp nodig? <strong>www.bewaardvoorjou.nl</strong></p>"
+        "</div></body></html>\n"
+    )
+    path = os.path.join(drive_path, "index.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html)
+    dim("🌐 index.html")
 
 
 def _write_dashboard_placeholder(drive_path: str) -> None:
@@ -299,13 +339,19 @@ def print_verify_report(drive_path: str, naam: str) -> None:
     else:
         ok("Alle vereiste mappen aanwezig.")
 
-    # Check of het dashboard er staat
-    dashboard = os.path.join(drive_path, "04_Start_Hier_Offline", "index.html")
-    if os.path.isfile(dashboard):
-        size_kb = os.path.getsize(dashboard) / 1024
-        ok(f"Dashboard aanwezig  ({size_kb:.0f} KB)")
+    # Check of het welkomstscherm (root) en dashboard aanwezig zijn
+    root_html   = os.path.join(drive_path, "index.html")
+    dashboard   = os.path.join(drive_path, "04_Start_Hier_Offline", "index.html")
+
+    if os.path.isfile(root_html):
+        ok(f"Welkomstscherm (index.html) aanwezig  ({os.path.getsize(root_html) / 1024:.0f} KB)")
     else:
-        warn("Dashboard (index.html) ontbreekt — controleer de backend-export.")
+        warn("Welkomstscherm (index.html) ontbreekt — controleer de backend-export.")
+
+    if os.path.isfile(dashboard):
+        ok(f"Dashboard aanwezig  ({os.path.getsize(dashboard) / 1024:.0f} KB)")
+    else:
+        warn("Dashboard (04_Start_Hier_Offline/index.html) ontbreekt.")
 
 
 # ─── API CLIENT ───────────────────────────────────────────────────────────────

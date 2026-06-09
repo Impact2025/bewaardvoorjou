@@ -88,6 +88,22 @@ export async function downloadBackup(
   URL.revokeObjectURL(url);
 }
 
+export async function downloadUsbToken(token: string): Promise<void> {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
+  const res = await fetch(`${base}/account/usb-token`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Koppelbestand mislukt (${res.status})`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "koppelbestand.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function deleteAccount(password: string, token: string): Promise<void> {
   await apiFetch<void>("/account/me", {
     method: "DELETE",
