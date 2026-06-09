@@ -19,8 +19,12 @@ function VertelContent() {
   const [question, setQuestion] = useState<NextQuestion | null>(null);
 
   const loadNextQuestion = useCallback(async () => {
-    if (!session?.token || !session?.primaryJourneyId) {
+    if (!session?.token) {
       router.push("/login");
+      return;
+    }
+    if (!session?.primaryJourneyId) {
+      router.push("/onboarding");
       return;
     }
     setPageState("loading");

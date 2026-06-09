@@ -43,9 +43,11 @@ export default function UitnodigingPage({ params }: PageProps) {
       .then((session) => {
         setSession(session);
         setState("success");
+        // Nieuwe gebruiker (geen journey) → onboarding; terugkerend → vertel
+        const destination = session.primaryJourneyId ? "/vertel" : "/onboarding";
         setTimeout(() => {
-          router.push("/vertel");
-        }, 1500);
+          router.push(destination);
+        }, 1800);
       })
       .catch((err: { message?: string }) => {
         const msg = err?.message ?? "";
@@ -91,12 +93,15 @@ export default function UitnodigingPage({ params }: PageProps) {
 
           {state === "success" && (
             <>
-
+              <div className="text-5xl mb-4">🎉</div>
               <h2 className="text-2xl font-serif font-semibold mb-3" style={{ color: "#2C2416" }}>
                 Welkom!
               </h2>
-              <p className="text-lg" style={{ color: "#4A4239" }}>
-                Je wordt nu doorgestuurd naar jouw vertelomgeving…
+              <p className="text-base mb-2" style={{ color: "#4A4239" }}>
+                Je bent ingelogd. We zetten alles klaar voor je.
+              </p>
+              <p className="text-sm" style={{ color: "#9C8B77" }}>
+                Even geduld — je wordt zo doorgestuurd…
               </p>
             </>
           )}

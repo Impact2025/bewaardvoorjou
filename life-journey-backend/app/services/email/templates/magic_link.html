@@ -1,29 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Jouw toegangslink — Bewaardvoorjou{% endblock %}
+{% block title %}Jouw levensverhaal bewaren — Bewaardvoorjou{% endblock %}
 
 {% block content %}
-<h1 class="heading">
-  {% if gifter_name %}
-  Je bent uitgenodigd, {{ display_name }}.
-  {% else %}
-  Jouw persoonlijke toegangslink.
-  {% endif %}
-</h1>
 
 {% if gifter_name %}
+<h1 class="heading">Lieve {{ display_name }},</h1>
+
 <p class="body-text">
-  <strong>{{ gifter_name }}</strong> heeft je uitgenodigd om jouw levensverhaal te vertellen &mdash; een onbetaalbaar cadeau voor de hele familie.
+  <strong>{{ gifter_name }}</strong> heeft je iets heel bijzonders gegeven: de kans om jouw levensverhaal vast te leggen — voor je kinderen, kleinkinderen, en iedereen die van je houdt.
 </p>
+
+<div class="accent-block">
+  <p><em>&ldquo;Jouw verhalen zijn de mooiste erfenis die je kunt achterlaten.&rdquo;</em></p>
+</div>
+
+<p class="body-text">
+  <strong>Bewaardvoorjou</strong> is een veilige, Nederlandse plek waar jij op jouw eigen tempo herinneringen vertelt &mdash; via warme vragen, in jouw eigen woorden. Geen technische kennis nodig. Gewoon beginnen.
+</p>
+
+<p class="body-text" style="font-weight: 600; margin-top: 24px; margin-bottom: 4px;">Hoe het werkt:</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
+  <tr>
+    <td style="padding: 10px 0; vertical-align: top; width: 28px; font-size: 18px; line-height: 1.4;">1.</td>
+    <td style="padding: 10px 0 10px 10px; font-size: 14px; color: #57534E; line-height: 1.6;">
+      <strong style="color: #1C1917;">Klik op de knop hieronder</strong><br>
+      Je maakt in &eacute;&eacute;n minuut een gratis account aan. Geen wachtwoord &mdash; je link is jouw toegang.
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 10px 0; vertical-align: top; font-size: 18px; line-height: 1.4;">2.</td>
+    <td style="padding: 10px 0 10px 10px; font-size: 14px; color: #57534E; line-height: 1.6;">
+      <strong style="color: #1C1917;">Stel een paar dingen in</strong><br>
+      Hoe wil je je verhaal vertellen? Voor wie bewaar je het? Duurt maar twee minuten.
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 10px 0; vertical-align: top; font-size: 18px; line-height: 1.4;">3.</td>
+    <td style="padding: 10px 0 10px 10px; font-size: 14px; color: #57534E; line-height: 1.6;">
+      <strong style="color: #1C1917;">Begin je eerste herinnering</strong><br>
+      Onze gids stelt de eerste vraag. Jij antwoordt &mdash; in jouw eigen tempo, zo lang als je wilt.
+    </td>
+  </tr>
+</table>
+
 {% else %}
-<p class="body-text">
-  Klik op de knop hieronder om direct in te loggen. Geen wachtwoord nodig.
-</p>
+<h1 class="heading">Jouw toegangslink, {{ display_name }}.</h1>
+<p class="body-text">Klik op de knop hieronder om direct in te loggen. Geen wachtwoord nodig.</p>
 {% endif %}
 
 <div class="cta-wrap">
-  <a href="{{ magic_link_url }}" class="cta-button">Begin mijn verhaal</a>
+  <a href="{{ magic_link_url }}" class="cta-button">Begin mijn verhaal &rarr;</a>
 </div>
+
+{% if gifter_name %}
+<p class="body-text" style="font-size: 13px; text-align: center; color: #A8A29E; margin-top: 0;">
+  Geen app nodig &nbsp;&middot;&nbsp; Werkt op tablet, telefoon &amp; computer &nbsp;&middot;&nbsp; Volledig in het Nederlands
+</p>
+{% endif %}
 
 <div class="divider"></div>
 
@@ -35,4 +70,5 @@
   Knop werkt niet? Kopieer dit in je browser:<br>
   {{ magic_link_url }}
 </p>
+
 {% endblock %}

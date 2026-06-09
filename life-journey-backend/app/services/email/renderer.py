@@ -292,7 +292,11 @@ def build_magic_link_email(
     magic_link_url: str,
     gifter_name: str | None = None,
 ) -> tuple[str, str, str]:
-    subject = "Je persoonlijke toegangslink – Bewaard voor jou"
+    subject = (
+        f"{gifter_name} heeft je iets bijzonders gegeven 🎁"
+        if gifter_name
+        else "Je persoonlijke toegangslink – Bewaardvoorjou"
+    )
     context = {
         "display_name": user_display_name,
         "magic_link_url": magic_link_url,
