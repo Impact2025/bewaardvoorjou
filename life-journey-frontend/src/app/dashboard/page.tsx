@@ -206,7 +206,7 @@ function DashboardContent() {
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FF8C42] hover:bg-[#F47B3B] text-white text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
                   >
                     <Play className="h-3.5 w-3.5" />
-                    {nextChapterTitle || "Start volgende"}
+                    Ga door met vertellen
                   </Link>
                 )}
               </div>
@@ -336,6 +336,7 @@ function DashboardContent() {
                       <Timeline
                         journeyId={journey.id}
                         onChapterSelect={handleChapterSelect}
+                        hideStats
                       />
                     ) : (
                       <p className="text-[#555555] text-center py-8">

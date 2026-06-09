@@ -15,12 +15,9 @@ import { Settings, LogOut, User } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/overview", label: "Mijn Reis" },
-  { href: "/timeline", label: "Tijdlijn" },
-  { href: "/chapters", label: "Hoofdstukken" },
+  { href: "/chapters", label: "Mijn Verhaal" },
   { href: "/family", label: "Familie" },
-  { href: "/recordings", label: "Mijn Opnames" },
-  { href: "/memos", label: "Memo's" },
+  { href: "/recordings", label: "Opnames" },
   { href: "/dashboard/support", label: "Hulp" },
 ];
 

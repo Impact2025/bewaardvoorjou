@@ -40,6 +40,7 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
     <button
       onClick={onClick}
       disabled={isLocked}
+      title={isLocked ? "Voltooi eerst het vorige hoofdstuk om dit te ontgrendelen" : undefined}
       className={cn(
         "group relative flex flex-col items-start p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ease-out",
         "w-[140px] sm:w-[160px] md:w-[180px] text-left",
@@ -147,8 +148,15 @@ export function TimelineChapter({ chapter, chapterDetail, playingAudio, onClick,
         </div>
       )}
 
+      {/* Lock hint */}
+      {isLocked && (
+        <p className="text-[10px] text-slate-400 mt-auto mb-1 leading-tight">
+          Voltooi eerst het vorige hoofdstuk
+        </p>
+      )}
+
       {/* Stats row */}
-      <div className="flex items-center justify-between w-full text-xs text-slate-600 mt-auto">
+      <div className={cn("flex items-center justify-between w-full text-xs text-slate-600", !isLocked && "mt-auto")}>
         <div className="flex items-center gap-1">
           {mediaIcons.length > 0 ? (
             <>

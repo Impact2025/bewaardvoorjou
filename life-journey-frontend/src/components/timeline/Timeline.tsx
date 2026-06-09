@@ -16,6 +16,7 @@ interface TimelineProps {
   onChapterSelect?: (chapterId: ChapterId) => void;
   selectedChapterId?: ChapterId;
   className?: string;
+  hideStats?: boolean;
 }
 
 export function Timeline({
@@ -23,6 +24,7 @@ export function Timeline({
   onChapterSelect,
   selectedChapterId,
   className,
+  hideStats = false,
 }: TimelineProps) {
   const { session } = useAuth();
   const [timeline, setTimeline] = useState<TimelineResponse | null>(null);
@@ -142,7 +144,7 @@ export function Timeline({
 
       <div className="relative">
         {/* Stats overview */}
-        <TimelineStats timeline={timeline} />
+        {!hideStats && <TimelineStats timeline={timeline} />}
 
       {/* Phases */}
       <div className="space-y-2">
