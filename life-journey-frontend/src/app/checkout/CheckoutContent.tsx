@@ -21,12 +21,14 @@ import StepConfirmation from "./StepConfirmation";
 
 const SOLD_OUT_PACKAGES = new Set(["ERFGOED", "VOOR_ALTIJD"]);
 const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL"]);
+const SOLD_OUT_ADDONS = new Set(["GIFT_BOX", "EXTRA_USB", "PHOTO_BOOK", "EXTRA_STORAGE", "VIDEO_INTRO"]);
 
 const STEPS = ["Pakket", "Personaliseer", "Betalen", "Bevestiging"] as const;
 
 export interface CheckoutState {
   packageType: PackageType;
   addons: AddonCode[];
+  forSelf: boolean;
   recipientName: string;
   recipientEmail: string;
   personalMessage: string;
@@ -70,6 +72,7 @@ export default function CheckoutContent() {
   const [state, setState] = useState<CheckoutState>({
     packageType,
     addons: [],
+    forSelf: false,
     recipientName: "",
     recipientEmail: "",
     personalMessage: "",
@@ -312,31 +315,42 @@ function StepSelectPlan({
       <div>
         <h3 className="font-medium text-[#1a1a1a] mb-3">Maak je cadeau nog specialer</h3>
         <div className="space-y-2">
-          {ADDON_OPTIONS.map((addon) => (
-            <label
-              key={addon.code}
-              className={cn(
-                "flex items-start justify-between p-4 rounded-xl border cursor-pointer transition-colors",
-                state.addons.includes(addon.code)
-                  ? "border-[#2d5016] bg-[#2d5016]/5"
-                  : "border-[#e5e0d8] bg-white hover:border-[#2d5016]/30"
-              )}
-            >
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={state.addons.includes(addon.code)}
-                  onChange={() => toggleAddon(addon.code)}
-                  className="mt-1 accent-[#2d5016]"
-                />
-                <div>
-                  <p className="font-medium text-[#1a1a1a] text-sm">{addon.label}</p>
-                  <p className="text-xs text-[#888]">{addon.description}</p>
+          {ADDON_OPTIONS.map((addon) => {
+            const addonSoldOut = SOLD_OUT_ADDONS.has(addon.code);
+            return (
+              <label
+                key={addon.code}
+                className={cn(
+                  "flex items-start justify-between p-4 rounded-xl border transition-colors",
+                  addonSoldOut
+                    ? "opacity-60 cursor-not-allowed border-[#e5e0d8] bg-[#f8f6f2]"
+                    : state.addons.includes(addon.code)
+                    ? "cursor-pointer border-[#2d5016] bg-[#2d5016]/5"
+                    : "cursor-pointer border-[#e5e0d8] bg-white hover:border-[#2d5016]/30"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={state.addons.includes(addon.code)}
+                    onChange={() => !addonSoldOut && toggleAddon(addon.code)}
+                    disabled={addonSoldOut}
+                    className="mt-1 accent-[#2d5016]"
+                  />
+                  <div>
+                    <p className="font-medium text-[#1a1a1a] text-sm">{addon.label}</p>
+                    {addonSoldOut
+                      ? <p className="text-xs text-[#e07020] font-medium">Tijdelijk niet beschikbaar</p>
+                      : <p className="text-xs text-[#888]">{addon.description}</p>
+                    }
+                  </div>
                 </div>
-              </div>
-              <span className="text-sm font-medium text-[#555] ml-4 flex-shrink-0">+€{addon.price}</span>
-            </label>
-          ))}
+                <span className={cn("text-sm font-medium ml-4 flex-shrink-0", addonSoldOut ? "text-[#aaa]" : "text-[#555]")}>
+                  +€{addon.price}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 

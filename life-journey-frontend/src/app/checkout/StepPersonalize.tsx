@@ -24,74 +24,126 @@ export default function StepPersonalize({ state, onChange, onNext }: Props) {
     addr.city.length >= 2;
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.guestEmail);
-  const isValid = emailValid && (state.skipShipping || addressFilled);
+  const recipientEmailValid = state.forSelf || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.recipientEmail);
+  const isValid = emailValid && recipientEmailValid && (state.skipShipping || addressFilled);
+
+  const handleForSelfToggle = (forSelf: boolean) => {
+    onChange({
+      forSelf,
+      recipientEmail: forSelf ? "" : state.recipientEmail,
+      recipientName: forSelf ? "" : state.recipientName,
+      personalMessage: forSelf ? "" : state.personalMessage,
+    });
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">Personaliseer je cadeau</h2>
-        <p className="text-[#888] text-sm">Voor wie is dit? En hoe bereiken we hen?</p>
-      </div>
-
-      {/* Vaderdag digitale start notice */}
-      <div className="bg-[#d4af37]/10 border border-[#d4af37]/40 rounded-xl p-4">
-        <p className="text-sm font-semibold text-[#1a1a1a] mb-1">🎁 Digitale start voor Vaderdag</p>
-        <p className="text-xs text-[#555] leading-relaxed">
-          Je cadeau is direct bruikbaar — de ontvanger krijgt een persoonlijke link per e-mail.
-          De fysieke doos wordt verstuurd zodra de voorraad beschikbaar is (september).
+        <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">
+          {state.forSelf ? "Jouw bestelling" : "Personaliseer je cadeau"}
+        </h2>
+        <p className="text-[#888] text-sm">
+          {state.forSelf ? "Voor wie is dit pakket?" : "Voor wie is dit? En hoe bereiken we hen?"}
         </p>
       </div>
 
-      {/* Ontvanger */}
-      <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4">
-        <h3 className="font-medium text-[#1a1a1a]">Over het cadeau</h3>
+      {/* Voor wie toggle */}
+      <div className="bg-white rounded-xl border border-[#e5e0d8] p-1 flex gap-1">
+        <button
+          type="button"
+          onClick={() => handleForSelfToggle(false)}
+          className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+            !state.forSelf
+              ? "bg-[#d4af37] text-[#1a1a1a]"
+              : "text-[#888] hover:text-[#1a1a1a]"
+          }`}
+        >
+          🎁 Voor iemand anders
+        </button>
+        <button
+          type="button"
+          onClick={() => handleForSelfToggle(true)}
+          className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+            state.forSelf
+              ? "bg-[#d4af37] text-[#1a1a1a]"
+              : "text-[#888] hover:text-[#1a1a1a]"
+          }`}
+        >
+          👤 Voor mezelf
+        </button>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#555] mb-1">
-            Voor wie is dit? <span className="text-[#888] font-normal">(optioneel)</span>
-          </label>
-          <input
-            type="text"
-            placeholder="bijv. Opa Jan, Papa, Oma Els"
-            value={state.recipientName}
-            onChange={(e) => onChange({ recipientName: e.target.value })}
-            maxLength={100}
-            className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[#555] mb-1">
-            E-mailadres van de ontvanger
-            <span className="text-[#d4af37] font-normal ml-1">— stuur toegang direct door</span>
-          </label>
-          <input
-            type="email"
-            placeholder="papa@email.nl"
-            value={state.recipientEmail}
-            onChange={(e) => onChange({ recipientEmail: e.target.value })}
-            className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
-          />
-          <p className="text-xs text-[#888] mt-1">
-            De ontvanger krijgt een persoonlijke welkomstlink zodra de betaling is afgerond.
+      {/* Vaderdag digitale start notice — alleen bij cadeau */}
+      {!state.forSelf && (
+        <div className="bg-[#d4af37]/10 border border-[#d4af37]/40 rounded-xl p-4">
+          <p className="text-sm font-semibold text-[#1a1a1a] mb-1">🎁 Digitale start voor Vaderdag</p>
+          <p className="text-xs text-[#555] leading-relaxed">
+            Je cadeau is direct bruikbaar — de ontvanger krijgt een persoonlijke link per e-mail.
+            De fysieke doos wordt verstuurd zodra de voorraad beschikbaar is (september).
           </p>
         </div>
+      )}
 
-        <div>
-          <label className="block text-sm font-medium text-[#555] mb-1">
-            Persoonlijke boodschap <span className="text-[#888] font-normal">(optioneel)</span>
-          </label>
-          <textarea
-            placeholder="bijv. Lieve papa, dit is voor jouw verhalen die wij nooit willen vergeten..."
-            value={state.personalMessage}
-            onChange={(e) => onChange({ personalMessage: e.target.value })}
-            maxLength={500}
-            rows={3}
-            className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 resize-none"
-          />
-          <p className="text-xs text-[#aaa] mt-1">{state.personalMessage.length}/500</p>
+      {state.forSelf ? (
+        /* Voor mezelf: alleen eigen gegevens */
+        <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4">
+          <h3 className="font-medium text-[#1a1a1a]">Jouw gegevens</h3>
+          <p className="text-xs text-[#888]">
+            Je toegangslink wordt naar jouw e-mailadres gestuurd.
+          </p>
         </div>
-      </div>
+      ) : (
+        /* Voor een ander: ontvanger invullen */
+        <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4">
+          <h3 className="font-medium text-[#1a1a1a]">Over het cadeau</h3>
+
+          <div>
+            <label className="block text-sm font-medium text-[#555] mb-1">
+              Voor wie is dit? <span className="text-[#888] font-normal">(optioneel)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="bijv. Opa Jan, Papa, Oma Els"
+              value={state.recipientName}
+              onChange={(e) => onChange({ recipientName: e.target.value })}
+              maxLength={100}
+              className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#555] mb-1">
+              E-mailadres van de ontvanger
+              <span className="text-[#d4af37] font-normal ml-1">— stuur toegang direct door</span>
+            </label>
+            <input
+              type="email"
+              placeholder="papa@email.nl"
+              value={state.recipientEmail}
+              onChange={(e) => onChange({ recipientEmail: e.target.value })}
+              className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+            />
+            <p className="text-xs text-[#888] mt-1">
+              De ontvanger krijgt een persoonlijke welkomstlink zodra de betaling is afgerond.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#555] mb-1">
+              Persoonlijke boodschap <span className="text-[#888] font-normal">(optioneel)</span>
+            </label>
+            <textarea
+              placeholder="bijv. Lieve papa, dit is voor jouw verhalen die wij nooit willen vergeten..."
+              value={state.personalMessage}
+              onChange={(e) => onChange({ personalMessage: e.target.value })}
+              maxLength={500}
+              rows={3}
+              className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 resize-none"
+            />
+            <p className="text-xs text-[#aaa] mt-1">{state.personalMessage.length}/500</p>
+          </div>
+        </div>
+      )}
 
       {/* Bezorgadres — optioneel via toggle */}
       <div className="bg-white rounded-xl border border-[#e5e0d8] overflow-hidden">
@@ -193,7 +245,9 @@ export default function StepPersonalize({ state, onChange, onNext }: Props) {
       <div className="bg-white rounded-xl border border-[#e5e0d8] p-5">
         <h3 className="font-medium text-[#1a1a1a] mb-3">Jouw e-mailadres</h3>
         <p className="text-xs text-[#888] mb-3">
-          Hier sturen we de bestelbevestiging naartoe.
+          {state.forSelf
+            ? "Hier sturen we je toegangslink en bestelbevestiging naartoe."
+            : "Hier sturen we de bestelbevestiging naartoe."}
         </p>
         <input
           type="email"
