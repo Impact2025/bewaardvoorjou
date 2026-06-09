@@ -15,6 +15,7 @@ from app.api.v1.routes import (
     family,
     admin,
     admin_enhanced,
+    admin_orders,
     emails,
     quick_thoughts,
     blog,
@@ -59,5 +60,6 @@ api_router.include_router(promo_codes.admin_router, prefix="/admin/promo-codes",
 api_router.include_router(support.router, prefix="/support", tags=["support"])
 api_router.include_router(support.admin_router, prefix="/admin", tags=["admin-support"])
 api_router.include_router(helpdesk.router, prefix="/helpdesk", tags=["helpdesk"])
+api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
 api_router.include_router(usb_export.router, prefix="/admin/usb", tags=["admin-usb"])
 api_router.include_router(backup.router, prefix="/account", tags=["account"])

@@ -80,3 +80,43 @@ class EarlyBirdStatus(BaseModel):
     deadline_iso: str
     waitlist_discount_cents: int
     digitaal_discount_cents: int = 0
+
+
+class OrderAdmin(BaseModel):
+    id: str
+    user_id: str | None = None
+    guest_email: str | None = None
+    buyer_email: str | None = None
+    buyer_name: str | None = None
+    package_type: str
+    price_paid: int
+    discount_cents: int = 0
+    addons: list[str] = []
+    addons_price: int = 0
+    stripe_payment_intent_id: str | None = None
+    stripe_payment_method: str | None = None
+    status: str
+    recipient_name: str | None = None
+    recipient_email: str | None = None
+    personal_message: str | None = None
+    gift_card_code: str | None = None
+    shipping_address: dict | None = None
+    promo_code_used: str | None = None
+    created_at: datetime
+    paid_at: datetime | None = None
+    fulfilled_at: datetime | None = None
+    usb_burned_at: datetime | None = None
+    usb_burned_by: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class UpdateOrderStatusRequest(BaseModel):
+    status: Literal["PENDING", "PAID", "FULFILLED", "CANCELLED", "REFUNDED"]
+
+
+class OrderListResponse(BaseModel):
+    orders: list[OrderAdmin]
+    total: int
+    skip: int
+    limit: int
