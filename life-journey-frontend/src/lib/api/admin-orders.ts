@@ -135,6 +135,20 @@ export async function markUsbBurned(orderId: string): Promise<AdminOrder> {
   return res.json();
 }
 
+export async function resendOrderEmails(
+  orderId: string
+): Promise<{ sent: string[]; errors: string[] }> {
+  const res = await fetch(`${API_BASE}/admin/orders/${orderId}/resend-emails`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "E-mails opnieuw sturen mislukt");
+  }
+  return res.json();
+}
+
 export function exportOrdersCsvUrl(status?: string): string {
   const qs = status ? `?status=${status}` : "";
   return `${API_BASE}/admin/orders/export/csv${qs}`;

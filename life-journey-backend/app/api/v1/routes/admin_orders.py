@@ -222,6 +222,85 @@ def mark_usb_burned(
 
 
 # ---------------------------------------------------------------------------
+# E-mails opnieuw versturen
+# ---------------------------------------------------------------------------
+
+@router.post("/{order_id}/resend-emails", status_code=200)
+def resend_order_emails(
+    order_id: str,
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+    """Stuur koper-bevestiging en/of ontvanger-uitnodiging opnieuw voor een betaalde order."""
+    from app.api.v1.routes.webhooks import (
+        _send_gift_buyer_confirmation,
+        _send_storyteller_magic_link,
+        _PACKAGE_NAMES,
+    )
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Bestelling niet gevonden")
+    if order.status not in ("PAID", "FULFILLED"):
+        raise HTTPException(status_code=400, detail="Order is niet betaald")
+
+    buyer_email = order.guest_email
+    if order.user_id:
+        user = db.query(User).filter(User.id == order.user_id).first()
+        if user:
+            buyer_email = user.email
+
+    sent: list[str] = []
+    errors: list[str] = []
+
+    # Koper-bevestiging
+    if buyer_email and order.recipient_name and order.recipient_email:
+        try:
+            _send_gift_buyer_confirmation(
+                order=order,
+                buyer_email=buyer_email,
+                recipient_name=order.recipient_name,
+                recipient_email=order.recipient_email,
+            )
+            sent.append(f"koper-bevestiging naar {buyer_email}")
+        except Exception as exc:
+            errors.append(f"koper-bevestiging mislukt: {exc}")
+
+        # Ontvanger magic link
+        try:
+            _send_storyteller_magic_link(
+                db=db,
+                recipient_email=order.recipient_email,
+                recipient_name=order.recipient_name,
+                gifter_email=buyer_email or "",
+                package_type=order.package_type,
+                personal_message=order.personal_message,
+            )
+            sent.append(f"uitnodiging naar {order.recipient_email}")
+        except Exception as exc:
+            errors.append(f"uitnodiging mislukt: {exc}")
+    elif buyer_email and order.package_type == "DIGITAAL" and order.gift_card_code:
+        from app.api.v1.routes.webhooks import _send_gift_card_buyer_email
+        try:
+            _send_gift_card_buyer_email(order=order, buyer_email=buyer_email)
+            sent.append(f"cadeaukaart naar {buyer_email}")
+        except Exception as exc:
+            errors.append(f"cadeaukaart mislukt: {exc}")
+    else:
+        raise HTTPException(status_code=400, detail="Order heeft geen ontvanger-email — niets te versturen")
+
+    db.add(AuditLog(
+        admin_id=admin.id,
+        admin_email=admin.email,
+        action="order_resend_emails",
+        detail=f"order={order_id} sent={sent} errors={errors}",
+    ))
+    db.commit()
+
+    return {"sent": sent, "errors": errors}
+
+
+# ---------------------------------------------------------------------------
 # CSV export
 # ---------------------------------------------------------------------------
 

@@ -17,6 +17,7 @@ import {
   Gift,
   CreditCard,
   RefreshCw,
+  Mail,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ import {
   getOrderStats,
   updateOrderStatus,
   markUsbBurned,
+  resendOrderEmails,
   exportOrdersCsvUrl,
   type AdminOrder,
   type OrderStats,
@@ -105,6 +107,8 @@ function OrderDrawer({
 }) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [burningUsb, setBurningUsb] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendResult, setResendResult] = useState<{ sent: string[]; errors: string[] } | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
   async function handleStatus(s: AdminOrder["status"]) {
@@ -128,6 +132,20 @@ function OrderDrawer({
       onUsbBurned(updated);
     } finally {
       setBurningUsb(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!confirm("Koper-bevestiging en ontvanger-uitnodiging opnieuw versturen?")) return;
+    setResending(true);
+    setResendResult(null);
+    try {
+      const result = await resendOrderEmails(order.id);
+      setResendResult(result);
+    } catch (e) {
+      setResendResult({ sent: [], errors: [e instanceof Error ? e.message : "Onbekende fout"] });
+    } finally {
+      setResending(false);
     }
   }
 
@@ -309,6 +327,28 @@ function OrderDrawer({
             </section>
           )}
         </div>
+
+        {/* E-mails opnieuw sturen */}
+        {order.status !== "PENDING" && order.status !== "CANCELLED" && (
+          <div className="px-6 py-4 border-t border-slate-200">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">E-mails</p>
+            <Button
+              variant="secondary"
+              onClick={handleResend}
+              disabled={resending}
+              className="gap-2 w-full"
+            >
+              <Mail className="h-4 w-4" />
+              {resending ? "Versturen..." : "Stuur e-mails opnieuw"}
+            </Button>
+            {resendResult && (
+              <div className={`mt-2 rounded-lg p-3 text-xs ${resendResult.errors.length > 0 ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"}`}>
+                {resendResult.sent.map((s) => <p key={s}>Verstuurd: {s}</p>)}
+                {resendResult.errors.map((e) => <p key={e}>Fout: {e}</p>)}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Status acties */}
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
