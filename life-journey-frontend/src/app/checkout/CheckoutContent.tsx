@@ -1,14 +1,15 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-import { Check, ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   PACKAGE_NAMES,
   PACKAGE_PRICES,
   ADDON_OPTIONS,
+  getOrderStatus,
   type PackageType,
   type AddonCode,
   type ShippingAddress,
@@ -68,6 +69,14 @@ export default function CheckoutContent() {
   const [earlyBird, setEarlyBird] = useState<EarlyBirdStatus | null>(null);
   useEffect(() => { getEarlyBirdStatus().then(setEarlyBird); }, []);
 
+  // Detecteer terugkeer van een Stripe-redirect (bijv. iDEAL) al bij de eerste render,
+  // zodat we niet kortstondig stap 1 tonen.
+  const isStripeReturn =
+    searchParams.get("step") === "confirmation" && !!searchParams.get("order_id");
+  const [returnStatus, setReturnStatus] = useState<"verifying" | "failed" | null>(
+    isStripeReturn ? "verifying" : null
+  );
+
   const [step, setStep] = useState(0);
   const [state, setState] = useState<CheckoutState>({
     packageType,
@@ -85,14 +94,47 @@ export default function CheckoutContent() {
     promoDiscountCents: 0,
   });
 
-  // Lees return_url voor Stripe iDEAL redirect
+  // Terugkeer van Stripe-redirect (iDEAL): verifieer de WERKELIJKE betaalstatus
+  // bij de backend. We vertrouwen bewust niet op de `redirect_status` uit de URL —
+  // die mag nooit een geslaagde bevestiging tonen voor een geannuleerde betaling.
+  const verifiedRef = useRef(false);
   useEffect(() => {
+    if (verifiedRef.current) return;
     const returnStep = searchParams.get("step");
     const orderId = searchParams.get("order_id");
-    if (returnStep === "confirmation" && orderId) {
-      setState((s) => ({ ...s, orderId }));
-      setStep(3);
-    }
+    if (returnStep !== "confirmation" || !orderId) return;
+    verifiedRef.current = true;
+
+    let active = true;
+    getOrderStatus(orderId)
+      .then((res) => {
+        if (!active) return;
+        if (res.status === "paid" || res.status === "processing") {
+          setState((s) => ({
+            ...s,
+            orderId: res.order_id,
+            packageType: res.package_type,
+            recipientName: res.recipient_name ?? s.recipientName,
+            recipientEmail: res.recipient_email ?? s.recipientEmail,
+            skipShipping: !res.has_shipping,
+            shippingAddress: res.shipping_city
+              ? { ...s.shippingAddress, city: res.shipping_city }
+              : s.shippingAddress,
+          }));
+          setReturnStatus(null);
+          setStep(3);
+        } else {
+          // pending of failed → geen valse succespagina
+          setReturnStatus("failed");
+        }
+      })
+      .catch(() => {
+        if (active) setReturnStatus("failed");
+      });
+
+    return () => {
+      active = false;
+    };
   }, [searchParams]);
 
   const totalAddons = state.addons.reduce((sum, code) => {
@@ -173,7 +215,18 @@ export default function CheckoutContent() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {step === 0 && (
+        {returnStatus === "verifying" && <VerifyingPayment />}
+        {returnStatus === "failed" && (
+          <PaymentFailed
+            packageType={state.packageType}
+            onRetry={() => {
+              // Verse start: PaymentIntent-state ging verloren bij de redirect.
+              window.location.href = `/checkout?package=${state.packageType}`;
+            }}
+            onHome={() => router.push("/")}
+          />
+        )}
+        {returnStatus === null && step === 0 && (
           <StepSelectPlan
             state={state}
             earlyBirdDiscount={earlyBirdDiscount}
@@ -442,6 +495,70 @@ function StepSelectPlan({
       >
         Volgende: Personaliseer →
       </button>
+    </div>
+  );
+}
+
+// ─── Stripe-redirect terugkeer: verifiëren ──────────────────────────────────
+
+function VerifyingPayment() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 space-y-4">
+      <div className="w-10 h-10 border-4 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+      <p className="text-[#888] text-sm">Je betaling wordt geverifieerd...</p>
+    </div>
+  );
+}
+
+// ─── Stripe-redirect terugkeer: betaling niet voltooid ──────────────────────
+
+function PaymentFailed({
+  packageType,
+  onRetry,
+  onHome,
+}: {
+  packageType: PackageType;
+  onRetry: () => void;
+  onHome: () => void;
+}) {
+  return (
+    <div className="space-y-8 text-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-20 h-20 bg-[#e04040]/10 rounded-full flex items-center justify-center">
+          <XCircle className="h-10 w-10 text-[#e04040]" />
+        </div>
+        <div>
+          <h2 className="font-serif text-3xl font-bold text-[#1a1a1a] mb-2">
+            Betaling niet voltooid
+          </h2>
+          <p className="text-[#888] max-w-md mx-auto">
+            Je betaling voor het pakket <strong>{PACKAGE_NAMES[packageType]}</strong> is
+            geannuleerd of niet afgerond. Er is niets in rekening gebracht.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left text-sm text-[#555]">
+        <p>
+          Geen zorgen — je kunt het gewoon opnieuw proberen. Heb je toch geld zien afgaan?
+          Neem dan contact met ons op, dan lossen we het direct op.
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <button
+          onClick={onRetry}
+          className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl transition-colors"
+        >
+          Opnieuw proberen
+        </button>
+        <button
+          onClick={onHome}
+          className="border border-[#e5e0d8] text-[#888] hover:text-[#1a1a1a] px-6 py-3 rounded-xl transition-colors"
+        >
+          Terug naar de homepage
+        </button>
+      </div>
     </div>
   );
 }

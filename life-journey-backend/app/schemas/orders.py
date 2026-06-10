@@ -83,6 +83,23 @@ class OrderPublic(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class OrderStatusPublic(BaseModel):
+    """Gezaghebbende betaalstatus + minimale weergavedata voor de bevestigingspagina.
+
+    Wordt opgehaald na de Stripe-redirect (bijv. iDEAL). De order-id (een
+    niet-raadbare UUID) fungeert als toegangssleutel voor gastbestellingen.
+    """
+
+    order_id: str
+    # Hoog-niveau status: paid | processing | pending | failed
+    status: Literal["paid", "processing", "pending", "failed"]
+    package_type: str
+    recipient_name: str | None = None
+    recipient_email: str | None = None
+    has_shipping: bool = False
+    shipping_city: str | None = None
+
+
 class EarlyBirdStatus(BaseModel):
     active: bool
     discount_cents: int

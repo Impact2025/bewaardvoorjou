@@ -18,6 +18,7 @@ from app.schemas.orders import (
     CreatePaymentIntentResponse,
     EarlyBirdStatus,
     OrderPublic,
+    OrderStatusPublic,
 )
 from loguru import logger
 
@@ -178,6 +179,10 @@ def create_payment_intent(
             recipient_email=str(payload.recipient_email) if payload.recipient_email else None,
         )
 
+        # Interne verkoopmelding naar de eigenaar
+        from app.services.email.admin import send_owner_sale_notification
+        send_owner_sale_notification(order, contact_email)
+
         return CreatePaymentIntentResponse(
             client_secret="",
             payment_intent_id="",
@@ -272,6 +277,68 @@ def create_payment_intent(
         order_id=order.id,
         amount_cents=total_cents,
         publishable_key=settings.stripe_publishable_key,
+    )
+
+
+def _map_stripe_status(stripe_status: str) -> str:
+    """Vertaalt een Stripe PaymentIntent-status naar onze hoog-niveau status."""
+    if stripe_status == "succeeded":
+        return "paid"
+    if stripe_status == "processing":
+        return "processing"
+    if stripe_status in ("canceled", "requires_payment_method"):
+        # Geannuleerd of laatste poging mislukt/afgebroken.
+        return "failed"
+    # requires_action | requires_confirmation | requires_capture → nog niet afgerond
+    return "pending"
+
+
+@router.get("/{order_id}/status", response_model=OrderStatusPublic)
+@limiter.limit(RateLimits.READ_STANDARD)
+def get_order_status(
+    request: Request,
+    order_id: str,
+    db: Session = Depends(get_db),
+) -> OrderStatusPublic:
+    """Gezaghebbende betaalstatus voor de bevestigingspagina na een Stripe-redirect.
+
+    Vertrouwt NIET op de `redirect_status` uit de URL (die zegt niets over de
+    werkelijke betaling en mag nooit een geslaagde bevestiging tonen). De order-id
+    is een niet-raadbare UUID en fungeert als toegangssleutel voor gastbestellingen.
+    """
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if order is None:
+        raise HTTPException(status_code=404, detail="Bestelling niet gevonden")
+
+    # Bepaal hoog-niveau status. De DB is leidend zodra de webhook is verwerkt;
+    # daarvoor vragen we de live status bij Stripe op (webhook-race).
+    if order.status in ("PAID", "FULFILLED"):
+        high_level = "paid"
+    elif order.status in ("CANCELLED", "REFUNDED"):
+        high_level = "failed"
+    elif order.stripe_payment_intent_id:
+        try:
+            stripe = _get_stripe()
+            intent = stripe.PaymentIntent.retrieve(order.stripe_payment_intent_id)
+            high_level = _map_stripe_status(intent.status)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.warning(f"Kon PaymentIntent-status niet ophalen voor order {order_id}: {exc}")
+            # Veilige fallback: behandel als nog-niet-betaald i.p.v. valse success.
+            high_level = "pending"
+    else:
+        high_level = "pending"
+
+    shipping = order.shipping_address or {}
+    return OrderStatusPublic(
+        order_id=order.id,
+        status=high_level,
+        package_type=order.package_type,
+        recipient_name=order.recipient_name,
+        recipient_email=order.recipient_email,
+        has_shipping=bool(shipping.get("city")),
+        shipping_city=shipping.get("city"),
     )
 
 

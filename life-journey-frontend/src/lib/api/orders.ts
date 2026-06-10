@@ -69,6 +69,34 @@ export async function createPaymentIntent(
   return res.json();
 }
 
+export type OrderPaymentStatus = "paid" | "processing" | "pending" | "failed";
+
+export interface OrderStatusResponse {
+  order_id: string;
+  status: OrderPaymentStatus;
+  package_type: PackageType;
+  recipient_name: string | null;
+  recipient_email: string | null;
+  has_shipping: boolean;
+  shipping_city: string | null;
+}
+
+/**
+ * Haalt de gezaghebbende betaalstatus van een order op bij de backend.
+ * Gebruikt na een Stripe-redirect (iDEAL) i.p.v. de onbetrouwbare `redirect_status`.
+ */
+export async function getOrderStatus(orderId: string): Promise<OrderStatusResponse> {
+  const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderId)}/status`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Kon de betaalstatus niet ophalen");
+  }
+  return res.json();
+}
+
 export const PACKAGE_PRICES: Record<PackageType, number> = {
   VERHAAL: 79,
   ERFGOED: 149,
