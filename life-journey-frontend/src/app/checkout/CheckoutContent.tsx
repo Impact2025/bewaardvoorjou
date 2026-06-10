@@ -133,7 +133,7 @@ export default function CheckoutContent() {
           <div className="text-right">
             <p className="font-bold text-[#1a1a1a]">{totalPrice === 0 ? "Gratis" : `€${totalPrice}`}</p>
             <p className="text-xs text-[#888]">
-              {state.packageType === "NALATENSCHAP" ? "eenmalig" : state.packageType === "VERHAAL" ? "per jaar" : "jaar 1"}
+              {state.packageType === "NALATENSCHAP" ? "eenmalig" : "5 jaar inbegrepen"}
             </p>
           </div>
         </div>
@@ -301,13 +301,13 @@ function StepSelectPlan({
                 <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
                 {pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>}
                 {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>}
-                {pkg === "VERHAAL" && <p className="text-xs text-[#888]">Digitaal — per jaar opzegbaar</p>}
+                {pkg === "VERHAAL" && <p className="text-xs text-[#888]">Digitaal · 5 jaar inbegrepen</p>}
               </div>
             </div>
             <div className="text-right">
               <span className="font-bold text-[#1a1a1a]">€{PACKAGE_PRICES[pkg]}</span>
-              {pkg === "ERFGOED" && <p className="text-xs text-[#888]">jaar 1 · €99/jaar v.a. jaar 2</p>}
-              {pkg === "VERHAAL" && <p className="text-xs text-[#888]">per jaar</p>}
+              {pkg === "ERFGOED" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
+              {pkg === "VERHAAL" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
               {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">eenmalig</p>}
             </div>
           </label>
@@ -430,9 +430,9 @@ function StepSelectPlan({
         <p className="text-xs text-[#888] mt-1">
           {state.packageType === "NALATENSCHAP"
             ? "Eenmalige betaling — nooit meer kosten"
-            : state.packageType === "VERHAAL"
-            ? "Per jaar · opzegbaar"
-            : "Eerste jaar inclusief Erfgoed Box · daarna €99/jaar"}
+            : state.packageType === "ERFGOED"
+            ? "5 jaar inbegrepen · doos bezorgd binnen 2 weken"
+            : "5 jaar inbegrepen · daarna opzegbaar"}
         </p>
       </div>
 

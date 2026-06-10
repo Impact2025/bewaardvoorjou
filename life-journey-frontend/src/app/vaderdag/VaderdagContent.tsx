@@ -194,10 +194,14 @@ export default function VaderdagContent() {
       <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-cream via-white to-warm-sand/20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange/10 border border-orange/30 text-orange text-xs font-bold mb-4 uppercase tracking-widest">
+              <Sparkles className="h-3.5 w-3.5" />
+              Vaderdag deal — t/m 15 juni
+            </div>
             <h2 className="text-3xl md:text-4xl font-serif font-semibold text-slate-900 mb-4">
               Kies het perfecte cadeau
             </h2>
-            <p className="text-slate-700">Digitale toegang start direct. De doos bezorgen we binnen 2 weken.</p>
+            <p className="text-slate-700">5 jaar inbegrepen. Digitale toegang start direct. De doos bezorgen we binnen 2 weken.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -212,7 +216,7 @@ export default function VaderdagContent() {
                 <div className="mb-1">
                   <span className="text-4xl font-bold text-slate-900">€149</span>
                 </div>
-                <p className="text-slate-400 text-xs mb-6">eerste jaar · daarna €99/jaar</p>
+                <p className="text-slate-400 text-xs mb-6">5 jaar inbegrepen · doos inbegrepen</p>
                 <ul className="space-y-2.5 mb-7">
                   {[
                     "Alle 18 hoofdstukken van zijn leven",

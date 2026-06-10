@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Shield, Truck, Phone, Star, Gift, Zap } from "lucide-react";
+import { Check, Shield, Truck, Phone, Star, Gift, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Configuratie ─────────────────────────────────────────────────────────────
 
 // Zet op false zodra dozen beschikbaar zijn (over 2 weken)
 const BOX_IS_PREORDER = true;
+
+// Vaderdag deal actief t/m 15 juni 2026
+const VADERDAG_DEAL_ACTIVE = true;
+const VADERDAG_DEADLINE = "2026-06-15T23:59:59+02:00";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
 
@@ -74,6 +78,7 @@ export default function PricingContent() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [foundingSpots, setFoundingSpots] = useState<{ remaining: number; total: number } | null>(null);
+  const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
     fetch(`${API_BASE}/orders/founding-member-spots`)
@@ -82,8 +87,46 @@ export default function PricingContent() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!VADERDAG_DEAL_ACTIVE) return;
+    const deadline = new Date(VADERDAG_DEADLINE).getTime();
+    const update = () => {
+      const diff = deadline - Date.now();
+      if (diff <= 0) { setCountdown(""); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setCountdown(d > 0 ? `${d} dag${d !== 1 ? "en" : ""} en ${h} uur` : `${h}u ${m}m`);
+    };
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f8f6f2]">
+
+      {/* ── Vaderdag deal banner ── */}
+      {VADERDAG_DEAL_ACTIVE && countdown && (
+        <div className="bg-[#1a1a1a] py-3 px-4 text-center">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="flex items-center gap-2 text-white">
+              <Clock className="h-4 w-4 text-[#d4af37]" />
+              <span className="text-sm font-medium">
+                <span className="text-[#d4af37] font-bold">Vaderdag deal</span>
+                {" "}— 5 jaar toegang inbegrepen · nog{" "}
+                <span className="font-bold">{countdown}</span>
+              </span>
+            </div>
+            <button
+              onClick={() => router.push("/vaderdag")}
+              className="text-xs font-bold text-[#1a1a1a] bg-[#d4af37] hover:bg-[#c49e2a] px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+            >
+              Bekijk Vaderdag pagina →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Hero ── */}
       <section className="py-16 px-4 text-center max-w-3xl mx-auto">
@@ -162,7 +205,7 @@ export default function PricingContent() {
             id="VERHAAL"
             name="Verhaal"
             price="€79"
-            priceSub="per jaar"
+            priceSub={VADERDAG_DEAL_ACTIVE ? "5 jaar inbegrepen — Vaderdag deal" : "5 jaar inbegrepen"}
             subtitle="Het complete digitale levensverhaal"
             hero={false}
             badge={null}
@@ -189,8 +232,8 @@ export default function PricingContent() {
             id="ERFGOED"
             name="Erfgoed"
             price="€149"
-            priceSub={BOX_IS_PREORDER ? "jaar 1 · doos volgt" : "eerste jaar (doos inbegrepen)"}
-            priceNote="Vanaf jaar 2: €99/jaar"
+            priceSub={VADERDAG_DEAL_ACTIVE ? "5 jaar inbegrepen + doos — Vaderdag deal" : "5 jaar inbegrepen (doos inbegrepen)"}
+            priceNote={undefined}
             subtitle="Met de fysieke herinneringsdoos"
             hero={true}
             badge="MEEST GEKOZEN"

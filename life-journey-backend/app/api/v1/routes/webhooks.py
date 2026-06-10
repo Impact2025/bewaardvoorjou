@@ -184,8 +184,8 @@ def _find_event_by_resend_id(db: Session, resend_email_id: str | None) -> EmailE
 
 # Pakket-tier instellingen die op de user worden gezet na betaling
 _PACKAGE_SETTINGS = {
-    "VERHAAL":     {"package_tier": "VERHAAL",     "max_family_members": 0, "max_chapters": None, "storage_years": 1},
-    "ERFGOED":     {"package_tier": "ERFGOED",     "max_family_members": 5, "max_chapters": None, "storage_years": 1},
+    "VERHAAL":     {"package_tier": "VERHAAL",     "max_family_members": 0, "max_chapters": None, "storage_years": 5},
+    "ERFGOED":     {"package_tier": "ERFGOED",     "max_family_members": 5, "max_chapters": None, "storage_years": 5},
     "NALATENSCHAP":{"package_tier": "NALATENSCHAP","max_family_members": 5, "max_chapters": None, "storage_years": 999},
     # Legacy (backward compat)
     "BEGIN":       {"package_tier": "BEGIN",       "max_family_members": 2, "max_chapters": 3,    "storage_years": 3},
