@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Check, Shield, Truck, Phone, Star, Gift, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -234,6 +235,7 @@ export default function PricingContent() {
             price="€149"
             priceSub={VADERDAG_DEAL_ACTIVE ? "5 jaar inbegrepen + doos — Vaderdag deal" : "5 jaar inbegrepen (doos inbegrepen)"}
             priceNote={undefined}
+            image="/erfgoed-box.jpg"
             subtitle="Met de fysieke herinneringsdoos"
             hero={true}
             badge="MEEST GEKOZEN"
@@ -457,6 +459,7 @@ function PackageCard({
   price,
   priceSub,
   priceNote,
+  image,
   subtitle,
   hero,
   badge,
@@ -472,6 +475,7 @@ function PackageCard({
   price: string;
   priceSub: string;
   priceNote?: string;
+  image?: string;
   subtitle: string;
   hero: boolean;
   badge: string | null;
@@ -522,6 +526,17 @@ function PackageCard({
         <div className="mb-5">
           <h3 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">{name}</h3>
           <p className="text-[#888] text-sm mb-3">{subtitle}</p>
+          {image && (
+            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-4">
+              <Image
+                src={image}
+                alt={`${name} box`}
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 350px"
+              />
+            </div>
+          )}
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-[#1a1a1a]">{price}</span>
           </div>

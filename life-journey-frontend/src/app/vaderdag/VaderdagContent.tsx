@@ -212,7 +212,16 @@ export default function VaderdagContent() {
               </div>
               <div className="p-8">
                 <h3 className="font-serif text-2xl font-bold text-slate-900 mb-1">Erfgoed Box</h3>
-                <p className="text-slate-500 text-sm mb-5">De complete Vaderdag-ervaring</p>
+                <p className="text-slate-500 text-sm mb-4">De complete Vaderdag-ervaring</p>
+                <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-5">
+                  <Image
+                    src="/erfgoed-box.jpg"
+                    alt="Erfgoed Box inhoud"
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 768px) 100vw, 400px"
+                  />
+                </div>
                 <div className="mb-1">
                   <span className="text-4xl font-bold text-slate-900">€149</span>
                 </div>
