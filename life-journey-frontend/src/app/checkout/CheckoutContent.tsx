@@ -101,17 +101,13 @@ export default function CheckoutContent() {
   }, 0);
   const earlyBirdDiscount = earlyBird?.active
     ? state.packageType === "VERHAAL"
-      ? (earlyBird as EarlyBirdStatus & { verhaal_discount_cents?: number }).verhaal_discount_cents
-        ? ((earlyBird as EarlyBirdStatus & { verhaal_discount_cents?: number }).verhaal_discount_cents ?? 0) / 100
-        : earlyBird.discount_cents / 100
+      ? earlyBird.verhaal_discount_cents / 100
       : state.packageType === "ERFGOED"
-      ? (earlyBird as EarlyBirdStatus & { erfgoed_discount_cents?: number }).erfgoed_discount_cents
-        ? ((earlyBird as EarlyBirdStatus & { erfgoed_discount_cents?: number }).erfgoed_discount_cents ?? 0) / 100
-        : 0
+      ? earlyBird.erfgoed_discount_cents / 100
       : state.packageType === "BEGIN"
       ? earlyBird.discount_cents / 100
       : state.packageType === "DIGITAAL"
-      ? (earlyBird.digitaal_discount_cents ?? 0) / 100
+      ? earlyBird.digitaal_discount_cents / 100
       : 0
     : 0;
   const promoDiscount = state.promoDiscountCents / 100;

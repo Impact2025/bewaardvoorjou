@@ -27,18 +27,14 @@ export default function StepConfirmation({ state }: Props) {
     hasAddress
       ? {
           icon: Truck,
-          title: "Doos bezorging: september",
-          desc: `We sturen de fysieke doos naar ${state.shippingAddress.city} zodra de voorraad klaar is.`,
+          title: "Doos onderweg binnen 2 weken",
+          desc: `We sturen de fysieke doos naar ${state.shippingAddress.city}. Je ontvangt een track & trace zodra het pakket op weg is.`,
         }
-      : {
-          icon: Clock,
-          title: "Doos-adres later invullen",
-          desc: "Je ontvangt een herinnering in september om je bezorgadres door te geven.",
-        },
+      : null,
     {
       icon: Package,
-      title: "Box wordt zorgvuldig ingepakt",
-      desc: "Elke box is uniek — ons team pakt hem persoonlijk in voor september.",
+      title: "Doos wordt zorgvuldig ingepakt",
+      desc: "Elke box is uniek — ons team pakt hem persoonlijk voor je in.",
     },
   ];
 
@@ -83,7 +79,7 @@ export default function StepConfirmation({ state }: Props) {
           )}
           <div className="flex justify-between">
             <span className="text-[#aaa]">Doos bezorging</span>
-            <span>{hasAddress ? `${state.shippingAddress.city} · september` : "Adres volgt (september)"}</span>
+            <span>{hasAddress ? `${state.shippingAddress.city} · binnen 2 weken` : "Adres opgeven via email"}</span>
           </div>
         </div>
       </div>
@@ -92,16 +88,16 @@ export default function StepConfirmation({ state }: Props) {
       <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left">
         <h3 className="font-medium text-[#1a1a1a] mb-4">Wat gebeurt er nu?</h3>
         <div className="space-y-4">
-          {nextSteps.map((item, i) => {
-            const Icon = item.icon;
+          {nextSteps.filter(Boolean).map((item, i) => {
+            const Icon = item!.icon;
             return (
               <div key={i} className="flex gap-3">
                 <div className="w-8 h-8 bg-[#d4af37]/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <Icon className="h-4 w-4 text-[#d4af37]" />
                 </div>
                 <div>
-                  <p className="font-medium text-[#1a1a1a] text-sm">{item.title}</p>
-                  <p className="text-[#888] text-xs">{item.desc}</p>
+                  <p className="font-medium text-[#1a1a1a] text-sm">{item!.title}</p>
+                  <p className="text-[#888] text-xs">{item!.desc}</p>
                 </div>
               </div>
             );
@@ -123,8 +119,7 @@ export default function StepConfirmation({ state }: Props) {
         <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
           <h3 className="font-medium text-[#2d5016] mb-2">✓ Digitale toegang geactiveerd</h3>
           <p className="text-sm text-[#555]">
-            Maak een account aan en begin direct met het vastleggen van herinneringen — de box
-            volgt in september.
+            Begin direct met het vastleggen van herinneringen. De doos volgt binnen 2 weken op het opgegeven adres.
           </p>
           <div className="mt-3 flex gap-2">
             <button
