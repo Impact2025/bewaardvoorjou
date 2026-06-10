@@ -246,6 +246,7 @@ export default function CheckoutContent() {
           <StepPayment
             state={state}
             totalPrice={totalPrice}
+            onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onSuccess={(orderId) => {
               setState((s) => ({ ...s, orderId }));
               setStep(3);
