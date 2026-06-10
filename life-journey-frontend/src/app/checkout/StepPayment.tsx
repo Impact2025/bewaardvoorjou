@@ -171,7 +171,7 @@ function PaymentForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">Betalen</h2>
-        <p className="text-[#888] text-sm">Kies je betaalmethode — iDEAL, creditcard of Klarna</p>
+        <p className="text-[#888] text-sm">Kies je betaalmethode — iDEAL, creditcard of Bancontact</p>
       </div>
 
       {/* Samenvatting */}
@@ -198,7 +198,7 @@ function PaymentForm({
         <PaymentElement
           options={{
             layout: "tabs",
-            paymentMethodOrder: ["ideal", "card"],
+            paymentMethodOrder: ["ideal", "card", "bancontact"],
           }}
         />
       </div>

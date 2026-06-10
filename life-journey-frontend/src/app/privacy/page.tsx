@@ -229,7 +229,7 @@ export default function PrivacyPage() {
                     volledige kaartgegevens op. Wij verwerken wel:
                   </p>
                   <ul className="list-disc list-outside pl-5 space-y-1">
-                    <li>Betaalmethode (iDEAL / creditcard / Klarna)</li>
+                    <li>Betaalmethode (iDEAL / creditcard / Bancontact)</li>
                     <li>Stripe payment intent ID (referentie)</li>
                     <li>Orderstatus, gefactureerd bedrag en pakketkeuze</li>
                     <li>Verzendadres bij bestelling van fysieke producten</li>

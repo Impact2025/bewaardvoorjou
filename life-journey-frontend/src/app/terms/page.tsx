@@ -131,7 +131,7 @@ const articles = [
     title: "Artikel 9 – Pakketten, betalingen en herroepingsrecht",
     content: [
       "BewaardVoorJou biedt een gratis basisversie en betaalde Pakketten (BEGIN, ERFGOED, VOOR ALTIJD). De kenmerken en prijzen van Pakketten zijn beschikbaar op bewaardvoorjou.nl/pricing.",
-      "Betaalde Pakketten worden vooraf in rekening gebracht via de beschikbare betaalmethoden (iDEAL, creditcard, Klarna en overige Stripe-methoden).",
+      "Betaalde Pakketten worden vooraf in rekening gebracht via de beschikbare betaalmethoden (iDEAL, creditcard, Bancontact en overige Stripe-methoden).",
       "Betalingen worden verwerkt door Stripe Inc. BewaardVoorJou slaat geen volledige betaalgegevens op.",
       "**Herroepingsrecht**: Als consument heeft u het recht de overeenkomst voor een betaald Pakket te herroepen binnen 14 dagen na aankoop, zonder opgave van redenen (Art. 6:230o BW, Richtlijn 2011/83/EU). U kunt uw herroepingsrecht uitoefenen via info@bewaardvoorjou.nl. Het herroepingsrecht vervalt zodra de Dienst volledig is geleverd of zodra de Gebruiker uitdrukkelijk toestemming heeft gegeven voor levering vóór het verstrijken van de herroepingstermijn en heeft erkend dat hij/zij zijn/haar herroepingsrecht verliest bij volledige uitvoering van de overeenkomst.",
       "Eenmalige aankopen (fysieke producten, extra opslag) worden niet terugbetaald tenzij de Dienst of het product aantoonbaar niet naar behoren heeft gefunctioneerd.",

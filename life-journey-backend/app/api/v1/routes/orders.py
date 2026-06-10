@@ -245,10 +245,13 @@ def create_payment_intent(
         metadata["personal_message"] = payload.personal_message[:200]
 
     try:
+        # Expliciete betaalmethodes i.p.v. automatic_payment_methods:
+        # voorkomt dat Link (met opgeslagen kaart) de PaymentElement overneemt
+        # en zorgt dat iDEAL altijd als eerste optie zichtbaar is (NL-markt).
         intent = stripe.PaymentIntent.create(
             amount=total_cents,
             currency="eur",
-            automatic_payment_methods={"enabled": True},
+            payment_method_types=["ideal", "card", "bancontact"],
             metadata=metadata,
             receipt_email=contact_email,
             description=f"Bewaardvoorjou — {payload.package_type} pakket",
