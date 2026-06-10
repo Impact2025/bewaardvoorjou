@@ -56,6 +56,12 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(hour=9, minute=0),
         "options": {"expires": 3600},
     },
+    # Dagelijks 06:00 UTC (08:00 Amsterdam) — systeemrapport naar de eigenaar
+    "daily-health-report": {
+        "task": "admin.daily_health_report",
+        "schedule": crontab(hour=6, minute=0),
+        "options": {"expires": 3600},
+    },
 }
 celery_app.conf.timezone = "Europe/Amsterdam"
 
@@ -287,3 +293,11 @@ def generate_export_task(journey_id: str, user_id: str) -> None:
         raise
     finally:
         db.close()
+
+
+# Registreer de Celery-beat taken uit scheduler.py bij deze app.
+# De worker en beat draaien tegen `app.services.email.tasks:celery_app`; zonder
+# deze import worden de taken uit scheduler.py (weekly_questions, inactivity,
+# seasonal, admin.daily_health_report) nooit geregistreerd en dus nooit
+# uitgevoerd. Onderaan geplaatst zodat celery_app al gedefinieerd is.
+from app.services.email import scheduler as _scheduler  # noqa: E402,F401

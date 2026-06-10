@@ -240,6 +240,24 @@ def send_seasonal_triggers_task() -> None:
     logger.info(f"Seasonal triggers complete: {sent_count} emails queued")
 
 
+@celery_app.task(name="admin.daily_health_report")
+def send_daily_health_report_task() -> None:
+    """
+    Dagelijks: stuur de eigenaar (info@bewaardvoorjou.nl) een systeemrapport
+    met verkopen/omzet, nieuwe accounts, e-mailgezondheid en waarschuwingen.
+    """
+    logger.info("Starting daily health report task")
+    from app.services.email.admin import send_daily_health_report
+
+    db: Session = SessionLocal()
+    try:
+        send_daily_health_report(db)
+    except Exception as e:
+        logger.error(f"Daily health report task failed: {e}")
+    finally:
+        db.close()
+
+
 @celery_app.task(name="email.check_progress_milestones")
 def check_progress_milestones_task(journey_id: str, user_id: str) -> None:
     """

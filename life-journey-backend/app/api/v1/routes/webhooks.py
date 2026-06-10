@@ -285,6 +285,10 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     recipient_name = metadata.get("recipient_name")
     contact_email = metadata.get("contact_email") or order.guest_email or ""
 
+    # Interne verkoopmelding naar de eigenaar (faalt nooit hard)
+    from app.services.email.admin import send_owner_sale_notification
+    send_owner_sale_notification(order, contact_email)
+
     if order.package_type == "DIGITAAL":
         # Digitale cadeaukaart: stuur koper een email met de kaartlink
         _send_gift_card_buyer_email(order, contact_email)

@@ -67,6 +67,9 @@ class Settings(BaseSettings):
   resend_enabled: bool = True
   app_base_url: str = "http://localhost:3000"
 
+  # Interne meldingen (verkoopnotificaties + dagelijks systeemrapport)
+  owner_notification_email: str = "info@bewaardvoorjou.nl"
+
   # Telemetry
   telemetry_disabled: bool = False
 
