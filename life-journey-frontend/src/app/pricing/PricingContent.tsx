@@ -61,7 +61,7 @@ const faqs = [
 const compareRows = [
   { label: "Prijs",               values: ["Gratis (30 dgn)", "€79/jaar", "€149 jaar 1 →\n€99/jaar", "€229 eenmalig"] },
   { label: "Alle 18 hoofdstukken",values: ["3 hoofdstukken",  true,       true,                       true]            },
-  { label: "AI-interviewer",      values: [true,              true,       true,                       true]            },
+  { label: "Persoonlijke gespreksleider", values: [true,       true,       true,                       true]            },
   { label: "Digitaal archief",    values: [true,              true,       true,                       true]            },
   { label: "Deellinks",          values: [true,              true,       true,                       true]            },
   { label: "Erfgoed Box",         values: [false,             false,      true,                       true]            },
@@ -135,7 +135,7 @@ export default function PricingContent() {
           Bewaar het verhaal van je ouder(s)<br className="hidden md:block" /> — voor altijd
         </h1>
         <p className="text-lg text-[#555] mb-8 max-w-xl mx-auto leading-relaxed">
-          Een AI-interviewer in het Nederlands begeleidt het gesprek. Jij luistert. De verhalen blijven.
+          Een geduldige gespreksleider in het Nederlands begeleidt het gesprek. Jij luistert. De verhalen blijven.
         </p>
 
         {/* Gratis start CTA */}
