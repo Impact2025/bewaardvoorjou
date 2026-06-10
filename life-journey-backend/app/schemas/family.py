@@ -118,6 +118,15 @@ class AcceptInviteResponse(BaseModel):
     login_url: Optional[str] = None
 
 
+class InvitePreviewResponse(BaseModel):
+    """Preview of an invitation without accepting it."""
+    inviter_name: str
+    invitee_name: str
+    journey_title: str
+    access_level: AccessLevel
+    expires_at: datetime
+
+
 # Role metadata for UI
 
 class RoleMetadata(BaseModel):

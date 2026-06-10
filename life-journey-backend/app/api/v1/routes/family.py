@@ -23,6 +23,7 @@ from app.schemas.family import (
     ResendInviteRequest,
     AcceptInviteRequest,
     AcceptInviteResponse,
+    InvitePreviewResponse,
     RoleMetadata,
     ROLE_METADATA,
     FamilyRole,
@@ -225,6 +226,48 @@ def get_stats(
     """Get family sharing statistics for a journey."""
     _ensure_journey_access(journey_id, db, current_user)
     return get_family_stats(db, journey_id)
+
+
+# Public invite preview endpoint (no auth required, no side effects)
+@router.get("/invite/{token}", response_model=InvitePreviewResponse)
+@limiter.limit(RateLimits.AUTH_LOGIN)
+def preview_invitation(
+    request: Request,
+    token: str,
+    db: Session = Depends(get_db),
+) -> InvitePreviewResponse:
+    """
+    Preview an invitation without accepting it.
+
+    Returns inviter name, journey title, access level and expiry so the
+    frontend can show a confirmation screen before the user commits.
+    """
+    from datetime import datetime
+
+    invite = get_invite_by_token(db, token)
+    if not invite:
+        raise HTTPException(status_code=404, detail="Uitnodiging niet gevonden")
+
+    expires = invite.expires_at
+    if expires.tzinfo is not None:
+        expires = expires.replace(tzinfo=None)
+    if expires < datetime.utcnow():
+        raise HTTPException(status_code=410, detail="Deze uitnodiging is verlopen")
+
+    if invite.accepted_at:
+        raise HTTPException(status_code=409, detail="Deze uitnodiging is al geaccepteerd")
+
+    member = invite.family_member
+    journey = member.journey
+    inviter = member.creator
+
+    return InvitePreviewResponse(
+        inviter_name=inviter.display_name if inviter else "Iemand",
+        invitee_name=member.name,
+        journey_title=journey.title,
+        access_level=AccessLevel(member.access_level.value),
+        expires_at=invite.expires_at,
+    )
 
 
 # Public invitation acceptance endpoint (no auth required)
