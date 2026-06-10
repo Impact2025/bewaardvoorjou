@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Je eerste herinnering{% endblock %}
+
+{% block content %}
+<h1 class="heading">{{ display_name }}, je eerste herinnering wacht.</h1>
+
+{% if tier == 1 %}
+<p class="body-text">
+  Je account staat klaar &mdash; nu het mooiste deel: je eerste verhaal vertellen. Je hoeft niets voor te bereiden. Eén vraag, jouw antwoord, in je eigen woorden.
+</p>
+{% elif tier == 3 %}
+<p class="body-text">
+  Een paar dagen geleden ben je begonnen, maar je eerste herinnering staat er nog niet. Geen zorgen &mdash; het kost echt maar vijf minuten, en het is zoveel waard.
+</p>
+{% else %}
+<p class="body-text">
+  Je verhaal is nog niet begonnen, en dat is precies waarom we je nog één keer een zetje geven. De eerste herinnering is de moeilijkste om te starten &mdash; en de mooiste om straks terug te horen.
+</p>
+{% endif %}
+
+<div class="accent-block" style="border-left-color: #B45309; background-color: #FEF3C7;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #92400E; font-weight: 600; margin-bottom: 8px;">
+    Je eerste vraag &mdash; {{ chapter_name }}
+  </p>
+  <p style="font-size: 17px; color: #1C1917; font-style: italic; line-height: 1.6; margin: 0;">
+    "{{ first_question }}"
+  </p>
+</div>
+
+<p class="body-text">
+  Spreek het in, typ het, of neem video op &mdash; jij kiest. Er is geen goed of fout.
+</p>
+
+<div class="cta-wrap">
+  <a href="{{ journey_url }}" class="cta-button">Vertel mijn eerste herinnering</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Geen haast &mdash; begin gewoon wanneer het goed voelt.
+</p>
+{% endblock %}

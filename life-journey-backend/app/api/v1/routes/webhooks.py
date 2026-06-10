@@ -114,12 +114,67 @@ async def resend_webhook(
         _handle_bounce(db, resend_email_id, data)
     elif event_type == "email.complained":
         _handle_complaint(db, resend_email_id, data)
+    elif event_type == "email.delivered":
+        _handle_delivered(db, resend_email_id)
+    elif event_type == "email.opened":
+        _handle_opened(db, resend_email_id)
+    elif event_type == "email.clicked":
+        _handle_clicked(db, resend_email_id)
     elif event_type == "email.delivery_delayed":
         logger.warning(f"Delivery delayed for resend_id={resend_email_id}: {data.get('reason', 'unknown')}")
     else:
         logger.debug(f"Unhandled Resend event type: {event_type}")
 
     return {"ok": True}
+
+
+# Terminale statussen die niet door een latere delivery/open mogen worden overschreven
+_TERMINAL_STATUSES = {"bounced", "complained", "failed"}
+
+
+def _handle_delivered(db: Session, resend_email_id: str | None) -> None:
+    """Markeer de e-mail als afgeleverd."""
+    event = _find_event_by_resend_id(db, resend_email_id)
+    if not event:
+        logger.warning(f"No EmailEvent found for resend_id={resend_email_id} (delivered)")
+        return
+    if event.delivered_at is None:
+        event.delivered_at = datetime.now(timezone.utc)
+    if event.status not in _TERMINAL_STATUSES:
+        event.status = "delivered"
+    db.commit()
+
+
+def _handle_opened(db: Session, resend_email_id: str | None) -> None:
+    """Registreer een open: eerste-open-tijd + teller."""
+    event = _find_event_by_resend_id(db, resend_email_id)
+    if not event:
+        logger.warning(f"No EmailEvent found for resend_id={resend_email_id} (opened)")
+        return
+    now = datetime.now(timezone.utc)
+    if event.opened_at is None:
+        event.opened_at = now
+    event.open_count = (event.open_count or 0) + 1
+    if event.delivered_at is None:
+        event.delivered_at = now  # een open impliceert aflevering
+    db.commit()
+
+
+def _handle_clicked(db: Session, resend_email_id: str | None) -> None:
+    """Registreer een klik: eerste-klik-tijd + teller. Impliceert open + delivery."""
+    event = _find_event_by_resend_id(db, resend_email_id)
+    if not event:
+        logger.warning(f"No EmailEvent found for resend_id={resend_email_id} (clicked)")
+        return
+    now = datetime.now(timezone.utc)
+    if event.clicked_at is None:
+        event.clicked_at = now
+    event.click_count = (event.click_count or 0) + 1
+    if event.opened_at is None:
+        event.opened_at = now
+    if event.delivered_at is None:
+        event.delivered_at = now
+    db.commit()
 
 
 def _handle_bounce(db: Session, resend_email_id: str | None, data: dict) -> None:

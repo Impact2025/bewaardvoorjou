@@ -245,6 +245,26 @@ def trigger_weekly_question_email(
     return enqueue_email_job(event.id)
 
 
+def _tier_already_sent(
+    db: Session,
+    *,
+    user_id: str,
+    journey_id: str,
+    email_type: str,
+    tier: int,
+) -> bool:
+    """Check whether a tiered re-engagement email was already sent for this tier."""
+    existing = db.query(EmailEventModel).filter(
+        EmailEventModel.user_id == user_id,
+        EmailEventModel.journey_id == journey_id,
+        EmailEventModel.email_type == email_type,
+    ).all()
+    return any(
+        e.context_data and e.context_data.get("tier") == tier
+        for e in existing
+    )
+
+
 def trigger_inactivity_reminder_email(
     db: Session,
     user_id: str,
@@ -252,9 +272,24 @@ def trigger_inactivity_reminder_email(
     days_inactive: int,
     next_chapter_id: str,
     next_question: str,
+    tier: int | None = None,
 ) -> Optional[str]:
-    """Queue een inactiviteitsherinnering. Na 7 of 21 dagen geen opname."""
+    """
+    Queue een inactiviteitsherinnering voor een gebruiker die al opnames heeft
+    maar inactief is geworden. `tier` is de drempel (7/21/45/90 dagen) en wordt
+    gebruikt voor deduplicatie — elke drempel wordt maximaal één keer verstuurd.
+    """
     if not should_send_email(db, user_id, "inactivity_reminder"):
+        return None
+
+    effective_tier = tier if tier is not None else days_inactive
+    if _tier_already_sent(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="inactivity_reminder",
+        tier=effective_tier,
+    ):
         return None
 
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
@@ -271,10 +306,89 @@ def trigger_inactivity_reminder_email(
             "days_inactive": days_inactive,
             "next_chapter_id": next_chapter_id,
             "next_question": next_question,
+            "tier": effective_tier,
         },
     )
 
-    logger.info(f"Email queued: inactivity_reminder ({days_inactive}d) to {user.email}")
+    logger.info(f"Email queued: inactivity_reminder (tier {effective_tier}d) to {user.email}")
+    return enqueue_email_job(event.id)
+
+
+def trigger_first_memory_nudge_email(
+    db: Session,
+    user_id: str,
+    journey_id: str,
+    next_chapter_id: str,
+    first_question: str,
+    tier: int,
+) -> Optional[str]:
+    """
+    Queue een onboarding-zetje voor een gebruiker die nog NOOIT een opname maakte.
+    `tier` is het aantal dagen sinds registratie (1/3/7) en dedupliceert per drempel.
+    """
+    if not should_send_email(db, user_id, "first_memory_nudge"):
+        return None
+
+    if _tier_already_sent(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="first_memory_nudge",
+        tier=tier,
+    ):
+        return None
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="first_memory_nudge",
+        sent_to=user.email,
+        context_data={
+            "next_chapter_id": next_chapter_id,
+            "first_question": first_question,
+            "tier": tier,
+        },
+    )
+
+    logger.info(f"Email queued: first_memory_nudge (tier {tier}d) to {user.email}")
+    return enqueue_email_job(event.id)
+
+
+def trigger_journey_complete_email(
+    db: Session,
+    user_id: str,
+    journey_id: str,
+) -> Optional[str]:
+    """Queue de feestelijke 'levensverhaal voltooid' email. Maximaal één keer."""
+    if not should_send_email(db, user_id, "journey_complete"):
+        return None
+
+    existing = db.query(EmailEventModel).filter(
+        EmailEventModel.user_id == user_id,
+        EmailEventModel.journey_id == journey_id,
+        EmailEventModel.email_type == "journey_complete",
+    ).first()
+    if existing:
+        return None
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="journey_complete",
+        sent_to=user.email,
+    )
+
+    logger.info(f"Email queued: journey_complete to {user.email}")
     return enqueue_email_job(event.id)
 
 

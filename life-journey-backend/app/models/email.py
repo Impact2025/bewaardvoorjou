@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, JSON, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String, Text
 
 from app.models.base import Base
 
@@ -45,9 +45,16 @@ class EmailEvent(Base):
     # Error message indien gefaald
     error_message = Column(Text, nullable=True)
 
+    # Engagement tracking (gevuld via Resend webhooks)
+    open_count = Column(Integer, nullable=False, default=0, server_default="0")
+    click_count = Column(Integer, nullable=False, default=0, server_default="0")
+
     # Timestamps
     created_at = Column(DateTime, default=utc_now, nullable=False, index=True)
     sent_at = Column(DateTime, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+    opened_at = Column(DateTime, nullable=True)   # eerste open
+    clicked_at = Column(DateTime, nullable=True)  # eerste klik
     bounced_at = Column(DateTime, nullable=True)
     complained_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)

@@ -1,0 +1,16 @@
+Je hebt het voltooid, {{ display_name }}. 🎉
+
+Wat een prestatie. Je hebt alle {{ total_count }} hoofdstukken van je levensverhaal verteld — van je vroegste herinneringen tot je diepste inzichten. Dat is iets om trots op te zijn.
+
+Wat je hier hebt gemaakt, is geen bestand. Het is een stem, een leven, een erfenis — bewaard voor iedereen die na je komt.
+
+Wat nu? Deel je verhaal met je familie, of bewaar het blijvend als download of fysiek boek. Jouw woorden verdienen het om door te leven.
+
+Bekijk en deel je verhaal:
+{{ journey_url }}
+
+Bedankt dat je je verhaal hebt toevertrouwd aan Bewaardvoorjou.
+
+—
+Bewaardvoorjou · bewaardvoorjou.nl
+{% if unsubscribe_token %}Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}{% endif %}

@@ -44,6 +44,12 @@ def should_send_email(db: Session, user_id: str, email_type: str) -> bool:
         return getattr(prefs, "weekly_question_emails", True)
     elif email_type == "inactivity_reminder":
         return getattr(prefs, "inactivity_reminders", True)
+    elif email_type == "first_memory_nudge":
+        # Onboarding-zetje valt onder dezelfde voorkeur als inactiviteit
+        return getattr(prefs, "inactivity_reminders", True)
+    elif email_type == "journey_complete":
+        # Het voltooiingsmoment valt onder mijlpaal-emails
+        return prefs.milestone_emails
     elif email_type == "seasonal":
         return getattr(prefs, "seasonal_emails", True)
     elif email_type == "family_notification":

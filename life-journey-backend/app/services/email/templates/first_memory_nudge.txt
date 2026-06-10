@@ -1,0 +1,23 @@
+{{ display_name }}, je eerste herinnering wacht.
+
+{% if tier == 1 %}
+Je account staat klaar — nu het mooiste deel: je eerste verhaal vertellen. Je hoeft niets voor te bereiden. Eén vraag, jouw antwoord, in je eigen woorden.
+{% elif tier == 3 %}
+Een paar dagen geleden ben je begonnen, maar je eerste herinnering staat er nog niet. Geen zorgen — het kost echt maar vijf minuten, en het is zoveel waard.
+{% else %}
+Je verhaal is nog niet begonnen, en dat is precies waarom we je nog één keer een zetje geven. De eerste herinnering is de moeilijkste om te starten — en de mooiste om straks terug te horen.
+{% endif %}
+
+Je eerste vraag — {{ chapter_name }}:
+"{{ first_question }}"
+
+Spreek het in, typ het, of neem video op — jij kiest. Er is geen goed of fout.
+
+Vertel mijn eerste herinnering:
+{{ journey_url }}
+
+Geen haast — begin gewoon wanneer het goed voelt.
+
+—
+Bewaardvoorjou · bewaardvoorjou.nl
+{% if unsubscribe_token %}Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}{% endif %}

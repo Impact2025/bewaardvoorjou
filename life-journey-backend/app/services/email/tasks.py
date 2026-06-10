@@ -23,6 +23,8 @@ from app.services.email.renderer import (
     build_email_verification_email,
     build_weekly_question_email,
     build_inactivity_reminder_email,
+    build_first_memory_nudge_email,
+    build_journey_complete_email,
     build_seasonal_email,
     build_progress_milestone_email,
     build_family_notification_email,
@@ -214,6 +216,29 @@ def _build_email(
             days_inactive=ctx.get("days_inactive", 7),
             next_chapter_id=ctx.get("next_chapter_id", "intro-reflection"),
             next_question=ctx.get("next_question", "Vertel iets moois over je jeugd..."),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "first_memory_nudge":
+        journey_url = f"{settings.app_base_url}/vertel"
+        return build_first_memory_nudge_email(
+            user_display_name=user.display_name,
+            tier=ctx.get("tier", 1),
+            next_chapter_id=ctx.get("next_chapter_id", "intro-reflection"),
+            first_question=ctx.get("first_question", "Vertel iets moois over je jeugd..."),
+            journey_url=journey_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "journey_complete":
+        journey = db.query(JourneyModel).filter(JourneyModel.id == email_event.journey_id).first()
+        journey_title = journey.title if journey else "Je levensverhaal"
+        journey_url = f"{settings.app_base_url}/dashboard"
+        return build_journey_complete_email(
+            user_display_name=user.display_name,
+            journey_title=journey_title,
+            total_count=ctx.get("total_count", 30),
             journey_url=journey_url,
             unsubscribe_token=unsub,
         )
