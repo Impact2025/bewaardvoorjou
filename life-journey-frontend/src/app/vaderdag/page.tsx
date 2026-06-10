@@ -4,7 +4,7 @@ import VaderdagContent from "./VaderdagContent";
 export const metadata: Metadata = {
   title: "Vaderdag cadeau — BewaardVoorJou.nl",
   description:
-    "Geef je vader het mooiste cadeau: zijn levensverhaal, vastgelegd voor altijd. Een AI-interviewer begeleidt hem door zijn mooiste herinneringen. Bestel vóór 13 juni.",
+    "Geef je vader het mooiste cadeau: zijn levensverhaal, vastgelegd voor altijd. Een geduldige gespreksleider begeleidt hem door zijn mooiste herinneringen. Bestel vóór 17 juni.",
   openGraph: {
     title: "Vaderdag cadeau — BewaardVoorJou.nl",
     description:

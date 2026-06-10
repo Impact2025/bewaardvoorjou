@@ -84,7 +84,7 @@ export default function VaderdagContent() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange/20 backdrop-blur-md border border-orange/30 text-white text-sm font-medium mb-8 shadow-xl">
               <Sparkles className="h-4 w-4 text-orange-light" />
-              <span>Vaderdag — zondag 15 juni 2026</span>
+              <span>Vaderdag — zondag 21 juni 2026</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
@@ -145,7 +145,7 @@ export default function VaderdagContent() {
           <div className="flex items-center gap-3">
             <Clock className="h-5 w-5 text-[#d4af37] flex-shrink-0" />
             <div>
-              <p className="text-white font-semibold text-sm">Bestel vóór vrijdag 13 juni voor Vaderdag levering</p>
+              <p className="text-white font-semibold text-sm">Bestel vóór dinsdag 17 juni voor Vaderdag levering</p>
               <p className="text-[#aaa] text-xs">Digitale toegang start altijd direct · doos volgt daarna</p>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function VaderdagContent() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange/10 border border-orange/30 text-orange text-xs font-bold mb-4 uppercase tracking-widest">
               <Sparkles className="h-3.5 w-3.5" />
-              Vaderdag deal — t/m 15 juni
+              Vaderdag deal — t/m 21 juni
             </div>
             <h2 className="text-3xl md:text-4xl font-serif font-semibold text-slate-900 mb-4">
               Kies het perfecte cadeau
@@ -377,7 +377,7 @@ export default function VaderdagContent() {
             Zijn verhaal verdient<br className="hidden md:block" /> een thuis
           </h2>
           <p className="text-xl mb-10 opacity-95">
-            Bestel vóór vrijdag 13 juni voor bezorging met Vaderdag.
+            Bestel vóór dinsdag 17 juni voor bezorging met Vaderdag.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button

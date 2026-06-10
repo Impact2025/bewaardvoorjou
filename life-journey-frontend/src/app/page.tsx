@@ -23,6 +23,8 @@ import {
   Upload,
 } from "lucide-react";
 
+const VADERDAG_ACTIVE = true; // zet op false na 21 juni
+
 export default function Home() {
   const { session, isLoading } = useAuth();
   const router = useRouter();
@@ -100,7 +102,7 @@ export default function Home() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange/20 backdrop-blur-md border border-orange/30 text-white text-sm font-medium mb-8 shadow-xl">
               <Sparkles className="h-4 w-4 text-orange-light" />
-              <span>Jouw levensverhaal — voor altijd bewaard</span>
+              <span>{VADERDAG_ACTIVE ? "Vaderdag cadeau — zondag 21 juni" : "Jouw levensverhaal — voor altijd bewaard"}</span>
             </div>
 
             {/* Main Heading */}
@@ -122,22 +124,45 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Button
-                asChild
-                className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
-              >
-                <Link href="/register" className="inline-flex items-center">
-                  Start gratis <ArrowRight className="ml-2 h-6 w-6" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white text-lg px-10 py-7 rounded-xl border-2 border-white/40 hover:border-white/60 transition-all duration-300"
-              >
-                <Link href="#features">
-                  Hoe werkt het?
-                </Link>
-              </Button>
+              {VADERDAG_ACTIVE ? (
+                <>
+                  <Button
+                    asChild
+                    className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
+                  >
+                    <Link href="/vaderdag" className="inline-flex items-center">
+                      Geef als cadeau <ArrowRight className="ml-2 h-6 w-6" />
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white text-lg px-10 py-7 rounded-xl border-2 border-white/40 hover:border-white/60 transition-all duration-300"
+                  >
+                    <Link href="/register" className="inline-flex items-center">
+                      Start gratis
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    asChild
+                    className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
+                  >
+                    <Link href="/register" className="inline-flex items-center">
+                      Start gratis <ArrowRight className="ml-2 h-6 w-6" />
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white text-lg px-10 py-7 rounded-xl border-2 border-white/40 hover:border-white/60 transition-all duration-300"
+                  >
+                    <Link href="#features">
+                      Hoe werkt het?
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Trust Indicators */}
@@ -165,7 +190,7 @@ export default function Home() {
           <div className="text-center sm:text-left">
             <p className="text-[#d4af37] text-xs font-bold tracking-widest uppercase mb-1">Vaderdag — 15 juni</p>
             <p className="text-white font-serif text-xl font-bold">Het mooiste cadeau dat je kunt geven</p>
-            <p className="text-[#aaa] text-sm mt-0.5">Direct beschikbaar via e-mail · Doos volgt in september</p>
+            <p className="text-[#aaa] text-sm mt-0.5">Digitale toegang direct · Doos bezorgd binnen 2 weken</p>
           </div>
           <Link
             href="/vaderdag"

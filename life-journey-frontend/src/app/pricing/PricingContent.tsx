@@ -13,7 +13,7 @@ const BOX_IS_PREORDER = true;
 
 // Vaderdag deal actief t/m 15 juni 2026
 const VADERDAG_DEAL_ACTIVE = true;
-const VADERDAG_DEADLINE = "2026-06-15T23:59:59+02:00";
+const VADERDAG_DEADLINE = "2026-06-21T23:59:59+02:00";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
 
