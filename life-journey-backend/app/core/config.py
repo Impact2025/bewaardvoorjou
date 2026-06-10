@@ -81,10 +81,15 @@ class Settings(BaseSettings):
   # Early Bird campagne
   # Zet EARLY_BIRD_ACTIVE=false in .env om de actie uit te zetten zonder herdeployment
   early_bird_active: bool = True
-  early_bird_deadline: str = "2026-06-10T23:59:59+00:00"   # ISO-8601 UTC
-  early_bird_begin_discount_cents: int = 2000                # €20 op BEGIN
+  early_bird_deadline: str = "2026-07-10T23:59:59+00:00"   # ISO-8601 UTC
+  early_bird_begin_discount_cents: int = 2000                # €20 op BEGIN (legacy)
   early_bird_waitlist_discount_cents: int = 3000             # €30 garantie op wachtlijst
-  early_bird_digitaal_discount_cents: int = 1000             # €10 op DIGITAAL
+  early_bird_digitaal_discount_cents: int = 1000             # €10 op DIGITAAL (legacy)
+  early_bird_verhaal_discount_cents: int = 1000              # €10 op VERHAAL
+  early_bird_erfgoed_discount_cents: int = 2000              # €20 op ERFGOED
+
+  # Founding Members
+  founding_member_max_count: int = 100
 
   # SEO Indexing
   site_url: str = "https://bewaardvoorjou.nl"

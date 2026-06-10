@@ -88,6 +88,9 @@ def register_user(
     terms_accepted_at=now if consent_terms else None,
     consent_special_categories_at=now if consent_special_categories else None,
     consent_marketing=consent_marketing,
+    trial_started_at=now,
+    trial_expires_at=now + timedelta(days=30),
+    max_chapters=3,
     **user_kwargs,
   )
   db.add(user)

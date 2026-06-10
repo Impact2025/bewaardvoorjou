@@ -27,7 +27,7 @@ export type AddonCode =
   | "EXTRA_STORAGE"
   | "VIDEO_INTRO";
 
-export type PackageType = "BEGIN" | "ERFGOED" | "VOOR_ALTIJD" | "DIGITAAL";
+export type PackageType = "VERHAAL" | "ERFGOED" | "NALATENSCHAP" | "BEGIN" | "VOOR_ALTIJD" | "DIGITAAL";
 
 export interface CreatePaymentIntentPayload {
   package_type: PackageType;
@@ -70,17 +70,23 @@ export async function createPaymentIntent(
 }
 
 export const PACKAGE_PRICES: Record<PackageType, number> = {
+  VERHAAL: 79,
+  ERFGOED: 149,
+  NALATENSCHAP: 229,
+  // Legacy
   BEGIN: 89,
-  ERFGOED: 249,
   VOOR_ALTIJD: 399,
   DIGITAAL: 49,
 };
 
 export const PACKAGE_NAMES: Record<PackageType, string> = {
+  VERHAAL: "Verhaal",
+  ERFGOED: "Erfgoed",
+  NALATENSCHAP: "Nalatenschap",
+  // Legacy
   BEGIN: "Het Begin",
-  ERFGOED: "De Erfgoed Box",
   VOOR_ALTIJD: "Voor Altijd",
-  DIGITAAL: "Vaderdag Digitaal",
+  DIGITAAL: "Digitaal",
 };
 
 export const ADDON_OPTIONS: { code: AddonCode; label: string; price: number; description: string }[] = [

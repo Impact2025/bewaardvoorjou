@@ -184,10 +184,13 @@ def _find_event_by_resend_id(db: Session, resend_email_id: str | None) -> EmailE
 
 # Pakket-tier instellingen die op de user worden gezet na betaling
 _PACKAGE_SETTINGS = {
-    "BEGIN": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
-    "ERFGOED": {"package_tier": "ERFGOED", "max_family_members": 5, "max_chapters": None, "storage_years": 10},
-    "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10, "max_chapters": None, "storage_years": 999},
-    "DIGITAAL": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
+    "VERHAAL":     {"package_tier": "VERHAAL",     "max_family_members": 0, "max_chapters": None, "storage_years": 1},
+    "ERFGOED":     {"package_tier": "ERFGOED",     "max_family_members": 5, "max_chapters": None, "storage_years": 1},
+    "NALATENSCHAP":{"package_tier": "NALATENSCHAP","max_family_members": 5, "max_chapters": None, "storage_years": 999},
+    # Legacy (backward compat)
+    "BEGIN":       {"package_tier": "BEGIN",       "max_family_members": 2, "max_chapters": 3,    "storage_years": 3},
+    "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10,"max_chapters": None, "storage_years": 999},
+    "DIGITAAL":    {"package_tier": "BEGIN",       "max_family_members": 2, "max_chapters": 3,    "storage_years": 3},
 }
 
 
@@ -270,6 +273,10 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
             user.max_chapters = pkg_settings.get("max_chapters")
             user.storage_years = pkg_settings.get("storage_years", 0)
             logger.info(f"Pakket {order.package_type} geactiveerd voor gebruiker {user.id}")
+
+    # Founding member: eerste 100 betalende klanten krijgen de badge
+    if user_id and order.package_type in ("VERHAAL", "ERFGOED", "NALATENSCHAP"):
+        _maybe_assign_founding_member(db, user_id)
 
     db.commit()
     logger.info(f"Order {order.id} succesvol verwerkt (€{order.price_paid / 100:.2f})")
@@ -361,10 +368,13 @@ def _send_storyteller_magic_link(
 
 
 _PACKAGE_NAMES = {
-    "BEGIN": "Het Begin",
-    "ERFGOED": "De Erfgoed Box",
+    "VERHAAL":     "Verhaal (Digitaal)",
+    "ERFGOED":     "Erfgoed Box",
+    "NALATENSCHAP":"Nalatenschap (Lifetime)",
+    # Legacy
+    "BEGIN":       "Het Begin",
     "VOOR_ALTIJD": "Voor Altijd",
-    "DIGITAAL": "Digitaal cadeau",
+    "DIGITAAL":    "Digitaal cadeau",
 }
 
 
@@ -395,6 +405,22 @@ def _send_gift_buyer_confirmation(
         logger.info(f"Koper-bevestiging verstuurd naar {buyer_email} voor order {order.id}")
     except Exception as exc:
         logger.error(f"Kon koper-bevestiging niet sturen voor order {order.id}: {exc}")
+
+
+def _maybe_assign_founding_member(db: Session, user_id: str) -> None:
+    """Koppel founding member status aan de gebruiker als er nog plekken zijn."""
+    from app.core.config import settings as _settings
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user or user.founding_member:
+        return
+    count = db.query(OrderModel).filter(
+        OrderModel.status == "PAID",
+        OrderModel.package_type.in_(["VERHAAL", "ERFGOED", "NALATENSCHAP"]),
+    ).count()
+    if count <= _settings.founding_member_max_count:
+        user.founding_member = True
+        user.founding_member_number = count
+        logger.info(f"Founding member #{count} toegewezen aan gebruiker {user_id}")
 
 
 def _handle_payment_failed(db: Session, payment_intent: dict) -> None:

@@ -54,12 +54,20 @@ class User(Base):
   ai_assistance_level = Column(String(32), nullable=True, default="full")  # full, minimal, none
 
   # Package / billing fields
-  # Values: NONE | BEGIN | ERFGOED | VOOR_ALTIJD
+  # Values: NONE | VERHAAL | ERFGOED | NALATENSCHAP | BEGIN | VOOR_ALTIJD (legacy)
   package_tier = Column(String(32), nullable=False, default="NONE", index=True)
   package_activated_at = Column(DateTime, nullable=True)
   max_family_members = Column(Integer, nullable=False, default=0)
   max_chapters = Column(Integer, nullable=True)  # NULL = onbeperkt
   storage_years = Column(Integer, nullable=False, default=0)
+
+  # Gratis proefperiode (30 dagen bij registratie)
+  trial_started_at = Column(DateTime, nullable=True)
+  trial_expires_at = Column(DateTime, nullable=True)
+
+  # Founding Member (eerste 100 betalende klanten)
+  founding_member = Column(Boolean, nullable=False, default=False)
+  founding_member_number = Column(Integer, nullable=True)
 
   # Magic link (passwordless) authenticatie
   magic_link_token = Column(String(128), nullable=True, index=True)

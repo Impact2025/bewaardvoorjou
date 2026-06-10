@@ -4,7 +4,13 @@ from typing import Literal
 from pydantic import BaseModel, EmailStr, Field
 
 
-PackageType = Literal["BEGIN", "ERFGOED", "VOOR_ALTIJD", "DIGITAAL"]
+PackageType = Literal[
+    "VERHAAL",       # €79/jaar — digitaal
+    "ERFGOED",       # €149 jaar 1 (doos inbegrepen), €99/jaar verlenging
+    "NALATENSCHAP",  # €229 eenmalig — lifetime
+    # Legacy (backward compat bestaande orders)
+    "BEGIN", "VOOR_ALTIJD", "DIGITAAL",
+]
 
 AddonCode = Literal[
     "GIFT_BOX",       # Luxe cadeauverpakking +€15
@@ -15,10 +21,13 @@ AddonCode = Literal[
 ]
 
 PACKAGE_PRICES: dict[str, int] = {
-    "BEGIN": 8900,       # €89
-    "ERFGOED": 24900,    # €249
-    "VOOR_ALTIJD": 39900,  # €399 (launch prijs)
-    "DIGITAAL": 4900,    # €49 digitale cadeaukaart
+    "VERHAAL": 7900,       # €79/jaar
+    "ERFGOED": 14900,      # €149 eerste jaar (doos inbegrepen)
+    "NALATENSCHAP": 22900, # €229 eenmalig (lifetime)
+    # Legacy
+    "BEGIN": 8900,
+    "VOOR_ALTIJD": 39900,
+    "DIGITAAL": 4900,
 }
 
 ADDON_PRICES: dict[str, int] = {
@@ -80,6 +89,8 @@ class EarlyBirdStatus(BaseModel):
     deadline_iso: str
     waitlist_discount_cents: int
     digitaal_discount_cents: int = 0
+    verhaal_discount_cents: int = 0
+    erfgoed_discount_cents: int = 0
 
 
 class OrderAdmin(BaseModel):

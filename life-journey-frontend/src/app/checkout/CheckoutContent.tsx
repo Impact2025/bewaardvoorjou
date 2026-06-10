@@ -19,9 +19,9 @@ import StepPersonalize from "./StepPersonalize";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
 
-const SOLD_OUT_PACKAGES = new Set(["ERFGOED", "VOOR_ALTIJD"]);
-const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL"]);
-const SOLD_OUT_ADDONS = new Set(["GIFT_BOX", "EXTRA_USB", "PHOTO_BOOK", "EXTRA_STORAGE", "VIDEO_INTRO"]);
+const SOLD_OUT_PACKAGES = new Set<string>([]);
+const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL"]);
+const SOLD_OUT_ADDONS = new Set<string>([]);
 
 const STEPS = ["Pakket", "Personaliseer", "Betalen", "Bevestiging"] as const;
 
@@ -53,10 +53,10 @@ const DEFAULT_ADDRESS: ShippingAddress = {
 export default function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const rawPackage = searchParams.get("package") ?? "BEGIN";
-  const packageType: PackageType = ["BEGIN", "ERFGOED", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
+  const rawPackage = searchParams.get("package") ?? "VERHAAL";
+  const packageType: PackageType = ["VERHAAL", "ERFGOED", "NALATENSCHAP", "BEGIN", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
     ? (rawPackage as PackageType)
-    : "BEGIN";
+    : "VERHAAL";
 
   // Redirect uitverkochte pakketten terug naar de pricing pagina
   useEffect(() => {
@@ -100,7 +100,15 @@ export default function CheckoutContent() {
     return sum + (opt?.price ?? 0);
   }, 0);
   const earlyBirdDiscount = earlyBird?.active
-    ? state.packageType === "BEGIN"
+    ? state.packageType === "VERHAAL"
+      ? (earlyBird as EarlyBirdStatus & { verhaal_discount_cents?: number }).verhaal_discount_cents
+        ? ((earlyBird as EarlyBirdStatus & { verhaal_discount_cents?: number }).verhaal_discount_cents ?? 0) / 100
+        : earlyBird.discount_cents / 100
+      : state.packageType === "ERFGOED"
+      ? (earlyBird as EarlyBirdStatus & { erfgoed_discount_cents?: number }).erfgoed_discount_cents
+        ? ((earlyBird as EarlyBirdStatus & { erfgoed_discount_cents?: number }).erfgoed_discount_cents ?? 0) / 100
+        : 0
+      : state.packageType === "BEGIN"
       ? earlyBird.discount_cents / 100
       : state.packageType === "DIGITAAL"
       ? (earlyBird.digitaal_discount_cents ?? 0) / 100
@@ -128,7 +136,9 @@ export default function CheckoutContent() {
           </div>
           <div className="text-right">
             <p className="font-bold text-[#1a1a1a]">{totalPrice === 0 ? "Gratis" : `€${totalPrice}`}</p>
-            <p className="text-xs text-[#888]">eenmalig</p>
+            <p className="text-xs text-[#888]">
+              {state.packageType === "NALATENSCHAP" ? "eenmalig" : state.packageType === "VERHAAL" ? "per jaar" : "jaar 1"}
+            </p>
           </div>
         </div>
       </div>
@@ -272,43 +282,40 @@ function StepSelectPlan({
 
       {/* Pakket keuze */}
       <div className="space-y-3">
-        {(["BEGIN", "ERFGOED", "VOOR_ALTIJD", "DIGITAAL"] as PackageType[]).map((pkg) => {
-          const soldOut = SOLD_OUT_PACKAGES.has(pkg);
-          return (
-            <label
-              key={pkg}
-              className={cn(
-                "flex items-center justify-between p-4 rounded-xl border transition-colors",
-                soldOut
-                  ? "opacity-60 cursor-not-allowed border-[#e5e0d8] bg-[#f8f6f2]"
-                  : state.packageType === pkg
-                  ? "cursor-pointer border-[#d4af37] bg-[#d4af37]/10"
-                  : "cursor-pointer border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="package"
-                  value={pkg}
-                  checked={state.packageType === pkg}
-                  onChange={() => !soldOut && onChange({ packageType: pkg })}
-                  disabled={soldOut}
-                  className="accent-[#d4af37]"
-                />
-                <div>
-                  <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
-                  {soldOut && <p className="text-xs text-[#e07020] font-medium">Uitverkocht — wachtlijst via /pricing</p>}
-                  {!soldOut && pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen</p>}
-                  {!soldOut && pkg === "VOOR_ALTIJD" && <p className="text-xs text-[#888]">Launch aanbieding</p>}
-                </div>
+        {(["VERHAAL", "ERFGOED", "NALATENSCHAP"] as PackageType[]).map((pkg) => (
+          <label
+            key={pkg}
+            className={cn(
+              "flex items-center justify-between p-4 rounded-xl border transition-colors cursor-pointer",
+              state.packageType === pkg
+                ? "border-[#d4af37] bg-[#d4af37]/10"
+                : "border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <input
+                type="radio"
+                name="package"
+                value={pkg}
+                checked={state.packageType === pkg}
+                onChange={() => onChange({ packageType: pkg, skipShipping: DIGITAL_ONLY_PACKAGES.has(pkg) })}
+                className="accent-[#d4af37]"
+              />
+              <div>
+                <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
+                {pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>}
+                {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>}
+                {pkg === "VERHAAL" && <p className="text-xs text-[#888]">Digitaal — per jaar opzegbaar</p>}
               </div>
-              <span className={cn("font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>
-                €{PACKAGE_PRICES[pkg]}
-              </span>
-            </label>
-          );
-        })}
+            </div>
+            <div className="text-right">
+              <span className="font-bold text-[#1a1a1a]">€{PACKAGE_PRICES[pkg]}</span>
+              {pkg === "ERFGOED" && <p className="text-xs text-[#888]">jaar 1 · €99/jaar v.a. jaar 2</p>}
+              {pkg === "VERHAAL" && <p className="text-xs text-[#888]">per jaar</p>}
+              {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">eenmalig</p>}
+            </div>
+          </label>
+        ))}
       </div>
 
       {/* Add-ons */}
@@ -356,8 +363,8 @@ function StepSelectPlan({
 
       {/* Kortingscode */}
       <div>
-        <h3 className="font-medium text-[#1a1a1a] mb-1">Uitnodigingscode</h3>
-        <p className="text-xs text-[#888] mb-3">Vereist om door te gaan — heb je er geen? Neem contact op.</p>
+        <h3 className="font-medium text-[#1a1a1a] mb-1">Kortingscode</h3>
+        <p className="text-xs text-[#888] mb-3">Optioneel — voer een code in als je die hebt.</p>
         {promoApplied && state.promoCode ? (
           <div className="flex items-center justify-between p-3 bg-[#2d5016]/5 border border-[#2d5016]/30 rounded-xl">
             <div>
@@ -424,19 +431,18 @@ function StepSelectPlan({
           <span>Totaal</span>
           <span>{total === 0 ? "Gratis 🎉" : `€${total}`}</span>
         </div>
-        <p className="text-xs text-[#888] mt-1">Inclusief gratis verzending</p>
-      </div>
-
-      {!promoApplied && (
-        <p className="text-center text-sm text-[#888]">
-          Je hebt een uitnodigingscode nodig om door te gaan.
+        <p className="text-xs text-[#888] mt-1">
+          {state.packageType === "NALATENSCHAP"
+            ? "Eenmalige betaling — nooit meer kosten"
+            : state.packageType === "VERHAAL"
+            ? "Per jaar · opzegbaar"
+            : "Eerste jaar inclusief Erfgoed Box · daarna €99/jaar"}
         </p>
-      )}
+      </div>
 
       <button
         onClick={onNext}
-        disabled={!promoApplied}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] disabled:bg-[#e5e0d8] disabled:text-[#aaa] disabled:cursor-not-allowed text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
+        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
       >
         Volgende: Personaliseer →
       </button>

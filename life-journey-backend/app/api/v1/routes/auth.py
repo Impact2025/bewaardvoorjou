@@ -57,9 +57,11 @@ def register(request: Request, payload: RegisterRequest, db: Session = Depends(g
       from app.api.v1.routes.promo_codes import _validate_code, increment_promo_usage
       from datetime import datetime, timezone
       _PACKAGE_SETTINGS = {
-        "BEGIN": {"package_tier": "BEGIN", "max_family_members": 2, "max_chapters": 3, "storage_years": 3},
-        "ERFGOED": {"package_tier": "ERFGOED", "max_family_members": 5, "max_chapters": None, "storage_years": 10},
-        "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10, "max_chapters": None, "storage_years": 999},
+        "VERHAAL":      {"package_tier": "VERHAAL",      "max_family_members": 0,  "max_chapters": None, "storage_years": 1},
+        "ERFGOED":      {"package_tier": "ERFGOED",      "max_family_members": 5,  "max_chapters": None, "storage_years": 1},
+        "NALATENSCHAP": {"package_tier": "NALATENSCHAP", "max_family_members": 5,  "max_chapters": None, "storage_years": 999},
+        "BEGIN":        {"package_tier": "BEGIN",        "max_family_members": 2,  "max_chapters": 3,    "storage_years": 3},
+        "VOOR_ALTIJD":  {"package_tier": "VOOR_ALTIJD",  "max_family_members": 10, "max_chapters": None, "storage_years": 999},
       }
       result = _validate_code(db, payload.promo_code, "BEGIN")
       if result.valid and result.grants_package:

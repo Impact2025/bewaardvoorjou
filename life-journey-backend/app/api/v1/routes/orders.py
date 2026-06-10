@@ -33,6 +33,10 @@ def _early_bird_discount_cents(package_type: str) -> int:
     try:
         deadline = parse_dt(settings.early_bird_deadline)
         if datetime.now(timezone.utc) <= deadline:
+            if package_type == "VERHAAL":
+                return settings.early_bird_verhaal_discount_cents
+            if package_type == "ERFGOED":
+                return settings.early_bird_erfgoed_discount_cents
             if package_type == "BEGIN":
                 return settings.early_bird_begin_discount_cents
             if package_type == "DIGITAAL":
@@ -40,6 +44,21 @@ def _early_bird_discount_cents(package_type: str) -> int:
     except Exception:
         pass
     return 0
+
+
+@router.get("/founding-member-spots")
+def get_founding_member_spots(db: Session = Depends(get_db)) -> dict:
+    """Geeft aan hoeveel founding member plekken er nog beschikbaar zijn."""
+    count = (
+        db.query(Order)
+        .filter(
+            Order.status == "PAID",
+            Order.package_type.in_(["VERHAAL", "ERFGOED", "NALATENSCHAP"]),
+        )
+        .count()
+    )
+    remaining = max(0, settings.founding_member_max_count - count)
+    return {"remaining": remaining, "total": settings.founding_member_max_count, "filled": count}
 
 
 @router.get("/early-bird", response_model=EarlyBirdStatus)
@@ -58,6 +77,8 @@ def get_early_bird_status() -> EarlyBirdStatus:
         deadline_iso=settings.early_bird_deadline,
         waitlist_discount_cents=settings.early_bird_waitlist_discount_cents if active else 0,
         digitaal_discount_cents=settings.early_bird_digitaal_discount_cents if active else 0,
+        verhaal_discount_cents=settings.early_bird_verhaal_discount_cents if active else 0,
+        erfgoed_discount_cents=settings.early_bird_erfgoed_discount_cents if active else 0,
     )
 
 
