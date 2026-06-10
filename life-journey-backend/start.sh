@@ -15,15 +15,15 @@ done
 
 # Start Celery workers in background
 echo "Starting Celery email worker..."
-celery -A app.services.email.tasks worker --loglevel=info -Q celery --concurrency=2 &
+python -m celery -A app.services.email.tasks:celery_app worker --loglevel=info -Q celery --concurrency=2 &
 EMAIL_WORKER_PID=$!
 
 echo "Starting Celery Beat scheduler..."
-celery -A app.services.email.tasks beat --loglevel=info &
+python -m celery -A app.services.email.tasks:celery_app beat --loglevel=info &
 BEAT_PID=$!
 
 echo "Starting Celery media worker..."
-celery -A app.services.media.tasks worker --loglevel=info -Q media --concurrency=2 &
+python -m celery -A app.services.media.tasks:celery_app worker --loglevel=info -Q media --concurrency=2 &
 MEDIA_WORKER_PID=$!
 
 # Trap signals and kill background workers on exit

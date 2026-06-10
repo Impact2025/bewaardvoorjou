@@ -1,0 +1,18 @@
+nul
+life-journey-frontend/
+life-journey-frontend/.next/
+node_modules/
+__pycache__/
+.git/
+
+# Secrets — nooit in de build/image bakken (productie gebruikt Railway-variabelen)
+.env
+.env.*
+!.env.example
+
+# Lokale rommel die niet in de image hoort
+*.pyc
+test.db
+life-journey-backend/test.db
+life-journey-backend/media_storage/
+.railway/
