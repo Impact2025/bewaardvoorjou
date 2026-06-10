@@ -106,7 +106,7 @@ def send_owner_sale_notification(order: OrderModel, contact_email: str | None) -
 
         html = _wrap("Nieuwe bestelling", body)
         text = (
-            f"Nieuwe bestelling\n\n"
+            "Nieuwe bestelling\n\n"
             + "\n".join(f"{k}: {v}" for k, v in rows).replace("&lt;", "<").replace("&gt;", ">")
         )
 
