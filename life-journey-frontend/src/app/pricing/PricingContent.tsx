@@ -156,7 +156,7 @@ export default function PricingContent() {
         <p className="text-sm text-[#888]">Gratis start: geen creditcard · 30 dagen · stop wanneer je wilt</p>
 
         {/* Founding member teller */}
-        {foundingSpots && foundingSpots.remaining > 0 && (
+        {foundingSpots && foundingSpots.remaining > 0 && foundingSpots.remaining < foundingSpots.total && (
           <div className="mt-6 inline-flex items-center gap-2 bg-[#d4af37]/15 border border-[#d4af37]/40 rounded-full px-5 py-2.5 text-sm text-[#1a1a1a] font-medium">
             <Star className="h-4 w-4 text-[#d4af37] fill-[#d4af37]" />
             Nog <strong>{foundingSpots.remaining}</strong> van de {foundingSpots.total} Founding Member plekken beschikbaar
@@ -308,7 +308,7 @@ export default function PricingContent() {
       </section>
 
       {/* ── Founding Member sectie ── */}
-      {foundingSpots && foundingSpots.remaining > 0 && (
+      {foundingSpots && foundingSpots.remaining > 0 && foundingSpots.remaining < foundingSpots.total && (
         <section className="bg-[#1a1a1a] py-14 px-4 text-center">
           <div className="max-w-xl mx-auto">
             <Star className="h-8 w-8 text-[#d4af37] fill-[#d4af37] mx-auto mb-4" />
@@ -486,7 +486,7 @@ function PackageCard({
   ctaLabel: string;
   onSelect: () => void;
 }) {
-  const showFoundingBadge = foundingSpots && foundingSpots.remaining > 0;
+  const showFoundingBadge = foundingSpots && foundingSpots.remaining > 0 && foundingSpots.remaining < foundingSpots.total;
 
   return (
     <div
