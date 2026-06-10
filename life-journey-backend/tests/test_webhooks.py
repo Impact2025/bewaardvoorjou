@@ -33,6 +33,8 @@ class _User:
     max_family_members: int = 0
     max_chapters: int | None = None
     storage_years: int = 0
+    founding_member: bool = False
+    founding_member_number: int | None = None
 
 
 @dataclass
@@ -81,6 +83,9 @@ class _FakeQuery:
 
     def all(self):
         return self._data
+
+    def count(self):
+        return len(self._data)
 
 
 class _FakeDb:

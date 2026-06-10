@@ -26,9 +26,12 @@ from app.services.journey_progress import (
 from app.services.email.events import (
     trigger_weekly_question_email,
     trigger_inactivity_reminder_email,
+    trigger_first_memory_nudge_email,
+    trigger_journey_complete_email,
     trigger_seasonal_email,
     trigger_progress_milestone_email,
 )
+from app.models.email import EmailEvent as EmailEventModel
 from app.services.ai.interviewer import build_prompt_fallback
 from app.schemas.common import ChapterId
 
@@ -49,6 +52,47 @@ SEASONAL_TRIGGERS: list[tuple[int, int, str, str, str]] = [
     (12, 31, "oud_nieuw", "future-dream",
      "Als je terugkijkt op dit jaar — wat was het mooiste moment?"),
 ]
+
+
+# Re-engagement drempels (in dagen)
+ONBOARDING_TIERS = [1, 3, 7]      # gebruiker heeft NOOIT iets opgenomen
+WINBACK_TIERS = [7, 21, 45, 90]   # gebruiker was actief maar is inactief geworden
+
+
+def select_reminder_tier(
+    days_inactive: int,
+    sent_tiers: set[int],
+    tiers: list[int],
+) -> int | None:
+    """
+    Kies de hoogste drempel die bereikt is (<= days_inactive) en nog niet is
+    verstuurd. Dit is bestand tegen gemiste runs: draait de dagelijkse taak een
+    dag niet, dan wordt de gemiste drempel alsnog opgepakt zodra hij weer draait.
+
+    Returns de drempel om te versturen, of None als er niets te doen is.
+    """
+    candidates = [t for t in tiers if t <= days_inactive and t not in sent_tiers]
+    return max(candidates) if candidates else None
+
+
+def _sent_tiers_for(
+    db: Session,
+    *,
+    user_id: str,
+    journey_id: str,
+    email_type: str,
+) -> set[int]:
+    """Verzamel de drempels die al voor dit type/journey zijn verstuurd."""
+    events = db.query(EmailEventModel).filter(
+        EmailEventModel.user_id == user_id,
+        EmailEventModel.journey_id == journey_id,
+        EmailEventModel.email_type == email_type,
+    ).all()
+    return {
+        e.context_data["tier"]
+        for e in events
+        if e.context_data and e.context_data.get("tier") is not None
+    }
 
 
 def _get_user_birthday_occasion(user: UserModel) -> tuple[str, str, str] | None:
@@ -126,8 +170,13 @@ def send_weekly_questions_task() -> None:
 @celery_app.task(name="email.check_inactive_users")
 def check_inactive_users_task() -> None:
     """
-    Dagelijks: check users die 7 of 21 dagen geen recording hebben gemaakt.
-    Stuur een warme herinnering met de volgende vraag.
+    Dagelijks: twee re-engagement sporen, beide drempel-gebaseerd en bestand
+    tegen gemiste runs:
+
+    1. Onboarding — gebruiker heeft NOOIT iets opgenomen: zachte zetjes op
+       dag 1, 3 en 7 na registratie (first_memory_nudge).
+    2. Win-back — gebruiker was actief maar is inactief: warme herinneringen
+       op dag 7, 21, 45 en 90 sinds de laatste opname (inactivity_reminder).
     """
     logger.info("Starting inactivity check task")
     db: Session = SessionLocal()
@@ -138,7 +187,6 @@ def check_inactive_users_task() -> None:
         pairs = _get_active_journeys(db)
         for user, journey in pairs:
             try:
-                # Haal datum van laatste recording op
                 latest_asset = (
                     db.query(MediaAssetModel)
                     .filter(MediaAssetModel.journey_id == journey.id)
@@ -146,22 +194,30 @@ def check_inactive_users_task() -> None:
                     .first()
                 )
 
-                if latest_asset and latest_asset.recorded_at:
-                    recorded_at = latest_asset.recorded_at
-                    if recorded_at.tzinfo is None:
-                        recorded_at = recorded_at.replace(tzinfo=timezone.utc)
-                    days_inactive = (now - recorded_at).days
-                elif not latest_asset:
-                    # Nooit een recording gemaakt — gebruik account aanmaakdatum
+                never_recorded = latest_asset is None or latest_asset.recorded_at is None
+
+                if never_recorded:
+                    # Spoor 1: onboarding — meet vanaf registratie
                     created_at = user.created_at
                     if created_at and created_at.tzinfo is None:
                         created_at = created_at.replace(tzinfo=timezone.utc)
                     days_inactive = (now - created_at).days if created_at else 0
+                    email_type = "first_memory_nudge"
+                    tiers = ONBOARDING_TIERS
                 else:
-                    continue
+                    # Spoor 2: win-back — meet vanaf laatste opname
+                    recorded_at = latest_asset.recorded_at
+                    if recorded_at.tzinfo is None:
+                        recorded_at = recorded_at.replace(tzinfo=timezone.utc)
+                    days_inactive = (now - recorded_at).days
+                    email_type = "inactivity_reminder"
+                    tiers = WINBACK_TIERS
 
-                # Stuur reminder bij 7 en 21 dagen inactiviteit
-                if days_inactive not in (7, 21):
+                sent_tiers = _sent_tiers_for(
+                    db, user_id=user.id, journey_id=journey.id, email_type=email_type
+                )
+                tier = select_reminder_tier(days_inactive, sent_tiers, tiers)
+                if tier is None:
                     continue
 
                 next_chapter = get_next_available_chapter(db, journey.id)
@@ -170,18 +226,29 @@ def check_inactive_users_task() -> None:
 
                 try:
                     chapter_enum = ChapterId(next_chapter)
-                    next_question = build_prompt_fallback(chapter_enum, [])
+                    question = build_prompt_fallback(chapter_enum, [])
                 except (ValueError, Exception):
-                    next_question = "Vertel over een moment dat je nooit vergeet."
+                    question = "Vertel over een moment dat je nooit vergeet."
 
-                result = trigger_inactivity_reminder_email(
-                    db=db,
-                    user_id=user.id,
-                    journey_id=journey.id,
-                    days_inactive=days_inactive,
-                    next_chapter_id=next_chapter,
-                    next_question=next_question,
-                )
+                if never_recorded:
+                    result = trigger_first_memory_nudge_email(
+                        db=db,
+                        user_id=user.id,
+                        journey_id=journey.id,
+                        next_chapter_id=next_chapter,
+                        first_question=question,
+                        tier=tier,
+                    )
+                else:
+                    result = trigger_inactivity_reminder_email(
+                        db=db,
+                        user_id=user.id,
+                        journey_id=journey.id,
+                        days_inactive=days_inactive,
+                        next_chapter_id=next_chapter,
+                        next_question=question,
+                        tier=tier,
+                    )
                 if result:
                     sent_count += 1
 
@@ -263,6 +330,14 @@ def check_progress_milestones_task(journey_id: str, user_id: str) -> None:
                     completed_count=completed_count,
                     total_count=total_count,
                 )
+
+        # Het grote moment: alles voltooid — stuur de feestelijke voltooiingsmail
+        if percent >= 100:
+            trigger_journey_complete_email(
+                db=db,
+                user_id=user_id,
+                journey_id=journey_id,
+            )
     except Exception as e:
         logger.error(f"Progress milestone check failed for journey {journey_id}: {e}")
     finally:

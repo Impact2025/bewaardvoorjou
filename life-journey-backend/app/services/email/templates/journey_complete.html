@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Je levensverhaal is voltooid{% endblock %}
+
+{% block content %}
+<h1 class="heading">Je hebt het voltooid, {{ display_name }}. 🎉</h1>
+
+<p class="body-text">
+  Wat een prestatie. Je hebt alle {{ total_count }} hoofdstukken van je levensverhaal verteld &mdash; van je vroegste herinneringen tot je diepste inzichten. Dat is iets om trots op te zijn.
+</p>
+
+<p class="body-text">
+  Wat je hier hebt gemaakt, is geen bestand. Het is een stem, een leven, een erfenis &mdash; bewaard voor iedereen die na je komt.
+</p>
+
+<div class="accent-block">
+  <p><strong>Wat nu?</strong> Deel je verhaal met je familie, of bewaar het blijvend als download of fysiek boek. Jouw woorden verdienen het om door te leven.</p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ journey_url }}" class="cta-button">Bekijk en deel je verhaal</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Bedankt dat je je verhaal hebt toevertrouwd aan Bewaardvoorjou.
+</p>
+{% endblock %}

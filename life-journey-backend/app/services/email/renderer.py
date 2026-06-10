@@ -40,6 +40,22 @@ def _inline_css(html: str) -> str:
         return html
 
 
+def truncate_subject(text: str, limit: int = 60) -> str:
+    """
+    Kort een onderwerpregel netjes in op een woordgrens.
+
+    Voegt alleen een ellips toe wanneer er daadwerkelijk is ingekort, en knipt
+    nooit midden in een woord af.
+    """
+    text = " ".join(text.split())  # normaliseer witruimte
+    if len(text) <= limit:
+        return text
+    clipped = text[:limit].rsplit(" ", 1)[0].rstrip(",.;:!?-")
+    if not clipped:  # één heel lang woord
+        clipped = text[:limit]
+    return f"{clipped}…"
+
+
 def render_email(
     template_name: str,
     context: dict[str, Any],
@@ -169,7 +185,7 @@ def build_weekly_question_email(
     unsubscribe_token: str,
 ) -> tuple[str, str, str]:
     chapter_name = get_chapter_name(chapter_id)
-    subject = f"Jouw vraag van deze week: {question_text[:60]}..."
+    subject = f"Jouw vraag van deze week: {truncate_subject(question_text, 55)}"
     context = {
         "display_name": user_display_name,
         "chapter_name": chapter_name,
@@ -224,6 +240,51 @@ def build_seasonal_email(
         "journey_url": journey_url,
     }
     html, text = render_email("seasonal", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_first_memory_nudge_email(
+    user_display_name: str,
+    tier: int,
+    next_chapter_id: str,
+    first_question: str,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    # Toon escaleert zacht naarmate de dagen verstrijken zonder eerste opname
+    subjects = {
+        1: f"Klaar voor je eerste herinnering, {user_display_name}?",
+        3: f"Je eerste verhaal in vijf minuten, {user_display_name}",
+        7: f"Eén vraag, één herinnering — begin vandaag, {user_display_name}",
+    }
+    subject = subjects.get(tier, f"Begin je eerste herinnering, {user_display_name}")
+    context = {
+        "display_name": user_display_name,
+        "tier": tier,
+        "chapter_name": get_chapter_name(next_chapter_id),
+        "first_question": first_question,
+        "journey_url": journey_url,
+    }
+    html, text = render_email("first_memory_nudge", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_journey_complete_email(
+    user_display_name: str,
+    journey_title: str,
+    total_count: int,
+    journey_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"Je hebt je levensverhaal voltooid, {user_display_name} 🎉"
+    context = {
+        "display_name": user_display_name,
+        "journey_title": journey_title,
+        "total_count": total_count,
+        "journey_url": journey_url,
+    }
+    html, text = render_email("journey_complete", context, unsubscribe_token)
+    logger.info(f"Built journey_complete email for {user_display_name}")
     return subject, html, text
 
 

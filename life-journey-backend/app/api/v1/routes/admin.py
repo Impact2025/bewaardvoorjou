@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_
+from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
@@ -41,6 +41,84 @@ def _audit(
         target_email=target.email if target else None,
         detail=detail,
     ))
+
+
+def _engagement_rates(
+    delivered: int, opened: int, clicked: int, bounced: int, complained: int, sent_ok: int
+) -> dict:
+    """Bereken engagement-percentages uit ruwe tellingen (deelt nooit door nul)."""
+    def pct(num: int, den: int) -> float:
+        return round((num / den) * 100, 1) if den else 0.0
+
+    # Bounce/complaint relateren we aan alles wat we probeerden af te leveren.
+    attempted = sent_ok + bounced
+    return {
+        "open_rate": pct(opened, delivered),
+        "click_rate": pct(clicked, delivered),
+        "click_to_open_rate": pct(clicked, opened),
+        "bounce_rate": pct(bounced, attempted),
+        "complaint_rate": pct(complained, delivered),
+    }
+
+
+@router.get("/email-analytics")
+def get_email_analytics(
+    days: int = Query(30, ge=1, le=365),
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Engagement-cijfers per e-mailtype over de afgelopen `days` dagen:
+    afgeleverd, geopend, geklikt, bounces en klachten — met afgeleide
+    open-, klik-, bounce- en klachtpercentages.
+    """
+    from datetime import timedelta
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    rows = (
+        db.query(
+            EmailEvent.email_type.label("email_type"),
+            func.count(EmailEvent.id).label("total"),
+            func.sum(case((EmailEvent.status.in_(["sent", "delivered"]), 1), else_=0)).label("sent_ok"),
+            func.sum(case((EmailEvent.delivered_at.isnot(None), 1), else_=0)).label("delivered"),
+            func.sum(case((EmailEvent.opened_at.isnot(None), 1), else_=0)).label("opened"),
+            func.sum(case((EmailEvent.clicked_at.isnot(None), 1), else_=0)).label("clicked"),
+            func.sum(case((EmailEvent.status == "bounced", 1), else_=0)).label("bounced"),
+            func.sum(case((EmailEvent.status == "complained", 1), else_=0)).label("complained"),
+        )
+        .filter(EmailEvent.created_at >= since)
+        .group_by(EmailEvent.email_type)
+        .all()
+    )
+
+    by_type = []
+    totals = {"total": 0, "sent_ok": 0, "delivered": 0, "opened": 0, "clicked": 0, "bounced": 0, "complained": 0}
+    for r in rows:
+        counts = {k: int(getattr(r, k) or 0) for k in totals}
+        for k in totals:
+            totals[k] += counts[k]
+        by_type.append({
+            "email_type": r.email_type,
+            **counts,
+            **_engagement_rates(
+                counts["delivered"], counts["opened"], counts["clicked"],
+                counts["bounced"], counts["complained"], counts["sent_ok"],
+            ),
+        })
+
+    by_type.sort(key=lambda x: x["total"], reverse=True)
+
+    return {
+        "window_days": days,
+        "totals": {
+            **totals,
+            **_engagement_rates(
+                totals["delivered"], totals["opened"], totals["clicked"],
+                totals["bounced"], totals["complained"], totals["sent_ok"],
+            ),
+        },
+        "by_type": by_type,
+    }
 
 
 @router.get("/stats")
