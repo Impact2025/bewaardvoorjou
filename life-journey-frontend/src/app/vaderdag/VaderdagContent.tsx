@@ -45,7 +45,7 @@ const reasons = [
   {
     icon: <Heart className="h-7 w-7 text-orange" />,
     title: "Geen stress, wél verbinding",
-    desc: "Een AI-interviewer stelt de vragen. Hij hoeft niks voor te bereiden. Gewoon vertellen.",
+    desc: "Een geduldige gespreksleider stelt de vragen. Hij hoeft niks voor te bereiden. Gewoon vertellen.",
   },
   {
     icon: <Gift className="h-7 w-7 text-orange" />,
@@ -98,7 +98,7 @@ export default function VaderdagContent() {
             </p>
 
             <p className="text-lg text-white/85 leading-relaxed mb-10 drop-shadow-lg">
-              Een AI-interviewer begeleidt hem door zijn mooiste herinneringen.
+              Een geduldige gespreksleider begeleidt hem door zijn mooiste herinneringen.
               Hij hoeft niks voor te bereiden. Gewoon vertellen.
             </p>
 
@@ -229,7 +229,7 @@ export default function VaderdagContent() {
                 <ul className="space-y-2.5 mb-7">
                   {[
                     "Alle 18 hoofdstukken van zijn leven",
-                    "AI-interviewer in het Nederlands",
+                    "Persoonlijke gespreksleider in het Nederlands",
                     "A5 magneetdoos met goudfolie logo",
                     "USB-stick in walnouthout",
                     "Grafiet potlood & A6 notitieboekje",

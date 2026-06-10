@@ -40,8 +40,8 @@ export default function Home() {
   const features = [
     {
       icon: <MessageCircle className="h-8 w-8 text-orange" />,
-      title: "AI-begeleide interviews",
-      description: "Een warme AI-interviewer stelt precies de juiste vragen op het juiste moment"
+      title: "Interviews die echt doorvragen",
+      description: "Een geduldige gespreksleider stelt precies de juiste vragen — jij hoeft niets voor te bereiden"
     },
     {
       icon: <Upload className="h-8 w-8 text-orange" />,
@@ -64,7 +64,7 @@ export default function Home() {
     {
       step: "2",
       title: "Begin met vertellen",
-      description: "Onze AI-interviewer begeleidt je door 30 hoofdstukken van je leven"
+      description: "Een slimme gespreksleider begeleidt je rustig door alle hoofdstukken van je leven"
     },
     {
       step: "3",
@@ -100,7 +100,7 @@ export default function Home() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange/20 backdrop-blur-md border border-orange/30 text-white text-sm font-medium mb-8 shadow-xl">
               <Sparkles className="h-4 w-4 text-orange-light" />
-              <span>Nieuw: Bewaar je levensverhaal met AI-hulp</span>
+              <span>Jouw levensverhaal — voor altijd bewaard</span>
             </div>
 
             {/* Main Heading */}
@@ -116,7 +116,7 @@ export default function Home() {
             </p>
 
             <p className="text-lg md:text-xl text-white/90 leading-relaxed mb-10 drop-shadow-lg">
-              BewaardVoorJou.nl helpt je om jouw verhaal vast te leggen met warme AI-begeleiding.
+              BewaardVoorJou.nl helpt je om jouw verhaal vast te leggen — met begeleiding die echt luistert.
               Voor jezelf, voor je familie, voor de volgende generatie.
             </p>
 

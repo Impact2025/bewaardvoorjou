@@ -22,7 +22,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/
 const faqs = [
   {
     q: "Hoe werkt de gratis proefperiode?",
-    a: "Je maakt een gratis account aan — geen creditcard nodig. Je krijgt direct toegang tot de onboarding en de eerste 3 hoofdstukken met de AI-interviewer. Na 30 dagen kun je je verhalen blijven lezen en delen, maar voor nieuwe opnames upgrade je naar een betaald pakket.",
+    a: "Je maakt een gratis account aan — geen creditcard nodig. Je krijgt direct toegang tot de onboarding en de eerste 3 hoofdstukken met de persoonlijke gespreksleider (aangedreven door AI). Na 30 dagen kun je je verhalen blijven lezen en delen, maar voor nieuwe opnames upgrade je naar een betaald pakket.",
   },
   {
     q: "Wanneer ontvang ik de Erfgoed Box?",
@@ -185,7 +185,7 @@ export default function PricingContent() {
             <p className="font-serif text-xl font-bold text-[#1a1a1a]">Gratis starten</p>
             <p className="text-[#555] text-sm mt-1">Maak een account aan en begin vandaag. Geen creditcard nodig.</p>
             <ul className="mt-3 space-y-1">
-              {["Onboarding + eerste 3 hoofdstukken", "AI-interviewer actief", "30 dagen volledig gratis"].map((f) => (
+              {["Onboarding + eerste 3 hoofdstukken", "Persoonlijke gespreksleider actief", "30 dagen volledig gratis"].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-[#555]">
                   <Check className="h-4 w-4 text-[#2d5016] flex-shrink-0" />{f}
                 </li>
@@ -214,7 +214,7 @@ export default function PricingContent() {
             foundingSpots={foundingSpots}
             features={[
               "Alle 18 hoofdstukken",
-              "Onbeperkte AI-interview sessies",
+              "Onbeperkte gesprekssessies",
               "Digitaal archief — levenslang leesbaar",
               "Deellinks met verlooptijd",
               "PDF/digitale export",
@@ -247,7 +247,7 @@ export default function PricingContent() {
               "USB-stick in walnouthout",
               "Zwart hout grafiet potlood",
               "A6 Notitieboekje",
-              "5 familieleden kunnen meelezen",
+              "Tot 5 familieleden kunnen meelezen",
               "Prioriteit support",
             ]}
             perfectFor={[
