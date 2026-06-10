@@ -168,10 +168,10 @@ export default function Home() {
             <p className="text-[#aaa] text-sm mt-0.5">Direct beschikbaar via e-mail · Doos volgt in september</p>
           </div>
           <Link
-            href="/pricing"
+            href="/vaderdag"
             className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
           >
-            Bestel Het Begin → €89
+            Bekijk het cadeau →
           </Link>
         </div>
       </section>
