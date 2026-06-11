@@ -43,7 +43,7 @@ const faqJsonLd = {
       name: "Is BewaardVoorJou.nl gratis?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Op dit moment is BewaardVoorJou.nl volledig gratis tijdens de lanceringsfase. Je kunt alle 58 hoofdstukken opnemen, transcripties krijgen, delen met familie, en je verhalen veilig bewaren zonder te betalen.",
+        text: "Je start gratis: zonder creditcard leg je je eerste 3 hoofdstukken vast, 30 dagen lang. Daarna blijven je verhalen leesbaar en deelbaar. Voor het hele levensverhaal (alle 58 hoofdstukken) kies je een pakket: Verhaal (€79), Erfgoed (€149, met fysieke doos) of Nalatenschap (€229 eenmalig, levenslang).",
       },
     },
     {

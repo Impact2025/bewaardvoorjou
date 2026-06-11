@@ -186,7 +186,7 @@ export default function FAQContent() {
         {
           question: "Hoeveel opslagruimte krijg ik?",
           answer:
-            "Gratis accounts krijgen op dit moment voldoende opslag voor alle 58 hoofdstukken in standaard kwaliteit (meestal 10-20GB). Gemiddeld neemt één hoofdstuk van 15 minuten ongeveer 300-500MB in beslag. Als je veel langere opnames maakt of alles in hoge resolutie wilt, kun je in de toekomst upgraden naar een betaald plan met meer opslag. We waarschuwen je als je tegen je limiet aanloopt.",
+            "Zowel tijdens je gratis proefperiode als met elk betaald pakket krijg je ruim voldoende opslag voor al je hoofdstukken in standaard kwaliteit. Gemiddeld neemt een video-opname van 15 minuten ongeveer 300-500MB in beslag; een audio-opname is veel lichter (15-30MB). We waarschuwen je ruim op tijd als je tegen een limiet aanloopt.",
         },
         {
           question: "Wat gebeurt er als mijn internetverbinding wegvalt tijdens opnemen?",
@@ -217,17 +217,17 @@ export default function FAQContent() {
         {
           question: "Is BewaardVoorJou.nl gratis?",
           answer:
-            "Op dit moment is BewaardVoorJou.nl volledig gratis tijdens de lanceeringsfase. Je kunt alle 58 hoofdstukken opnemen, transcripties krijgen, delen met familie, en je verhalen veilig bewaren zonder te betalen. In de toekomst introduceren we mogelijk premium functies zoals onbeperkte opslag, fysieke boeken, of familie-abonnementen, maar de kernfunctionaliteit blijft altijd gratis toegankelijk.",
+            "Je start gratis: maak een account aan zonder creditcard en leg je eerste 3 hoofdstukken vast, 30 dagen lang. Daarna blijven je verhalen altijd leesbaar en deelbaar. Wil je je hele levensverhaal (alle 58 hoofdstukken) opnemen, dan kies je een pakket: Verhaal (€79), Erfgoed (€149, inclusief de fysieke herinneringsdoos) of Nalatenschap (€229 eenmalig, met levenslange toegang).",
         },
         {
-          question: "Welke betaalopties komen er in de toekomst?",
+          question: "Welke pakketten zijn er?",
           answer:
-            "We werken aan verschillende opties: (1) Gratis Tier: 58 hoofdstukken, standaard opslag, basis delen (altijd beschikbaar), (2) Familie Tier: Meerdere familieleden, meer opslag, samenwerkingsfuncties, (3) Legacy Tier: Gegarandeerde permanente opslag, fysiek boek, tijdcapsules, (4) Eeuwig Tier: Eenmalige betaling voor levenslange opslag voor toekomstige generaties. Prijzen en details worden later aangekondigd. Gebruikers die nu gratis starten krijgen een speciale korting wanneer premium functies beschikbaar komen.",
+            "Naast gratis starten zijn er drie pakketten: (1) Verhaal (€79): alle 58 hoofdstukken, digitaal archief en deellinks, inclusief 5 jaar toegang. (2) Erfgoed (€149): alles van Verhaal plus de fysieke Erfgoed Box en meelezen voor maximaal 5 familieleden. (3) Nalatenschap (€229 eenmalig): levenslange toegang, jaarlijkse USB-backup en boek-credits. De eerste 100 betalende klanten krijgen de Founding Member-status.",
         },
         {
           question: "Kan ik een fysiek boek laten maken van mijn verhaal?",
           answer:
-            "Dit is een van onze meest gevraagde functies en komt eraan! Je zult straks je hele levensverhaal kunnen laten omzetten naar een prachtig gedrukt boek met transcripties, foto's, en QR-codes die linken naar video-fragmenten. Print-on-demand betekent dat we per stuk drukken - jij bepaalt hoeveel exemplaren je wilt voor familie. Verwacht deze functie eind 2025.",
+            "Dit is een van onze meest gevraagde functies en komt eraan! Je zult straks je hele levensverhaal kunnen laten omzetten naar een prachtig gedrukt boek met transcripties, foto's, en QR-codes die linken naar video-fragmenten. Print-on-demand betekent dat we per stuk drukken - jij bepaalt hoeveel exemplaren je wilt voor familie. Het Nalatenschap-pakket bevat alvast 2 boek-credits, in te wisselen zodra de printfunctie live is.",
         },
         {
           question: "Zijn er extra kosten voor delen met familie?",
@@ -237,7 +237,7 @@ export default function FAQContent() {
         {
           question: "Wat gebeurt er met mijn verhalen als ik stop met betalen?",
           answer:
-            "Als we in de toekomst betaalde functies introduceren: je verhalen blijven altijd toegankelijk, ook als je terugvalt naar het gratis plan. Je verliest alleen de premium functies (bijv. extra opslag, geavanceerde tools), maar je bestaande opnames blijven behouden. Je kunt ook altijd eerst alles exporteren voordat je downgradet. We geloven niet in 'gijzelen' van je herinneringen.",
+            "Je verhalen blijven altijd leesbaar en deelbaar — ook na afloop van een pakket. Bij Verhaal en Erfgoed kun je geen nieuwe opnames toevoegen of bewerken tot je verlengt; we sturen 30 dagen van tevoren een herinnering. Bij Nalatenschap betaal je eenmalig en houd je levenslang toegang. Je kunt bovendien altijd alles exporteren — we geloven niet in 'gijzelen' van je herinneringen.",
         },
       ],
     },
