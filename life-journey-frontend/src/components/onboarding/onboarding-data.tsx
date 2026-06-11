@@ -25,7 +25,7 @@ export const onboardingSlides: OnboardingSlide[] = [
     id: "chapters",
     title: "Kies je eigen avontuur",
     description: [
-      "30 hoofdstukken over verschillende levensfases",
+      "58 hoofdstukken over verschillende levensfases",
       "Van je jeugd tot levenslessen en toekomstdromen",
       "Activeer alleen wat relevant voor jou is"
     ],

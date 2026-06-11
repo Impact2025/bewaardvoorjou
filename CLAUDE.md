@@ -101,7 +101,7 @@ D:\Memories/
 
 ### ✅ Werkend
 1. **Gebruikersbeheer** - Registratie, login, profiel (Argon2 encryptie)
-2. **18 Hoofdstukken** - Gestructureerd in 5 fasen + bonus
+2. **58 Hoofdstukken** - Gestructureerd in 7 levensfasen + 20 optionele verdiepingsvragen (78 totaal)
 3. **AI Interviewer** - Claude 3.5 Sonnet, Nederlandse toon
 4. **Audio/Video Opname** - Browser-based, S3 upload
 5. **Transcriptie** - Whisper large-v3, Nederlands geoptimaliseerd

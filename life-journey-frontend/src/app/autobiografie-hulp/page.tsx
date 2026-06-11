@@ -207,7 +207,7 @@ const faqs = [
   {
     question: "Wat is het verschil tussen een autobiografie en memoires?",
     answer:
-      "Een autobiografie beschrijft je hele leven chronologisch. Memoires richten zich op een specifieke periode of thema. Bij BewaardVoorJou.nl bouw je door 30 hoofdstukken een complete autobiografie op — van vroegste herinneringen tot levenslessen.",
+      "Een autobiografie beschrijft je hele leven chronologisch. Memoires richten zich op een specifieke periode of thema. Bij BewaardVoorJou.nl bouw je door 58 hoofdstukken een complete autobiografie op — van vroegste herinneringen tot levenslessen.",
   },
   {
     question: "Hoe lang duurt het om een autobiografie te schrijven?",

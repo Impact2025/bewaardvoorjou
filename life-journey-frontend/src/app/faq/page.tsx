@@ -27,7 +27,7 @@ const faqJsonLd = {
       name: "Wat is BewaardVoorJou.nl precies?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "BewaardVoorJou.nl is een digitaal platform waarmee je jouw levensverhaal op een gestructureerde, empathische manier kunt vastleggen voor toekomstige generaties. Onze AI-interviewer begeleidt je door 30 hoofdstukken die samen jouw unieke leven vertellen.",
+        text: "BewaardVoorJou.nl is een digitaal platform waarmee je jouw levensverhaal op een gestructureerde, empathische manier kunt vastleggen voor toekomstige generaties. Onze AI-interviewer begeleidt je door 58 hoofdstukken die samen jouw unieke leven vertellen.",
       },
     },
     {
@@ -43,7 +43,7 @@ const faqJsonLd = {
       name: "Is BewaardVoorJou.nl gratis?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Op dit moment is BewaardVoorJou.nl volledig gratis tijdens de lanceringsfase. Je kunt alle 30 hoofdstukken opnemen, transcripties krijgen, delen met familie, en je verhalen veilig bewaren zonder te betalen.",
+        text: "Je start gratis: zonder creditcard leg je je eerste 3 hoofdstukken vast, 30 dagen lang. Daarna blijven je verhalen leesbaar en deelbaar. Voor het hele levensverhaal (alle 58 hoofdstukken) kies je een pakket: Verhaal (€79), Erfgoed (€149, met fysieke doos) of Nalatenschap (€229 eenmalig, levenslang).",
       },
     },
     {
@@ -72,10 +72,10 @@ const faqJsonLd = {
     },
     {
       "@type": "Question",
-      name: "Moet ik alle 30 hoofdstukken doen?",
+      name: "Moet ik alle 58 hoofdstukken doen?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Nee, je bepaalt zelf. De 30 hoofdstukken bieden een complete structuur, maar je kunt kiezen welke hoofdstukken voor jou belangrijk zijn. Je kunt ook hoofdstukken in willekeurige volgorde doen — er is geen dwang.",
+        text: "Nee, je bepaalt zelf. De 58 hoofdstukken bieden een complete structuur, maar je kunt kiezen welke hoofdstukken voor jou belangrijk zijn. Je kunt ook hoofdstukken in willekeurige volgorde doen — er is geen dwang.",
       },
     },
     {

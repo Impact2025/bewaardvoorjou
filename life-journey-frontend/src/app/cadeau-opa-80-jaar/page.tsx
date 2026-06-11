@@ -89,7 +89,7 @@ const jsonLd = {
       name: "De Erfgoed Box — cadeau voor opa van 80 jaar",
       image: "https://bewaardvoorjou.nl/erfgoed-box.jpg",
       description:
-        "Een luxe cadeaubox waarmee opa zijn complete levensverhaal vastlegt: 18 hoofdstukken, een persoonlijke gespreksleider, een magneetdoos met goudfolie, een rustgevende thee, een zandloper en een USB-stick in walnotenhout.",
+        "Een luxe cadeaubox waarmee opa zijn complete levensverhaal vastlegt: 58 hoofdstukken, een persoonlijke gespreksleider, een magneetdoos met goudfolie, een rustgevende thee, een zandloper en een USB-stick in walnotenhout.",
       brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
       offers: [
         {
@@ -134,7 +134,7 @@ const jsonLd = {
           name: "Wat zit er in de Erfgoed Box?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Een luxe magneetdoos met goudfolie-logo, een rustgevende thee om bij te vertellen, een zandloper om rustig de tijd te nemen, een USB-stick in walnotenhout, een grafietpotlood en een A6-notitieboekje. Plus digitale toegang tot alle 18 hoofdstukken van zijn leven.",
+            text: "Een luxe magneetdoos met goudfolie-logo, een rustgevende thee om bij te vertellen, een zandloper om rustig de tijd te nemen, een USB-stick in walnotenhout, een grafietpotlood en een A6-notitieboekje. Plus digitale toegang tot alle 58 hoofdstukken van zijn leven.",
           },
         },
         {
@@ -234,7 +234,7 @@ const faqs = [
   {
     question: "Wat zit er precies in de Erfgoed Box?",
     answer:
-      "Een luxe magneetdoos met goudfolie-logo, een rustgevende thee om bij te vertellen, een zandloper om rustig de tijd te nemen, een USB-stick in walnotenhout, een grafietpotlood en een A6-notitieboekje. Plus digitale toegang tot alle 18 hoofdstukken van zijn leven.",
+      "Een luxe magneetdoos met goudfolie-logo, een rustgevende thee om bij te vertellen, een zandloper om rustig de tijd te nemen, een USB-stick in walnotenhout, een grafietpotlood en een A6-notitieboekje. Plus digitale toegang tot alle 58 hoofdstukken van zijn leven.",
   },
   {
     question: "Hoe snel wordt het cadeau geleverd?",
@@ -482,7 +482,7 @@ export default function CadeauOpa80JaarPage() {
                 <p className="text-slate-400 text-xs mb-6">5 jaar inbegrepen · doos inbegrepen</p>
                 <ul className="space-y-2.5 mb-7">
                   {[
-                    "Alle 18 hoofdstukken van zijn leven",
+                    "Alle 58 hoofdstukken van zijn leven",
                     "Persoonlijke gespreksleider in het Nederlands",
                     "Luxe A5 magneetdoos met goudfolie-logo",
                     "Rustgevende thee & zandloper",

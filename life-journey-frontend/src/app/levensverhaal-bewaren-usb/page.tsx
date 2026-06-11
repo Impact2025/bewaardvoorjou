@@ -184,7 +184,7 @@ const steps = [
     step: "1",
     title: "Leg je verhaal vast",
     description:
-      "Een geduldige gespreksleider begeleidt je door 18 hoofdstukken. Vertel via tekst, audio of video — alles wordt veilig in de cloud bewaard.",
+      "Een geduldige gespreksleider begeleidt je door 58 hoofdstukken. Vertel via tekst, audio of video — alles wordt veilig in de cloud bewaard.",
   },
   {
     step: "2",
@@ -489,7 +489,7 @@ export default function LevensverhaalBewarenUsbPage() {
                   {[
                     "Volledige cloudtoegang tot je verhaal",
                     "USB-stick in walnotenhout",
-                    "Alle 18 hoofdstukken van je leven",
+                    "Alle 58 hoofdstukken van je leven",
                     "Persoonlijke gespreksleider",
                     "Export in open formaten, altijd",
                     "5 familieleden kunnen meelezen",

@@ -11,13 +11,28 @@ import {
   Lock
 } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
-export const metadata = {
+const PAGE_URL = "https://bewaardvoorjou.nl/about";
+const PAGE_DESCRIPTION =
+  "Het verhaal achter BewaardVoorJou.nl — ontstaan uit een persoonlijke familiebehoefte en de missie om levensverhalen te bewaren voor volgende generaties.";
+
+export const metadata: Metadata = {
   title: "Over ons | BewaardVoorJou.nl",
-  description:
-    "Het verhaal achter BewaardVoorJou.nl — ontstaan uit een persoonlijke familiebehoefte en de missie om levensverhalen te bewaren voor volgende generaties.",
+  description: PAGE_DESCRIPTION,
+  alternates: {
+    canonical: PAGE_URL,
+  },
+  openGraph: {
+    type: "website",
+    locale: "nl_NL",
+    url: PAGE_URL,
+    siteName: "Bewaard voor jou",
+    title: "Over ons | BewaardVoorJou.nl",
+    description: PAGE_DESCRIPTION,
+  },
 };
 
 export default function OverOnsPage() {

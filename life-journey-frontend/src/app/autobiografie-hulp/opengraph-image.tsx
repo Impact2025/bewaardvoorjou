@@ -124,7 +124,7 @@ export default function OgImage() {
               borderTop: "1px solid rgba(255,255,255,0.15)",
             }}
           >
-            {["Gratis starten", "30 hoofdstukken", "100% AVG-veilig"].map((item) => (
+            {["Gratis starten", "58 hoofdstukken", "100% AVG-veilig"].map((item) => (
               <div
                 key={item}
                 style={{

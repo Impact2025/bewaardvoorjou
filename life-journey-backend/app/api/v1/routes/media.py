@@ -13,6 +13,7 @@ from app.services.media.presigner import build_presigned_upload
 from app.services.media.processor import enqueue_transcode_job, enqueue_transcript_job
 from app.services.media.local_storage import local_storage
 from app.services.media.validators import validate_object_key, validate_file_extension
+from app.services.entitlements import assert_can_record
 from app.services.email.events import trigger_milestone_email
 from app.api.deps import get_current_user
 from app.core.rate_limiter import limiter, RateLimits
@@ -42,6 +43,7 @@ def presign_upload(
   current_user: User = Depends(get_current_user),
 ) -> MediaPresignResponse:
   _ensure_journey(payload.journey_id, db, current_user)
+  assert_can_record(db, current_user, payload.journey_id, payload.chapter_id.value)
   response = build_presigned_upload(payload)
 
   # Use the object_key from the presign response (which includes chapter_id in the path)
