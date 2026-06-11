@@ -285,7 +285,9 @@ function StepSelectPlan({
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const ebDiscount = ["BEGIN", "DIGITAAL"].includes(state.packageType) ? earlyBirdDiscount : 0;
+  // Gebruik de door de parent per pakket berekende early-bird korting (geldt voor
+  // VERHAAL/ERFGOED/BEGIN/DIGITAAL) — consistent met de betaalstap én de backend.
+  const ebDiscount = earlyBirdDiscount;
   const total = Math.max(0, PACKAGE_PRICES[state.packageType] + totalAddons - ebDiscount - promoDiscount);
 
   const handleApplyPromo = async () => {

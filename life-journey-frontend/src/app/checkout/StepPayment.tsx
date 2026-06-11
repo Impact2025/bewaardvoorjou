@@ -240,7 +240,6 @@ function PaymentForm({
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  const promoDiscount = state.promoDiscountCents / 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,7 +284,7 @@ function PaymentForm({
               <p className="text-[#888] text-xs mt-0.5">+ {state.addons.length} extra{state.addons.length > 1 ? "'s" : ""} (€{totalAddons})</p>
             )}
             {state.promoCode && (
-              <p className="text-[#7bbf6a] text-xs mt-0.5">Kortingscode {state.promoCode}: −€{promoDiscount}</p>
+              <p className="text-[#7bbf6a] text-xs mt-0.5">Kortingscode {state.promoCode} toegepast</p>
             )}
           </div>
           <div className="text-right">
