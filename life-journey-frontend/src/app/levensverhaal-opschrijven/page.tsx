@@ -64,7 +64,7 @@ const jsonLd = {
   "@type": "WebPage",
   name: "Levensverhaal opschrijven",
   description:
-    "Jouw levensverhaal opschrijven met AI-begeleiding. BewaardVoorJou.nl begeleidt je door 30 hoofdstukken van je leven.",
+    "Jouw levensverhaal opschrijven met AI-begeleiding. BewaardVoorJou.nl begeleidt je door 58 hoofdstukken van je leven.",
   url: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
   breadcrumb: {
     "@type": "BreadcrumbList",
@@ -86,7 +86,7 @@ const jsonLd = {
         name: "Hoe begin ik met mijn levensverhaal opschrijven?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Bij BewaardVoorJou.nl begin je met een gratis account. Onze AI-interviewer stelt je warme, open vragen waardoor herinneringen vanzelf naar boven komen. Je hoeft niet te weten waar je begint — wij begeleiden je stap voor stap door 30 hoofdstukken.",
+          text: "Bij BewaardVoorJou.nl begin je met een gratis account. Onze AI-interviewer stelt je warme, open vragen waardoor herinneringen vanzelf naar boven komen. Je hoeft niet te weten waar je begint — wij begeleiden je stap voor stap door 58 hoofdstukken.",
         },
       },
       {
@@ -180,7 +180,7 @@ const faqs = [
   {
     question: "Hoe begin ik met mijn levensverhaal opschrijven?",
     answer:
-      "Je begint met een gratis account en kiest een van de 30 hoofdstukken. Onze AI-interviewer stelt open vragen die herinneringen losmaken. Je hoeft zelf niets te bedenken — gewoon vertellen.",
+      "Je begint met een gratis account en kiest een van de 58 hoofdstukken. Onze AI-interviewer stelt open vragen die herinneringen losmaken. Je hoeft zelf niets te bedenken — gewoon vertellen.",
   },
   {
     question: "Moet ik goed kunnen schrijven?",

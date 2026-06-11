@@ -130,7 +130,7 @@ export default function AdminSubscriptionsPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
-              { name: "Basis", price: "Gratis", color: "bg-slate-100 text-slate-700", features: ["1 levensverhaal", "5 GB opslag", "18 hoofdstukken"] },
+              { name: "Basis", price: "Gratis", color: "bg-slate-100 text-slate-700", features: ["1 levensverhaal", "5 GB opslag", "58 hoofdstukken"] },
               { name: "Familie", price: "€9,99/mnd", color: "bg-pink-100 text-pink-700", features: ["5 familieleden", "50 GB opslag", "Gedeelde tijdlijn"] },
               { name: "Legacy", price: "€19,99/mnd", color: "bg-amber-100 text-amber-700", features: ["Onbeperkt leden", "200 GB opslag", "Fysiek boek"] },
               { name: "Eeuwig", price: "€499 eenmalig", color: "bg-purple-100 text-purple-700", features: ["Alles voor altijd", "Onbeperkte opslag", "Prioriteit support"] },

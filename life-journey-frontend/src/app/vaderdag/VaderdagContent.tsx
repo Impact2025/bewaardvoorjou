@@ -228,7 +228,7 @@ export default function VaderdagContent() {
                 <p className="text-slate-400 text-xs mb-6">5 jaar inbegrepen · doos inbegrepen</p>
                 <ul className="space-y-2.5 mb-7">
                   {[
-                    "Alle 18 hoofdstukken van zijn leven",
+                    "Alle 58 hoofdstukken van zijn leven",
                     "Persoonlijke gespreksleider in het Nederlands",
                     "A5 magneetdoos met goudfolie logo",
                     "USB-stick in walnouthout",

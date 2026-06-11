@@ -60,7 +60,7 @@ const faqs = [
 
 const compareRows = [
   { label: "Prijs",               values: ["Gratis (30 dgn)", "€79/jaar", "€149 jaar 1 →\n€99/jaar", "€229 eenmalig"] },
-  { label: "Alle 18 hoofdstukken",values: ["3 hoofdstukken",  true,       true,                       true]            },
+  { label: "Alle 58 hoofdstukken",values: ["3 hoofdstukken",  true,       true,                       true]            },
   { label: "Persoonlijke gespreksleider", values: [true,       true,       true,                       true]            },
   { label: "Digitaal archief",    values: [true,              true,       true,                       true]            },
   { label: "Deellinks",          values: [true,              true,       true,                       true]            },
@@ -213,7 +213,7 @@ export default function PricingContent() {
             isPreorder={false}
             foundingSpots={foundingSpots}
             features={[
-              "Alle 18 hoofdstukken",
+              "Alle 58 hoofdstukken",
               "Onbeperkte gesprekssessies",
               "Digitaal archief — levenslang leesbaar",
               "Deellinks met verlooptijd",

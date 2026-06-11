@@ -20,10 +20,18 @@ function extractErrorMessage(error: unknown, fallback: string): string {
 
 function handleApiError(error: unknown, setUploadStatus: (msg: string | null) => void, fallback: string) {
   const message = extractErrorMessage(error, fallback);
-  setUploadStatus(message);
   if (isApiError(error) && error.status === 401) {
+    setUploadStatus(message);
     setTimeout(() => { window.location.href = "/login"; }, 2500);
+    return;
   }
+  // 402: proefperiode verlopen of hoofdstuk-limiet bereikt → naar de pakketten.
+  if (isApiError(error) && error.status === 402) {
+    setUploadStatus(`${message} Je wordt doorgestuurd naar de pakketten…`);
+    setTimeout(() => { window.location.href = "/pricing"; }, 3500);
+    return;
+  }
+  setUploadStatus(message);
 }
 
 interface UseRecorderActionsProps {
