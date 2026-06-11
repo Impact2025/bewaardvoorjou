@@ -25,6 +25,7 @@ interface ChipOption {
 
 type Phase =
   | "init"
+  | "name_confirm"
   | "name"
   | "birth_year"
   | "purpose"
@@ -32,7 +33,6 @@ type Phase =
   | "privacy"
   | "tempo"
   | "ai_assistance"
-  | "promo_code"
   | "summary"
   | "submitting"
   | "done";
@@ -45,8 +45,6 @@ interface CollectedData {
   privacyLevel: "private" | "trusted" | "legacy";
   challenge: string;
   aiAssistance: "full" | "minimal" | "none";
-  promoCode?: string;
-  promoApplied?: boolean;
 }
 
 // ─── Script data ──────────────────────────────────────────────────────────────
@@ -130,7 +128,7 @@ function GuideMessage({ content, showAvatar }: { content: string; showAvatar: bo
   return (
     <div className="flex items-end gap-2.5 chat-msg-in">
       <div className={cn("w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-warm-amber/20", !showAvatar && "invisible")}>
-        <Image src="/Logo_Bewaardvoorjou.png" alt="Gids" width={32} height={32} />
+        <Image src="/Logo_Bewaardvoorjou.png" alt="Saar" width={32} height={32} />
       </div>
       <div className="max-w-[78%] bg-white border border-neutral-sand rounded-2xl rounded-bl-sm px-4 py-3 text-sm text-foreground shadow-sm leading-relaxed">
         {content}
@@ -226,7 +224,6 @@ const PHASE_ORDER: Phase[] = [
   "privacy",
   "tempo",
   "ai_assistance",
-  "promo_code",
   "summary",
 ];
 
@@ -327,7 +324,7 @@ export function ChatOnboarding() {
 
   // Focus text input when relevant
   useEffect(() => {
-    if (phase === "name" || phase === "birth_year" || phase === "promo_code") {
+    if (phase === "name" || phase === "birth_year") {
       const t = setTimeout(() => inputRef.current?.focus(), 100);
       return () => clearTimeout(t);
     }
@@ -340,9 +337,6 @@ export function ChatOnboarding() {
 
     const prefill = session?.user?.displayName ?? "";
     const hasPrefilledName = Boolean(prefill && prefill !== session?.user?.email);
-    if (hasPrefilledName) {
-      setTextInput(prefill);
-    }
 
     const run = async () => {
       // Try to resume saved progress
@@ -377,19 +371,22 @@ export function ChatOnboarding() {
         }
       }
 
-      const nameQuestion = hasPrefilledName
-        ? `Je hebt je geregistreerd als "${prefill}". Klopt deze naam, of wil je liever een andere gebruiken?`
-        : "Hoe mag ik je noemen?";
+      const intro = [
+        "Hoi! Ik ben Saar, je persoonlijke gids bij Bewaard voor jou.",
+        "Ik help je in een paar vragen op weg. Het duurt maar twee minuten.",
+      ];
 
-      await showGuideMessages(
-        [
-          "Hoi! Welkom bij Bewaard voor jou.",
-          "Ik ga je in een paar vragen helpen je reis te starten. Het duurt maar twee minuten.",
-          nameQuestion,
-        ],
-        650,
-      );
-      setPhase("name");
+      if (hasPrefilledName) {
+        setData((prev) => ({ ...prev, displayName: prefill }));
+        await showGuideMessages(
+          [...intro, `Je staat bij ons bekend als "${prefill}". Mag ik je zo noemen?`],
+          650,
+        );
+        setPhase("name_confirm");
+      } else {
+        await showGuideMessages([...intro, "Hoe mag ik je noemen?"], 650);
+        setPhase("name");
+      }
     };
 
     run();
@@ -397,10 +394,10 @@ export function ChatOnboarding() {
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleName = async () => {
-    const name = textInput.trim();
-    if (!name) return;
-    addMessage("user", name);
+  // Shared: accept a name and move on to the birth-year step.
+  // `bubble` lets the user's reply read naturally (e.g. just "Daan" on confirm).
+  const proceedWithName = async (name: string, bubble?: string) => {
+    addMessage("user", bubble ?? name);
     setTextInput("");
     const next = { displayName: name };
     setData((prev) => ({ ...prev, ...next }));
@@ -411,6 +408,30 @@ export function ChatOnboarding() {
     ]);
     setPhase("birth_year");
     await saveProgress("birth_year", next);
+  };
+
+  const handleName = async () => {
+    const name = textInput.trim();
+    if (!name) return;
+    await proceedWithName(name);
+  };
+
+  // User confirms the pre-filled registration name.
+  const handleConfirmName = async () => {
+    const name = (data.displayName ?? session?.user?.displayName ?? "").trim();
+    if (!name) {
+      setPhase("name");
+      return;
+    }
+    await proceedWithName(name, name);
+  };
+
+  // User wants a different name than the one they registered with.
+  const handleChooseOtherName = async () => {
+    addMessage("user", "Liever een andere naam");
+    setTextInput("");
+    await showGuideMessages(["Geen probleem! Hoe wil je dat ik je noem?"]);
+    setPhase("name");
   };
 
   const handleBirthYear = async (skip = false) => {
@@ -486,7 +507,7 @@ export function ChatOnboarding() {
     addMessage("user", label);
     setData((prev) => ({ ...prev, challenge: value }));
 
-    await showGuideMessages(["Wil je begeleiding van onze AI tijdens het vertellen?"]);
+    await showGuideMessages(["Wil je dat ik je begeleid tijdens het vertellen, met vervolgvragen onderweg?"]);
     setPhase("ai_assistance");
   };
 
@@ -498,61 +519,10 @@ export function ChatOnboarding() {
       return merged;
     });
 
-    // Skip promo code step if user already has an active package (applied during registration)
-    if (session?.user?.packageTier && session.user.packageTier !== "NONE") {
-      await showGuideMessages([
-        "Bijna klaar!",
-        "Dan zetten we alles klaar voor je.",
-        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
-      ]);
-      setPhase("summary");
-      return;
-    }
-
     await showGuideMessages([
       "Bijna klaar!",
-      "Heb je een promotiecode ontvangen? Vul hem hieronder in — anders sla je gewoon over.",
+      "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
     ]);
-    setPhase("promo_code");
-  };
-
-  const handlePromoCode = async (skip = false) => {
-    if (skip || !textInput.trim()) {
-      addMessage("user", "Geen code");
-      setTextInput("");
-      await showGuideMessages([
-        "Dan zetten we alles klaar voor je.",
-        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
-      ]);
-      setPhase("summary");
-      return;
-    }
-
-    const code = textInput.trim().toUpperCase();
-    addMessage("user", code);
-    setTextInput("");
-
-    try {
-      const { redeemPromoCode } = await import("@/lib/api/promo-codes");
-      const result = await redeemPromoCode(code);
-      if (result.success) {
-        setData((prev) => ({ ...prev, promoCode: code, promoApplied: true }));
-        await showGuideMessages([
-          `Gelukt! ${result.message}`,
-          "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
-        ]);
-      } else {
-        await showGuideMessages([
-          "Die code herken ik niet. We gaan verder zonder.",
-          "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
-        ]);
-      }
-    } catch {
-      await showGuideMessages([
-        "Code kon niet worden gecontroleerd. We gaan verder.",
-        "Bekijk je keuzes hieronder en start wanneer je er klaar voor bent.",
-      ]);
-    }
     setPhase("summary");
   };
 
@@ -611,7 +581,8 @@ export function ChatOnboarding() {
 
   // ─── Progress ─────────────────────────────────────────────────────────────────
 
-  const phaseIndex = PHASE_ORDER.indexOf(phase);
+  const effectivePhase = phase === "name_confirm" ? "name" : phase;
+  const phaseIndex = PHASE_ORDER.indexOf(effectivePhase);
   const progress =
     phaseIndex <= 0 ? 0 : Math.round(((phaseIndex) / (PHASE_ORDER.length - 1)) * 100);
 
@@ -650,37 +621,47 @@ export function ChatOnboarding() {
       {/* Input area */}
       {!isTyping && phase !== "init" && phase !== "done" && (
         <div className="flex-shrink-0 pt-4 border-t border-neutral-sand/60">
+          {/* Name confirmation — clear yes/no instead of an ambiguous pre-filled field */}
+          {phase === "name_confirm" && (
+            <div className="flex flex-col sm:flex-row gap-2 chat-msg-in">
+              <button
+                onClick={handleConfirmName}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-warm-amber text-slate-900 rounded-full text-sm font-semibold hover:bg-warm-amber/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+              >
+                Ja, noem me {(data.displayName ?? session?.user?.displayName ?? "").trim()}
+                <span aria-hidden>→</span>
+              </button>
+              <button
+                onClick={handleChooseOtherName}
+                className="inline-flex items-center justify-center px-6 py-3 border border-neutral-sand bg-white text-foreground rounded-full text-sm font-medium hover:border-warm-amber/60 hover:bg-warm-amber/5 transition-colors focus:outline-none focus:ring-2 focus:ring-warm-amber/40"
+              >
+                Nee, andere naam
+              </button>
+            </div>
+          )}
+
           {/* Text input phases */}
-          {(phase === "name" || phase === "birth_year" || phase === "promo_code") && (
+          {(phase === "name" || phase === "birth_year") && (
             <div className="flex gap-2">
               <input
                 ref={inputRef}
                 type={phase === "birth_year" ? "number" : "text"}
                 value={textInput}
-                onChange={(e) => setTextInput(phase === "promo_code" ? e.target.value.toUpperCase() : e.target.value)}
+                onChange={(e) => setTextInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     if (phase === "name") handleName();
-                    else if (phase === "birth_year") handleBirthYear(false);
-                    else handlePromoCode(false);
+                    else handleBirthYear(false);
                   }
                 }}
-                placeholder={
-                  phase === "name" ? "Je naam of alias..." :
-                  phase === "birth_year" ? "Bijv. 1958" :
-                  "Bijv. WELKOM2026"
-                }
+                placeholder={phase === "name" ? "Je naam of alias..." : "Bijv. 1958"}
                 min={phase === "birth_year" ? 1900 : undefined}
                 max={phase === "birth_year" ? new Date().getFullYear() : undefined}
-                maxLength={phase === "promo_code" ? 32 : undefined}
-                className={cn(
-                  "flex-1 rounded-full border border-input-border bg-white px-5 py-3 text-sm text-foreground shadow-sm focus:border-warm-amber focus:outline-none focus:ring-2 focus:ring-warm-amber/30 transition-colors",
-                  phase === "promo_code" && "font-mono tracking-wide"
-                )}
+                className="flex-1 rounded-full border border-input-border bg-white px-5 py-3 text-sm text-foreground shadow-sm focus:border-warm-amber focus:outline-none focus:ring-2 focus:ring-warm-amber/30 transition-colors"
               />
-              {(phase === "birth_year" || phase === "promo_code") && (
+              {phase === "birth_year" && (
                 <button
-                  onClick={() => phase === "birth_year" ? handleBirthYear(true) : handlePromoCode(true)}
+                  onClick={() => handleBirthYear(true)}
                   className="whitespace-nowrap px-4 py-2.5 text-sm text-foreground/60 hover:text-foreground border border-neutral-sand rounded-full hover:border-warm-amber/40 transition-colors"
                 >
                   Sla over
@@ -689,8 +670,7 @@ export function ChatOnboarding() {
               <button
                 onClick={() => {
                   if (phase === "name") handleName();
-                  else if (phase === "birth_year") handleBirthYear(false);
-                  else handlePromoCode(false);
+                  else handleBirthYear(false);
                 }}
                 disabled={phase === "name" && !textInput.trim()}
                 className="w-11 h-11 flex items-center justify-center bg-warm-amber text-slate-900 rounded-full font-bold text-lg disabled:opacity-40 hover:bg-warm-amber/90 transition-colors shadow-sm flex-shrink-0"
@@ -730,7 +710,6 @@ export function ChatOnboarding() {
                   { label: "Privacy", value: PRIVACY_LABELS[data.privacyLevel ?? ""] ?? data.privacyLevel },
                   { label: "Tempo", value: data.challenge },
                   { label: "AI-begeleiding", value: AI_LABELS[data.aiAssistance ?? ""] ?? data.aiAssistance },
-                  data.promoApplied ? { label: "Promotiecode", value: `${data.promoCode} toegepast` } : null,
                 ]
                   .filter(Boolean)
                   .map((row) => (
