@@ -5,7 +5,7 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-neutral-sand bg-white py-12 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-8 mb-8">
           {/* Brand */}
           <div className="sm:col-span-2 md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
@@ -43,6 +43,19 @@ export function PublicFooter() {
               <li><Link href="/kennisbank" className="hover:text-orange transition-colors">Kennisbank</Link></li>
               <li><Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen</Link></li>
               <li><Link href="/about" className="hover:text-orange transition-colors">Over ons</Link></li>
+            </ul>
+          </div>
+
+          {/* Onderwerpen */}
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3">Onderwerpen</h3>
+            <ul className="space-y-2 text-sm text-slate-600">
+              <li><Link href="/levensverhaal-opschrijven" className="hover:text-orange transition-colors">Levensverhaal opschrijven</Link></li>
+              <li><Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Autobiografie schrijven</Link></li>
+              <li><Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Digitaal familiearchief</Link></li>
+              <li><Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal op USB</Link></li>
+              <li><Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa & oma</Link></li>
+              <li><Link href="/vaderdag" className="hover:text-orange transition-colors">Vaderdag cadeau</Link></li>
             </ul>
           </div>
 
