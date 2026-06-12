@@ -71,7 +71,7 @@ function ChaptersContent() {
 
   if (isLoading) {
     return (
-      <AppShell title="Jouw Levensverhaal" description="Volg de 5 fases om je verhaal vast te leggen" activeHref="/chapters">
+      <AppShell title="Jouw Levensverhaal" description="Volg de 7 fases om je verhaal vast te leggen" activeHref="/chapters">
         <Card className="bg-cream border-neutral-sand">
           <CardHeader>
             <CardTitle>Bezig met laden…</CardTitle>
@@ -84,7 +84,7 @@ function ChaptersContent() {
 
   if (error) {
     return (
-      <AppShell title="Jouw Levensverhaal" description="Volg de 5 fases om je verhaal vast te leggen" activeHref="/chapters">
+      <AppShell title="Jouw Levensverhaal" description="Volg de 7 fases om je verhaal vast te leggen" activeHref="/chapters">
         <Card className="bg-cream border-neutral-sand">
           <CardHeader>
             <CardTitle>Kon hoofdstukken niet laden</CardTitle>
@@ -98,7 +98,7 @@ function ChaptersContent() {
   return (
     <AppShell
       title="Jouw Levensverhaal"
-      description="Volg de 5 fases om je verhaal vast te leggen"
+      description="Volg de 7 fases om je verhaal vast te leggen"
       activeHref="/chapters"
     >
       <div className="space-y-4">
@@ -107,7 +107,7 @@ function ChaptersContent() {
           <CardHeader>
             <CardTitle className="text-2xl">Welkom bij jouw levensreis</CardTitle>
             <CardDescription className="text-base">
-              We begeleiden je door 5 fases om je levensverhaal vast te leggen. Klik op een fase om de hoofdstukken te bekijken.
+              We begeleiden je door 7 fases om je levensverhaal vast te leggen. Klik op een fase om de hoofdstukken te bekijken.
             </CardDescription>
           </CardHeader>
         </Card>
