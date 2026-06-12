@@ -25,6 +25,15 @@ interface BlogPost {
   created_at: string;
 }
 
+interface ArticleListItem {
+  id: string;
+  title: string;
+  slug: string;
+  header_color: string | null;
+  published_at: string | null;
+  created_at: string;
+}
+
 async function getArticle(slug: string): Promise<BlogPost | null> {
   try {
     const res = await fetch(`${API_BASE}/blog/public/slug/${slug}`, {
@@ -35,6 +44,22 @@ async function getArticle(slug: string): Promise<BlogPost | null> {
     return res.json();
   } catch {
     return null;
+  }
+}
+
+async function getRelatedArticles(
+  excludeSlug: string
+): Promise<ArticleListItem[]> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/blog/public/list?section=knowledge&limit=12`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const articles: ArticleListItem[] = await res.json();
+    return articles.filter((a) => a.slug !== excludeSlug).slice(0, 3);
+  } catch {
+    return [];
   }
 }
 
@@ -82,7 +107,10 @@ export default async function KennisbankArtikelPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = await getArticle(slug);
+  const [article, related] = await Promise.all([
+    getArticle(slug),
+    getRelatedArticles(slug),
+  ]);
 
   if (!article) notFound();
 
@@ -167,6 +195,34 @@ export default async function KennisbankArtikelPage({
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </article>
+
+        {/* Gerelateerde artikelen */}
+        {related.length > 0 && (
+          <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
+            <h2 className="font-serif font-semibold text-slate-900 text-xl mb-6">
+              Meer uit de kennisbank
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {related.map((rel) => (
+                <Link
+                  key={rel.id}
+                  href={`/kennisbank/${rel.slug}`}
+                  className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all"
+                >
+                  <div
+                    className="h-1"
+                    style={{ backgroundColor: rel.header_color ?? "#E8773C" }}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">
+                      {rel.title}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* CTA */}
         <section className="bg-white border-t border-neutral-sand py-12 px-4 sm:px-6">

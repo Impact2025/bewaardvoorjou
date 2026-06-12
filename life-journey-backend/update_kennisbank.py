@@ -66,9 +66,9 @@ ARTICLES = [
         "meta_title": "Hoe begin ik met mijn levensverhaal? | BewaardVoorJou.nl",
         "meta_description": "Begin vandaag met je levensverhaal. Ontdek waarom één herinnering genoeg is om te starten en hoe de AI-interviewer je stap voor stap begeleidt.",
         "keywords": "levensverhaal vastleggen beginnen, biografie starten, herinneringen bewaren, levensverhaal ouderen, hoe schrijf je een biografie, levensverhaal beginnen tips",
-        "excerpt": "Het vastleggen van je levensverhaal begint niet met het schrijven van een heel boek, maar met het uitspreken van één enkele herinnering. BewaardVoorJou.nl begeleidt je stap voor stap door dertig hoofdstukken, zodat jouw unieke verhaal bewaard blijft voor de mensen die jou lief zijn.",
+        "excerpt": "Het vastleggen van je levensverhaal begint niet met het schrijven van een heel boek, maar met het uitspreken van één enkele herinnering. BewaardVoorJou.nl begeleidt je stap voor stap door 58 hoofdstukken, zodat jouw unieke verhaal bewaard blijft voor de mensen die jou lief zijn.",
         "content": """<blockquote>
-<p><strong>In het kort:</strong> Je hebt geen schrijftalent, geen speciale apparatuur en geen vrije dag nodig om te beginnen. Eén herinnering, hardop uitgesproken, is genoeg. BewaardVoorJou.nl begeleidt je daarna stap voor stap door dertig hoofdstukken — in jouw eigen tempo, op jouw eigen manier.</p>
+<p><strong>In het kort:</strong> Je hebt geen schrijftalent, geen speciale apparatuur en geen vrije dag nodig om te beginnen. Eén herinnering, hardop uitgesproken, is genoeg. BewaardVoorJou.nl begeleidt je daarna stap voor stap door 58 hoofdstukken — in jouw eigen tempo, op jouw eigen manier.</p>
 </blockquote>
 
 <p>Misschien heb je het al vaker gedacht: <em>"Ik moet mijn verhalen ergens bewaren voordat ik ze vergeet."</em> Of misschien zei jouw vader of moeder het vroeger, en vraag je je nu af wat er verloren is gegaan. Die gedachte is niet voor niets. Levensverhalen zijn de enige erfenis die niet te kopen is.</p>
@@ -95,17 +95,21 @@ ARTICLES = [
 <p><strong>Tip:</strong> Leg je telefoon voor je neer en stel jezelf één vraag: <em>"Wat is de eerste herinnering die nu bij me opkomt?"</em> Schrijf het antwoord op of spreek het in. Dat is jouw levensverhaal — het is al begonnen.</p>
 </blockquote>
 
-<h2>De kracht van structuur: hoe dertig hoofdstukken je bevrijden</h2>
+<h2>De kracht van structuur: hoe 58 hoofdstukken je bevrijden</h2>
 
-<p>BewaardVoorJou.nl begeleidt je door <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">dertig zorgvuldig ontworpen hoofdstukken</a>, verdeeld over vijf levensfasen. Die structuur is niet willekeurig. Ze is gebaseerd op bewezen narratieve technieken en inzichten uit de levensverhaaltherapie.</p>
+<p>BewaardVoorJou.nl begeleidt je door <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">58 zorgvuldig ontworpen hoofdstukken</a>, verdeeld over zeven levensfasen. Die structuur is niet willekeurig. Ze is gebaseerd op bewezen narratieve technieken en inzichten uit de levensverhaaltherapie.</p>
 
 <ul>
-<li><strong>Fase 1 — Vroege jeugd (0–12 jaar):</strong> Je eerste herinneringen, je thuis, de mensen die je vroeg hebben gevormd.</li>
-<li><strong>Fase 2 — Jongvolwassenheid (12–25 jaar):</strong> Vriendschappen, eerste liefde, keuzes en dromen.</li>
-<li><strong>Fase 3 — Volwassenheid (25–45 jaar):</strong> Werk, gezin, verantwoordelijkheid en grote beslissingen.</li>
-<li><strong>Fase 4 — Rijpheid (45–65 jaar):</strong> Oogsten, loslaten en herontdekken wie je bent.</li>
-<li><strong>Fase 5 — Wijsheid (65+ jaar):</strong> Terugkijken, dankbaarheid en de lessen die je wilt doorgeven.</li>
+<li><strong>Fase 1 — Wie ben jij?</strong> Je kernwoorden, je intentie en wat jou uniek maakt.</li>
+<li><strong>Fase 2 — Je Wortels:</strong> Je vroegste herinneringen, je ouders en grootouders, het ouderlijk huis en de buurt waarin je opgroeide.</li>
+<li><strong>Fase 3 — Jeugd & School:</strong> Je favoriete plekken, de geluiden van toen en je schooltijd.</li>
+<li><strong>Fase 4 — Jong Volwassen:</strong> Vriendschappen, eerste liefde, keuzes en dromen.</li>
+<li><strong>Fase 5 — Liefde & Gezin:</strong> Je partner, kinderen en het gezinsleven dat je opbouwde.</li>
+<li><strong>Fase 6 — Midden Leven & Verlies:</strong> Werk en carrière, grote beslissingen, rouw en wat je meedroeg.</li>
+<li><strong>Fase 7 — Nu & Nalatenschap:</strong> Terugkijken, je levenswijsheid en de boodschappen die je wilt doorgeven.</li>
 </ul>
+
+<p>Naast deze zeven kernfasen (58 hoofdstukken) zijn er nog 20 optionele verdiepingsvragen over creativiteit, intuïtie en onverwachte wendingen — samen 78 hoofdstukken als je alles wilt vastleggen.</p>
 
 <p>Je hoeft niet bij fase 1 te beginnen. Je kiest zelf het tempo, de volgorde en de diepte. En als je vastloopt, helpt de <a href="/kennisbank/wat-doet-de-ai-interviewer-precies">AI-interviewer</a> je verder met concrete, doorvragende vragen.</p>
 
@@ -161,67 +165,73 @@ ARTICLES = [
 
     {
         "slug": "de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten",
-        "title": "De 30 hoofdstukken van je leven: wat kun je verwachten?",
-        "meta_title": "De 30 levensverhaal-hoofdstukken uitgelegd | BewaardVoorJou.nl",
-        "meta_description": "Ontdek hoe de 30 hoofdstukken jouw levensverhaal structureren. Van vroege jeugd tot wijsheid — elk hoofdstuk heeft zijn eigen focus en vragen.",
-        "keywords": "30 hoofdstukken levensverhaal, levensfasen biografie, structuur levensverhaal, levensverhaal onderwerpen, biografie schrijven structuur",
-        "excerpt": "BewaardVoorJou.nl begeleidt je door dertig zorgvuldig ontworpen hoofdstukken, verdeeld over vijf levensfasen. Van je vroegste herinneringen tot de wijsheid die je wilt doorgeven.",
+        "title": "De 58 hoofdstukken van je leven: wat kun je verwachten?",
+        "meta_title": "De 58 levensverhaal-hoofdstukken uitgelegd | BewaardVoorJou.nl",
+        "meta_description": "Ontdek hoe de 58 hoofdstukken in zeven levensfasen jouw levensverhaal structureren. Van je wortels tot je nalatenschap — elk hoofdstuk heeft zijn eigen focus.",
+        "keywords": "58 hoofdstukken levensverhaal, levensfasen biografie, structuur levensverhaal, levensverhaal onderwerpen, biografie schrijven structuur",
+        "excerpt": "BewaardVoorJou.nl begeleidt je door 58 zorgvuldig ontworpen hoofdstukken, verdeeld over zeven levensfasen. Van je wortels en jeugd tot de nalatenschap die je wilt doorgeven.",
         "content": """<blockquote>
-<p><strong>In het kort:</strong> De dertig hoofdstukken van BewaardVoorJou.nl zijn geen willekeurige lijst vragen. Ze zijn gebouwd op bewezen narratieve technieken, verdeeld over vijf levensfasen. Elk hoofdstuk is behapbaar (30–90 minuten), en je kiest zelf de volgorde en het tempo.</p>
+<p><strong>In het kort:</strong> De 58 hoofdstukken van BewaardVoorJou.nl zijn geen willekeurige lijst vragen. Ze zijn gebouwd op bewezen narratieve technieken, verdeeld over zeven levensfasen. Elk hoofdstuk is behapbaar (30–90 minuten), en je kiest zelf de volgorde en het tempo. Wie verder wil, vindt nog 20 optionele verdiepingsvragen — samen 78 hoofdstukken.</p>
 </blockquote>
 
-<p>Een levensverhaal zonder structuur voelt als een la vol losse foto's — prachtig, maar chaotisch. De dertig hoofdstukken van BewaardVoorJou.nl geven jou een helder pad zonder je vrijheid in te perken. Denk aan een wandeling door je eigen leven, waarbij de kaart er altijd is maar jij bepaalt hoe je loopt.</p>
+<p>Een levensverhaal zonder structuur voelt als een la vol losse foto's — prachtig, maar chaotisch. De 58 hoofdstukken van BewaardVoorJou.nl geven jou een helder pad zonder je vrijheid in te perken. Denk aan een wandeling door je eigen leven, waarbij de kaart er altijd is maar jij bepaalt hoe je loopt.</p>
 
-<h2>Waarom dertig hoofdstukken de juiste balans bieden</h2>
+<h2>Waarom 58 hoofdstukken de juiste balans bieden</h2>
 
-<p>Te breed en mensen blokkeren (<em>"Vertel eens over je hele leven"</em>). Te smal en verhalen missen diepgang. Dertig hoofdstukken zijn het resultaat van uitgebreid onderzoek naar levensverhaaltherapie en autobiografisch schrijven. Per hoofdstuk ben je gemiddeld dertig tot negentig minuten bezig — lang genoeg voor echte diepgang, kort genoeg om niet overweldigd te raken.</p>
+<p>Te breed en mensen blokkeren (<em>"Vertel eens over je hele leven"</em>). Te smal en verhalen missen diepgang. De 58 hoofdstukken zijn het resultaat van uitgebreid onderzoek naar levensverhaaltherapie en autobiografisch schrijven. Per hoofdstuk ben je gemiddeld dertig tot negentig minuten bezig — lang genoeg voor echte diepgang, kort genoeg om niet overweldigd te raken.</p>
 
 <p>Wil je weten hoe je überhaupt begint? Lees dan eerst <a href="/kennisbank/hoe-begin-ik-met-het-vastleggen-van-mijn-levensverhaal">hoe je start met het vastleggen van je levensverhaal</a>.</p>
 
-<h2>Fase 1: Vroege jeugd (0–12 jaar)</h2>
+<h2>Fase 1: Wie ben jij?</h2>
 
-<p>De eerste levensfase bevat de hoofdstukken over jouw vroegste herinneringen, jouw thuis, jouw familie en de mensen die jou als kind hebben gevormd. Vragen gaan over je geboorteplaats, je eerste schooldag, bijzondere tradities en de verhalen die je als kind hoorde.</p>
+<p>De eerste fase is een zachte start. In een handvol hoofdstukken leg je je kernwoorden vast, je intentie (waarom doe je dit?) en wat jou maakt tot wie je bent. Geen feiten of jaartallen, maar de essentie waarmee je verhaal begint.</p>
+
+<blockquote>
+<p><strong>Tip:</strong> Heb je moeite om te beginnen? Bekijk dan voor je sessie wat oude foto's of vraag een broer, zus of neef om een herinnering te delen. Lees ook: <a href="/kennisbank/tips-om-herinneringen-op-te-halen-voor-je-biografie">tips om herinneringen op te halen voor je biografie</a>.</p>
+</blockquote>
+
+<h2>Fase 2: Je Wortels</h2>
+
+<p>De tweede en meest uitgebreide fase gaat over waar je vandaan komt: je vroegste herinneringen, je vader en moeder, je grootouders, broers en zussen, het ouderlijk huis en de buurt of het dorp van je jeugd. Ook geloof, het financiële klimaat thuis en wat je van vroeger meedroeg komen aan bod.</p>
 
 <p>Veel mensen zijn verrast hoe levendig herinneringen worden als de juiste vragen worden gesteld. Een geur, een geluid of een oud liedje dat de AI-interviewer noemt, kan plotseling een schat aan herinneringen openen die decennia verborgen waren.</p>
 
-<blockquote>
-<p><strong>Tip:</strong> Heb je moeite met herinneringen aan je vroege jeugd? Bekijk dan voor je sessie wat oude foto's of vraag een broer, zus of neef om een herinnering te delen. Lees ook: <a href="/kennisbank/tips-om-herinneringen-op-te-halen-voor-je-biografie">tips om herinneringen op te halen voor je biografie</a>.</p>
-</blockquote>
+<h2>Fase 3: Jeugd & School</h2>
 
-<h2>Fase 2: Jongvolwassenheid (12–25 jaar)</h2>
+<p>De derde fase gaat over je kinder- en schooltijd: je favoriete plekken, de geluiden van toen, meesters en juffen, vriendjes en de wereld zoals die toen voelde. Dit zijn de jaren die je vormden zonder dat je het doorhad.</p>
 
-<p>De tweede fase gaat over de jaren waarin je jezelf begon te ontdekken: vriendschappen, eerste liefde, keuzes voor opleiding of beroep, dromen en teleurstellingen. Dit zijn de meest vormende jaren, en tegelijk de jaren waarover het minst gesproken wordt.</p>
+<h2>Fase 4: Jong Volwassen</h2>
 
-<p>De vragen in deze fase zijn bewust open en uitnodigend. Er is geen oordeel. Geen antwoord is fout. Het gaat om jouw beleving, jouw waarheid.</p>
+<p>De vierde fase gaat over de jaren waarin je jezelf begon te ontdekken: vriendschappen, eerste liefde, keuzes voor opleiding of beroep, dromen en teleurstellingen. De vragen zijn bewust open en uitnodigend. Er is geen oordeel — het gaat om jouw beleving, jouw waarheid.</p>
 
-<h2>Fase 3: Volwassenheid (25–45 jaar)</h2>
+<h2>Fase 5: Liefde & Gezin</h2>
 
-<p>De derde fase belicht de grote beslissingen: een partner kiezen, kinderen krijgen of juist niet, een carrière opbouwen, rouwen. Dit zijn de jaren van verantwoordelijkheid en van keuzes met langetermijngevolgen.</p>
+<p>De vijfde fase belicht de mensen om je heen: een partner kiezen, kinderen krijgen of juist niet, het gezinsleven dat je opbouwde. De vragen helpen zichtbaar te maken hoe bijzonder en moedig die alledaagse keuzes eigenlijk waren — ook als ze op dat moment gewoon "dingen waren die gedaan moesten worden."</p>
 
-<p>De vragen in deze fase helpen zichtbaar te maken hoe bijzonder en moedig die alledaagse keuzes eigenlijk waren — ook als ze op dat moment gewoon "dingen waren die gedaan moesten worden."</p>
+<h2>Fase 6: Midden Leven & Verlies</h2>
 
-<h2>Fase 4: Rijpheid (45–65 jaar)</h2>
+<p>De zesde fase gaat over werk en carrière, grote beslissingen, rouw en loslaten. Kinderen die het huis uitgaan, ouders die overlijden, een loopbaan die verandert. Veel gebruikers geven aan dat juist deze fase hen het meest raakt — het is de fase waarin je voor het eerst écht begint terug te kijken én vooruit te kijken tegelijk.</p>
 
-<p>De vierde fase is er een van oogsten en loslaten: kinderen die het huis uitgaan, ouders die overlijden, een carrière die verandert. Maar ook: de vrijheid die groeit en de herbezinning op wat echt belangrijk is.</p>
+<h2>Fase 7: Nu & Nalatenschap</h2>
 
-<p>Veel gebruikers van BewaardVoorJou.nl geven aan dat juist deze fase hen het meest raakt — het is de fase waarin je voor het eerst écht begint terug te kijken én vooruit te kijken tegelijk.</p>
-
-<h2>Fase 5: Wijsheid (65+ jaar)</h2>
-
-<p>De vijfde fase is de fase van doorgeven. Wat heb je geleerd? Wat zou je anders doen? Welke waarden wil je meegeven? Dit zijn de hoofdstukken die na jouw leven het langst blijven leven. Ze vormen de erfenis die niet gekocht of verkocht kan worden.</p>
+<p>De zevende fase is de fase van doorgeven. Wat heb je geleerd? Wat zou je anders doen? Welke waarden wil je meegeven? Dit zijn de hoofdstukken die na jouw leven het langst blijven leven. Ze vormen de erfenis die niet gekocht of verkocht kan worden.</p>
 
 <p>De <a href="https://www.reminiscentiewerk.nl/" target="_blank" rel="noopener noreferrer">Nederlandse Stichting Reminiscentiewerk</a> werkt al decennia met soortgelijke methoden in de ouderenzorg. De ervaringen bevestigen telkens hetzelfde: het vertellen van levensverhalen is heilzaam, zowel voor de verteller als de luisteraar.</p>
 
+<h2>Optioneel: Verdieping & Creativiteit</h2>
+
+<p>Naast de zeven kernfasen zijn er 20 optionele verdiepingsvragen over creativiteit, intuïtie, onverwachte wendingen en de minder voor de hand liggende kanten van je leven. Samen met de 58 kernhoofdstukken kom je zo op 78 hoofdstukken — maar elk optioneel hoofdstuk is precies dat: optioneel.</p>
+
 <h2>Hoe de hoofdstukken op elkaar aansluiten</h2>
 
-<p>Een bijzonder kenmerk van BewaardVoorJou.nl is dat de <a href="/kennisbank/wat-doet-de-ai-interviewer-precies">AI-interviewer verbanden legt tussen hoofdstukken</a>. Als je in fase 2 vertelt over een droom die je had, kan de interviewer in fase 4 vragen of je die droom hebt kunnen waarmaken. Zo wordt jouw levensverhaal geen verzameling losse fragmenten, maar een samenhangend geheel.</p>
+<p>Een bijzonder kenmerk van BewaardVoorJou.nl is dat de <a href="/kennisbank/wat-doet-de-ai-interviewer-precies">AI-interviewer verbanden legt tussen hoofdstukken</a>. Als je in fase 4 vertelt over een droom die je had, kan de interviewer in fase 6 vragen of je die droom hebt kunnen waarmaken. Zo wordt jouw levensverhaal geen verzameling losse fragmenten, maar een samenhangend geheel.</p>
 
 <hr>
 
 <h2>Veelgestelde vragen over de hoofdstukken</h2>
 
-<h3>Moet ik alle dertig hoofdstukken afronden?</h3>
-<p>Nee. Sommige mensen werken alle dertig volledig af. Anderen focussen op de hoofdstukken die hen het meest aanspreken. Alles wat je invult is waardevol, ook als het maar één hoofdstuk is.</p>
+<h3>Moet ik alle 58 hoofdstukken afronden?</h3>
+<p>Nee. Sommige mensen werken alle 58 volledig af. Anderen focussen op de hoofdstukken die hen het meest aanspreken. Alles wat je invult is waardevol, ook als het maar één hoofdstuk is.</p>
 
 <h3>Kan ik een hoofdstuk later aanvullen?</h3>
 <p>Ja, altijd. Een hoofdstuk is nooit "klaar". Je kunt op elk moment terugkeren om een herinnering toe te voegen of een antwoord te bewerken.</p>
@@ -641,7 +651,7 @@ ARTICLES = [
 
 <h2>Stap 2: Kies je eerste hoofdstuk (1 minuut)</h2>
 
-<p>Na het inloggen zie je het overzicht van de <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">dertig hoofdstukken</a>. Je hoeft niet bij fase 1 te beginnen. Kies het hoofdstuk dat je nu het meest aanspreekt.</p>
+<p>Na het inloggen zie je het overzicht van de <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">58 hoofdstukken</a>. Je hoeft niet bij fase 1 te beginnen. Kies het hoofdstuk dat je nu het meest aanspreekt.</p>
 
 <p>Voor de meeste mensen is de vroege jeugd een goed startpunt: het is ver genoeg in het verleden om prettig over te vertellen, maar dichtbij genoeg om heldere herinneringen te hebben. Maar vertrouw je eigen gevoel.</p>
 
@@ -1016,7 +1026,7 @@ ARTICLES = [
 <li><strong>Vul jouw voornaam, e-mailadres en een wachtwoord in.</strong> Kies iets dat je kunt onthouden maar anderen niet gemakkelijk kunnen raden.</li>
 <li><strong>Klik op "Account aanmaken".</strong> Je ontvangt binnen een minuut een bevestigingse-mail.</li>
 <li><strong>Open de bevestigingse-mail</strong> en klik op "Bevestig mijn account". Je wordt automatisch doorgestuurd en bent direct ingelogd.</li>
-<li><strong>Klaar.</strong> Je ziet nu het overzicht van de <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">dertig hoofdstukken</a> en kunt direct beginnen.</li>
+<li><strong>Klaar.</strong> Je ziet nu het overzicht van de <a href="/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten">58 hoofdstukken</a> en kunt direct beginnen.</li>
 </ol>
 
 <blockquote>
@@ -1076,7 +1086,7 @@ ARTICLES = [
 
 <ul>
 <li>Jouw account aanmaken en jouw profiel instellen</li>
-<li>Alle dertig hoofdstukken bekijken en starten</li>
+<li>Alle 58 hoofdstukken bekijken en starten</li>
 <li>Meerdere audio- en video-opnames maken</li>
 <li>Tekst invoeren in alle hoofdstukken</li>
 <li>Jouw verhalen opslaan en terugkijken</li>
