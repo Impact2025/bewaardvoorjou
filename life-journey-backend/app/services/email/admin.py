@@ -117,6 +117,72 @@ def send_owner_sale_notification(order: OrderModel, contact_email: str | None) -
 
 
 # ---------------------------------------------------------------------------
+# 1b. Nieuw supportticket — melding naar de eigenaar
+# ---------------------------------------------------------------------------
+
+def send_owner_ticket_notification(
+    ticket_number: int,
+    category: str,
+    subject: str,
+    message: str,
+    submitter_name: str,
+    submitter_email: str | None,
+) -> None:
+    """Stuur de eigenaar een melding dat er een nieuwe support-vraag binnen is.
+
+    Faalt nooit hard: een mislukte interne melding mag het aanmaken van het
+    ticket nooit blokkeren.
+    """
+    try:
+        import html as _html
+
+        owner = settings.owner_notification_email
+        if not owner:
+            return
+
+        rows = [
+            ("Ticket", f"BVJ-{ticket_number:04d}"),
+            ("Categorie", _html.escape(category or "—")),
+            ("Onderwerp", _html.escape(subject or "—")),
+            ("Van", _html.escape(submitter_name or "—")),
+            ("E-mail", _html.escape(submitter_email or "—")),
+        ]
+        table = "".join(
+            f'<tr><td style="padding:6px 12px 6px 0;color:#777;font-size:14px;white-space:nowrap;">{k}</td>'
+            f'<td style="padding:6px 0;font-size:14px;font-weight:600;">{v}</td></tr>'
+            for k, v in rows
+        )
+        msg_html = _html.escape(message or "").replace("\n", "<br>")
+        reply_btn = (
+            f'<p style="margin-top:20px;"><a href="mailto:{submitter_email}'
+            f'?subject=Re: {_html.escape(subject or "")} (BVJ-{ticket_number:04d})" '
+            f'style="background:#e05c00;color:#fff;text-decoration:none;padding:10px 18px;'
+            f'border-radius:8px;font-size:14px;font-weight:600;">Direct antwoorden</a></p>'
+            if submitter_email else ""
+        )
+        body = (
+            f'<p style="font-size:15px;">Er is een nieuwe vraag binnengekomen via het contactformulier 📨</p>'
+            f'<table style="border-collapse:collapse;margin-top:8px;">{table}</table>'
+            f'<div style="background:#f9f6f0;border-radius:12px;padding:16px;margin:20px 0;'
+            f'font-size:14px;color:#333;white-space:normal;">{msg_html}</div>'
+            f'{reply_btn}'
+        )
+        owner_subject = f"📨 Nieuwe vraag: {subject} — BVJ-{ticket_number:04d}"
+
+        html = _wrap("Nieuw supportticket", body)
+        text = (
+            "Nieuwe vraag via contactformulier\n\n"
+            + "\n".join(f"{k}: {v}" for k, v in rows).replace("&lt;", "<").replace("&gt;", ">")
+            + f"\n\nBericht:\n{message or ''}"
+        )
+
+        send_email(to=owner, subject=owner_subject, html=html, text=text)
+        logger.info(f"Ticketmelding verstuurd naar eigenaar voor BVJ-{ticket_number:04d}")
+    except Exception as exc:
+        logger.error(f"Kon ticketmelding niet sturen voor BVJ-{ticket_number:04d}: {exc}")
+
+
+# ---------------------------------------------------------------------------
 # 2. Dagelijks systeemrapport
 # ---------------------------------------------------------------------------
 

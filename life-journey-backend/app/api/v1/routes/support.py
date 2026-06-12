@@ -159,6 +159,18 @@ def create_ticket(
         subject=ticket.subject,
     )
 
+    # Notificeer de eigenaar (info@bewaardvoorjou.nl) met de volledige vraag
+    from app.services.email.admin import send_owner_ticket_notification
+
+    send_owner_ticket_notification(
+        ticket_number=ticket.ticket_number,
+        category=ticket.category,
+        subject=ticket.subject,
+        message=payload.message,
+        submitter_name=submitter_name,
+        submitter_email=submitter_email,
+    )
+
     return _ticket_to_response(ticket, db)
 
 
