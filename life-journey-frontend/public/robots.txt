@@ -8,6 +8,17 @@ Disallow: /chapters/
 Disallow: /onboarding/
 Disallow: /admin/
 Disallow: /api/
+Disallow: /vertel
+Disallow: /record
+Disallow: /recordings
+Disallow: /memos
+Disallow: /overview
+Disallow: /timeline
+Disallow: /journey
+Disallow: /legacy
+Disallow: /family
+Disallow: /checkout
+Disallow: /instellingen
 
 # Sitemap
 Sitemap: https://bewaardvoorjou.nl/sitemap.xml
