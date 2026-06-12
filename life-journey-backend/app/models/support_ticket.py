@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String, Text
 
 from app.models.base import Base
 
@@ -17,8 +17,18 @@ def generate_uuid() -> str:
 class SupportTicket(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
 
-    # Human-readable number (BVJ-0001) — default set by PostgreSQL sequence via migration
-    ticket_number = Column(Integer, nullable=False, unique=True)
+    # Human-readable number (BVJ-0001). De sequence wordt door de migraties aangemaakt
+    # (supportticket_ticket_number_seq). Door de Sequence ook hier te koppelen haalt
+    # SQLAlchemy zelf nextval() op bij elke INSERT — anders stuurt de ORM expliciet
+    # NULL mee, wat de DB-default overschrijft en een NOT NULL-violation geeft.
+    _ticket_number_seq = Sequence("supportticket_ticket_number_seq")
+    ticket_number = Column(
+        Integer,
+        _ticket_number_seq,
+        server_default=_ticket_number_seq.next_value(),
+        nullable=False,
+        unique=True,
+    )
 
     # Ingelogde gebruiker (optioneel — gasten hebben geen user_id)
     user_id = Column(String, ForeignKey("user.id", ondelete="SET NULL"), nullable=True, index=True)
