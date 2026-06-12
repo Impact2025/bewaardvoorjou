@@ -437,6 +437,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Contextuele interne links — helpt ontdekking & SEO */}
+      <section className="py-16 px-4 sm:px-6 bg-warm-50 border-t border-neutral-sand">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
+            Ontdek meer
+          </h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-3 text-slate-700">
+            <Link href="/levensverhaal-opschrijven" className="hover:text-orange transition-colors">Je levensverhaal opschrijven →</Link>
+            <Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Hulp bij je autobiografie →</Link>
+            <Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Een digitaal familiearchief →</Link>
+            <Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal bewaren op USB →</Link>
+            <Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa & oma →</Link>
+            <Link href="/vaderdag" className="hover:text-orange transition-colors">Een betekenisvol vaderdag-cadeau →</Link>
+            <Link href="/kennisbank" className="hover:text-orange transition-colors">Kennisbank: hoe begin je? →</Link>
+            <Link href="/blog" className="hover:text-orange transition-colors">Verhalen & inspiratie op de blog →</Link>
+            <Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen →</Link>
+          </div>
+        </div>
+      </section>
+
       <PublicFooter />
     </div>
   );
