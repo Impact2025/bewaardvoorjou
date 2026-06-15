@@ -10,7 +10,9 @@ Taken:
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, timezone
+from typing import Callable
 
 from loguru import logger
 from sqlalchemy.orm import Session
@@ -36,19 +38,72 @@ from app.services.email.tasks import celery_app
 
 
 # ---------------------------------------------------------------------------
-# Seizoenskalender — (maand, dag, occasie, chapter_id, vraag)
+# Seizoenskalender
 # ---------------------------------------------------------------------------
+# Moeder- en Vaderdag zijn *zwevende* feestdagen (2e zondag mei / 3e zondag
+# juni) — geen vaste datum. We berekenen ze per jaar i.p.v. ze te hardcoden,
+# zodat de mail altijd op de juiste zondag valt en niet op een willekeurige
+# weekdag. Kerst en oud & nieuw zijn wél vaste datums.
 
-SEASONAL_TRIGGERS: list[tuple[int, int, str, str, str]] = [
-    (5, 11, "moederdag", "family-children",
-     "Wat was het mooiste moment dat je als moeder hebt beleefd?"),
-    (6, 15, "vaderdag", "family-children",
-     "Wat heeft het vaderschap jou geleerd over jezelf?"),
-    (12, 24, "kerst", "roots-siblings",
-     "Hoe zag kerst eruit in je kindertijd — wat mis je het meest?"),
-    (12, 31, "oud_nieuw", "future-dream",
-     "Als je terugkijkt op dit jaar — wat was het mooiste moment?"),
+
+def _nth_weekday_of_month(year: int, month: int, weekday: int, n: int) -> date:
+    """De n-de `weekday` (ma=0 … zo=6) van een maand. n=1 is de eerste."""
+    first = date(year, month, 1)
+    offset = (weekday - first.weekday()) % 7
+    return date(year, month, 1) + timedelta(days=offset + (n - 1) * 7)
+
+
+def mothers_day(year: int) -> date:
+    """Moederdag NL/BE: tweede zondag van mei."""
+    return _nth_weekday_of_month(year, 5, 6, 2)
+
+
+def fathers_day(year: int) -> date:
+    """Vaderdag NL/BE: derde zondag van juni."""
+    return _nth_weekday_of_month(year, 6, 6, 3)
+
+
+@dataclass(frozen=True)
+class SeasonalTrigger:
+    """Eén seizoensgebonden e-mailmoment.
+
+    `resolve_date` levert de datum voor een gegeven jaar — vast of zwevend.
+    `audience` bepaalt naar wie de mail gaat (zie _matches_audience).
+    """
+    occasion: str
+    chapter_id: str
+    question: str
+    resolve_date: Callable[[int], date]
+    audience: str = "all"
+
+
+SEASONAL_TRIGGERS: list[SeasonalTrigger] = [
+    SeasonalTrigger(
+        "moederdag", "family-children",
+        "Wat was het mooiste moment dat je als moeder hebt beleefd?",
+        mothers_day, audience="mothers",
+    ),
+    SeasonalTrigger(
+        "vaderdag", "family-children",
+        "Wat heeft het vaderschap jou geleerd over jezelf?",
+        fathers_day, audience="fathers",
+    ),
+    SeasonalTrigger(
+        "kerst", "roots-siblings",
+        "Hoe zag kerst eruit in je kindertijd — wat mis je het meest?",
+        lambda y: date(y, 12, 24),
+    ),
+    SeasonalTrigger(
+        "oud_nieuw", "future-dream",
+        "Als je terugkijkt op dit jaar — wat was het mooiste moment?",
+        lambda y: date(y, 12, 31),
+    ),
 ]
+
+
+def _seasonal_triggers_for(today: date) -> list[SeasonalTrigger]:
+    """Alle seizoenstriggers die vandaag (in het lopende jaar) vallen."""
+    return [t for t in SEASONAL_TRIGGERS if t.resolve_date(today.year) == today]
 
 
 def _get_user_birthday_occasion(user: UserModel) -> tuple[str, str, str] | None:
@@ -74,6 +129,46 @@ def _get_active_journeys(db: Session) -> list[tuple[UserModel, JourneyModel]]:
     return results
 
 
+def _journey_activity_key(journey: JourneyModel) -> datetime:
+    """Sorteersleutel: laatste activiteit van een journey (tz-aware UTC)."""
+    moment = journey.updated_at or journey.created_at
+    if moment is None:
+        return datetime.min.replace(tzinfo=timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment
+
+
+def _one_journey_per_user(
+    pairs: list[tuple[UserModel, JourneyModel]],
+) -> list[tuple[UserModel, JourneyModel]]:
+    """Dedupliceer naar één (meest recent actieve) journey per gebruiker.
+
+    Een gebruiker met meerdere journeys zou anders per journey een aparte
+    re-engagement-mail krijgen. We kiezen de journey met de laatste activiteit.
+    """
+    best: dict[str, tuple[UserModel, JourneyModel]] = {}
+    for user, journey in pairs:
+        current = best.get(user.id)
+        if current is None or _journey_activity_key(journey) > _journey_activity_key(current[1]):
+            best[user.id] = (user, journey)
+    return list(best.values())
+
+
+def _matches_audience(user: UserModel, audience: str) -> bool:
+    """Bepaal of een gebruiker tot de doelgroep van een seizoenstrigger hoort.
+
+    Op dit moment kent het datamodel nog geen rol-/oudersignaal, dus
+    'mothers'/'fathers' gedragen zich nog als 'all'. Dit is het enige
+    filterpunt: zodra `User.parent_role` bestaat (zie targeting-plan) wordt
+    hier daadwerkelijk gefilterd zonder de rest van de flow te raken.
+    """
+    if audience == "all":
+        return True
+    # TODO(targeting): filter op parent_role zodra het veld beschikbaar is.
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Celery Beat Tasks
 # ---------------------------------------------------------------------------
@@ -83,13 +178,21 @@ def send_weekly_questions_task() -> None:
     """
     Elke maandag 09:00: stuur wekelijkse vraag naar alle actieve storytellers.
     Haal de volgende beschikbare chapter op en genereer een vraag.
+
+    - Eén mail per gebruiker (niet per journey).
+    - Op een dag die ook een seizoensmoment is, slaan we de wekelijkse vraag
+      over: de speciale (Moeder-/Vaderdag/kerst-)mail krijgt voorrang.
     """
     logger.info("Starting weekly questions task")
     db: Session = SessionLocal()
     sent_count = 0
 
+    if _seasonal_triggers_for(date.today()):
+        logger.info("Weekly questions skipped: today is a seasonal email day")
+        return
+
     try:
-        pairs = _get_active_journeys(db)
+        pairs = _one_journey_per_user(_get_active_journeys(db))
         for user, journey in pairs:
             try:
                 next_chapter = get_next_available_chapter(db, journey.id)
@@ -135,7 +238,7 @@ def check_inactive_users_task() -> None:
     now = datetime.now(timezone.utc)
 
     try:
-        pairs = _get_active_journeys(db)
+        pairs = _one_journey_per_user(_get_active_journeys(db))
         for user, journey in pairs:
             try:
                 # Haal datum van laatste recording op
@@ -206,27 +309,25 @@ def send_seasonal_triggers_task() -> None:
     sent_count = 0
 
     try:
-        matching = [
-            (month, day, occasion, chapter_id, question)
-            for month, day, occasion, chapter_id, question in SEASONAL_TRIGGERS
-            if month == today.month and day == today.day
-        ]
+        matching = _seasonal_triggers_for(today)
 
         if not matching:
             logger.debug(f"No seasonal triggers for {today}")
             return
 
-        pairs = _get_active_journeys(db)
-        for month, day, occasion, chapter_id, question in matching:
+        pairs = _one_journey_per_user(_get_active_journeys(db))
+        for trigger in matching:
             for user, journey in pairs:
+                if not _matches_audience(user, trigger.audience):
+                    continue
                 try:
                     result = trigger_seasonal_email(
                         db=db,
                         user_id=user.id,
                         journey_id=journey.id,
-                        occasion=occasion,
-                        question_text=question,
-                        chapter_id=chapter_id,
+                        occasion=trigger.occasion,
+                        question_text=trigger.question,
+                        chapter_id=trigger.chapter_id,
                     )
                     if result:
                         sent_count += 1
