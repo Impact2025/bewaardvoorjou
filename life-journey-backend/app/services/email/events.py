@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from loguru import logger
@@ -13,6 +14,54 @@ from app.models.user import User as UserModel
 from app.models.journey import Journey as JourneyModel
 from app.services.email.preferences import should_send_email
 from app.services.email.processor import enqueue_email_job
+
+
+# Niet-transactionele "re-engagement" mailtypes. Hiervan sturen we er maximaal
+# één per gebruiker per dag, zodat ze niet op elkaar stapelen (bv. wekelijkse
+# vraag + seizoensmail op dezelfde maandag).
+REENGAGEMENT_TYPES = ("weekly_question", "inactivity_reminder", "seasonal")
+
+
+def _to_aware_utc(value: datetime | None) -> datetime | None:
+    """Normaliseer een (mogelijk naïeve) datetime naar tz-aware UTC."""
+    if value is None:
+        return None
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def _recent_events(
+    db: Session,
+    user_id: str,
+    email_types: tuple[str, ...],
+    *,
+    limit: int = 20,
+) -> list[EmailEventModel]:
+    """Recente niet-gefaalde events van deze gebruiker, nieuwste eerst."""
+    return (
+        db.query(EmailEventModel)
+        .filter(
+            EmailEventModel.user_id == user_id,
+            EmailEventModel.email_type.in_(email_types),
+            EmailEventModel.status != "failed",
+        )
+        .order_by(EmailEventModel.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+
+def _already_sent_reengagement_today(db: Session, user_id: str) -> bool:
+    """True als er vandaag al een re-engagement-mail naar deze gebruiker ging.
+
+    De vergelijking gebeurt Python-side op tz-aware UTC, zodat naïeve/aware
+    timestamps in de DB geen verschil maken.
+    """
+    today = datetime.now(timezone.utc).date()
+    for event in _recent_events(db, user_id, REENGAGEMENT_TYPES):
+        created = _to_aware_utc(event.created_at)
+        if created and created.date() == today:
+            return True
+    return False
 
 
 def _create_email_event(
@@ -225,6 +274,21 @@ def trigger_weekly_question_email(
     if not should_send_email(db, user_id, "weekly_question"):
         return None
 
+    # Week-guard: hooguit één wekelijkse vraag per ~week. Vangt dubbele beat-runs,
+    # task-retries en meerdere journeys per gebruiker af. 6 dagen i.p.v. 7 zodat
+    # de normale wekelijkse cadans (elke maandag) altijd doorkomt.
+    recent = _recent_events(db, user_id, ("weekly_question",), limit=1)
+    if recent:
+        last = _to_aware_utc(recent[0].created_at)
+        if last and (datetime.now(timezone.utc) - last) < timedelta(days=6):
+            logger.info(f"Weekly question skipped (within 6d) for user {user_id}")
+            return None
+
+    # Dagcap: max één re-engagement-mail per gebruiker per dag.
+    if _already_sent_reengagement_today(db, user_id):
+        logger.info(f"Weekly question skipped (re-engagement cap) for user {user_id}")
+        return None
+
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:
         return None
@@ -255,6 +319,11 @@ def trigger_inactivity_reminder_email(
 ) -> Optional[str]:
     """Queue een inactiviteitsherinnering. Na 7 of 21 dagen geen opname."""
     if not should_send_email(db, user_id, "inactivity_reminder"):
+        return None
+
+    # Dagcap: max één re-engagement-mail per gebruiker per dag.
+    if _already_sent_reengagement_today(db, user_id):
+        logger.info(f"Inactivity reminder skipped (re-engagement cap) for user {user_id}")
         return None
 
     user = db.query(UserModel).filter(UserModel.id == user_id).first()

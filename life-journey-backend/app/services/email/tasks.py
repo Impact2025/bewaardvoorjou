@@ -37,29 +37,35 @@ celery_app.conf.broker_connection_timeout = 2
 celery_app.conf.broker_connection_retry_on_startup = False
 
 # Celery Beat schedule — re-engagement automation
+#
+# Prioriteitsvolgorde op een dag waarop meerdere triggers samenvallen wordt
+# bepaald door de uitvoertijd + de dagcap in events.py (max 1 re-engagement-
+# mail per gebruiker per dag): seizoen (06:30) > wekelijkse vraag (07:00) >
+# inactiviteit (08:00). De seizoensmail draait dus eerst en de latere triggers
+# vallen die dag stil. De wekelijkse taak slaat seizoensdagen sowieso over.
 celery_app.conf.beat_schedule = {
-    # Elke maandag 09:00 Amsterdam time (= 07:00 UTC winter, 07:00 UTC zomer)
+    # Dagelijks 06:00 UTC (08:00 Amsterdam) — systeemrapport naar de eigenaar
+    "daily-health-report": {
+        "task": "admin.daily_health_report",
+        "schedule": crontab(hour=6, minute=0),
+        "options": {"expires": 3600},
+    },
+    # Dagelijks 06:30 UTC — seizoenstriggers (hoogste prioriteit, draait eerst)
+    "daily-seasonal-triggers": {
+        "task": "email.seasonal_triggers",
+        "schedule": crontab(hour=6, minute=30),
+        "options": {"expires": 3600},
+    },
+    # Elke maandag 07:00 UTC (09:00 Amsterdam) — wekelijkse vraag
     "weekly-questions": {
         "task": "email.weekly_questions",
         "schedule": crontab(hour=7, minute=0, day_of_week=1),
         "options": {"expires": 3600},
     },
-    # Dagelijks 08:00 UTC — inactiviteitscheck
+    # Dagelijks 08:00 UTC — inactiviteitscheck (laagste prioriteit)
     "daily-inactivity-check": {
         "task": "email.check_inactive_users",
         "schedule": crontab(hour=8, minute=0),
-        "options": {"expires": 3600},
-    },
-    # Dagelijks 09:00 UTC — seizoenstriggers
-    "daily-seasonal-triggers": {
-        "task": "email.seasonal_triggers",
-        "schedule": crontab(hour=9, minute=0),
-        "options": {"expires": 3600},
-    },
-    # Dagelijks 06:00 UTC (08:00 Amsterdam) — systeemrapport naar de eigenaar
-    "daily-health-report": {
-        "task": "admin.daily_health_report",
-        "schedule": crontab(hour=6, minute=0),
         "options": {"expires": 3600},
     },
 }
