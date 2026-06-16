@@ -1,0 +1,15 @@
+Het is bezorgd!
+
+Goed nieuws: het cadeau voor {{ recipient_name }} is bezorgd. Dit is hét moment.
+
+DOE DIT NU
+Bel {{ recipient_name }} en doe samen het eerste hoofdstuk — jij aan de telefoon, {{ recipient_name }}
+met de kaart in de hand. Zo begint het verhaal samen.
+{% if first_chapter_hint %}
+Tip voor de eerste vraag: {{ first_chapter_hint }}
+{% endif %}
+
+Vragen? Mail ons gerust op support@bewaardvoorjou.nl.
+
+Met warme groet,
+Het Bewaardvoorjou team

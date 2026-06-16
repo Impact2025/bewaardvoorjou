@@ -37,6 +37,37 @@ def enqueue_transcode_job(asset_id: str) -> Optional[str]:
         return None
 
 
+def enqueue_gift_message_transcript_job(order_id: str) -> Optional[str]:
+    """Transcribeer het cadeaubericht van een order (meeleesversie).
+
+    Best-effort: queue via Celery in productie, anders synchroon. Faalt nooit hard —
+    een mislukte transcriptie mag de order of de ontgrendeling niet blokkeren.
+    """
+    if not _is_celery_available():
+        try:
+            from app.services.media.tasks import generate_gift_message_transcript
+            generate_gift_message_transcript(order_id)
+            return "sync"
+        except Exception as e:
+            logger.error(f"Synchrone cadeaubericht-transcriptie faalde voor order {order_id}: {e}")
+            return None
+
+    try:
+        from app.services.media.tasks import celery_app
+        result = celery_app.send_task("gift.message_transcript", args=[order_id])
+        logger.info(f"Cadeaubericht-transcriptie gequeued voor order {order_id}, task_id={result.id}")
+        return result.id
+    except Exception as e:
+        logger.warning(f"Queue cadeaubericht-transcriptie faalde voor order {order_id}, sync fallback: {e}")
+        try:
+            from app.services.media.tasks import generate_gift_message_transcript
+            generate_gift_message_transcript(order_id)
+            return "sync"
+        except Exception as e2:
+            logger.error(f"Sync fallback transcriptie faalde ook voor order {order_id}: {e2}")
+            return None
+
+
 def enqueue_transcript_job(asset_id: str) -> Optional[str]:
     """
     Enqueue transcript generation job for media asset.

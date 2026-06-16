@@ -386,3 +386,58 @@ def check_progress_milestones_task(journey_id: str, user_id: str) -> None:
         logger.error(f"Progress milestone check failed for journey {journey_id}: {e}")
     finally:
         db.close()
+
+
+@celery_app.task(name="email.scheduled_gift_redemptions")
+def send_scheduled_gift_redemptions_task() -> None:
+    """Dagelijks: verstuur cadeau-uitnodigingen waarvan het bezorgmoment is bereikt.
+
+    Voor cadeaus met een toekomstig bezorgmoment (bijv. 'vóór Vaderdag') wordt de
+    ontvanger-uitnodiging pas op de dag zelf verstuurd. Idempotent via
+    order.redemption_email_sent_at — een order wordt nooit dubbel gemaild.
+    """
+    from app.models.order import Order as OrderModel
+    from app.api.v1.routes.webhooks import _send_storyteller_magic_link
+
+    logger.info("Starting scheduled gift redemptions task")
+    db: Session = SessionLocal()
+    sent = 0
+    try:
+        today = date.today()
+        orders = (
+            db.query(OrderModel)
+            .filter(
+                OrderModel.status.in_(["PAID", "FULFILLED"]),
+                OrderModel.recipient_email.isnot(None),
+                OrderModel.redemption_email_sent_at.is_(None),
+                OrderModel.delivery_date.isnot(None),
+                OrderModel.delivery_date <= today,
+            )
+            .all()
+        )
+        for order in orders:
+            contact_email = order.guest_email or ""
+            if not contact_email and order.user_id:
+                user = db.query(UserModel).filter(UserModel.id == order.user_id).first()
+                if user:
+                    contact_email = user.email
+            try:
+                _send_storyteller_magic_link(
+                    db,
+                    order.recipient_email,
+                    order.recipient_name or "je dierbare",
+                    contact_email,
+                    package_type=order.package_type,
+                    personal_message=order.personal_message,
+                )
+                order.redemption_email_sent_at = datetime.now(timezone.utc)
+                db.commit()
+                sent += 1
+            except Exception as e:
+                logger.error(f"Geplande redemption-mail mislukt voor order {order.id}: {e}")
+                db.rollback()
+        logger.info(f"Geplande cadeau-redemptions verzonden: {sent}")
+    except Exception as e:
+        logger.error(f"Scheduled gift redemptions task failed: {e}")
+    finally:
+        db.close()

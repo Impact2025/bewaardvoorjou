@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Mail, Package, Truck, Clock } from "lucide-react";
-import { PACKAGE_NAMES } from "@/lib/api/orders";
+import { CheckCircle, Mail, Package, Truck, Printer, Phone } from "lucide-react";
+import { PACKAGE_NAMES, getOrderStatus, type OrderStatusResponse } from "@/lib/api/orders";
 import { type CheckoutState } from "./CheckoutContent";
 
 interface Props {
@@ -11,32 +12,30 @@ interface Props {
 
 export default function StepConfirmation({ state }: Props) {
   const router = useRouter();
-  const hasRecipientEmail = !!state.recipientEmail;
-  const hasAddress = !state.skipShipping && !!state.shippingAddress.city;
+  const [order, setOrder] = useState<OrderStatusResponse | null>(null);
 
-  const nextSteps = [
-    {
-      icon: Mail,
-      title: hasRecipientEmail
-        ? `Welkomstlink onderweg naar ${state.recipientEmail}`
-        : "Bevestigingsmail onderweg",
-      desc: hasRecipientEmail
-        ? "De ontvanger ontvangt een persoonlijke link om direct in te loggen. Check ook de spam-map."
-        : "Check je inbox (en spam) voor de bestelbevestiging en je digitale toegang.",
-    },
-    hasAddress
-      ? {
-          icon: Truck,
-          title: "Doos onderweg binnen 2 weken",
-          desc: `We sturen de fysieke doos naar ${state.shippingAddress.city}. Je ontvangt een track & trace zodra het pakket op weg is.`,
-        }
-      : null,
-    {
-      icon: Package,
-      title: "Doos wordt zorgvuldig ingepakt",
-      desc: "Elke box is uniek — ons team pakt hem persoonlijk voor je in.",
-    },
-  ];
+  // Haal de gezaghebbende orderdata op (o.a. de redemption-token voor de startkaart).
+  useEffect(() => {
+    if (!state.orderId) return;
+    let active = true;
+    getOrderStatus(state.orderId)
+      .then((res) => active && setOrder(res))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [state.orderId]);
+
+  const recipientName = order?.recipient_name || state.recipientName || "";
+  const recipientEmail = order?.recipient_email || state.recipientEmail || "";
+  const hasRecipientEmail = !!recipientEmail;
+  const hasShipping = order ? order.has_shipping : !state.skipShipping && !!state.shippingAddress.city;
+  const shippingCity = order?.shipping_city || state.shippingAddress.city;
+  const redemptionToken = order?.redemption_token || "";
+  const isGift = !state.forSelf && (!!recipientName || !!redemptionToken);
+  const who = recipientName || "de ontvanger";
+
+  const startkaartUrl = redemptionToken ? `/cadeau/${redemptionToken}` : "";
 
   return (
     <div className="space-y-8 text-center">
@@ -47,94 +46,97 @@ export default function StepConfirmation({ state }: Props) {
         </div>
         <div>
           <h2 className="font-serif text-3xl font-bold text-[#1a1a1a] mb-2">
-            Bedankt voor je bestelling!
+            {isGift ? `Je cadeau is onderweg naar ${who}` : "Bedankt voor je bestelling!"}
           </h2>
           <p className="text-[#888]">
-            {hasRecipientEmail
-              ? `De welkomstlink is onderweg naar ${state.recipientEmail}.`
+            {isGift
+              ? "We laten je weten zodra het bezorgd is."
               : "Je digitale toegang is direct actief."}
           </p>
         </div>
       </div>
 
+      {/* Startkaart — koper kan deze printen/overhandigen (elk pakket) */}
+      {isGift && startkaartUrl && (
+        <div className="bg-[#1a1a1a] rounded-2xl p-6 text-left">
+          <div className="flex items-center gap-2 mb-2">
+            <Printer className="h-5 w-5 text-[#d4af37]" />
+            <h3 className="font-serif font-bold text-lg text-[#d4af37]">De startkaart van {who}</h3>
+          </div>
+          <p className="text-sm text-[#bbb] mb-4">
+            Hiermee opent {who} het cadeau — print de kaart of laat de QR-code op je telefoon zien.
+            Jouw persoonlijke bericht is het eerste wat ze zien.
+          </p>
+          <button
+            onClick={() => window.open(startkaartUrl, "_blank")}
+            className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-5 py-3 rounded-xl transition-colors"
+          >
+            Bekijk &amp; print de startkaart →
+          </button>
+        </div>
+      )}
+
       {/* Bestelling samenvatting */}
-      <div className="bg-[#1a1a1a] rounded-2xl p-6 text-white text-left">
-        <h3 className="font-serif font-bold text-lg mb-4 text-[#d4af37]">Jouw bestelling</h3>
+      <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left">
+        <h3 className="font-medium text-[#1a1a1a] mb-4">Jouw bestelling</h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-[#aaa]">Pakket</span>
-            <span>{PACKAGE_NAMES[state.packageType]}</span>
-          </div>
-          {state.recipientName && (
-            <div className="flex justify-between">
-              <span className="text-[#aaa]">Voor</span>
-              <span>{state.recipientName}</span>
-            </div>
-          )}
+          <Row label="Pakket" value={PACKAGE_NAMES[state.packageType]} />
+          {recipientName && <Row label="Voor" value={recipientName} />}
           {state.orderId && (
-            <div className="flex justify-between">
-              <span className="text-[#aaa]">Bestelnummer</span>
-              <span className="font-mono text-xs">{state.orderId.slice(0, 8).toUpperCase()}</span>
-            </div>
+            <Row label="Bestelnummer" value={state.orderId.slice(0, 8).toUpperCase()} mono />
           )}
-          <div className="flex justify-between">
-            <span className="text-[#aaa]">Doos bezorging</span>
-            <span>{hasAddress ? `${state.shippingAddress.city} · binnen 2 weken` : "Adres opgeven via email"}</span>
-          </div>
         </div>
       </div>
 
-      {/* Wat nu? */}
+      {/* Wat gebeurt er nu? */}
       <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left">
         <h3 className="font-medium text-[#1a1a1a] mb-4">Wat gebeurt er nu?</h3>
         <div className="space-y-4">
-          {nextSteps.filter(Boolean).map((item, i) => {
-            const Icon = item!.icon;
-            return (
-              <div key={i} className="flex gap-3">
-                <div className="w-8 h-8 bg-[#d4af37]/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-4 w-4 text-[#d4af37]" />
-                </div>
-                <div>
-                  <p className="font-medium text-[#1a1a1a] text-sm">{item!.title}</p>
-                  <p className="text-[#888] text-xs">{item!.desc}</p>
-                </div>
-              </div>
-            );
-          })}
+          {hasRecipientEmail && (
+            <NextStep
+              icon={Mail}
+              title={`Uitnodiging onderweg naar ${recipientEmail}`}
+              desc={`${who} ontvangt een persoonlijke link${state.deliveryDate ? ` op ${state.deliveryDate}` : ""}. Jouw bericht is het eerste wat ze zien.`}
+            />
+          )}
+          {hasShipping && (
+            <NextStep
+              icon={Truck}
+              title="Doos wordt verzonden"
+              desc={`We sturen de fysieke doos naar ${shippingCity}. Je ontvangt een track & trace zodra het pakket onderweg is.`}
+            />
+          )}
+          {isGift && (
+            <NextStep
+              icon={Phone}
+              title="Ons mooiste advies"
+              desc={`Bel ${who} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, ${who} met de kaart in de hand. Zo begint het verhaal samen.`}
+            />
+          )}
+          {!isGift && (
+            <NextStep
+              icon={Package}
+              title="Begin direct"
+              desc="Je digitale toegang is actief. Maak een account aan en leg je eerste herinnering vast."
+            />
+          )}
         </div>
       </div>
 
-      {/* Cadeau bevestiging — ontvanger heeft welkomstlink gekregen */}
-      {hasRecipientEmail ? (
-        <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
-          <h3 className="font-medium text-[#2d5016] mb-2">✓ Cadeau verstuurd</h3>
-          <p className="text-sm text-[#555]">
-            {state.recipientName ? `${state.recipientName} heeft` : "De ontvanger heeft"} een
-            persoonlijke welkomstlink ontvangen op{" "}
-            <span className="font-medium">{state.recipientEmail}</span>.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-[#f0f7eb] rounded-2xl border border-[#2d5016]/20 p-6 text-left">
-          <h3 className="font-medium text-[#2d5016] mb-2">✓ Digitale toegang geactiveerd</h3>
-          <p className="text-sm text-[#555]">
-            Begin direct met het vastleggen van herinneringen. De doos volgt binnen 2 weken op het opgegeven adres.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => router.push("/register")}
-              className="bg-[#2d5016] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#3a6620] transition-colors"
-            >
-              Account aanmaken
-            </button>
-            <button
-              onClick={() => router.push("/login")}
-              className="border border-[#2d5016] text-[#2d5016] text-sm px-4 py-2 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
-            >
-              Inloggen
-            </button>
-          </div>
+      {!isGift && (
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => router.push("/register")}
+            className="bg-[#2d5016] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#3a6620] transition-colors"
+          >
+            Account aanmaken
+          </button>
+          <button
+            onClick={() => router.push("/login")}
+            className="border border-[#2d5016] text-[#2d5016] text-sm px-4 py-2 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
+          >
+            Inloggen
+          </button>
         </div>
       )}
 
@@ -144,6 +146,37 @@ export default function StepConfirmation({ state }: Props) {
       >
         Terug naar de homepage
       </button>
+    </div>
+  );
+}
+
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-[#888]">{label}</span>
+      <span className={mono ? "font-mono text-xs text-[#1a1a1a]" : "text-[#1a1a1a]"}>{value}</span>
+    </div>
+  );
+}
+
+function NextStep({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="w-8 h-8 bg-[#d4af37]/20 rounded-full flex items-center justify-center flex-shrink-0">
+        <Icon className="h-4 w-4 text-[#d4af37]" />
+      </div>
+      <div>
+        <p className="font-medium text-[#1a1a1a] text-sm">{title}</p>
+        <p className="text-[#888] text-xs">{desc}</p>
+      </div>
     </div>
   );
 }

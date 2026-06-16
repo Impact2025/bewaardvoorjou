@@ -29,12 +29,26 @@ export type AddonCode =
 
 export type PackageType = "VERHAAL" | "ERFGOED" | "NALATENSCHAP" | "BEGIN" | "VOOR_ALTIJD" | "DIGITAAL";
 
+export type RecipientRelation =
+  | "vader" | "moeder" | "opa" | "oma" | "schoonouder" | "partner" | "anders";
+
+export type GiftReveal = "SURPRISE" | "ANNOUNCED";
+
+export type MessageMediaType = "text" | "audio" | "video";
+
 export interface CreatePaymentIntentPayload {
   package_type: PackageType;
   addons: AddonCode[];
+  for_self?: boolean;
   recipient_name: string;
   recipient_email?: string;
+  recipient_relation?: RecipientRelation;
   personal_message: string;
+  card_message?: string;
+  message_media_url?: string;
+  message_media_type?: MessageMediaType;
+  gift_reveal?: GiftReveal;
+  delivery_date?: string; // YYYY-MM-DD
   shipping_address?: ShippingAddress;
   guest_email?: string;
   promo_code?: string;
@@ -79,6 +93,9 @@ export interface OrderStatusResponse {
   recipient_email: string | null;
   has_shipping: boolean;
   shipping_city: string | null;
+  redemption_token: string | null;
+  gift_reveal: string | null;
+  delivery_date: string | null;
 }
 
 /**
@@ -95,6 +112,90 @@ export async function getOrderStatus(orderId: string): Promise<OrderStatusRespon
     throw new Error(err.detail ?? "Kon de betaalstatus niet ophalen");
   }
   return res.json();
+}
+
+// ─── Cadeaubericht (audio/video) upload ──────────────────────────────────────
+
+interface GiftMessagePresignResponse {
+  upload_url: string;
+  object_key: string;
+  upload_method: string;
+}
+
+/**
+ * Upload een opgenomen of geüpload audio/video cadeaubericht.
+ * Retourneert de object_key die als `message_media_url` meegaat naar create-payment-intent.
+ */
+export async function uploadGiftMessage(
+  blob: Blob,
+  filename: string,
+  modality: "audio" | "video"
+): Promise<string> {
+  const presignRes = await fetch(`${API_BASE}/orders/gift-message/presign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename, modality, size_bytes: blob.size }),
+  });
+  if (!presignRes.ok) {
+    const err = await presignRes.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Kon het bericht niet voorbereiden");
+  }
+  const presign: GiftMessagePresignResponse = await presignRes.json();
+
+  const uploadRes = await fetch(presign.upload_url, {
+    method: presign.upload_method || "PUT",
+    headers: { "Content-Type": blob.type || "application/octet-stream" },
+    body: blob,
+  });
+  if (!uploadRes.ok) {
+    throw new Error("Het uploaden van het bericht is mislukt");
+  }
+  return presign.object_key;
+}
+
+// ─── Cadeau-ontgrendeling (redemption) ───────────────────────────────────────
+
+export interface GiftRedemption {
+  recipient_name: string | null;
+  recipient_relation: string | null;
+  package_type: PackageType;
+  gifter_name: string | null;
+  personal_message: string | null;
+  message_media_type: MessageMediaType | null;
+  message_media_url: string | null;
+  message_transcript: string | null;
+  message_status: string | null;
+  card_message: string | null;
+  already_redeemed: boolean;
+}
+
+/** Haalt de ontgrendel-data op voor een cadeau-token (publiek, via QR/startkaart). */
+export async function getGiftRedemption(token: string): Promise<GiftRedemption> {
+  const res = await fetch(`${API_BASE}/orders/redeem/${encodeURIComponent(token)}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Cadeau niet gevonden");
+  }
+  return res.json();
+}
+
+/**
+ * Start het cadeau vanaf de QR/startkaart: de ontvanger geeft zijn e-mail op en
+ * krijgt een magic link die het pakket activeert (geen wachtwoord nodig).
+ */
+export async function startGiftRedemption(token: string, email: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/orders/redeem/${encodeURIComponent(token)}/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Kon het cadeau niet starten");
+  }
 }
 
 export const PACKAGE_PRICES: Record<PackageType, number> = {

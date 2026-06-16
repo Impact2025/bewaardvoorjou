@@ -85,6 +85,81 @@ def transcode_asset(asset_id: str) -> None:
         db.close()
 
 
+def _read_media_bytes(object_key: str) -> bytes | None:
+    """Lees mediabytes uit S3/R2 (indien geconfigureerd), anders uit lokale opslag."""
+    if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
+        try:
+            import boto3
+            endpoint_url = settings.s3_endpoint_url
+            if not endpoint_url and settings.s3_region:
+                endpoint_url = f"https://s3.{settings.s3_region}.amazonaws.com"
+            s3 = boto3.client(
+                "s3",
+                region_name=settings.s3_region,
+                endpoint_url=endpoint_url,
+                aws_access_key_id=settings.aws_access_key_id,
+                aws_secret_access_key=settings.aws_secret_access_key,
+            )
+            obj = s3.get_object(Bucket=settings.s3_bucket, Key=object_key)
+            return obj["Body"].read()
+        except Exception as e:
+            logger.warning(f"S3-read mislukt voor {object_key}, val terug op lokaal: {e}")
+    try:
+        path = local_storage.get_file_path(object_key)
+        if path and path.exists():
+            return path.read_bytes()
+    except Exception as e:
+        logger.error(f"Lokale read mislukt voor {object_key}: {e}")
+    return None
+
+
+@celery_app.task(name="gift.message_transcript")
+def generate_gift_message_transcript(order_id: str) -> None:
+    """Transcribeer het audio/video cadeaubericht van een order.
+
+    Levert de meeleesversie (ondertiteling) voor de ontvanger — fijn voor een oudere
+    lezer of bij zacht geluid. Best-effort: een fout zet message_status op 'failed'
+    maar blokkeert nooit de order of de ontgrendeling.
+    """
+    import io
+    from app.models.order import Order as OrderModel
+
+    logger.info(f"Start transcriptie cadeaubericht voor order {order_id}")
+    db: Session = SessionLocal()
+    try:
+        order = db.query(OrderModel).filter(OrderModel.id == order_id).first()
+        if not order or not order.message_media_url:
+            return
+        if order.message_media_type not in ("audio", "video"):
+            return
+
+        data = _read_media_bytes(order.message_media_url)
+        if data is None:
+            order.message_status = "failed"
+            db.commit()
+            logger.error(f"Cadeaubericht-bestand niet gevonden voor order {order_id}: {order.message_media_url}")
+            return
+
+        filename = order.message_media_url.split("/")[-1]
+        transcript = transcribe_audio(io.BytesIO(data), filename)
+        order.message_transcript = (transcript or "").strip() or None
+        order.message_status = "ready"
+        db.commit()
+        logger.info(f"Cadeaubericht getranscribeerd voor order {order_id} ({len(transcript or '')} tekens)")
+    except Exception as e:
+        logger.error(f"Transcriptie cadeaubericht mislukt voor order {order_id}: {e}")
+        db.rollback()
+        try:
+            order = db.query(OrderModel).filter(OrderModel.id == order_id).first()
+            if order:
+                order.message_status = "failed"
+                db.commit()
+        except Exception:
+            db.rollback()
+    finally:
+        db.close()
+
+
 @celery_app.task(name="media.transcript")
 def generate_transcript(asset_id: str) -> None:
     """

@@ -16,7 +16,10 @@ import {
 } from "@/lib/api/orders";
 import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
 import { validatePromoCode } from "@/lib/api/promo-codes";
-import StepPersonalize from "./StepPersonalize";
+import type { RecipientRelation, GiftReveal, MessageMediaType } from "@/lib/api/orders";
+import StepRecipient from "./StepRecipient";
+import StepMessage from "./StepMessage";
+import StepGifting from "./StepGifting";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
 
@@ -24,7 +27,11 @@ const SOLD_OUT_PACKAGES = new Set<string>([]);
 const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL"]);
 const SOLD_OUT_ADDONS = new Set<string>([]);
 
-const STEPS = ["Pakket", "Personaliseer", "Betalen", "Bevestiging"] as const;
+// Stappen verschillen voor een cadeau (de boodschap is het hart) en een eigen aankoop.
+// We renderen op basis van het label, niet op een vaste index, zodat de 'voor mezelf'-
+// toggle de juiste stappen toont zonder de indicator te breken.
+const GIFT_STEPS = ["Pakket", "Voor wie", "Boodschap", "Geven", "Betalen", "Bevestiging"] as const;
+const SELF_STEPS = ["Pakket", "Jouw gegevens", "Betalen", "Bevestiging"] as const;
 
 export interface CheckoutState {
   packageType: PackageType;
@@ -32,7 +39,13 @@ export interface CheckoutState {
   forSelf: boolean;
   recipientName: string;
   recipientEmail: string;
+  recipientRelation: RecipientRelation | "";
   personalMessage: string;
+  cardMessage: string;
+  messageMediaType: MessageMediaType;
+  messageMediaUrl: string;
+  giftReveal: GiftReveal;
+  deliveryDate: string;
   shippingAddress: ShippingAddress;
   skipShipping: boolean;
   guestEmail: string;
@@ -84,7 +97,13 @@ export default function CheckoutContent() {
     forSelf: false,
     recipientName: "",
     recipientEmail: "",
+    recipientRelation: "",
     personalMessage: "",
+    cardMessage: "",
+    messageMediaType: "text",
+    messageMediaUrl: "",
+    giftReveal: "SURPRISE",
+    deliveryDate: "",
     shippingAddress: DEFAULT_ADDRESS,
     skipShipping: DIGITAL_ONLY_PACKAGES.has(packageType),
     guestEmail: "",
@@ -93,6 +112,10 @@ export default function CheckoutContent() {
     promoCode: "",
     promoDiscountCents: 0,
   });
+
+  // Actieve stappen op basis van cadeau vs. eigen aankoop.
+  const steps = state.forSelf ? SELF_STEPS : GIFT_STEPS;
+  const currentLabel = steps[Math.min(step, steps.length - 1)];
 
   // Terugkeer van Stripe-redirect (iDEAL): verifieer de WERKELIJKE betaalstatus
   // bij de backend. We vertrouwen bewust niet op de `redirect_status` uit de URL —
@@ -122,7 +145,9 @@ export default function CheckoutContent() {
               : s.shippingAddress,
           }));
           setReturnStatus(null);
-          setStep(3);
+          // Toon de bevestiging (laatste stap). Een Stripe-redirect keert altijd in
+          // de cadeau-flow terug (forSelf=false), dus GIFT_STEPS is leidend.
+          setStep(GIFT_STEPS.length - 1);
         } else {
           // pending of failed → geen valse succespagina
           setReturnStatus("failed");
@@ -185,8 +210,8 @@ export default function CheckoutContent() {
       <div className="bg-white border-b border-[#e5e0d8] px-4 py-3">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
-            {STEPS.map((label, i) => (
-              <div key={i} className="flex items-center">
+            {steps.map((label, i) => (
+              <div key={label} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -204,8 +229,8 @@ export default function CheckoutContent() {
                     {label}
                   </span>
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={cn("h-px w-8 sm:w-16 mx-1 sm:mx-2 transition-colors", i < step ? "bg-[#2d5016]" : "bg-[#e5e0d8]")} />
+                {i < steps.length - 1 && (
+                  <div className={cn("h-px w-6 sm:w-12 mx-1 sm:mx-2 transition-colors", i < step ? "bg-[#2d5016]" : "bg-[#e5e0d8]")} />
                 )}
               </div>
             ))}
@@ -226,34 +251,48 @@ export default function CheckoutContent() {
             onHome={() => router.push("/")}
           />
         )}
-        {returnStatus === null && step === 0 && (
+        {returnStatus === null && currentLabel === "Pakket" && (
           <StepSelectPlan
             state={state}
             earlyBirdDiscount={earlyBirdDiscount}
             promoDiscount={effectivePromoDiscount}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
-            onNext={() => setStep(1)}
+            onNext={() => setStep(step + 1)}
           />
         )}
-        {step === 1 && (
-          <StepPersonalize
+        {returnStatus === null && (currentLabel === "Voor wie" || currentLabel === "Jouw gegevens") && (
+          <StepRecipient
             state={state}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
-            onNext={() => setStep(2)}
+            onNext={() => setStep(step + 1)}
           />
         )}
-        {step === 2 && (
+        {returnStatus === null && currentLabel === "Boodschap" && (
+          <StepMessage
+            state={state}
+            onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
+            onNext={() => setStep(step + 1)}
+          />
+        )}
+        {returnStatus === null && currentLabel === "Geven" && (
+          <StepGifting
+            state={state}
+            onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
+            onNext={() => setStep(step + 1)}
+          />
+        )}
+        {returnStatus === null && currentLabel === "Betalen" && (
           <StepPayment
             state={state}
             totalPrice={totalPrice}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onSuccess={(orderId) => {
               setState((s) => ({ ...s, orderId }));
-              setStep(3);
+              setStep(steps.length - 1);
             }}
           />
         )}
-        {step === 3 && (
+        {currentLabel === "Bevestiging" && (
           <StepConfirmation state={state} />
         )}
       </div>

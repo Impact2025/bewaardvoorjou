@@ -50,6 +50,12 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(hour=6, minute=0),
         "options": {"expires": 3600},
     },
+    # Dagelijks 06:15 UTC — geplande cadeau-uitnodigingen op bezorgmoment
+    "scheduled-gift-redemptions": {
+        "task": "email.scheduled_gift_redemptions",
+        "schedule": crontab(hour=6, minute=15),
+        "options": {"expires": 3600},
+    },
     # Dagelijks 06:30 UTC — seizoenstriggers (hoogste prioriteit, draait eerst)
     "daily-seasonal-triggers": {
         "task": "email.seasonal_triggers",
