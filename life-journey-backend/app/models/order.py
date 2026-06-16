@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Integer, JSON, String, Text
+from sqlalchemy import Column, Date, DateTime, Integer, JSON, String, Text
 
 from app.models.base import Base
 from app.models.user import generate_uuid
@@ -35,10 +35,28 @@ class Order(Base):
 
     # Personalisatie
     recipient_name = Column(String(255), nullable=True)
-    recipient_email = Column(String(255), nullable=True)  # e-mail begiftigde (DIGITAAL)
-    personal_message = Column(Text, nullable=True)
+    recipient_email = Column(String(255), nullable=True)  # e-mail begiftigde (optioneel)
+    recipient_relation = Column(String(32), nullable=True)  # vader|moeder|opa|oma|schoonouder|partner|anders — stuurt de toon van de copy
+    personal_message = Column(Text, nullable=True)  # digitaal bericht (tekst), getoond bij eerste start
+    card_message = Column(Text, nullable=True)  # tekst voor op de fysieke kaart/banderol
 
-    # Gift card
+    # Digitaal bericht — media (ontgrendelt bij eerste start)
+    message_media_url = Column(String(512), nullable=True)   # object_key van het geüploade audio/video-bericht
+    message_media_type = Column(String(16), nullable=True)   # text | audio | video
+    message_transcript = Column(Text, nullable=True)         # Whisper-transcript (meeleesversie)
+    message_status = Column(String(16), nullable=True)       # pending | ready | failed (transcriptie)
+
+    # Cadeau-overhandiging
+    gift_reveal = Column(String(16), nullable=True)          # SURPRISE | ANNOUNCED
+    delivery_date = Column(Date, nullable=True)              # gewenst bezorg-/verzendmoment (of geplande digitale send)
+
+    # Universele ontgrendel-token — werkt via QR op de (start)kaart én via e-mail,
+    # ongeacht of het e-mailadres van de ontvanger bekend is. Gegenereerd voor elke cadeau-order.
+    redemption_token = Column(String(64), nullable=True, unique=True, index=True)
+    redeemed_at = Column(DateTime, nullable=True)            # moment van eerste ontgrendeling
+    redemption_email_sent_at = Column(DateTime, nullable=True)  # ontvanger-uitnodiging verzonden (idempotentie geplande send)
+
+    # Gift card (legacy DIGITAAL voucher-pad)
     gift_card_code = Column(String(32), nullable=True, unique=True, index=True)
 
     # Verzendadres (JSON)

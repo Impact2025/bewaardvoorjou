@@ -281,8 +281,14 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     db.commit()
     logger.info(f"Order {order.id} succesvol verwerkt (€{order.price_paid / 100:.2f})")
 
-    recipient_email = metadata.get("recipient_email")
-    recipient_name = metadata.get("recipient_name")
+    # Transcribeer een eventueel audio/video cadeaubericht (meeleesversie). Best-effort.
+    if order.message_media_url and order.message_media_type in ("audio", "video"):
+        try:
+            from app.services.media.processor import enqueue_gift_message_transcript_job
+            enqueue_gift_message_transcript_job(order.id)
+        except Exception as exc:
+            logger.warning(f"Kon cadeaubericht-transcriptie niet starten voor order {order.id}: {exc}")
+
     contact_email = metadata.get("contact_email") or order.guest_email or ""
 
     # Interne verkoopmelding naar de eigenaar (faalt nooit hard)
@@ -290,18 +296,11 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
     send_owner_sale_notification(order, contact_email)
 
     if order.package_type == "DIGITAAL":
-        # Digitale cadeaukaart: stuur koper een email met de kaartlink
+        # Legacy digitale cadeaukaart: stuur koper een email met de kaartlink
         _send_gift_card_buyer_email(order, contact_email)
-    elif recipient_email and recipient_name:
-        # Fysiek pakket cadeau: stuur magic link naar begiftigde storyteller
-        _send_storyteller_magic_link(
-            db, recipient_email, recipient_name, contact_email,
-            package_type=order.package_type,
-            personal_message=order.personal_message,
-        )
-        # Stuur koper een bevestigingsmail
-        if contact_email:
-            _send_gift_buyer_confirmation(order, contact_email, recipient_name, recipient_email)
+    else:
+        # Alle pakketten (VERHAAL/ERFGOED/NALATENSCHAP): universele cadeau-ruggengraat
+        _dispatch_gift_emails(db, order, contact_email)
 
 
 def _send_gift_card_buyer_email(order: "OrderModel", buyer_email: str) -> None:
@@ -386,15 +385,22 @@ def _send_gift_buyer_confirmation(
     order: "OrderModel",
     buyer_email: str,
     recipient_name: str,
-    recipient_email: str,
+    recipient_email: str = "",
 ) -> None:
-    """Stuur de koper een bevestigingsmail nadat de magic link naar de ontvanger is gestuurd."""
+    """Stuur de koper een bevestiging — met de printbare startkaart-link voor élk pakket."""
     from app.services.email.renderer import build_gift_buyer_confirmation_email
     from app.services.email.client import send_email
+    from app.core.config import settings as _settings
 
     shipping_city: str | None = None
     if order.shipping_address and isinstance(order.shipping_address, dict):
         shipping_city = order.shipping_address.get("city")
+
+    redemption_url = (
+        f"{_settings.app_base_url}/cadeau/{order.redemption_token}"
+        if order.redemption_token else None
+    )
+    delivery_date_str = order.delivery_date.isoformat() if order.delivery_date else None
 
     try:
         subject, html, text = build_gift_buyer_confirmation_email(
@@ -404,11 +410,60 @@ def _send_gift_buyer_confirmation(
             package_name=_PACKAGE_NAMES.get(order.package_type, order.package_type),
             order_id_short=order.id[:8].upper(),
             shipping_city=shipping_city,
+            redemption_url=redemption_url,
+            has_recipient_email=bool(recipient_email),
+            delivery_date=delivery_date_str,
         )
         send_email(to=buyer_email, subject=subject, html=html, text=text)
         logger.info(f"Koper-bevestiging verstuurd naar {buyer_email} voor order {order.id}")
     except Exception as exc:
         logger.error(f"Kon koper-bevestiging niet sturen voor order {order.id}: {exc}")
+
+
+def _delivery_is_due(order: "OrderModel") -> bool:
+    """True als het bezorgmoment vandaag of in het verleden ligt (of niet ingesteld)."""
+    if not order.delivery_date:
+        return True
+    from datetime import date as _date
+    delivery = order.delivery_date
+    if isinstance(delivery, datetime):
+        delivery = delivery.date()
+    return delivery <= _date.today()
+
+
+def _dispatch_gift_emails(db: Session, order: "OrderModel", contact_email: str) -> None:
+    """Stuur de cadeau-e-mails voor élk pakket via dezelfde ruggengraat.
+
+    - Ontvanger (als e-mail bekend én bezorgmoment bereikt): redemption/magic link,
+      met het persoonlijke bericht als eerste wat ze zien.
+    - Koper: altijd direct een bevestiging met de printbare startkaart-link.
+
+    Een toekomstig bezorgmoment stelt alleen de ontvanger-mail uit; de beat-taak
+    `email.scheduled_gift_redemptions` verstuurt die op de dag zelf (idempotent via
+    redemption_email_sent_at).
+    """
+    is_gift = bool(order.redemption_token or order.recipient_email or order.recipient_name)
+    if not is_gift:
+        # 'Voor mezelf' — de koper is zelf de gebruiker; geen aparte cadeau-mail.
+        return
+
+    recipient_name = order.recipient_name or "je dierbare"
+
+    if order.recipient_email and not order.redemption_email_sent_at and _delivery_is_due(order):
+        _send_storyteller_magic_link(
+            db, order.recipient_email, recipient_name, contact_email or "",
+            package_type=order.package_type,
+            personal_message=order.personal_message,
+        )
+        order.redemption_email_sent_at = datetime.now(timezone.utc)
+        db.commit()
+    elif order.recipient_email and not _delivery_is_due(order):
+        logger.info(f"Ontvanger-mail uitgesteld tot {order.delivery_date} voor order {order.id}")
+
+    if contact_email:
+        _send_gift_buyer_confirmation(
+            order, contact_email, recipient_name, order.recipient_email or "",
+        )
 
 
 def _maybe_assign_founding_member(db: Session, user_id: str) -> None:

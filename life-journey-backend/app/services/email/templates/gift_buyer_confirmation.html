@@ -28,16 +28,34 @@
   </table>
 </div>
 
+{% if has_recipient_email %}
 <p class="body-text">
   We hebben <strong>{{ recipient_name }}</strong> een persoonlijke uitnodiging gestuurd op
-  <strong>{{ recipient_email }}</strong>. Ze kunnen direct inloggen en beginnen met het vastleggen van hun levensverhaal.
+  <strong>{{ recipient_email }}</strong>{% if delivery_date %} — gepland voor <strong>{{ delivery_date }}</strong>{% endif %}.
+  Zodra ze openen, is jouw persoonlijke bericht het eerste wat ze zien.
 </p>
+{% else %}
+<p class="body-text">
+  Jij geeft dit cadeau zelf. Hieronder vind je de <strong>startkaart</strong> van
+  <strong>{{ recipient_name }}</strong> — print hem of laat de QR-code op je telefoon zien.
+  Zodra {{ recipient_name }} hem opent, is jouw persoonlijke bericht het eerste wat ze zien.
+</p>
+{% endif %}
+
+{% if redemption_url %}
+<div class="cta-wrap">
+  <a href="{{ redemption_url }}" class="cta-button">Bekijk &amp; print de startkaart &rarr;</a>
+</div>
+<p class="note" style="text-align: center;">
+  Bewaar deze link goed — hiermee ontgrendelt {{ recipient_name }} het cadeau.
+</p>
+{% endif %}
 
 <div style="background: #fdf8ef; border: 1px solid #e8d8a0; border-radius: 12px; padding: 20px; margin: 24px 0;">
-  <p style="margin: 0 0 8px 0; font-weight: 700; color: #8B6914; font-size: 15px;">💬 Tip: stuur zelf ook een berichtje</p>
+  <p style="margin: 0 0 8px 0; font-weight: 700; color: #8B6914; font-size: 15px;">💛 Ons mooiste advies</p>
   <p style="margin: 0; color: #6B6456; font-size: 14px; line-height: 1.6;">
-    De uitnodigingsmail is verstuurd, maar een persoonlijk berichtje van jou maakt het extra bijzonder.
-    Vertel {{ recipient_name }} waarom je dit cadeau hebt gekocht — dat is het mooiste begin van hun verhaal.
+    Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk —
+    jij aan de telefoon, {{ recipient_name }} met de kaart in de hand. Zo begint het verhaal samen.
   </p>
 </div>
 

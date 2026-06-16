@@ -21,6 +21,30 @@ from app.schemas.orders import OrderAdmin, OrderListResponse, UpdateOrderStatusR
 router = APIRouter(dependencies=[Depends(get_current_admin_user)])
 
 
+def _notify_buyer_delivered(order: Order, db: Session) -> None:
+    """Stuur de koper het 'het is bezorgd — bel nu'-bericht. Best-effort; faalt nooit hard."""
+    from loguru import logger
+
+    buyer_email = order.guest_email
+    if order.user_id:
+        user = db.query(User).filter(User.id == order.user_id).first()
+        if user:
+            buyer_email = user.email
+    if not buyer_email or not order.recipient_name:
+        return
+    try:
+        from app.services.email.renderer import build_gift_delivered_email
+        from app.services.email.client import send_email
+        subject, html, text = build_gift_delivered_email(
+            buyer_email=buyer_email,
+            recipient_name=order.recipient_name,
+        )
+        send_email(to=buyer_email, subject=subject, html=html, text=text)
+        logger.info(f"Bezorgnotificatie verstuurd naar {buyer_email} voor order {order.id}")
+    except Exception as exc:
+        logger.error(f"Kon bezorgnotificatie niet sturen voor order {order.id}: {exc}")
+
+
 def _enrich(order: Order, db: Session) -> dict:
     """Voeg kopergegevens toe aan een order dict."""
     buyer_email: str | None = order.guest_email
@@ -179,8 +203,11 @@ def update_order_status(
     old_status = order.status
     order.status = body.status
 
-    if body.status == "FULFILLED" and not order.fulfilled_at:
-        order.fulfilled_at = datetime.now(timezone.utc)
+    if body.status == "FULFILLED" and old_status != "FULFILLED":
+        if not order.fulfilled_at:
+            order.fulfilled_at = datetime.now(timezone.utc)
+        # Notificeer de koper: "het is bezorgd — bel nu, doe samen hoofdstuk 1"
+        _notify_buyer_delivered(order, db)
 
     db.add(AuditLog(
         admin_id=admin.id,

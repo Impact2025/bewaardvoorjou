@@ -1,7 +1,16 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
+
+
+RecipientRelation = Literal[
+    "vader", "moeder", "opa", "oma", "schoonouder", "partner", "anders",
+]
+
+GiftReveal = Literal["SURPRISE", "ANNOUNCED"]
+
+MessageMediaType = Literal["text", "audio", "video"]
 
 
 PackageType = Literal[
@@ -51,12 +60,37 @@ class ShippingAddress(BaseModel):
 class CreatePaymentIntentRequest(BaseModel):
     package_type: PackageType
     addons: list[AddonCode] = Field(default_factory=list)
+    for_self: bool = False  # True = koper bestelt voor zichzelf (geen cadeau-token/redemption)
     recipient_name: str | None = Field(default=None, max_length=255)
-    recipient_email: EmailStr | None = None  # e-mailadres van de begiftigde storyteller
-    personal_message: str | None = Field(default=None, max_length=500)
+    recipient_email: EmailStr | None = None  # e-mailadres van de begiftigde storyteller (optioneel)
+    recipient_relation: RecipientRelation | None = None  # stuurt de toon van alle copy
+    personal_message: str | None = Field(default=None, max_length=500)  # digitaal bericht (tekst)
+    card_message: str | None = Field(default=None, max_length=280)  # tekst voor op de fysieke kaart
+    message_media_url: str | None = Field(default=None, max_length=512)  # object_key van audio/video-bericht
+    message_media_type: MessageMediaType | None = None
+    gift_reveal: GiftReveal | None = None  # verrassing of aangekondigd
+    delivery_date: date | None = None  # gewenst bezorg-/verzendmoment (of geplande digitale send)
     shipping_address: ShippingAddress | None = None  # optioneel bij digitale start
     guest_email: EmailStr | None = None  # voor niet-ingelogde gebruikers (koper)
     promo_code: str | None = Field(default=None, max_length=32)  # optionele kortingscode
+
+
+class GiftMessagePresignRequest(BaseModel):
+    """Upload-aanvraag voor een audio/video cadeaubericht, opgenomen tijdens checkout.
+
+    Het bericht wordt vóór de order aangemaakt (tijdens 'personaliseer'), dus de
+    upload hangt aan een tijdelijke draft-id i.p.v. een order-id. De resulterende
+    object_key gaat als `message_media_url` mee in create-payment-intent.
+    """
+    filename: str = Field(min_length=1, max_length=255)
+    modality: Literal["audio", "video"]
+    size_bytes: int = Field(gt=0)
+
+
+class GiftMessagePresignResponse(BaseModel):
+    upload_url: str
+    object_key: str
+    upload_method: str = "PUT"
 
 
 class CreatePaymentIntentResponse(BaseModel):
@@ -98,6 +132,37 @@ class OrderStatusPublic(BaseModel):
     recipient_email: str | None = None
     has_shipping: bool = False
     shipping_city: str | None = None
+    # Universele ontgrendel-token → bevestigingspagina kan de printbare startkaart tonen
+    redemption_token: str | None = None
+    gift_reveal: str | None = None
+    delivery_date: date | None = None
+
+
+class StartRedemptionRequest(BaseModel):
+    """De ontvanger geeft zijn e-mail op de cadeaupagina (QR/startkaart) op.
+
+    We sturen een magic link die het pakket activeert — geen wachtwoord nodig.
+    """
+    email: EmailStr
+
+
+class GiftRedemptionPublic(BaseModel):
+    """Publieke ontgrendel-data voor de cadeaupagina (QR/startkaart).
+
+    De redemption_token (niet-raadbaar) fungeert als toegangssleutel. Het persoonlijke
+    bericht (tekst of audio/video + transcript) is het eerste wat de ontvanger ziet.
+    """
+    recipient_name: str | None = None
+    recipient_relation: str | None = None
+    package_type: str
+    gifter_name: str | None = None
+    personal_message: str | None = None        # digitaal tekstbericht
+    message_media_type: str | None = None       # text | audio | video
+    message_media_url: str | None = None        # kant-en-klare playback-URL (signed/serve)
+    message_transcript: str | None = None       # meeleesversie (Whisper)
+    message_status: str | None = None           # pending | ready | failed (transcriptie)
+    card_message: str | None = None
+    already_redeemed: bool = False
 
 
 class EarlyBirdStatus(BaseModel):
@@ -126,7 +191,18 @@ class OrderAdmin(BaseModel):
     status: str
     recipient_name: str | None = None
     recipient_email: str | None = None
+    recipient_relation: str | None = None
     personal_message: str | None = None
+    card_message: str | None = None
+    message_media_url: str | None = None
+    message_media_type: str | None = None
+    message_transcript: str | None = None
+    message_status: str | None = None
+    gift_reveal: str | None = None
+    delivery_date: date | None = None
+    redemption_token: str | None = None
+    redeemed_at: datetime | None = None
+    redemption_email_sent_at: datetime | None = None
     gift_card_code: str | None = None
     shipping_address: dict | None = None
     promo_code_used: str | None = None

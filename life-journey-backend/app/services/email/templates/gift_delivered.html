@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Het cadeau is bezorgd — Bewaardvoorjou{% endblock %}
+
+{% block content %}
+<h1 class="heading">Het is bezorgd 📦</h1>
+
+<p class="body-text">
+  Goed nieuws: het cadeau voor <strong>{{ recipient_name }}</strong> is bezorgd. Dit is hét moment.
+</p>
+
+<div style="background: #fdf8ef; border: 1px solid #e8d8a0; border-radius: 12px; padding: 20px; margin: 24px 0;">
+  <p style="margin: 0 0 8px 0; font-weight: 700; color: #8B6914; font-size: 15px;">💛 Doe dit nu</p>
+  <p style="margin: 0; color: #6B6456; font-size: 14px; line-height: 1.6;">
+    Bel {{ recipient_name }} en doe samen het eerste hoofdstuk — jij aan de telefoon,
+    {{ recipient_name }} met de kaart in de hand. Zo begint het verhaal samen, en wordt het openen
+    van de doos een herinnering op zich.
+  </p>
+</div>
+
+{% if first_chapter_hint %}
+<p class="body-text" style="font-size: 14px; color: #6B6456;">
+  <strong>Tip voor de eerste vraag:</strong> {{ first_chapter_hint }}
+</p>
+{% endif %}
+
+<div class="divider"></div>
+
+<p class="note">
+  Vragen? Mail ons gerust op
+  <a href="mailto:support@bewaardvoorjou.nl" style="color: #8B6914;">support@bewaardvoorjou.nl</a>.
+</p>
+{% endblock %}

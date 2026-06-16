@@ -9,13 +9,22 @@ Pakket:       {{ package_name }}
 Voor:         {{ recipient_name }}
 Bestelnummer: {{ order_id_short }}
 
-We hebben {{ recipient_name }} een persoonlijke uitnodiging gestuurd op {{ recipient_email }}.
-Ze kunnen direct inloggen en beginnen met het vastleggen van hun levensverhaal.
+{% if has_recipient_email %}
+We hebben {{ recipient_name }} een persoonlijke uitnodiging gestuurd op {{ recipient_email }}{% if delivery_date %} — gepland voor {{ delivery_date }}{% endif %}.
+Zodra ze openen, is jouw persoonlijke bericht het eerste wat ze zien.
+{% else %}
+Jij geeft dit cadeau zelf. Hieronder vind je de startkaart van {{ recipient_name }} — print hem
+of laat de QR-code op je telefoon zien. Zodra {{ recipient_name }} hem opent, is jouw persoonlijke
+bericht het eerste wat ze zien.
+{% endif %}
+{% if redemption_url %}
+STARTKAART (bewaar deze link goed):
+{{ redemption_url }}
+{% endif %}
 
-TIP: stuur zelf ook een berichtje
-De uitnodigingsmail is verstuurd, maar een persoonlijk berichtje van jou maakt het extra
-bijzonder. Vertel {{ recipient_name }} waarom je dit cadeau hebt gekocht — dat is het mooiste
-begin van hun verhaal.
+ONS MOOISTE ADVIES
+Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk —
+jij aan de telefoon, {{ recipient_name }} met de kaart in de hand. Zo begint het verhaal samen.
 
 {% if shipping_city %}
 FYSIEKE DOOS

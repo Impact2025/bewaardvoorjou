@@ -66,6 +66,23 @@ class _Order:
     paid_at: datetime | None = None
     stripe_payment_method: str | None = None
     promo_code_used: str | None = None
+    # Cadeau-flow velden (spiegelen de ORM-kolommen; standaard None = geen cadeau)
+    recipient_name: str | None = None
+    recipient_email: str | None = None
+    recipient_relation: str | None = None
+    personal_message: str | None = None
+    card_message: str | None = None
+    message_media_url: str | None = None
+    message_media_type: str | None = None
+    message_transcript: str | None = None
+    message_status: str | None = None
+    gift_reveal: str | None = None
+    delivery_date: object | None = None
+    redemption_token: str | None = None
+    redeemed_at: datetime | None = None
+    redemption_email_sent_at: datetime | None = None
+    shipping_address: dict | None = None
+    gift_card_code: str | None = None
 
 
 class _FakeQuery:

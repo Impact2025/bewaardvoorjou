@@ -349,17 +349,41 @@ def build_gift_buyer_confirmation_email(
     package_name: str,
     order_id_short: str,
     shipping_city: str | None = None,
+    redemption_url: str | None = None,
+    has_recipient_email: bool = True,
+    delivery_date: str | None = None,
 ) -> tuple[str, str, str]:
-    subject = f"Bedankt! Je cadeau voor {recipient_name} is verstuurd 🎁"
+    subject = f"Bedankt! Je cadeau voor {recipient_name} staat klaar 🎁"
     context = {
         "recipient_name": recipient_name,
         "recipient_email": recipient_email,
         "package_name": package_name,
         "order_id_short": order_id_short,
         "shipping_city": shipping_city,
+        # Startkaart: koper kan deze printen/overhandigen — werkt voor élk pakket,
+        # ook als het e-mailadres van de ontvanger niet bekend is.
+        "redemption_url": redemption_url,
+        "has_recipient_email": has_recipient_email,
+        "delivery_date": delivery_date,
     }
     html, text = render_email("gift_buyer_confirmation", context)
     logger.info(f"Built gift_buyer_confirmation email for {buyer_email}")
+    return subject, html, text
+
+
+def build_gift_delivered_email(
+    buyer_email: str,
+    recipient_name: str,
+    first_chapter_hint: str | None = None,
+) -> tuple[str, str, str]:
+    """Notificeer de koper dat het cadeau bezorgd is — met het 'bel nu, doe samen hoofdstuk 1'-advies."""
+    subject = f"Het cadeau voor {recipient_name} is bezorgd 📦 — bel ze nu"
+    context = {
+        "recipient_name": recipient_name,
+        "first_chapter_hint": first_chapter_hint,
+    }
+    html, text = render_email("gift_delivered", context)
+    logger.info(f"Built gift_delivered email for {buyer_email}")
     return subject, html, text
 
 
