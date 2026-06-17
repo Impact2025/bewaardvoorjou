@@ -2,8 +2,10 @@
 
 Deze e-mails gaan naar `settings.owner_notification_email` (standaard
 info@bewaardvoorjou.nl) en zijn bewust losgekoppeld van het reguliere,
-template-gestuurde e-mailsysteem voor gebruikers: ze hebben geen unsubscribe,
-geen EmailEvent-tracking en geen Jinja-templates nodig.
+template-gestuurde e-mailsysteem voor gebruikers: ze hebben geen unsubscribe
+en geen Jinja-templates nodig. De verkoopmelding wordt wél als EmailEvent
+gelogd (via `log_and_send`) zodat per bestelling traceerbaar is of de eigenaar
+de melding heeft ontvangen; het dagelijkse systeemrapport blijft ongelogd.
 """
 
 from __future__ import annotations
@@ -59,11 +61,13 @@ def _wrap(title: str, body_html: str) -> str:
 # 1. Verkoopmelding — bij elke betaalde of gratis bestelling
 # ---------------------------------------------------------------------------
 
-def send_owner_sale_notification(order: OrderModel, contact_email: str | None) -> None:
+def send_owner_sale_notification(
+    db: Session, order: OrderModel, contact_email: str | None
+) -> None:
     """Stuur de eigenaar een melding dat er een bestelling is geplaatst.
 
     Faalt nooit hard: een mislukte interne melding mag de betaalverwerking
-    nooit blokkeren.
+    nooit blokkeren. Wordt als EmailEvent gelogd (order_id = deze bestelling).
     """
     try:
         owner = settings.owner_notification_email
@@ -110,8 +114,16 @@ def send_owner_sale_notification(order: OrderModel, contact_email: str | None) -
             + "\n".join(f"{k}: {v}" for k, v in rows).replace("&lt;", "<").replace("&gt;", ">")
         )
 
-        send_email(to=owner, subject=subject, html=html, text=text)
-        logger.info(f"Verkoopmelding verstuurd naar eigenaar voor order {order.id}")
+        from app.services.email.audit import log_and_send
+        log_and_send(
+            db,
+            email_type="owner_sale_notification",
+            to=owner,
+            subject=subject,
+            html=html,
+            text=text,
+            order_id=order.id,
+        )
     except Exception as exc:
         logger.error(f"Kon verkoopmelding niet sturen voor order {getattr(order, 'id', '?')}: {exc}")
 
