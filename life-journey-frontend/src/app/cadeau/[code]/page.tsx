@@ -135,7 +135,7 @@ function RedemptionExperience({
           <PersonalMessage data={data} gifter={gifter} />
 
           {/* CTA — start zonder wachtwoord via magic link */}
-          <StartForm token={token} />
+          <StartForm token={token} name={name} />
 
           {/* Print de startkaart (voor de gever) */}
           <div className="text-center">
@@ -156,11 +156,12 @@ function RedemptionExperience({
   );
 }
 
-function StartForm({ token }: { token: string }) {
+function StartForm({ token, name }: { token: string; name: string }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const addressed = !!name && name !== "Lieve ontvanger";
 
   const submit = async () => {
     if (!valid) return;
@@ -190,9 +191,12 @@ function StartForm({ token }: { token: string }) {
 
   return (
     <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-center">
-      <h3 className="font-serif text-xl font-bold text-[#1a1a1a] mb-1">Klaar om te beginnen?</h3>
+      <h3 className="font-serif text-xl font-bold text-[#1a1a1a] mb-1">
+        {addressed ? `Ben jij ${name}? Begin hier` : "Klaar om te beginnen?"}
+      </h3>
       <p className="text-sm text-[#888] mb-4">
-        Vul je e-mail in — we sturen je een link om direct te starten. Geen wachtwoord, geen app.
+        Vul <strong>jouw eigen</strong> e-mailadres in — we sturen je een link om direct te starten.
+        Geen wachtwoord, geen app.
       </p>
       <div className="space-y-2">
         <div className="relative">
@@ -225,6 +229,12 @@ function StartForm({ token }: { token: string }) {
         </button>
         {error && <p className="text-xs text-[#e04040]">{error}</p>}
       </div>
+
+      {/* Voor de gever: maakt duidelijk dat dit veld niet voor hém is */}
+      <p className="text-xs text-[#aaa] mt-4 leading-relaxed border-t border-[#f0ece6] pt-3">
+        Geef jíj dit cadeau? Dan hoef je hier niets in te vullen — {addressed ? name : "de ontvanger"}{" "}
+        doet dat zelf. Print de startkaart hieronder om te overhandigen, of stuur deze link door.
+      </p>
     </div>
   );
 }
