@@ -29,10 +29,13 @@ try:
         "a", "img",
         "table", "thead", "tbody", "tr", "th", "td",
         "hr", "figure", "figcaption", "span", "div",
+        "iframe", "video",
     }
     _ALLOWED_ATTRS = {
         "a": {"href", "title", "target", "rel"},
         "img": {"src", "alt", "title", "width", "height"},
+        "iframe": {"src", "width", "height", "frameborder", "allowfullscreen", "allow", "style"},
+        "video": {"src", "controls", "style", "width", "height"},
         "*": {"class", "id"},
     }
     def _sanitize_html(html: str | None) -> str | None:
