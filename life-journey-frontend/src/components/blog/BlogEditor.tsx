@@ -32,6 +32,7 @@ import {
   Loader2,
   Table as TableIcon,
   Video,
+  Youtube,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,51 @@ const VideoNode = Node.create({
     return ["video", mergeAttributes({ controls: true, style: "max-width:100%;border-radius:8px;" }, HTMLAttributes)];
   },
 });
+
+const YoutubeNode = Node.create({
+  name: "youtube",
+  group: "block",
+  atom: true,
+  addAttributes() {
+    return { src: { default: null } };
+  },
+  parseHTML() {
+    return [{ tag: 'iframe[src*="youtube.com/embed"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "iframe",
+      mergeAttributes(
+        {
+          width: "100%",
+          height: "400",
+          frameborder: "0",
+          allowfullscreen: "true",
+          allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+          style: "border-radius:8px;aspect-ratio:16/9;width:100%;",
+        },
+        HTMLAttributes
+      ),
+    ];
+  },
+});
+
+function toYoutubeEmbed(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let videoId: string | null = null;
+    if (u.hostname.includes("youtu.be")) {
+      videoId = u.pathname.slice(1).split("?")[0];
+    } else if (u.hostname.includes("youtube.com")) {
+      if (u.pathname.includes("/embed/")) return url;
+      videoId = u.searchParams.get("v");
+    }
+    if (!videoId) return null;
+    return `https://www.youtube.com/embed/${videoId}`;
+  } catch {
+    return null;
+  }
+}
 
 export interface BlogEditorHandle {
   insertLink: (href: string, text: string) => void;
@@ -134,6 +180,7 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
       TableHeader,
       TableCell,
       VideoNode,
+      YoutubeNode,
     ],
     content,
     onUpdate({ editor }) {
@@ -271,6 +318,18 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
       if (url) editor.chain().focus().insertContent({ type: "video", attrs: { src: url } }).run();
     }
   }, [editor, onVideoUpload]);
+
+  const addYoutube = useCallback(() => {
+    if (!editor) return;
+    const url = window.prompt("YouTube URL (bijv. https://www.youtube.com/watch?v=...):");
+    if (!url) return;
+    const embedUrl = toYoutubeEmbed(url.trim());
+    if (!embedUrl) {
+      window.alert("Ongeldige YouTube URL. Gebruik een link zoals:\nhttps://www.youtube.com/watch?v=...\nhttps://youtu.be/...");
+      return;
+    }
+    editor.chain().focus().insertContent({ type: "youtube", attrs: { src: embedUrl } }).run();
+  }, [editor]);
 
   const insertTable = useCallback(() => {
     if (!editor) return;
@@ -411,6 +470,9 @@ export const BlogEditor = forwardRef<BlogEditorHandle, BlogEditorProps>(function
           ) : (
             <Video className="h-4 w-4" />
           )}
+        </ToolBtn>
+        <ToolBtn onClick={addYoutube} title="YouTube video invoegen">
+          <Youtube className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn onClick={insertTable} title="Tabel invoegen">
           <TableIcon className="h-4 w-4" />
