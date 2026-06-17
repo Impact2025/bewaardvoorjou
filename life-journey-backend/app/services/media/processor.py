@@ -28,7 +28,7 @@ def enqueue_transcode_job(asset_id: str) -> Optional[str]:
 
     try:
         from app.services.media.tasks import celery_app
-        result = celery_app.send_task("media.transcode", args=[asset_id])
+        result = celery_app.send_task("media.transcode", args=[asset_id], queue="media")
         logger.info(f"Queued transcode job for asset {asset_id}, task_id={result.id}")
         return result.id
     except Exception as e:
@@ -54,7 +54,7 @@ def enqueue_gift_message_transcript_job(order_id: str) -> Optional[str]:
 
     try:
         from app.services.media.tasks import celery_app
-        result = celery_app.send_task("gift.message_transcript", args=[order_id])
+        result = celery_app.send_task("gift.message_transcript", args=[order_id], queue="media")
         logger.info(f"Cadeaubericht-transcriptie gequeued voor order {order_id}, task_id={result.id}")
         return result.id
     except Exception as e:
@@ -94,7 +94,7 @@ def enqueue_transcript_job(asset_id: str) -> Optional[str]:
 
     try:
         from app.services.media.tasks import celery_app
-        result = celery_app.send_task("media.transcript", args=[asset_id])
+        result = celery_app.send_task("media.transcript", args=[asset_id], queue="media")
         logger.info(f"Queued transcript job for asset {asset_id}, task_id={result.id}")
         return result.id
     except Exception as e:
