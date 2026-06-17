@@ -282,6 +282,7 @@ def resend_order_emails(
     if buyer_email and order.recipient_name and order.recipient_email:
         try:
             _send_gift_buyer_confirmation(
+                db,
                 order=order,
                 buyer_email=buyer_email,
                 recipient_name=order.recipient_name,
@@ -307,7 +308,7 @@ def resend_order_emails(
     elif buyer_email and order.package_type == "DIGITAAL" and order.gift_card_code:
         from app.api.v1.routes.webhooks import _send_gift_card_buyer_email
         try:
-            _send_gift_card_buyer_email(order=order, buyer_email=buyer_email)
+            _send_gift_card_buyer_email(db, order=order, buyer_email=buyer_email)
             sent.append(f"cadeaukaart naar {buyer_email}")
         except Exception as exc:
             errors.append(f"cadeaukaart mislukt: {exc}")

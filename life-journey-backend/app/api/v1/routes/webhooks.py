@@ -156,16 +156,18 @@ def _handle_complaint(db: Session, resend_email_id: str | None, data: dict) -> N
     event.status = "complained"
     event.complained_at = now
 
-    # Globally unsubscribe the user immediately
-    prefs = db.query(EmailPreferenceModel).filter(
-        EmailPreferenceModel.user_id == event.user_id
-    ).first()
-    if not prefs:
-        prefs = EmailPreferenceModel(user_id=event.user_id)
-        db.add(prefs)
-    prefs.unsubscribed_all = True
-    prefs.unsubscribed_at = now
-    logger.info(f"Complaint received, unsubscribed user {event.user_id}")
+    # Globally unsubscribe the user immediately — alleen voor events met een account
+    # (transactionele mails naar eigenaar/gast hebben geen user_id).
+    if event.user_id:
+        prefs = db.query(EmailPreferenceModel).filter(
+            EmailPreferenceModel.user_id == event.user_id
+        ).first()
+        if not prefs:
+            prefs = EmailPreferenceModel(user_id=event.user_id)
+            db.add(prefs)
+        prefs.unsubscribed_all = True
+        prefs.unsubscribed_at = now
+        logger.info(f"Complaint received, unsubscribed user {event.user_id}")
 
     db.commit()
 
@@ -293,20 +295,20 @@ def _handle_payment_succeeded(db: Session, payment_intent: dict) -> None:
 
     # Interne verkoopmelding naar de eigenaar (faalt nooit hard)
     from app.services.email.admin import send_owner_sale_notification
-    send_owner_sale_notification(order, contact_email)
+    send_owner_sale_notification(db, order, contact_email)
 
     if order.package_type == "DIGITAAL":
         # Legacy digitale cadeaukaart: stuur koper een email met de kaartlink
-        _send_gift_card_buyer_email(order, contact_email)
+        _send_gift_card_buyer_email(db, order, contact_email)
     else:
         # Alle pakketten (VERHAAL/ERFGOED/NALATENSCHAP): universele cadeau-ruggengraat
         _dispatch_gift_emails(db, order, contact_email)
 
 
-def _send_gift_card_buyer_email(order: "OrderModel", buyer_email: str) -> None:
+def _send_gift_card_buyer_email(db: Session, order: "OrderModel", buyer_email: str) -> None:
     """Stuur de koper een e-mail met de cadeaukaart link en upgradevoucher."""
     from app.services.email.renderer import build_gift_card_buyer_email
-    from app.services.email.client import send_email
+    from app.services.email.audit import log_and_send
     from app.core.config import settings as _settings
 
     if not buyer_email or not order.gift_card_code:
@@ -321,10 +323,20 @@ def _send_gift_card_buyer_email(order: "OrderModel", buyer_email: str) -> None:
             gift_card_url=gift_card_url,
             voucher_code="UPGRADE30",
         )
-        send_email(to=buyer_email, subject=subject, html=html, text=text)
-        logger.info(f"Gift card email verstuurd naar koper {buyer_email} voor order {order.id}")
     except Exception as exc:
-        logger.error(f"Kon gift card email niet sturen voor order {order.id}: {exc}")
+        logger.error(f"Kon gift card email niet opbouwen voor order {order.id}: {exc}")
+        return
+
+    log_and_send(
+        db,
+        email_type="gift_card_buyer",
+        to=buyer_email,
+        subject=subject,
+        html=html,
+        text=text,
+        user_id=order.user_id,
+        order_id=order.id,
+    )
 
 
 def _send_storyteller_magic_link(
@@ -382,6 +394,7 @@ _PACKAGE_NAMES = {
 
 
 def _send_gift_buyer_confirmation(
+    db: Session,
     order: "OrderModel",
     buyer_email: str,
     recipient_name: str,
@@ -389,7 +402,7 @@ def _send_gift_buyer_confirmation(
 ) -> None:
     """Stuur de koper een bevestiging — met de printbare startkaart-link voor élk pakket."""
     from app.services.email.renderer import build_gift_buyer_confirmation_email
-    from app.services.email.client import send_email
+    from app.services.email.audit import log_and_send
     from app.core.config import settings as _settings
 
     shipping_city: str | None = None
@@ -414,10 +427,20 @@ def _send_gift_buyer_confirmation(
             has_recipient_email=bool(recipient_email),
             delivery_date=delivery_date_str,
         )
-        send_email(to=buyer_email, subject=subject, html=html, text=text)
-        logger.info(f"Koper-bevestiging verstuurd naar {buyer_email} voor order {order.id}")
     except Exception as exc:
-        logger.error(f"Kon koper-bevestiging niet sturen voor order {order.id}: {exc}")
+        logger.error(f"Kon koper-bevestiging niet opbouwen voor order {order.id}: {exc}")
+        return
+
+    log_and_send(
+        db,
+        email_type="gift_buyer_confirmation",
+        to=buyer_email,
+        subject=subject,
+        html=html,
+        text=text,
+        user_id=order.user_id,
+        order_id=order.id,
+    )
 
 
 def _delivery_is_due(order: "OrderModel") -> bool:
@@ -462,7 +485,7 @@ def _dispatch_gift_emails(db: Session, order: "OrderModel", contact_email: str) 
 
     if contact_email:
         _send_gift_buyer_confirmation(
-            order, contact_email, recipient_name, order.recipient_email or "",
+            db, order, contact_email, recipient_name, order.recipient_email or "",
         )
 
 

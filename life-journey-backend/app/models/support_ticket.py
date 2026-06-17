@@ -2,8 +2,19 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String, Text
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.functions import next_value
 
 from app.models.base import Base
+
+
+@compiles(next_value, "sqlite")
+def _sqlite_next_value(element, compiler, **kw):
+    """SQLite kent geen sequences. Alleen voor de test-DB (sqlite) compileren we
+    nextval() naar NULL, zodat `create_all` de SupportTicket-tabel kan aanmaken.
+    Op Postgres (productie) blijft het echte sequence-gedrag ongewijzigd.
+    """
+    return "NULL"
 
 
 def utc_now():

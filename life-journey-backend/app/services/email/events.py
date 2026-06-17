@@ -451,7 +451,7 @@ def trigger_family_invite_email(
 ) -> Optional[str]:
     """Stuur een uitnodigingsemail naar een familielid (geen account vereist)."""
     from app.services.email.renderer import build_family_invite_email
-    from app.services.email.client import send_email
+    from app.services.email.audit import log_and_send
 
     user = db.query(UserModel).filter(UserModel.email == recipient_email).first()
 
@@ -467,10 +467,20 @@ def trigger_family_invite_email(
             invite_url=invite_url,
             expires_date=expires_date,
         )
-        send_email(to=recipient_email, subject=subject, html=html, text=text)
-        logger.info(f"Family invite email sent to {recipient_email}")
     except Exception as e:
-        logger.error(f"Family invite email failed for {recipient_email}: {e}")
+        logger.error(f"Family invite email build failed for {recipient_email}: {e}")
+        return None
+
+    log_and_send(
+        db,
+        email_type="family_invite",
+        to=recipient_email,
+        subject=subject,
+        html=html,
+        text=text,
+        user_id=user.id if user else None,
+        context_data={"inviter_name": inviter_name, "role_label": role_label},
+    )
     return None
 
 
@@ -511,9 +521,9 @@ def trigger_family_notification_email(
         )
         return enqueue_email_job(event.id)
     else:
-        # Geen user — stuur direct zonder event tracking
+        # Geen user-account: nog steeds gelogd als EmailEvent (user_id = None).
         from app.services.email.renderer import build_family_notification_email
-        from app.services.email.client import send_email
+        from app.services.email.audit import log_and_send
         try:
             subject, html, text = build_family_notification_email(
                 recipient_name=recipient_name,
@@ -522,9 +532,25 @@ def trigger_family_notification_email(
                 share_url=share_url,
                 unsubscribe_token="",
             )
-            send_email(to=recipient_email, subject=subject, html=html, text=text)
         except Exception as e:
-            logger.error(f"Family notification direct send failed: {e}")
+            logger.error(f"Family notification build failed: {e}")
+            return None
+
+        log_and_send(
+            db,
+            email_type="family_notification",
+            to=recipient_email,
+            subject=subject,
+            html=html,
+            text=text,
+            journey_id=journey_id,
+            context_data={
+                "recipient_name": recipient_name,
+                "storyteller_name": storyteller_name,
+                "chapter_title": chapter_title,
+                "share_url": share_url,
+            },
+        )
         return None
 
 

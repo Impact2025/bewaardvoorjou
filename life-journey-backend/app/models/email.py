@@ -21,8 +21,11 @@ class EmailEvent(Base):
     Voorkomt duplicaten via unique constraints en status tracking.
     """
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    # Nullable: transactionele mails (eigenaar-melding, gast-koper) hebben geen account.
+    user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), nullable=True, index=True)
     journey_id = Column(String, ForeignKey("journey.id", ondelete="CASCADE"), nullable=True, index=True)
+    # Link naar de bestelling voor order-gerelateerde mails (koper-bevestiging, cadeaukaart, verkoopmelding).
+    order_id = Column(String, ForeignKey("order.id", ondelete="SET NULL"), nullable=True, index=True)
 
     # Email type: "welcome", "chapter_complete", "milestone_unlock", "email_verification", "password_reset"
     email_type = Column(String(64), nullable=False, index=True)

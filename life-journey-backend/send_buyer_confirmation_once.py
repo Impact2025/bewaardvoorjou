@@ -37,6 +37,7 @@ try:
         sys.exit(1)
 
     _send_gift_buyer_confirmation(
+        db,
         order=order,
         buyer_email=order.guest_email,
         recipient_name=order.recipient_name or "de ontvanger",

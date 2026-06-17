@@ -110,7 +110,6 @@ def presign_gift_message(
     als `message_media_url` mee in create-payment-intent.
     """
     import uuid as _uuid
-    from pathlib import Path as _Path
     from app.services.media.validators import sanitize_filename, validate_file_extension
 
     ext = validate_file_extension(payload.filename)  # blokkeert gevaarlijke/onbekende extensies
@@ -268,7 +267,7 @@ def create_payment_intent(
 
         # Interne verkoopmelding naar de eigenaar
         from app.services.email.admin import send_owner_sale_notification
-        send_owner_sale_notification(order, contact_email)
+        send_owner_sale_notification(db, order, contact_email)
 
         return CreatePaymentIntentResponse(
             client_secret="",
@@ -577,17 +576,9 @@ def _trigger_order_email_free(
     """Verstuurt de juiste email na een gratis order (spiegelt de Stripe webhook logica)."""
     try:
         if order.package_type == "DIGITAAL" and order.gift_card_code:
-            from app.services.email.renderer import build_gift_card_buyer_email
-            from app.services.email.client import send_email
-            gift_card_url = f"{settings.app_base_url}/cadeau/{order.gift_card_code}"
-            subject, html, text = build_gift_card_buyer_email(
-                buyer_email=contact_email,
-                recipient_name=recipient_name or "je geliefde",
-                gift_card_url=gift_card_url,
-                voucher_code="UPGRADE30",
-            )
-            send_email(to=contact_email, subject=subject, html=html, text=text)
-            logger.info(f"Gift card email verstuurd naar {contact_email} voor gratis order {order.id}")
+            # Cadeaukaart-mail (incl. EmailEvent-tracking) — gedeeld met de webhook-flow.
+            from app.api.v1.routes.webhooks import _send_gift_card_buyer_email
+            _send_gift_card_buyer_email(db, order, contact_email)
         else:
             # Universele cadeau-ruggengraat: ontvanger-uitnodiging (indien e-mail bekend)
             # + koper-bevestiging met startkaart-link. Hergebruikt de webhook-logica.
