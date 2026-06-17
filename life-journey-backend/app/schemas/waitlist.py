@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Literal
 
-WaitlistPackage = Literal["ERFGOED", "VOOR_ALTIJD"]
+WaitlistPackage = Literal["ERFGOED", "NALATENSCHAP", "VOOR_ALTIJD"]
 
 
 class WaitlistJoinRequest(BaseModel):

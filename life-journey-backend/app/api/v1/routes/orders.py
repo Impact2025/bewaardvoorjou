@@ -57,7 +57,7 @@ def get_founding_member_spots(db: Session = Depends(get_db)) -> dict:
     count = (
         db.query(Order)
         .filter(
-            Order.status == "PAID",
+            Order.status.in_(["PAID", "FULFILLED"]),
             Order.package_type.in_(["VERHAAL", "ERFGOED", "NALATENSCHAP"]),
         )
         .count()

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check, Shield, Truck, Phone, Star, Gift, Zap, Clock } from "lucide-react";
@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 
 // Zet op false zodra dozen beschikbaar zijn (over 2 weken)
 const BOX_IS_PREORDER = true;
+const ERFGOED_SOLD_OUT = true;
+const NALATENSCHAP_SOLD_OUT = true;
 
 // Vaderdag deal actief t/m 15 juni 2026
 const VADERDAG_DEAL_ACTIVE = true;
@@ -146,12 +148,14 @@ export default function PricingContent() {
           >
             Start gratis — 3 hoofdstukken →
           </button>
-          <button
-            onClick={() => router.push("/checkout?package=ERFGOED")}
-            className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-8 py-4 rounded-xl text-base transition-colors"
-          >
-            Bestel de Erfgoed Box
-          </button>
+          {!ERFGOED_SOLD_OUT && (
+            <button
+              onClick={() => router.push("/checkout?package=ERFGOED")}
+              className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-8 py-4 rounded-xl text-base transition-colors"
+            >
+              Bestel de Erfgoed Box
+            </button>
+          )}
         </div>
         <p className="text-sm text-[#888]">Gratis start: geen creditcard · 30 dagen · stop wanneer je wilt</p>
 
@@ -240,6 +244,7 @@ export default function PricingContent() {
             hero={true}
             badge="MEEST GEKOZEN"
             isPreorder={BOX_IS_PREORDER}
+            soldOut={ERFGOED_SOLD_OUT}
             foundingSpots={foundingSpots}
             features={[
               "Alles van Verhaal",
@@ -268,6 +273,7 @@ export default function PricingContent() {
             hero={false}
             badge={null}
             isPreorder={BOX_IS_PREORDER}
+            soldOut={NALATENSCHAP_SOLD_OUT}
             foundingSpots={foundingSpots}
             features={[
               "Alles van Erfgoed",
@@ -320,7 +326,7 @@ export default function PricingContent() {
               in hun profiel. Geen financieel voordeel — puur de erkenning dat jij dit platform mede mogelijk hebt gemaakt.
             </p>
             <button
-              onClick={() => router.push("/checkout?package=ERFGOED")}
+              onClick={() => router.push(`/checkout?package=${ERFGOED_SOLD_OUT ? "VERHAAL" : "ERFGOED"}`)}
               className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-8 py-3 rounded-xl transition-colors"
             >
               Word Founding Member →
@@ -356,18 +362,27 @@ export default function PricingContent() {
             ))}
           </div>
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-            <button
-              onClick={() => router.push("/checkout?package=ERFGOED&gift=true")}
-              className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-7 py-3 rounded-xl transition-colors"
-            >
-              Geef de Erfgoed Box →
-            </button>
-            <button
-              onClick={() => router.push("/checkout?package=NALATENSCHAP&gift=true")}
-              className="bg-[#1a1a1a] hover:bg-[#333] text-white font-bold px-7 py-3 rounded-xl transition-colors"
-            >
-              Geef Nalatenschap →
-            </button>
+            {!ERFGOED_SOLD_OUT && (
+              <button
+                onClick={() => router.push("/checkout?package=ERFGOED&gift=true")}
+                className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-7 py-3 rounded-xl transition-colors"
+              >
+                Geef de Erfgoed Box →
+              </button>
+            )}
+            {!NALATENSCHAP_SOLD_OUT && (
+              <button
+                onClick={() => router.push("/checkout?package=NALATENSCHAP&gift=true")}
+                className="bg-[#1a1a1a] hover:bg-[#333] text-white font-bold px-7 py-3 rounded-xl transition-colors"
+              >
+                Geef Nalatenschap →
+              </button>
+            )}
+            {ERFGOED_SOLD_OUT && NALATENSCHAP_SOLD_OUT && (
+              <p className="text-sm text-[#888]">
+                De dozen zijn tijdelijk uitverkocht. Meld je aan op de wachtlijst via de pakketkaarten hierboven.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -435,12 +450,14 @@ export default function PricingContent() {
           >
             Start gratis →
           </button>
-          <button
-            onClick={() => router.push("/checkout?package=ERFGOED")}
-            className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-8 py-4 rounded-xl transition-colors"
-          >
-            Bestel de Erfgoed Box →
-          </button>
+          {!ERFGOED_SOLD_OUT && (
+            <button
+              onClick={() => router.push("/checkout?package=ERFGOED")}
+              className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-8 py-4 rounded-xl transition-colors"
+            >
+              Bestel de Erfgoed Box →
+            </button>
+          )}
         </div>
         <p className="text-[#555] text-xs mt-5">
           {BOX_IS_PREORDER ? "Doos volgt over 2 weken · " : "Gratis verzending · "}
@@ -464,6 +481,7 @@ function PackageCard({
   hero,
   badge,
   isPreorder,
+  soldOut = false,
   foundingSpots,
   features,
   perfectFor,
@@ -480,6 +498,7 @@ function PackageCard({
   hero: boolean;
   badge: string | null;
   isPreorder: boolean;
+  soldOut?: boolean;
   foundingSpots: { remaining: number; total: number } | null;
   features: string[];
   perfectFor: string[];
@@ -487,12 +506,32 @@ function PackageCard({
   onSelect: () => void;
 }) {
   const showFoundingBadge = foundingSpots && foundingSpots.remaining > 0 && foundingSpots.remaining < foundingSpots.total;
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyStatus, setNotifyStatus] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
+
+  async function handleNotify(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setNotifyStatus("loading");
+    try {
+      const res = await fetch(`${API_BASE}/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: notifyEmail, package_type: id }),
+      });
+      const data = await res.json();
+      setNotifyStatus(res.ok && !data.already_registered ? "success" : res.ok ? "duplicate" : "error");
+    } catch {
+      setNotifyStatus("error");
+    }
+  }
 
   return (
     <div
       className={cn(
         "relative bg-white rounded-2xl overflow-hidden border transition-shadow",
-        hero
+        soldOut
+          ? "border-[#e5e0d8] shadow-md"
+          : hero
           ? "border-[#d4af37] shadow-2xl md:scale-105 ring-2 ring-[#d4af37]/30"
           : "border-[#e5e0d8] shadow-md hover:shadow-lg"
       )}
@@ -502,20 +541,28 @@ function PackageCard({
           ⭐ {badge} ⭐
         </div>
       )}
-      {isPreorder && !badge && (
-        <div className="bg-[#1a1a1a] text-white text-xs font-bold text-center py-2 tracking-widest">
-          PRE-ORDER · DIGITAAL DIRECT BESCHIKBAAR
+      {soldOut ? (
+        <div className="bg-[#888] text-white text-xs font-bold text-center py-2 tracking-widest">
+          TIJDELIJK UITVERKOCHT
         </div>
-      )}
-      {isPreorder && badge && (
-        <div className="bg-[#1a1a1a]/80 text-white text-xs font-medium text-center py-1 tracking-wider">
-          PRE-ORDER · DIGITAAL DIRECT BESCHIKBAAR
-        </div>
+      ) : (
+        <>
+          {isPreorder && !badge && (
+            <div className="bg-[#1a1a1a] text-white text-xs font-bold text-center py-2 tracking-widest">
+              PRE-ORDER · DIGITAAL DIRECT BESCHIKBAAR
+            </div>
+          )}
+          {isPreorder && badge && (
+            <div className="bg-[#1a1a1a]/80 text-white text-xs font-medium text-center py-1 tracking-wider">
+              PRE-ORDER · DIGITAAL DIRECT BESCHIKBAAR
+            </div>
+          )}
+        </>
       )}
 
       <div className="p-6 md:p-7">
         {/* Founding member badge */}
-        {showFoundingBadge && id !== "VERHAAL" && (
+        {showFoundingBadge && id !== "VERHAAL" && !soldOut && (
           <div className="flex items-center gap-1.5 bg-[#d4af37]/15 border border-[#d4af37]/40 rounded-lg px-3 py-1.5 mb-4 w-fit">
             <Star className="h-3 w-3 text-[#d4af37] fill-[#d4af37]" />
             <span className="text-xs font-bold text-[#1a1a1a]">Founding Member inbegrepen</span>
@@ -527,7 +574,7 @@ function PackageCard({
           <h3 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">{name}</h3>
           <p className="text-[#888] text-sm mb-3">{subtitle}</p>
           {image && (
-            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-4">
+            <div className={cn("relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-4", soldOut && "opacity-60")}>
               <Image
                 src={image}
                 alt={`${name} box`}
@@ -538,24 +585,60 @@ function PackageCard({
             </div>
           )}
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-[#1a1a1a]">{price}</span>
+            <span className={cn("text-4xl font-bold", soldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>{price}</span>
           </div>
           <p className="text-[#888] text-xs mt-1">{priceSub}</p>
           {priceNote && <p className="text-xs text-[#d4af37] font-medium mt-0.5">{priceNote}</p>}
         </div>
 
         {/* CTA */}
-        <button
-          onClick={onSelect}
-          className={cn(
-            "w-full py-3 rounded-xl font-bold text-sm transition-colors mb-5",
-            hero
-              ? "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"
-              : "bg-[#1a1a1a] hover:bg-[#333] text-white"
-          )}
-        >
-          {ctaLabel} →
-        </button>
+        {soldOut ? (
+          <div className="mb-5">
+            {notifyStatus === "success" ? (
+              <div className="w-full py-3 rounded-xl bg-[#f0ece6] text-[#1a1a1a] text-sm text-center font-medium">
+                ✓ Je staat op de wachtlijst!
+              </div>
+            ) : notifyStatus === "duplicate" ? (
+              <div className="w-full py-3 rounded-xl bg-[#f0ece6] text-[#1a1a1a] text-sm text-center font-medium">
+                Je staat al op de wachtlijst.
+              </div>
+            ) : (
+              <form onSubmit={handleNotify} className="space-y-2">
+                <p className="text-xs text-[#888] text-center">Stuur me een melding als dit pakket weer beschikbaar is</p>
+                <input
+                  type="email"
+                  value={notifyEmail}
+                  onChange={(e) => setNotifyEmail(e.target.value)}
+                  placeholder="jouw@email.nl"
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#e5e0d8] text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                />
+                <button
+                  type="submit"
+                  disabled={notifyStatus === "loading"}
+                  className="w-full py-3 rounded-xl font-bold text-sm bg-[#1a1a1a] hover:bg-[#333] text-white transition-colors disabled:opacity-60"
+                >
+                  {notifyStatus === "loading" ? "Bezig…" : "Stuur me een melding →"}
+                </button>
+                {notifyStatus === "error" && (
+                  <p className="text-xs text-red-600 text-center">Er ging iets mis. Probeer het opnieuw.</p>
+                )}
+              </form>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onSelect}
+            className={cn(
+              "w-full py-3 rounded-xl font-bold text-sm transition-colors mb-5",
+              hero
+                ? "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"
+                : "bg-[#1a1a1a] hover:bg-[#333] text-white"
+            )}
+          >
+            {ctaLabel} →
+          </button>
+        )}
 
         {/* Features */}
         <ul className="space-y-2 mb-5">

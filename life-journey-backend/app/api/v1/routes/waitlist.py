@@ -15,8 +15,9 @@ from app.schemas.waitlist import WaitlistJoinRequest, WaitlistJoinResponse
 router = APIRouter()
 
 _SOLD_OUT: dict[str, dict[str, str]] = {
-    "ERFGOED": {"name": "De Erfgoed Box", "available_from": "september 2025"},
-    "VOOR_ALTIJD": {"name": "Voor Altijd", "available_from": "september 2025"},
+    "ERFGOED": {"name": "De Erfgoed Box", "available_from": "nader te bepalen"},
+    "NALATENSCHAP": {"name": "Nalatenschap", "available_from": "nader te bepalen"},
+    "VOOR_ALTIJD": {"name": "Voor Altijd", "available_from": "nader te bepalen"},
 }
 
 
