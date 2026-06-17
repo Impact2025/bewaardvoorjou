@@ -110,7 +110,6 @@ def presign_gift_message(
     als `message_media_url` mee in create-payment-intent.
     """
     import uuid as _uuid
-    from pathlib import Path as _Path
     from app.services.media.validators import sanitize_filename, validate_file_extension
 
     ext = validate_file_extension(payload.filename)  # blokkeert gevaarlijke/onbekende extensies
