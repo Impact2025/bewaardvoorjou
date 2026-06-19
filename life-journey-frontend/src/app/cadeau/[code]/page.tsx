@@ -256,11 +256,25 @@ function StartForm({ token, name, gifterName }: { token: string; name: string; g
 
 function PersonalMessage({ data, gifter }: { data: GiftRedemption; gifter: string }) {
   const [showTranscript, setShowTranscript] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   if (data.message_media_type === "video" && data.message_media_url) {
     return (
       <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg">
-        <video src={data.message_media_url} controls playsInline className="w-full" />
+        {videoError ? (
+          <div className="p-6 text-center text-[#aaa] text-sm">
+            <p className="mb-1">Het videobericht kon niet worden geladen.</p>
+            <p>Neem contact op via <span className="text-[#d4af37]">support@bewaardvoorjou.nl</span></p>
+          </div>
+        ) : (
+          <video
+            src={data.message_media_url}
+            controls
+            playsInline
+            className="w-full"
+            onError={() => setVideoError(true)}
+          />
+        )}
         <Transcript
           status={data.message_status}
           transcript={data.message_transcript}

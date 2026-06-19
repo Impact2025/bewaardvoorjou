@@ -441,10 +441,14 @@ def get_order_status(
 def _gift_media_playback_url(object_key: str | None) -> str | None:
     """Bouw een afspeelbare URL voor een audio/video cadeaubericht.
 
-    S3/R2: een presigned GET-URL (1 uur geldig). Anders: de publieke serve-endpoint.
+    Voorkeur: publieke R2-URL (geen vervaldatum). Fallback: presigned URL (1 uur).
+    Laatste optie: lokale serve-endpoint (alleen dev/ephemeral).
     """
     if not object_key:
         return None
+    # Publieke R2-URL heeft geen vervaldatum en werkt altijd als de bucket publiek is
+    if settings.s3_public_url:
+        return f"{settings.s3_public_url.rstrip('/')}/{object_key}"
     if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
         try:
             import boto3
@@ -461,7 +465,7 @@ def _gift_media_playback_url(object_key: str | None) -> str | None:
             return s3.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": settings.s3_bucket, "Key": object_key},
-                ExpiresIn=3600,
+                ExpiresIn=604800,  # 7 dagen
             )
         except Exception as exc:
             logger.warning(f"Kon presigned URL niet maken voor {object_key}: {exc}")
