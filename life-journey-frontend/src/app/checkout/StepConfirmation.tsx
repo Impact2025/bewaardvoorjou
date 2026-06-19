@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Mail, Package, Truck, Printer, Phone } from "lucide-react";
+import { CheckCircle, Mail, Package, Truck, Printer, Phone, FileText } from "lucide-react";
 import { PACKAGE_NAMES, getOrderStatus, type OrderStatusResponse } from "@/lib/api/orders";
 import { type CheckoutState } from "./CheckoutContent";
 
@@ -58,21 +58,52 @@ export default function StepConfirmation({ state }: Props) {
 
       {/* Startkaart — koper kan deze printen/overhandigen (elk pakket) */}
       {isGift && startkaartUrl && (
-        <div className="bg-[#1a1a1a] rounded-2xl p-6 text-left">
-          <div className="flex items-center gap-2 mb-2">
-            <Printer className="h-5 w-5 text-[#d4af37]" />
-            <h3 className="font-serif font-bold text-lg text-[#d4af37]">De startkaart van {who}</h3>
+        <div className="bg-[#1a1a1a] rounded-2xl p-6 text-left space-y-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Printer className="h-5 w-5 text-[#d4af37]" />
+              <h3 className="font-serif font-bold text-lg text-[#d4af37]">Iets voor {who}</h3>
+            </div>
+            <p className="text-sm text-[#bbb] mb-4">
+              Hiermee opent {who} het cadeau — laat de QR-code zien of geef de cadeaubon persoonlijk mee.
+            </p>
           </div>
-          <p className="text-sm text-[#bbb] mb-4">
-            Hiermee opent {who} het cadeau — print de kaart of laat de QR-code op je telefoon zien.
-            Jouw persoonlijke bericht is het eerste wat ze zien.
-          </p>
-          <button
-            onClick={() => window.open(startkaartUrl, "_blank")}
-            className="bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-5 py-3 rounded-xl transition-colors"
-          >
-            Bekijk &amp; print de startkaart →
-          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Cadeaubon (A4 PDF) */}
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="flex items-center gap-2 mb-1">
+                <FileText className="h-4 w-4 text-[#d4af37]" />
+                <p className="text-white text-sm font-semibold">Cadeaubon (A4)</p>
+              </div>
+              <p className="text-[#999] text-xs mb-3 leading-relaxed">
+                Mooie, drukbare cadeaubon met naam, bericht en QR-code. Perfect om in een envelop te doen.
+              </p>
+              <button
+                onClick={() => window.open(`/cadeaubon/${redemptionToken}`, "_blank")}
+                className="w-full bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-4 py-2.5 rounded-lg transition-colors text-sm"
+              >
+                Download cadeaubon →
+              </button>
+            </div>
+
+            {/* Digitale startkaart (QR) */}
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="flex items-center gap-2 mb-1">
+                <Printer className="h-4 w-4 text-[#aaa]" />
+                <p className="text-white text-sm font-semibold">Digitale startkaart</p>
+              </div>
+              <p className="text-[#999] text-xs mb-3 leading-relaxed">
+                Activatiepagina met QR-code. {who} vult hier hun e-mailadres in om direct te starten.
+              </p>
+              <button
+                onClick={() => window.open(startkaartUrl, "_blank")}
+                className="w-full border border-white/20 text-white hover:bg-white/10 font-medium px-4 py-2.5 rounded-lg transition-colors text-sm"
+              >
+                Bekijk startkaart →
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

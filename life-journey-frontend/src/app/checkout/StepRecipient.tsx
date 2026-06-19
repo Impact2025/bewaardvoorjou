@@ -183,11 +183,48 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
 
           {!state.skipShipping && (
             <div className="px-5 pb-5 space-y-4 border-t border-[#f0ece6]">
+              {/* Bezorgen naar ontvanger of naar koper zelf */}
               <div>
-                <label className="block text-sm font-medium text-[#555] mb-1">Volledige naam *</label>
+                <p className="text-xs font-medium text-[#555] mb-2">Bezorgen naar</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onChange({ deliverToSelf: false })}
+                    className={`py-2.5 px-3 rounded-lg text-xs border transition-colors text-left ${
+                      !state.deliverToSelf
+                        ? "border-[#d4af37] bg-[#d4af37]/10 text-[#1a1a1a] font-medium"
+                        : "border-[#e5e0d8] text-[#666] hover:border-[#d4af37]/50"
+                    }`}
+                  >
+                    <span className="block font-medium">{name === "hen" ? "De ontvanger" : name}</span>
+                    <span className="text-[#888] font-normal">Cadeau wordt bezorgd bij {name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onChange({ deliverToSelf: true })}
+                    className={`py-2.5 px-3 rounded-lg text-xs border transition-colors text-left ${
+                      state.deliverToSelf
+                        ? "border-[#d4af37] bg-[#d4af37]/10 text-[#1a1a1a] font-medium"
+                        : "border-[#e5e0d8] text-[#666] hover:border-[#d4af37]/50"
+                    }`}
+                  >
+                    <span className="block font-medium">Mijn eigen adres</span>
+                    <span className="text-[#888] font-normal">Ik geef het zelf aan {name}</span>
+                  </button>
+                </div>
+                {state.deliverToSelf && (
+                  <p className="text-xs text-[#d4af37] mt-2 bg-[#d4af37]/5 rounded-lg px-3 py-2">
+                    Vul hieronder jouw eigen adres in — de doos wordt bij jou thuis bezorgd.
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#555] mb-1">
+                  {state.deliverToSelf ? "Jouw volledige naam *" : "Volledige naam ontvanger *"}
+                </label>
                 <input
                   type="text"
-                  placeholder="Voor- en achternaam"
+                  placeholder={state.deliverToSelf ? "Jouw voor- en achternaam" : "Voor- en achternaam"}
                   value={addr.full_name}
                   onChange={(e) => updateAddr("full_name", e.target.value)}
                   className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"

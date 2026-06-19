@@ -24,7 +24,7 @@ import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
 
 const SOLD_OUT_PACKAGES = new Set<string>(["ERFGOED", "NALATENSCHAP"]);
-const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL"]);
+const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL", "BABY_GIFT"]);
 const SOLD_OUT_ADDONS = new Set<string>(["GIFT_BOX", "EXTRA_USB", "EXTRA_STORAGE"]);
 
 // Stappen verschillen voor een cadeau (de boodschap is het hart) en een eigen aankoop.
@@ -48,6 +48,7 @@ export interface CheckoutState {
   deliveryDate: string;
   shippingAddress: ShippingAddress;
   skipShipping: boolean;
+  deliverToSelf: boolean;
   guestEmail: string;
   orderId: string;
   paymentIntentId: string;
@@ -68,7 +69,7 @@ export default function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const rawPackage = searchParams.get("package") ?? "VERHAAL";
-  const packageType: PackageType = ["VERHAAL", "ERFGOED", "NALATENSCHAP", "BEGIN", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
+  const packageType: PackageType = ["VERHAAL", "ERFGOED", "NALATENSCHAP", "BABY_GIFT", "BEGIN", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
     ? (rawPackage as PackageType)
     : "VERHAAL";
 
@@ -106,6 +107,7 @@ export default function CheckoutContent() {
     deliveryDate: "",
     shippingAddress: DEFAULT_ADDRESS,
     skipShipping: DIGITAL_ONLY_PACKAGES.has(packageType),
+    deliverToSelf: false,
     guestEmail: "",
     orderId: "",
     paymentIntentId: "",
