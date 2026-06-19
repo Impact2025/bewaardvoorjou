@@ -7,6 +7,12 @@ import { BabyHeader } from "@/components/baby/BabyHeader";
 import { BabyFooter } from "@/components/baby/BabyFooter";
 import { useBabyTheme, THEME_CONFIG, type BabyTheme } from "@/components/baby/BabyThemeContext";
 
+const THEME_LOGOS: Record<BabyTheme, string> = {
+  meisje:   "/images/logo-baby-meisje.png",
+  jongen:   "/images/logo-baby-jongen.png",
+  neutraal: "/images/logo-baby-neutraal.png",
+};
+
 const FEATURES: { Icon: LucideIcon; title: string; body: string }[] = [
   {
     Icon: BookOpen,
@@ -89,13 +95,20 @@ export function VoorBabyContent() {
                     <button
                       key={th}
                       onClick={() => setTheme(th)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         isActive
                           ? `${cfg.switcherBg} shadow-sm`
                           : "text-gray-500 hover:text-gray-700"
                       }`}
                     >
-                      {cfg.emoji} {cfg.label}
+                      <Image
+                        src={THEME_LOGOS[th]}
+                        alt={cfg.label}
+                        width={20}
+                        height={20}
+                        className="w-5 h-5 object-contain"
+                      />
+                      {cfg.label}
                     </button>
                   );
                 })}

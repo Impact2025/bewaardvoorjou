@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useBabyTheme, THEME_CONFIG, type BabyTheme } from "./BabyThemeContext";
 
@@ -18,12 +17,15 @@ const NAV_LINKS = [
 
 const THEMES: BabyTheme[] = ["meisje", "jongen", "neutraal"];
 
+const THEME_LOGOS: Record<BabyTheme, string> = {
+  meisje:   "/images/logo-baby-meisje.png",
+  jongen:   "/images/logo-baby-jongen.png",
+  neutraal: "/images/logo-baby-neutraal.png",
+};
+
 export function BabyHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, setTheme, t } = useBabyTheme();
-  const pathname = usePathname();
-
-  const isLanding = pathname === "/voor-baby";
 
   return (
     <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
@@ -31,9 +33,15 @@ export function BabyHeader() {
 
         {/* Sub-brand logo */}
         <Link href="/voor-baby" className="flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center text-xl">
-            👶
-          </div>
+          <Image
+            key={theme}
+            src={THEME_LOGOS[theme]}
+            alt="Bewaard voor Baby logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain transition-all duration-300"
+            priority
+          />
           <div className="flex flex-col leading-tight">
             <span className="font-bold text-gray-900 text-base">Bewaard voor Baby</span>
             <Link
@@ -52,7 +60,7 @@ export function BabyHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className={`font-medium transition-colors hover:text-gray-900`}
+              className="font-medium transition-colors hover:text-gray-900"
             >
               {link.label}
             </Link>
@@ -71,13 +79,20 @@ export function BabyHeader() {
                   key={th}
                   onClick={() => setTheme(th)}
                   title={cfg.label}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     isActive
                       ? `${cfg.switcherBg} shadow-sm`
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  {cfg.emoji} <span className="hidden xl:inline">{cfg.label}</span>
+                  <Image
+                    src={THEME_LOGOS[th]}
+                    alt={cfg.label}
+                    width={16}
+                    height={16}
+                    className="w-4 h-4 object-contain"
+                  />
+                  <span className="hidden xl:inline">{cfg.label}</span>
                 </button>
               );
             })}
@@ -135,13 +150,20 @@ export function BabyHeader() {
                     <button
                       key={th}
                       onClick={() => setTheme(th)}
-                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
                         isActive
                           ? `${cfg.switcherBg} shadow-sm`
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
-                      {cfg.emoji} {cfg.label}
+                      <Image
+                        src={THEME_LOGOS[th]}
+                        alt={cfg.label}
+                        width={18}
+                        height={18}
+                        className="w-4 h-4 object-contain"
+                      />
+                      {cfg.label}
                     </button>
                   );
                 })}
