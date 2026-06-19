@@ -109,7 +109,7 @@ export default function CadeaubonPage() {
     packageName: content.name,
     packageTagline: content.tagline,
     packageFeatures: content.features,
-    personalMessage: data.personal_message,
+    personalMessage: data.personal_message || data.card_message,
     activationUrl,
   };
 
