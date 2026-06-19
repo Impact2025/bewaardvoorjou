@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import { createBabyJourney, type NarratorRole, type GrandparentEntry } from "@/lib/api/baby";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -49,6 +50,7 @@ const NARRATOR_OPTIONS: { role: NarratorRole; label: string; description: string
 
 export default function BabyOnboardingPage() {
   const router = useRouter();
+  const { t } = useBabyTheme();
   const [step, setStep] = useState<Step>(0);
   const [state, setState] = useState<WizardState>({
     babyName: "",
@@ -117,12 +119,12 @@ export default function BabyOnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center px-4 py-12">
+    <div className={`min-h-screen ${t.primaryBg} flex flex-col items-center justify-center px-4 py-12`}>
       <div className="w-full max-w-lg">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <p className="text-pink-600 font-semibold text-sm uppercase tracking-wider mb-2">
+          <p className={`${t.primaryText} font-semibold text-sm uppercase tracking-wider mb-2`}>
             Bewaard voor Baby
           </p>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -136,14 +138,14 @@ export default function BabyOnboardingPage() {
             <div
               key={i}
               className={`h-1.5 flex-1 rounded-full transition-colors ${
-                i <= step ? "bg-pink-500" : "bg-pink-200"
+                i <= step ? t.progressActive : t.progressBg
               }`}
             />
           ))}
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-sm border border-pink-100 p-8">
+        <div className={`bg-white rounded-3xl shadow-sm border ${t.primaryBorder} p-8`}>
 
           {/* Stap 0: Babynaam */}
           {step === 0 && (
@@ -159,7 +161,7 @@ export default function BabyOnboardingPage() {
                   placeholder="Naam van jullie baby"
                   maxLength={50}
                   autoFocus
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
+                  className={`w-full border border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 ${t.inputRing} focus:border-transparent`}
                 />
                 <p className="mt-2 text-sm text-gray-400">
                   Dit is de naam die in alle vragen en e-mails verschijnt.
@@ -182,7 +184,7 @@ export default function BabyOnboardingPage() {
                   type="date"
                   value={state.babyBirthDate}
                   onChange={set("babyBirthDate")}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className={`w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${t.inputRing}`}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -194,7 +196,7 @@ export default function BabyOnboardingPage() {
                     type="time"
                     value={state.birthTimeStr}
                     onChange={set("birthTimeStr")}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className={`w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${t.inputRing}`}
                   />
                 </div>
                 <div>
@@ -209,7 +211,7 @@ export default function BabyOnboardingPage() {
                     value={state.birthWeightGrams}
                     onChange={set("birthWeightGrams")}
                     placeholder="3.420"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className={`w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${t.inputRing}`}
                   />
                 </div>
               </div>
@@ -225,7 +227,7 @@ export default function BabyOnboardingPage() {
                   value={state.birthLengthCm}
                   onChange={set("birthLengthCm")}
                   placeholder="52.0"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className={`w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${t.inputRing}`}
                 />
               </div>
             </div>
@@ -243,14 +245,14 @@ export default function BabyOnboardingPage() {
                   onClick={() => setState((s) => ({ ...s, narratorRole: opt.role }))}
                   className={`w-full text-left p-5 rounded-2xl border-2 transition-all ${
                     state.narratorRole === opt.role
-                      ? "border-pink-500 bg-pink-50"
-                      : "border-gray-200 hover:border-pink-300 hover:bg-pink-50/30"
+                      ? t.selectedBorder
+                      : `border-gray-200 ${t.hoverBorder}`
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-gray-900">{opt.label}</span>
                     {state.narratorRole === opt.role && (
-                      <span className="w-5 h-5 bg-pink-500 rounded-full flex items-center justify-center">
+                      <span className={`w-5 h-5 ${t.selectedDot} rounded-full flex items-center justify-center`}>
                         <Check className="w-3 h-3 text-white" />
                       </span>
                     )}
@@ -273,7 +275,7 @@ export default function BabyOnboardingPage() {
                   value={state.partnerEmail}
                   onChange={set("partnerEmail")}
                   placeholder="partner@email.nl"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className={`w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${t.inputRing}`}
                 />
                 <p className="mt-1 text-xs text-gray-400">
                   De partner ontvangt een uitnodiging om mee te schrijven.
@@ -285,8 +287,8 @@ export default function BabyOnboardingPage() {
                   Opa en oma toevoegen (optioneel)
                 </p>
                 {grandparents.map((gp, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl mb-2 text-sm">
-                    <Check className="w-4 h-4 text-pink-500 shrink-0" />
+                  <div key={i} className={`flex items-center gap-3 p-3 ${t.itemBg} rounded-xl mb-2 text-sm`}>
+                    <Check className={`w-4 h-4 ${t.checkColor} shrink-0`} />
                     <span className="text-gray-700">
                       {gp.name} — <span className="text-gray-400">{gp.email}</span>
                     </span>
@@ -298,20 +300,20 @@ export default function BabyOnboardingPage() {
                     value={state.grandparentName}
                     onChange={set("grandparentName")}
                     placeholder="Naam (bijv. Oma Riet)"
-                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className={`border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${t.inputRing}`}
                   />
                   <input
                     type="email"
                     value={state.grandparentEmail}
                     onChange={set("grandparentEmail")}
                     placeholder="E-mailadres"
-                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className={`border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${t.inputRing}`}
                   />
                 </div>
                 <button
                   onClick={addGrandparent}
                   disabled={!state.grandparentEmail || !state.grandparentName}
-                  className="mt-2 text-sm text-pink-600 font-medium hover:text-pink-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={`mt-2 text-sm ${t.primaryText} font-medium ${t.primaryTextMedium} disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
                   + Voeg toe
                 </button>
@@ -338,7 +340,7 @@ export default function BabyOnboardingPage() {
             <button
               onClick={handleNext}
               disabled={!canNext() || loading}
-              className="flex-1 flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className={`flex-1 flex items-center justify-center gap-2 ${t.primary} text-white font-semibold px-6 py-3 rounded-xl ${t.primaryHover} transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm`}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
