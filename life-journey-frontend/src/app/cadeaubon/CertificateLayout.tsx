@@ -9,7 +9,7 @@ export interface CertificateProps {
   packageType: string;
   packageName: string;
   packageTagline: string;
-  packageFeatures: string[];
+  packageFeatures: readonly string[];
   personalMessage: string | null;
   activationUrl: string;
 }
