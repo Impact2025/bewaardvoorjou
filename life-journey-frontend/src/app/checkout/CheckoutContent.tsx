@@ -23,9 +23,9 @@ import StepGifting from "./StepGifting";
 import StepPayment from "./StepPayment";
 import StepConfirmation from "./StepConfirmation";
 
-const SOLD_OUT_PACKAGES = new Set<string>([]);
+const SOLD_OUT_PACKAGES = new Set<string>(["ERFGOED", "NALATENSCHAP"]);
 const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL"]);
-const SOLD_OUT_ADDONS = new Set<string>([]);
+const SOLD_OUT_ADDONS = new Set<string>(["GIFT_BOX", "EXTRA_USB", "EXTRA_STORAGE"]);
 
 // Stappen verschillen voor een cadeau (de boodschap is het hart) en een eigen aankoop.
 // We renderen op basis van het label, niet op een vaste index, zodat de 'voor mezelf'-
@@ -373,40 +373,50 @@ function StepSelectPlan({
 
       {/* Pakket keuze */}
       <div className="space-y-3">
-        {(["VERHAAL", "ERFGOED", "NALATENSCHAP"] as PackageType[]).map((pkg) => (
-          <label
-            key={pkg}
-            className={cn(
-              "flex items-center justify-between p-4 rounded-xl border transition-colors cursor-pointer",
-              state.packageType === pkg
-                ? "border-[#d4af37] bg-[#d4af37]/10"
-                : "border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="package"
-                value={pkg}
-                checked={state.packageType === pkg}
-                onChange={() => onChange({ packageType: pkg, skipShipping: DIGITAL_ONLY_PACKAGES.has(pkg) })}
-                className="accent-[#d4af37]"
-              />
-              <div>
-                <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
-                {pkg === "ERFGOED" && <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>}
-                {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>}
-                {pkg === "VERHAAL" && <p className="text-xs text-[#888]">Digitaal · 5 jaar inbegrepen</p>}
+        {(["VERHAAL", "ERFGOED", "NALATENSCHAP"] as PackageType[]).map((pkg) => {
+          const pkgSoldOut = SOLD_OUT_PACKAGES.has(pkg);
+          return (
+            <label
+              key={pkg}
+              className={cn(
+                "flex items-center justify-between p-4 rounded-xl border transition-colors",
+                pkgSoldOut
+                  ? "opacity-60 cursor-not-allowed border-[#e5e0d8] bg-[#f8f6f2]"
+                  : state.packageType === pkg
+                  ? "cursor-pointer border-[#d4af37] bg-[#d4af37]/10"
+                  : "cursor-pointer border-[#e5e0d8] bg-white hover:border-[#d4af37]/50"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="package"
+                  value={pkg}
+                  checked={state.packageType === pkg}
+                  onChange={() => !pkgSoldOut && onChange({ packageType: pkg, skipShipping: DIGITAL_ONLY_PACKAGES.has(pkg) })}
+                  disabled={pkgSoldOut}
+                  className="accent-[#d4af37]"
+                />
+                <div>
+                  <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
+                  {pkgSoldOut
+                    ? <p className="text-xs text-[#e07020] font-medium">Tijdelijk uitverkocht</p>
+                    : pkg === "ERFGOED"
+                    ? <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>
+                    : pkg === "NALATENSCHAP"
+                    ? <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>
+                    : <p className="text-xs text-[#888]">Digitaal · 5 jaar inbegrepen</p>
+                  }
+                </div>
               </div>
-            </div>
-            <div className="text-right">
-              <span className="font-bold text-[#1a1a1a]">€{PACKAGE_PRICES[pkg]}</span>
-              {pkg === "ERFGOED" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
-              {pkg === "VERHAAL" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
-              {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">eenmalig</p>}
-            </div>
-          </label>
-        ))}
+              <div className="text-right">
+                <span className={cn("font-bold", pkgSoldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>€{PACKAGE_PRICES[pkg]}</span>
+                {pkg !== "NALATENSCHAP" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
+                {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">eenmalig</p>}
+              </div>
+            </label>
+          );
+        })}
       </div>
 
       {/* Add-ons */}
