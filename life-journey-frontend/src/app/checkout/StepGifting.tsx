@@ -2,6 +2,7 @@
 
 import { type CheckoutState } from "./CheckoutContent";
 import { type GiftReveal } from "@/lib/api/orders";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 interface Props {
   state: CheckoutState;
@@ -12,10 +13,14 @@ interface Props {
 const DIGITAL_PACKAGES = new Set(["VERHAAL", "DIGITAAL", "BABY_GIFT"]);
 
 export default function StepGifting({ state, onChange, onNext }: Props) {
+  const { t } = useBabyTheme();
   const name = state.recipientName.trim() || "hen";
   const today = new Date().toISOString().slice(0, 10);
   const isDigital = DIGITAL_PACKAGES.has(state.packageType);
   const isBaby = state.packageType === "BABY_GIFT";
+  const selectedCard = isBaby ? `border-2 ${t.primaryBorder} ${t.primaryBg}` : "border-[#d4af37] bg-[#d4af37]/10";
+  const hoverCard = isBaby ? `border-[#e5e0d8] ${t.hoverBorder}` : "border-[#e5e0d8] hover:border-[#d4af37]/50";
+  const ctaBtn = isBaby ? `${t.primary} ${t.primaryHover} text-white` : "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]";
 
   const setReveal = (reveal: GiftReveal) => onChange({ giftReveal: reveal });
 
@@ -48,9 +53,7 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
           <label
             key={opt.value}
             className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-              state.giftReveal === opt.value
-                ? "border-[#d4af37] bg-[#d4af37]/10"
-                : "border-[#e5e0d8] hover:border-[#d4af37]/50"
+              state.giftReveal === opt.value ? selectedCard : hoverCard
             }`}
           >
             <input
@@ -104,7 +107,7 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
 
       <button
         onClick={onNext}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
+        className={`w-full ${ctaBtn} font-bold py-4 rounded-xl transition-colors text-lg`}
       >
         Volgende: Betalen →
       </button>

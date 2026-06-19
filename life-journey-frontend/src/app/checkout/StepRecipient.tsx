@@ -2,6 +2,7 @@
 
 import { type CheckoutState } from "./CheckoutContent";
 import { type ShippingAddress, type RecipientRelation } from "@/lib/api/orders";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 interface Props {
   state: CheckoutState;
@@ -36,9 +37,16 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DIGITAL_PACKAGES = new Set(["VERHAAL", "DIGITAAL", "BABY_GIFT"]);
 
 export default function StepRecipient({ state, onChange, onNext }: Props) {
+  const { t } = useBabyTheme();
   const isDigital = DIGITAL_PACKAGES.has(state.packageType);
   const isBaby = state.packageType === "BABY_GIFT";
   const addr = state.shippingAddress;
+
+  const activeBtn = isBaby ? `${t.primary} text-white` : "bg-[#d4af37] text-[#1a1a1a]";
+  const selectedOption = isBaby ? `${t.selectedBorder} text-gray-900 font-medium` : "border-[#d4af37] bg-[#d4af37]/10 text-[#1a1a1a] font-medium";
+  const hoverOption = isBaby ? `border-[#e5e0d8] text-[#666] ${t.hoverBorder}` : "border-[#e5e0d8] text-[#666] hover:border-[#d4af37]/50";
+  const ring = isBaby ? `focus:ring-2 ${t.inputRing}` : "focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50";
+  const ctaBtn = isBaby ? `${t.primary} ${t.primaryHover} text-white` : "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]";
   const name = state.recipientName.trim() || "hen";
   const activeRelations = isBaby ? BABY_RELATIONS : RELATIONS;
 
@@ -102,7 +110,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
           type="button"
           onClick={() => handleForSelfToggle(false)}
           className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
-            !state.forSelf ? "bg-[#d4af37] text-[#1a1a1a]" : "text-[#888] hover:text-[#1a1a1a]"
+            !state.forSelf ? activeBtn : "text-[#888] hover:text-[#1a1a1a]"
           }`}
         >
           🎁 Voor iemand anders
@@ -111,7 +119,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
           type="button"
           onClick={() => handleForSelfToggle(true)}
           className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
-            state.forSelf ? "bg-[#d4af37] text-[#1a1a1a]" : "text-[#888] hover:text-[#1a1a1a]"
+            state.forSelf ? activeBtn : "text-[#888] hover:text-[#1a1a1a]"
           }`}
         >
           👤 Voor mezelf
@@ -137,7 +145,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
               value={state.recipientName}
               onChange={(e) => onChange({ recipientName: e.target.value })}
               maxLength={100}
-              className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+              className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
             />
           </div>
 
@@ -153,9 +161,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                   type="button"
                   onClick={() => onChange({ recipientRelation: r.value })}
                   className={`py-2 px-3 rounded-lg text-sm border transition-colors ${
-                    state.recipientRelation === r.value
-                      ? "border-[#d4af37] bg-[#d4af37]/10 text-[#1a1a1a] font-medium"
-                      : "border-[#e5e0d8] text-[#666] hover:border-[#d4af37]/50"
+                    state.recipientRelation === r.value ? selectedOption : hoverOption
                   }`}
                 >
                   {r.label}
@@ -173,7 +179,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
               placeholder={`${name.toLowerCase()}@email.nl`}
               value={state.recipientEmail}
               onChange={(e) => onChange({ recipientEmail: e.target.value })}
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
                 state.recipientEmail && !recipientEmailValid ? "border-red-300 bg-red-50" : "border-[#e5e0d8]"
               }`}
             />
@@ -254,7 +260,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                   placeholder={state.deliverToSelf ? "Jouw voor- en achternaam" : "Voor- en achternaam"}
                   value={addr.full_name}
                   onChange={(e) => updateAddr("full_name", e.target.value)}
-                  className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                  className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                 />
               </div>
               <div className="grid grid-cols-3 gap-3">
@@ -265,7 +271,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                     placeholder="Kerkstraat"
                     value={addr.street}
                     onChange={(e) => updateAddr("street", e.target.value)}
-                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                   />
                 </div>
                 <div>
@@ -275,7 +281,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                     placeholder="12A"
                     value={addr.house_number}
                     onChange={(e) => updateAddr("house_number", e.target.value)}
-                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                   />
                 </div>
               </div>
@@ -288,7 +294,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                     value={addr.postal_code}
                     onChange={(e) => updateAddr("postal_code", e.target.value.toUpperCase())}
                     maxLength={7}
-                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                   />
                 </div>
                 <div>
@@ -298,7 +304,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                     placeholder="Amsterdam"
                     value={addr.city}
                     onChange={(e) => updateAddr("city", e.target.value)}
-                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                    className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                   />
                 </div>
               </div>
@@ -307,7 +313,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
                 <select
                   value={addr.country}
                   onChange={(e) => updateAddr("country", e.target.value)}
-                  className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+                  className="w-full border border-[#e5e0d8] rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
                 >
                   <option value="NL">Nederland</option>
                   <option value="BE">België</option>
@@ -332,7 +338,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
           placeholder="jij@email.nl"
           value={state.guestEmail}
           onChange={(e) => onChange({ guestEmail: e.target.value })}
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
             state.guestEmail && !emailValid ? "border-red-300 bg-red-50" : "border-[#e5e0d8]"
           }`}
         />
@@ -344,7 +350,7 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
       <button
         onClick={onNext}
         disabled={!isValid}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] disabled:bg-[#e5e0d8] disabled:text-[#aaa] disabled:cursor-not-allowed text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
+        className={`w-full ${ctaBtn} disabled:bg-[#e5e0d8] disabled:text-[#aaa] disabled:cursor-not-allowed font-bold py-4 rounded-xl transition-colors text-lg`}
       >
         {state.forSelf ? "Volgende: Betalen →" : "Volgende: Jouw boodschap →"}
       </button>

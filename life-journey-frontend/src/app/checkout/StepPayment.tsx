@@ -7,6 +7,7 @@ import { createPaymentIntent, PACKAGE_NAMES, ADDON_OPTIONS } from "@/lib/api/ord
 import { validatePromoCode } from "@/lib/api/promo-codes";
 import { type CheckoutState } from "./CheckoutContent";
 import { Shield, Lock } from "lucide-react";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 interface Props {
   state: CheckoutState;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export default function StepPayment({ state, totalPrice, onChange, onSuccess }: Props) {
+  const { t, theme } = useBabyTheme();
+  const isBaby = state.packageType === "BABY_GIFT";
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [publishableKey, setPublishableKey] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string>("");
@@ -91,7 +94,7 @@ export default function StepPayment({ state, totalPrice, onChange, onSuccess }: 
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 space-y-4">
-          <div className="w-10 h-10 border-4 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+          <div className={`w-10 h-10 border-4 border-t-transparent rounded-full animate-spin ${isBaby ? t.primaryBorder : "border-[#d4af37]"}`} />
           <p className="text-[#888] text-sm">Betaalpagina voorbereiden...</p>
         </div>
       )}
@@ -118,7 +121,7 @@ export default function StepPayment({ state, totalPrice, onChange, onSuccess }: 
             appearance: {
               theme: "stripe",
               variables: {
-                colorPrimary: "#d4af37",
+                colorPrimary: isBaby ? t.hex : "#d4af37",
                 colorBackground: "#ffffff",
                 colorText: "#1a1a1a",
                 colorDanger: "#df1b41",
@@ -238,10 +241,14 @@ function PaymentForm({
   orderId: string;
   onSuccess: (orderId: string) => void;
 }) {
+  const { t } = useBabyTheme();
+  const isBaby = state.packageType === "BABY_GIFT";
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const ctaBtn = isBaby ? `${t.primary} ${t.primaryHover} text-white` : "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]";
+  const priceColor = isBaby ? t.primaryText : "text-[#d4af37]";
 
   const totalAddons = state.addons.reduce((sum, code) => {
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
@@ -296,7 +303,7 @@ function PaymentForm({
             )}
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#d4af37]">€{totalPrice}</p>
+            <p className={`text-2xl font-bold ${priceColor}`}>€{totalPrice}</p>
             <p className="text-xs text-[#666]">eenmalig</p>
           </div>
         </div>
@@ -322,7 +329,7 @@ function PaymentForm({
       <button
         type="submit"
         disabled={submitting || !stripe}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] disabled:opacity-60 disabled:cursor-not-allowed text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg flex items-center justify-center gap-2"
+        className={`w-full ${ctaBtn} disabled:opacity-60 disabled:cursor-not-allowed font-bold py-4 rounded-xl transition-colors text-lg flex items-center justify-center gap-2`}
       >
         {submitting ? (
           <>

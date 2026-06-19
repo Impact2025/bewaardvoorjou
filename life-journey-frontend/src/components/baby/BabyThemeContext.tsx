@@ -14,6 +14,7 @@ export const THEME_CONFIG = {
   meisje: {
     label: "Meisje",
     emoji: "🩷",
+    hex: "#db2777",
     primary: "bg-pink-600",
     primaryHover: "hover:bg-pink-700",
     primaryText: "text-pink-600",
@@ -47,6 +48,7 @@ export const THEME_CONFIG = {
   jongen: {
     label: "Jongen",
     emoji: "💙",
+    hex: "#0ea5e9",
     primary: "bg-sky-500",
     primaryHover: "hover:bg-sky-600",
     primaryText: "text-sky-500",
@@ -80,6 +82,7 @@ export const THEME_CONFIG = {
   neutraal: {
     label: "Neutraal",
     emoji: "🌿",
+    hex: "#0d9488",
     primary: "bg-teal-600",
     primaryHover: "hover:bg-teal-700",
     primaryText: "text-teal-600",

@@ -2,6 +2,7 @@
 
 import { type CheckoutState } from "./CheckoutContent";
 import GiftMessageRecorder from "./GiftMessageRecorder";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 interface Props {
   state: CheckoutState;
@@ -10,8 +11,12 @@ interface Props {
 }
 
 export default function StepMessage({ state, onChange, onNext }: Props) {
+  const { t } = useBabyTheme();
   const name = state.recipientName.trim() || "hen";
   const isBaby = state.packageType === "BABY_GIFT";
+  const ctaBtn = isBaby ? `${t.primary} ${t.primaryHover} text-white` : "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]";
+  const confirmBox = isBaby ? `${t.primaryBg} border ${t.primaryBorder}` : "bg-[#f0f7eb] border border-[#2d5016]/20";
+  const confirmText = isBaby ? t.primaryText : "text-[#2d5016]";
 
   const hasMessage =
     state.messageMediaType === "text"
@@ -62,8 +67,8 @@ export default function StepMessage({ state, onChange, onNext }: Props) {
       />
 
       {hasMessage && (
-        <div className="bg-[#f0f7eb] border border-[#2d5016]/20 rounded-xl p-4">
-          <p className="text-sm text-[#2d5016]">
+        <div className={`${confirmBox} rounded-xl p-4`}>
+          <p className={`text-sm ${confirmText}`}>
             Mooi. Dit bewaren we tot {name} voor het eerst begint — dan is dit het eerste wat hij of
             zij ziet.
           </p>
@@ -73,7 +78,7 @@ export default function StepMessage({ state, onChange, onNext }: Props) {
       {/* Betaling nooit blokkeren op een bericht — overslaan mag altijd */}
       <button
         onClick={onNext}
-        className="w-full bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold py-4 rounded-xl transition-colors text-lg"
+        className={`w-full ${ctaBtn} font-bold py-4 rounded-xl transition-colors text-lg`}
       >
         Volgende: Hoe wil je het geven? →
       </button>
