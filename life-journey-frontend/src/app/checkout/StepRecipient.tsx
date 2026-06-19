@@ -20,8 +20,10 @@ const RELATIONS: { value: RecipientRelation; label: string }[] = [
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DIGITAL_PACKAGES = new Set(["VERHAAL", "DIGITAAL", "BABY_GIFT"]);
 
 export default function StepRecipient({ state, onChange, onNext }: Props) {
+  const isDigital = DIGITAL_PACKAGES.has(state.packageType);
   const addr = state.shippingAddress;
   const name = state.recipientName.trim() || "hen";
 
@@ -153,15 +155,17 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
               }`}
             />
             <p className="text-xs text-[#888] mt-1">
-              Hiermee kunnen we {name} een vriendelijk zetje geven om te starten. Geen
-              contactgegevens? Geen probleem — de doos bevat een eigen startkaart.
+              Hiermee kunnen we {name} een vriendelijk zetje geven om te starten.
+              {isDigital
+                ? " Geen contactgegevens? Geen probleem — je ontvangt na betaling een cadeaubon om te overhandigen."
+                : " Geen contactgegevens? Geen probleem — de doos bevat een eigen startkaart."}
             </p>
           </div>
         </div>
       )}
 
-      {/* Bezorgadres — optioneel via toggle (alleen relevant bij cadeau of fysiek pakket) */}
-      {!state.forSelf && (
+      {/* Bezorgadres — alleen bij fysieke pakketten (niet bij digitaal/Verhaal) */}
+      {!state.forSelf && !isDigital && (
         <div className="bg-white rounded-xl border border-[#e5e0d8] overflow-hidden">
           <button
             type="button"
