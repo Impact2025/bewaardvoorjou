@@ -1,3 +1,5 @@
+import { extractDetail } from "./api-error";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
 
 function getToken(): string | null {
@@ -79,7 +81,7 @@ export async function createPaymentIntent(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Betaling kon niet worden gestart");
+    throw new Error(extractDetail(err.detail, "Betaling kon niet worden gestart"));
   }
 
   return res.json();
@@ -111,7 +113,7 @@ export async function getOrderStatus(orderId: string): Promise<OrderStatusRespon
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Kon de betaalstatus niet ophalen");
+    throw new Error(extractDetail(err.detail, "Kon de betaalstatus niet ophalen"));
   }
   return res.json();
 }
@@ -140,7 +142,7 @@ export async function uploadGiftMessage(
   });
   if (!presignRes.ok) {
     const err = await presignRes.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Kon het bericht niet voorbereiden");
+    throw new Error(extractDetail(err.detail, "Kon het bericht niet voorbereiden"));
   }
   const presign: GiftMessagePresignResponse = await presignRes.json();
 
@@ -179,7 +181,7 @@ export async function getGiftRedemption(token: string): Promise<GiftRedemption> 
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Cadeau niet gevonden");
+    throw new Error(extractDetail(err.detail, "Cadeau niet gevonden"));
   }
   return res.json();
 }
@@ -196,7 +198,7 @@ export async function startGiftRedemption(token: string, email: string): Promise
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Kon het cadeau niet starten");
+    throw new Error(extractDetail(err.detail, "Kon het cadeau niet starten"));
   }
 }
 

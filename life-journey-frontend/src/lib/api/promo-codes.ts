@@ -1,3 +1,5 @@
+import { extractDetail } from "./api-error";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
 
 function getToken(): string | null {
@@ -85,7 +87,7 @@ export async function createPromoCode(data: CreatePromoCodePayload): Promise<Pro
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Aanmaken mislukt");
+    throw new Error(extractDetail(err.detail, "Aanmaken mislukt"));
   }
   return res.json();
 }
@@ -123,7 +125,7 @@ export async function redeemPromoCode(code: string): Promise<RedeemPromoCodeResp
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "Inwisselen mislukt");
+    throw new Error(extractDetail(err.detail, "Inwisselen mislukt"));
   }
   return res.json();
 }
