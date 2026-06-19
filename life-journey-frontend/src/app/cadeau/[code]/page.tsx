@@ -135,7 +135,7 @@ function RedemptionExperience({
           <PersonalMessage data={data} gifter={gifter} />
 
           {/* CTA — start zonder wachtwoord via magic link */}
-          <StartForm token={token} name={name} />
+          <StartForm token={token} name={name} gifterName={gifter} />
 
           {/* Print de startkaart (voor de gever) */}
           <div className="text-center">
@@ -156,12 +156,13 @@ function RedemptionExperience({
   );
 }
 
-function StartForm({ token, name }: { token: string; name: string }) {
+function StartForm({ token, name, gifterName }: { token: string; name: string; gifterName: string }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const addressed = !!name && name !== "Lieve ontvanger";
+  const giver = gifterName && gifterName !== "iemand die van je houdt" ? gifterName : null;
 
   const submit = async () => {
     if (!valid) return;
@@ -190,51 +191,65 @@ function StartForm({ token, name }: { token: string; name: string }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-center">
-      <h3 className="font-serif text-xl font-bold text-[#1a1a1a] mb-1">
-        {addressed ? `Ben jij ${name}? Begin hier` : "Klaar om te beginnen?"}
-      </h3>
-      <p className="text-sm text-[#888] mb-4">
-        Vul <strong>jouw eigen</strong> e-mailadres in — we sturen je een link om direct te starten.
-        Geen wachtwoord, geen app.
-      </p>
-      <div className="space-y-2">
-        <div className="relative">
-          <Mail className="h-4 w-4 text-[#aaa] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="email"
-            placeholder="jouw@email.nl"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError(null);
-            }}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
-            className="w-full border border-[#e5e0d8] rounded-xl pl-9 pr-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
-          />
+    <div className="space-y-3">
+      {/* Noot voor de gever — prominent, duidelijk gescheiden van het ontvangerformulier */}
+      <div className="bg-[#faf9f7] rounded-2xl border border-[#e5e0d8] p-4 flex gap-3 items-start">
+        <div className="w-8 h-8 bg-[#d4af37]/15 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Heart className="h-4 w-4 text-[#d4af37]" />
         </div>
-        <button
-          onClick={submit}
-          disabled={!valid || status === "sending"}
-          className="w-full bg-[#2d5016] text-white font-semibold py-3.5 rounded-xl hover:bg-[#3a6620] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {status === "sending" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              Begin mijn verhaal
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
-        {error && <p className="text-xs text-[#e04040]">{error}</p>}
+        <div className="text-left">
+          <p className="text-sm font-semibold text-[#1a1a1a]">
+            {giver ? `Ben jij ${giver}, de gever?` : "Ben jij degene die dit cadeau geeft?"}
+          </p>
+          <p className="text-xs text-[#888] mt-0.5 leading-relaxed">
+            Dan hoef je hier niets in te vullen.{" "}
+            {addressed ? name : "De ontvanger"} vult dit zelf in wanneer hij of zij het cadeau opent.
+            Stuur deze link door, of overhandig de cadeaubon die je al hebt ontvangen.
+          </p>
+        </div>
       </div>
 
-      {/* Voor de gever: maakt duidelijk dat dit veld niet voor hém is */}
-      <p className="text-xs text-[#aaa] mt-4 leading-relaxed border-t border-[#f0ece6] pt-3">
-        Geef jíj dit cadeau? Dan hoef je hier niets in te vullen — {addressed ? name : "de ontvanger"}{" "}
-        doet dat zelf. Print de startkaart hieronder om te overhandigen, of stuur deze link door.
-      </p>
+      {/* Formulier voor de ontvanger */}
+      <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-center">
+        <h3 className="font-serif text-xl font-bold text-[#1a1a1a] mb-1">
+          {addressed ? `Ben jij ${name}? Begin hier` : "Klaar om te beginnen?"}
+        </h3>
+        <p className="text-sm text-[#888] mb-4">
+          Vul je e-mailadres in — we sturen je een persoonlijke link om direct te starten.
+          Geen wachtwoord, geen app.
+        </p>
+        <div className="space-y-2">
+          <div className="relative">
+            <Mail className="h-4 w-4 text-[#aaa] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="email"
+              placeholder="jouw@email.nl"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              className="w-full border border-[#e5e0d8] rounded-xl pl-9 pr-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50"
+            />
+          </div>
+          <button
+            onClick={submit}
+            disabled={!valid || status === "sending"}
+            className="w-full bg-[#2d5016] text-white font-semibold py-3.5 rounded-xl hover:bg-[#3a6620] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {status === "sending" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                Begin mijn verhaal
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+          {error && <p className="text-xs text-[#e04040]">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 }
