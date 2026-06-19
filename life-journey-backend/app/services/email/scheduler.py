@@ -396,7 +396,7 @@ def send_baby_weekly_questions_task() -> None:
     babyboek-ouders. Schakelt na maand 3 automatisch over naar maandelijks.
     """
     from app.models.baby_journey import BabyJourney as BabyJourneyModel
-    from app.services.baby.journey import build_baby_prompt, MONTHLY_CHAPTER_IDS, _next_chapter
+    from app.services.baby.journey import build_baby_prompt, _next_chapter
     from app.services.email.events import trigger_baby_weekly_question_email
 
     logger.info("Starting baby weekly questions task")

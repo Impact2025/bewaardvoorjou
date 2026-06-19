@@ -7,7 +7,6 @@ mijlpalen, partner-uitnodigingen en opa/oma-digestbeheer.
 
 from __future__ import annotations
 
-import math
 from datetime import date, datetime, timezone
 from uuid import uuid4
 
@@ -434,7 +433,7 @@ def build_baby_prompt(
     Genereer een rol-bewuste interviewvraag voor een baby-chapter.
     Variant van build_prompt_with_ai, speciaal voor BewaardVoorBaby.
     """
-    from app.services.ai.interviewer import CHAPTER_CONTEXTS, clean_ai_question, build_prompt_fallback
+    from app.services.ai.interviewer import CHAPTER_CONTEXTS, clean_ai_question
     from app.schemas.common import ChapterId as ChapterIdEnum
     from app.core.config import settings
 

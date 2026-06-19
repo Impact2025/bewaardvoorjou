@@ -333,19 +333,16 @@ def _build_email(
         )
 
     if email_event.email_type == "baby_milestone_trigger":
-        from app.services.ai.interviewer import CHAPTER_CONTEXTS
-        from app.schemas.common import ChapterId as ChapterIdEnum
 
         milestone_type = ctx.get("milestone_type", "")
         milestone_label = ctx.get("milestone_label", milestone_type)
-        narrator_role = ctx.get("narrator_role", "SAMEN")
         baby_name = ctx.get("baby_name", "jullie kindje")
 
         # Genereer een passende verdiepingsvraag voor deze mijlpaal
         milestone_questions: dict[str, str] = {
             "eerste_glimlach": f"Hoe zag die eerste glimlach van {baby_name} eruit, en wat dacht je op dat moment?",
             "eerste_lach": f"Wat deed je om die eerste echte schaterlach van {baby_name} uit te lokken?",
-            "eerste_doorslapen": f"Hoe voelde het om voor het eerst door te slapen — geloofde je het bijna niet?",
+            "eerste_doorslapen": "Hoe voelde het om voor het eerst door te slapen — geloofde je het bijna niet?",
             "eerste_omrollen_buik_naar_rug": f"Hoe zag het eruit toen {baby_name} voor het eerst omdraaide?",
             "eerste_hapjes": f"Wat was het eerste voedsel dat {baby_name} proefde, en hoe reageerde hij/zij?",
             "eerste_tandje": f"Hoe ontdekte je dat het eerste tandje van {baby_name} er aankwam?",
