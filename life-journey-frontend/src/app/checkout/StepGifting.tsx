@@ -9,9 +9,12 @@ interface Props {
   onNext: () => void;
 }
 
+const DIGITAL_PACKAGES = new Set(["VERHAAL", "DIGITAAL", "BABY_GIFT"]);
+
 export default function StepGifting({ state, onChange, onNext }: Props) {
   const name = state.recipientName.trim() || "hen";
   const today = new Date().toISOString().slice(0, 10);
+  const isDigital = DIGITAL_PACKAGES.has(state.packageType);
 
   const setReveal = (reveal: GiftReveal) => onChange({ giftReveal: reveal });
 
@@ -29,12 +32,16 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
           {
             value: "SURPRISE" as GiftReveal,
             title: "Verrassing",
-            desc: `De doos komt onaangekondigd aan. Op de buitenkant staat duidelijk "Een cadeau van jou", zodat ${name} nooit schrikt van een onverwacht pakket.`,
+            desc: isDigital
+              ? `De digitale uitnodiging komt onaangekondigd bij ${name} aan — jij overhandigt de cadeaubon zelf op het juiste moment.`
+              : `De doos komt onaangekondigd aan. Op de buitenkant staat duidelijk "Een cadeau van jou", zodat ${name} nooit schrikt van een onverwacht pakket.`,
           },
           {
             value: "ANNOUNCED" as GiftReveal,
             title: "Ik vertel het zelf eerst",
-            desc: `Fijn als je niet wilt dat ${name} schrikt van een onverwacht pakket.`,
+            desc: isDigital
+              ? `Je vertelt ${name} van tevoren dat er een cadeau aankomt, zodat de uitnodiging verwacht wordt.`
+              : `Fijn als je niet wilt dat ${name} schrikt van een onverwacht pakket.`,
           },
         ]).map((opt) => (
           <label
@@ -62,10 +69,13 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
 
       {/* Bezorgmoment */}
       <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-3">
-        <h3 className="font-medium text-[#1a1a1a]">Wanneer mag het bezorgd worden?</h3>
+        <h3 className="font-medium text-[#1a1a1a]">
+          {isDigital ? "Wanneer sturen we de uitnodiging?" : "Wanneer mag het bezorgd worden?"}
+        </h3>
         <p className="text-xs text-[#888]">
-          Kies een dag. We zorgen dat het cadeau op tijd aankomt. Laat leeg om zo snel mogelijk te
-          versturen.
+          {isDigital
+            ? `Kies een datum als je wilt dat de digitale uitnodiging op een specifiek moment bij ${name} aankomt. Laat leeg om direct te versturen.`
+            : "Kies een dag. We zorgen dat het cadeau op tijd aankomt. Laat leeg om zo snel mogelijk te versturen."}
         </p>
         <input
           type="date"
