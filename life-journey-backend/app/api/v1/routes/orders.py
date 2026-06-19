@@ -54,6 +54,8 @@ def _early_bird_discount_cents(package_type: str) -> int:
 @router.get("/founding-member-spots")
 def get_founding_member_spots(db: Session = Depends(get_db)) -> dict:
     """Geeft aan hoeveel founding member plekken er nog beschikbaar zijn."""
+    from datetime import date
+
     count = (
         db.query(Order)
         .filter(
@@ -62,7 +64,11 @@ def get_founding_member_spots(db: Session = Depends(get_db)) -> dict:
         )
         .count()
     )
-    remaining = max(0, settings.founding_member_max_count - count)
+    # Visuele schaarste: start op 47 op 19 juni 2026, daalt 3 per dag
+    days_elapsed = max(0, (date.today() - date(2026, 6, 19)).days)
+    virtual_remaining = max(0, 47 - 3 * days_elapsed)
+    real_remaining = max(0, settings.founding_member_max_count - count)
+    remaining = min(virtual_remaining, real_remaining)
     return {"remaining": remaining, "total": settings.founding_member_max_count, "filled": count}
 
 
