@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
@@ -65,37 +66,58 @@ export default function VoorBabyPage() {
       <PublicHeader />
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-pink-50 to-white pt-24 pb-20 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
-            Kraamcadeau van het jaar
+      <section className="bg-gradient-to-b from-pink-50 to-white pt-16 pb-0 md:pb-0 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+
+          {/* Tekst */}
+          <div className="flex-1 text-center md:text-left py-8 md:py-20">
+            <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+              Kraamcadeau van het jaar
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+              Het eerste jaar van{" "}
+              <span className="text-pink-600">jullie kindje</span>{" "}
+              verdient een plek.
+            </h1>
+            <p className="text-xl text-gray-600 leading-relaxed mb-10 max-w-xl">
+              Bewaard voor Baby begeleidt ouders met wekelijkse vragen, mijlpalen bijhouden
+              en een digitaal babyboek dat generaties meegaat. Het mooiste kraamcadeau — voor €59.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link
+                href="/checkout?package=BABY_GIFT"
+                className="inline-block bg-pink-600 text-white font-semibold px-8 py-4 rounded-xl text-base hover:bg-pink-700 transition-colors shadow-sm"
+              >
+                Geef als kraamcadeau — €59
+              </Link>
+              <Link
+                href="/checkout?package=BABY_GIFT&for_self=true"
+                className="inline-block border border-pink-200 text-pink-700 font-semibold px-8 py-4 rounded-xl text-base hover:bg-pink-50 transition-colors"
+              >
+                Koop voor jezelf
+              </Link>
+            </div>
+            <p className="mt-5 text-sm text-gray-400">
+              Eenmalig €59 · Geen abonnement · Jaar toegang + fotoboek-voucher
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-            Het eerste jaar van{" "}
-            <span className="text-pink-600">jullie kindje</span>{" "}
-            verdient een plek.
-          </h1>
-          <p className="text-xl text-gray-600 leading-relaxed mb-10 max-w-2xl mx-auto">
-            Bewaard voor Baby begeleidt ouders met wekelijkse vragen, mijlpalen bijhouden
-            en een digitaal babyboek dat generaties meegaat. Het mooiste kraamcadeau — voor €59.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/checkout?package=BABY_GIFT"
-              className="inline-block bg-pink-600 text-white font-semibold px-8 py-4 rounded-xl text-base hover:bg-pink-700 transition-colors shadow-sm"
-            >
-              Geef als kraamcadeau — €59
-            </Link>
-            <Link
-              href="/checkout?package=BABY_GIFT&for_self=true"
-              className="inline-block border border-pink-200 text-pink-700 font-semibold px-8 py-4 rounded-xl text-base hover:bg-pink-50 transition-colors"
-            >
-              Koop voor jezelf
-            </Link>
+
+          {/* Afbeelding */}
+          <div className="flex-1 w-full md:max-w-[520px] relative">
+            <div className="relative w-full aspect-[4/3] md:aspect-[3/4] rounded-t-3xl md:rounded-3xl overflow-hidden shadow-xl">
+              <Image
+                src="/images/baby-hero.png"
+                alt="Lachende baby op een zachte crème deken"
+                fill
+                priority
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              {/* Zachte roze tint-overlay aan de onderkant voor naadloze overgang */}
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-pink-50/60 to-transparent md:hidden" />
+            </div>
           </div>
-          <p className="mt-5 text-sm text-gray-400">
-            Eenmalig €59 · Geen abonnement · Jaar toegang + fotoboek-voucher
-          </p>
+
         </div>
       </section>
 
