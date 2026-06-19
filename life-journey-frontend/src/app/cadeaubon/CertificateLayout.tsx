@@ -114,7 +114,7 @@ export function CertificateLayout({
                 Bewaardvoorjou
               </p>
               <p style={{ color: "#999", fontSize: "7pt", letterSpacing: "0.5px", fontStyle: "italic", margin: "1.5mm 0 0" }}>
-                Levensverhalen voor altijd
+                Vertel het vandaag, bewaar het voor altijd
               </p>
             </div>
 
@@ -158,13 +158,25 @@ export function CertificateLayout({
               <p style={{ color: "#777", fontSize: "8pt", fontStyle: "italic", margin: "0 0 4mm" }}>
                 {packageTagline}
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "2.5mm" }}>
-                {packageFeatures.map((f) => (
-                  <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: "3mm" }}>
-                    <div style={{ width: "4px", height: "4px", background: "#d4af37", transform: "rotate(45deg)", flexShrink: 0, marginTop: "4.5px" }} />
-                    <span style={{ color: "#444", fontSize: "8.5pt", lineHeight: 1.5 }}>{f}</span>
-                  </div>
-                ))}
+              <div style={{ display: "flex", flexDirection: "column", gap: "3mm" }}>
+                {packageFeatures.map((f) => {
+                  const colonIdx = f.indexOf(": ");
+                  const title = colonIdx > -1 ? f.slice(0, colonIdx) : null;
+                  const desc = colonIdx > -1 ? f.slice(colonIdx + 2) : f;
+                  return (
+                    <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: "3mm" }}>
+                      <div style={{ width: "4px", height: "4px", background: "#d4af37", transform: "rotate(45deg)", flexShrink: 0, marginTop: "5px" }} />
+                      <span style={{ color: "#444", fontSize: "8pt", lineHeight: 1.55 }}>
+                        {title && (
+                          <span style={{ color: "#1a1a1a", fontWeight: 700, fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                            {title}:{" "}
+                          </span>
+                        )}
+                        {desc}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Aankondiging doos — alleen voor box-pakketten */}
