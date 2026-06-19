@@ -29,6 +29,7 @@ from app.api.v1.routes import (
     helpdesk,
     usb_export,
     backup,
+    baby,
 )
 
 
@@ -63,3 +64,4 @@ api_router.include_router(helpdesk.router, prefix="/helpdesk", tags=["helpdesk"]
 api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
 api_router.include_router(usb_export.router, prefix="/admin/usb", tags=["admin-usb"])
 api_router.include_router(backup.router, prefix="/account", tags=["account"])
+api_router.include_router(baby.router, prefix="/baby", tags=["baby"])

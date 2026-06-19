@@ -400,3 +400,141 @@ def build_export_ready_email(
     }
     html, text = render_email("export_ready", context)
     return subject, html, text
+
+
+# ── BewaardVoorBaby e-mails ────────────────────────────────────────────────
+
+def build_baby_gift_delivery_email(
+    recipient_name: str,
+    gifter_name: str | None,
+    baby_name: str,
+    onboarding_url: str,
+) -> tuple[str, str, str]:
+    """Verstuurd aan de ontvanger (ouder) zodra een BABY_GIFT order is ingewisseld."""
+    subject = f"Bewaard voor {baby_name} — jouw digitale babyboek staat klaar!"
+    context = {
+        "recipient_name": recipient_name,
+        "gifter_name": gifter_name,
+        "baby_name": baby_name,
+        "onboarding_url": onboarding_url,
+    }
+    html, text = render_email("baby_gift_delivery", context)
+    logger.info(f"Built baby_gift_delivery email for {recipient_name}")
+    return subject, html, text
+
+
+def build_baby_weekly_question_email(
+    user_display_name: str,
+    baby_name: str,
+    chapter_id: str,
+    question_text: str,
+    dashboard_url: str,
+    age_weeks: int | None,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    age_label = f"{age_weeks} weken" if age_weeks is not None else "de eerste weken"
+    subject = f"Bewaar dit moment van {baby_name} — {age_label}"
+    context = {
+        "display_name": user_display_name,
+        "baby_name": baby_name,
+        "chapter_id": chapter_id,
+        "question_text": question_text,
+        "dashboard_url": dashboard_url,
+        "age_weeks": age_weeks,
+        "age_label": age_label,
+    }
+    html, text = render_email("baby_weekly_question", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_baby_milestone_trigger_email(
+    user_display_name: str,
+    baby_name: str,
+    milestone_label: str,
+    question_text: str,
+    dashboard_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"{baby_name}: {milestone_label} — vertel hoe het was!"
+    context = {
+        "display_name": user_display_name,
+        "baby_name": baby_name,
+        "milestone_label": milestone_label,
+        "question_text": question_text,
+        "dashboard_url": dashboard_url,
+    }
+    html, text = render_email("baby_milestone_trigger", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_baby_grandparent_digest_email(
+    grandparent_name: str,
+    baby_name: str,
+    age_weeks: int | None,
+    milestones_this_month: list[dict],
+    highlight_snippet: str | None,
+    digest_url: str,
+) -> tuple[str, str, str]:
+    age_label = f"{age_weeks // 4} maanden" if age_weeks and age_weeks >= 4 else "de eerste weken"
+    subject = f"Update van {baby_name} — {age_label} oud!"
+    context = {
+        "grandparent_name": grandparent_name,
+        "baby_name": baby_name,
+        "age_label": age_label,
+        "milestones": milestones_this_month,
+        "highlight_snippet": highlight_snippet,
+        "digest_url": digest_url,
+    }
+    html, text = render_email("baby_grandparent_digest", context)
+    return subject, html, text
+
+
+def build_baby_partner_invite_email(
+    partner_email: str,
+    inviter_name: str,
+    baby_name: str,
+    invite_url: str,
+) -> tuple[str, str, str]:
+    subject = f"{inviter_name} nodigt je uit om mee te schrijven in het boek van {baby_name}"
+    context = {
+        "inviter_name": inviter_name,
+        "baby_name": baby_name,
+        "invite_url": invite_url,
+    }
+    html, text = render_email("baby_partner_invite", context)
+    return subject, html, text
+
+
+def build_baby_first_birthday_email(
+    user_display_name: str,
+    baby_name: str,
+    photobook_progress_pct: int,
+    dashboard_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    subject = f"Gefeliciteerd! {baby_name} is vandaag 1 jaar! 🎂"
+    context = {
+        "display_name": user_display_name,
+        "baby_name": baby_name,
+        "photobook_progress_pct": photobook_progress_pct,
+        "dashboard_url": dashboard_url,
+    }
+    html, text = render_email("baby_first_birthday", context, unsubscribe_token)
+    return subject, html, text
+
+
+def build_baby_golden_ticket_email(
+    user_display_name: str,
+    baby_name: str,
+    golden_ticket_url: str,
+    unsubscribe_token: str,
+) -> tuple[str, str, str]:
+    """Gouden Ticket: cross-sell BewaardVoorJou aan opa/oma op eerste verjaardag."""
+    subject = f"{baby_name} wordt 1 — geef opa of oma het mooiste cadeau"
+    context = {
+        "display_name": user_display_name,
+        "baby_name": baby_name,
+        "golden_ticket_url": golden_ticket_url,
+    }
+    html, text = render_email("baby_golden_ticket", context, unsubscribe_token)
+    return subject, html, text

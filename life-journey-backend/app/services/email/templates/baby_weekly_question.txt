@@ -1,0 +1,18 @@
+Bewaard voor {{ baby_name }} — een vraag voor jou
+
+{{ display_name }}, dit moment verdient een plek.
+
+{{ baby_name }} is nu {{ age_label }} oud. Voor je het weet is dit voorbij — leg het nu vast.
+
+JOUW VRAAG VAN DEZE WEEK:
+"{{ question_text }}"
+
+Spreek je antwoord in, type het of neem video op. Een minuut is genoeg.
+
+Leg dit moment vast: {{ dashboard_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl
+{% if unsubscribe_token %}
+Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}
+{% endif %}

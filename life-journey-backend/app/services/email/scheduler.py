@@ -17,6 +17,7 @@ from typing import Callable
 from loguru import logger
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.user import User as UserModel
 from app.models.journey import Journey as JourneyModel
@@ -386,6 +387,224 @@ def check_progress_milestones_task(journey_id: str, user_id: str) -> None:
         logger.error(f"Progress milestone check failed for journey {journey_id}: {e}")
     finally:
         db.close()
+
+
+@celery_app.task(name="baby.weekly_questions")
+def send_baby_weekly_questions_task() -> None:
+    """
+    Elke maandag 09:00: stuur wekelijkse herinneringsvraag naar alle actieve
+    babyboek-ouders. Schakelt na maand 3 automatisch over naar maandelijks.
+    """
+    from app.models.baby_journey import BabyJourney as BabyJourneyModel
+    from app.services.baby.journey import build_baby_prompt, MONTHLY_CHAPTER_IDS, _next_chapter
+    from app.services.email.events import trigger_baby_weekly_question_email
+
+    logger.info("Starting baby weekly questions task")
+    db: Session = SessionLocal()
+    sent = 0
+    today = date.today()
+
+    try:
+        baby_journeys = (
+            db.query(BabyJourneyModel)
+            .join(UserModel, UserModel.id == BabyJourneyModel.user_id)
+            .filter(
+                UserModel.is_active,
+                UserModel.email_verified,
+                ~UserModel.email_bounced,
+            )
+            .all()
+        )
+
+        for bj in baby_journeys:
+            try:
+                # Leeftijd in weken
+                age_weeks: int | None = None
+                if bj.baby_birth_date:
+                    delta = today - bj.baby_birth_date
+                    age_weeks = delta.days // 7
+
+                # Na maand 3 → maandelijks i.p.v. wekelijks
+                if bj.pivot_to_monthly:
+                    # Sla wekelijkse taken over — de maandelijkse beat-task regelt dit
+                    continue
+
+                if age_weeks is not None and age_weeks > 13 and not bj.pivot_to_monthly:
+                    bj.pivot_to_monthly = True
+                    bj.pivot_triggered_at = datetime.now(timezone.utc)
+                    db.commit()
+                    continue
+
+                from app.models.journey import Journey as JourneyModel2
+                journey = db.query(JourneyModel2).filter(JourneyModel2.id == bj.journey_id).first()
+                progress_dict = journey.progress if journey and journey.progress else {}
+
+                next_chapter_id, _ = _next_chapter(age_weeks, progress_dict)
+                if not next_chapter_id:
+                    continue
+
+                question = build_baby_prompt(
+                    next_chapter_id,
+                    bj.baby_name,
+                    bj.narrator_role,
+                )
+                dashboard_url = f"{settings.app_base_url}/baby/dashboard"
+
+                result = trigger_baby_weekly_question_email(
+                    db=db,
+                    user_id=bj.user_id,
+                    journey_id=bj.journey_id,
+                    baby_name=bj.baby_name,
+                    chapter_id=next_chapter_id,
+                    question_text=question,
+                    dashboard_url=dashboard_url,
+                    age_weeks=age_weeks,
+                )
+                if result:
+                    bj.last_weekly_email_at = datetime.now(timezone.utc)
+                    db.commit()
+                    sent += 1
+
+            except Exception as e:
+                logger.error(f"Baby weekly question failed for baby journey {bj.id}: {e}")
+                continue
+
+    finally:
+        db.close()
+
+    logger.info(f"Baby weekly questions task complete: {sent} emails queued")
+
+
+@celery_app.task(name="baby.grandparent_digest")
+def send_baby_grandparent_digest_task() -> None:
+    """
+    Maandelijks (1e van de maand): stuur opa/oma een digest van de nieuwe mijlpalen.
+    """
+    from app.models.baby_journey import BabyJourney as BabyJourneyModel, BabyMilestone as BabyMilestoneModel, MILESTONE_LABELS
+    from app.services.email.renderer import build_baby_grandparent_digest_email
+    from app.services.email.audit import log_and_send
+
+    logger.info("Starting baby grandparent digest task")
+    db: Session = SessionLocal()
+    sent = 0
+    today = date.today()
+
+    try:
+        baby_journeys = db.query(BabyJourneyModel).filter(
+            BabyJourneyModel.grandparent_emails.isnot(None),
+        ).all()
+
+        for bj in baby_journeys:
+            grandparents = bj.grandparent_emails or []
+            if not grandparents:
+                continue
+
+            # Mijlpalen van de afgelopen maand
+            month_ago = datetime(today.year, today.month, 1, tzinfo=timezone.utc)
+            recent_milestones = db.query(BabyMilestoneModel).filter(
+                BabyMilestoneModel.baby_journey_id == bj.id,
+                BabyMilestoneModel.marked_at >= month_ago,
+            ).all()
+
+            if not recent_milestones:
+                continue
+
+            age_weeks: int | None = None
+            if bj.baby_birth_date:
+                age_weeks = (today - bj.baby_birth_date).days // 7
+
+            milestones_data = [
+                {
+                    "label": MILESTONE_LABELS.get(m.milestone_type, m.milestone_type),
+                    "date": m.milestone_date.strftime("%d %B") if m.milestone_date else None,
+                }
+                for m in recent_milestones
+            ]
+
+            digest_url = f"{settings.app_base_url}/baby/shared/{bj.id}"
+
+            for gp in grandparents:
+                if not gp.get("digest_active"):
+                    continue
+                gp_email = gp.get("email", "")
+                gp_name = gp.get("name", "")
+                if not gp_email:
+                    continue
+                try:
+                    subject, html, text = build_baby_grandparent_digest_email(
+                        grandparent_name=gp_name,
+                        baby_name=bj.baby_name,
+                        age_weeks=age_weeks,
+                        milestones_this_month=milestones_data,
+                        highlight_snippet=None,
+                        digest_url=digest_url,
+                    )
+                    log_and_send(
+                        db,
+                        email_type="baby_grandparent_digest",
+                        to=gp_email,
+                        subject=subject,
+                        html=html,
+                        text=text,
+                        user_id=bj.user_id,
+                        journey_id=bj.journey_id,
+                        context_data={"baby_name": bj.baby_name, "grandparent_email": gp_email},
+                    )
+                    sent += 1
+                except Exception as e:
+                    logger.error(f"Grandparent digest failed for {gp_email}: {e}")
+
+            bj.last_grandparent_digest_at = datetime.now(timezone.utc)
+            db.commit()
+
+    finally:
+        db.close()
+
+    logger.info(f"Baby grandparent digest complete: {sent} emails sent")
+
+
+@celery_app.task(name="baby.check_first_birthday")
+def check_baby_first_birthday_task() -> None:
+    """Dagelijks: check welke baby's vandaag 1 jaar worden en stuur verjaardagsmail + golden ticket."""
+    from app.models.baby_journey import BabyJourney as BabyJourneyModel
+    from app.services.email.events import trigger_baby_first_birthday_email
+    from app.services.baby.journey import get_photobook_voucher_status
+
+    logger.info("Starting baby first birthday check task")
+    db: Session = SessionLocal()
+    today = date.today()
+    first_birthday = today.replace(year=today.year - 1)
+    sent = 0
+
+    try:
+        turning_one = db.query(BabyJourneyModel).filter(
+            BabyJourneyModel.baby_birth_date == first_birthday,
+        ).all()
+
+        for bj in turning_one:
+            try:
+                status = get_photobook_voucher_status(db, bj)
+                dashboard_url = f"{settings.app_base_url}/baby/dashboard"
+                golden_ticket_url = f"{settings.app_base_url}/cadeau?utm_source=golden_ticket&ref={bj.user_id}"
+
+                result = trigger_baby_first_birthday_email(
+                    db=db,
+                    user_id=bj.user_id,
+                    journey_id=bj.journey_id,
+                    baby_name=bj.baby_name,
+                    photobook_progress_pct=status.progress_pct,
+                    dashboard_url=dashboard_url,
+                    golden_ticket_url=golden_ticket_url,
+                )
+                if result:
+                    sent += 1
+            except Exception as e:
+                logger.error(f"First birthday check failed for baby journey {bj.id}: {e}")
+
+    finally:
+        db.close()
+
+    logger.info(f"Baby first birthday check complete: {sent} emails queued")
 
 
 @celery_app.task(name="email.scheduled_gift_redemptions")

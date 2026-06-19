@@ -28,6 +28,13 @@ from app.services.email.renderer import (
     build_family_notification_email,
     build_magic_link_email,
     build_export_ready_email,
+    # BewaardVoorBaby
+    build_baby_gift_delivery_email,
+    build_baby_weekly_question_email,
+    build_baby_milestone_trigger_email,
+    build_baby_first_birthday_email,
+    build_baby_golden_ticket_email,
+    build_baby_partner_invite_email,
 )
 
 celery_app = Celery("life_journey_email")
@@ -72,6 +79,24 @@ celery_app.conf.beat_schedule = {
     "daily-inactivity-check": {
         "task": "email.check_inactive_users",
         "schedule": crontab(hour=8, minute=0),
+        "options": {"expires": 3600},
+    },
+    # BewaardVoorBaby: elke maandag 09:30 UTC wekelijkse herinneringsvraag
+    "baby-weekly-questions": {
+        "task": "baby.weekly_questions",
+        "schedule": crontab(hour=9, minute=30, day_of_week=1),
+        "options": {"expires": 3600},
+    },
+    # BewaardVoorBaby: 1e van de maand 10:00 UTC — opa/oma digest
+    "baby-grandparent-digest": {
+        "task": "baby.grandparent_digest",
+        "schedule": crontab(hour=10, minute=0, day_of_month=1),
+        "options": {"expires": 3600},
+    },
+    # BewaardVoorBaby: dagelijks 07:30 UTC — eerste verjaardag check
+    "baby-first-birthday-check": {
+        "task": "baby.check_first_birthday",
+        "schedule": crontab(hour=7, minute=30),
         "options": {"expires": 3600},
     },
 }
@@ -285,6 +310,95 @@ def _build_email(
             download_url=ctx["download_url"],
             expires_hours=ctx.get("expires_hours", 24),
         )
+
+    # ── BewaardVoorBaby ───────────────────────────────────────────────────
+
+    if email_event.email_type == "baby_gift_delivery":
+        return build_baby_gift_delivery_email(
+            recipient_name=ctx.get("recipient_name", user.display_name),
+            gifter_name=ctx.get("gifter_name"),
+            baby_name=ctx.get("baby_name", "jullie kindje"),
+            onboarding_url=ctx.get("onboarding_url", f"{settings.app_base_url}/voor-baby/onboarding"),
+        )
+
+    if email_event.email_type == "baby_weekly_question":
+        return build_baby_weekly_question_email(
+            user_display_name=ctx.get("display_name", user.display_name),
+            baby_name=ctx.get("baby_name", "jullie kindje"),
+            chapter_id=ctx.get("chapter_id", "baby-birth-story"),
+            question_text=ctx.get("question_text", "Vertel over dit bijzondere moment..."),
+            dashboard_url=ctx.get("dashboard_url", f"{settings.app_base_url}/voor-baby/dashboard"),
+            age_weeks=ctx.get("age_weeks"),
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "baby_milestone_trigger":
+        from app.services.ai.interviewer import CHAPTER_CONTEXTS
+        from app.schemas.common import ChapterId as ChapterIdEnum
+
+        milestone_type = ctx.get("milestone_type", "")
+        milestone_label = ctx.get("milestone_label", milestone_type)
+        narrator_role = ctx.get("narrator_role", "SAMEN")
+        baby_name = ctx.get("baby_name", "jullie kindje")
+
+        # Genereer een passende verdiepingsvraag voor deze mijlpaal
+        milestone_questions: dict[str, str] = {
+            "eerste_glimlach": f"Hoe zag die eerste glimlach van {baby_name} eruit, en wat dacht je op dat moment?",
+            "eerste_lach": f"Wat deed je om die eerste echte schaterlach van {baby_name} uit te lokken?",
+            "eerste_doorslapen": f"Hoe voelde het om voor het eerst door te slapen — geloofde je het bijna niet?",
+            "eerste_omrollen_buik_naar_rug": f"Hoe zag het eruit toen {baby_name} voor het eerst omdraaide?",
+            "eerste_hapjes": f"Wat was het eerste voedsel dat {baby_name} proefde, en hoe reageerde hij/zij?",
+            "eerste_tandje": f"Hoe ontdekte je dat het eerste tandje van {baby_name} er aankwam?",
+            "eerste_zitten": f"Hoe trots was je toen {baby_name} voor het eerst rechtop zat?",
+            "eerste_kruipen": f"Waar kroop {baby_name} naartoe zodra hij/zij kon bewegen?",
+            "eerste_staan": f"Beschrijf het moment dat {baby_name} voor het eerst zelfstandig stond.",
+            "eerste_woordje_mama": f"Hoe klonk dat eerste 'mama' van {baby_name}, en wat deed je?",
+            "eerste_woordje_papa": f"Hoe klonk dat eerste 'papa' van {baby_name}, en wie was erbij?",
+            "eerste_stapjes": f"Vertel over de eerste stapjes van {baby_name} — wie was erbij en wat voelde je?",
+            "eerste_verjaardag": f"Hoe was de eerste verjaardagsdag van {baby_name}?",
+        }
+        question = milestone_questions.get(
+            milestone_type,
+            f"Vertel over het moment dat {baby_name} {milestone_label.lower()} — hoe was dat voor jou?",
+        )
+        dashboard_url = ctx.get("dashboard_url", f"{settings.app_base_url}/voor-baby/dashboard")
+        return build_baby_milestone_trigger_email(
+            user_display_name=user.display_name,
+            baby_name=baby_name,
+            milestone_label=milestone_label,
+            question_text=question,
+            dashboard_url=dashboard_url,
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "baby_first_birthday":
+        return build_baby_first_birthday_email(
+            user_display_name=ctx.get("display_name", user.display_name),
+            baby_name=ctx.get("baby_name", "jullie kindje"),
+            photobook_progress_pct=ctx.get("photobook_progress_pct", 0),
+            dashboard_url=ctx.get("dashboard_url", f"{settings.app_base_url}/voor-baby/dashboard"),
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type in ("baby_golden_ticket",):
+        return build_baby_golden_ticket_email(
+            user_display_name=user.display_name,
+            baby_name=ctx.get("baby_name", "jullie kindje"),
+            golden_ticket_url=ctx.get("golden_ticket_url", f"{settings.app_base_url}/cadeau"),
+            unsubscribe_token=unsub,
+        )
+
+    if email_event.email_type == "baby_partner_invite":
+        return build_baby_partner_invite_email(
+            partner_email=email_event.sent_to,
+            inviter_name=ctx.get("inviter_name", "je partner"),
+            baby_name=ctx.get("baby_name", "jullie kindje"),
+            invite_url=ctx.get("invite_url", f"{settings.app_base_url}/voor-baby"),
+        )
+
+    if email_event.email_type == "baby_grandparent_digest":
+        # Grootouder-digest wordt direct via log_and_send afgehandeld, niet via EmailEvent-task
+        raise ValueError("baby_grandparent_digest moet via log_and_send lopen, niet via task queue")
 
     raise ValueError(f"Unknown email type: {email_event.email_type}")
 

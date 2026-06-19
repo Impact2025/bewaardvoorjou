@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ baby_name }}: {{ milestone_label }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <div style="font-size: 44px; line-height: 1;">&#127881;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  {{ baby_name }} heeft iets bereikt!
+</h1>
+<p style="text-align: center; font-size: 18px; font-weight: 600; color: #BE185D; margin: 0 0 20px;">
+  {{ milestone_label }}
+</p>
+
+<p class="body-text">
+  Leg dit moment vast voordat het vervaagt. Jij bent de enige die dit zo heeft meegemaakt.
+</p>
+
+<div class="accent-block" style="border-left-color: #BE185D; background-color: #FDF2F8;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #9D174D; font-weight: 600; margin-bottom: 8px;">
+    Jouw vraag
+  </p>
+  <p style="font-size: 17px; color: #1C1917; font-style: italic; line-height: 1.6; margin: 0;">
+    "{{ question_text }}"
+  </p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" class="cta-button" style="background-color: #BE185D;">Vertel het verhaal</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Dit verhaal wordt een dag een schat voor {{ baby_name }} &mdash; en voor jou.
+</p>
+{% endblock %}

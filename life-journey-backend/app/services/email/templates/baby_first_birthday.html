@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ baby_name }} is 1 jaar!{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <div style="font-size: 48px; line-height: 1;">&#127874;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  Gefeliciteerd, {{ display_name }}!<br>
+  <span style="color: #BE185D;">{{ baby_name }} is 1 jaar oud.</span>
+</h1>
+
+<p class="body-text" style="text-align: center;">
+  Een jaar vol eerste keren, slaapgebrek en momenten die je nooit vergeet.<br>
+  Jullie hebben het gehaald &mdash; en bewaard.
+</p>
+
+<div class="divider"></div>
+
+<p style="font-size: 14px; font-weight: 600; color: #1C1917; margin: 0 0 8px;">
+  Jouw fotoboek-voucher wacht
+</p>
+<p class="body-text">
+  Je hebt <strong>{{ photobook_progress_pct }}%</strong> van het babyboek voltooid.
+  Rond de resterende hoofdstukken af en zet dit jaar om in een echt boek.
+</p>
+<div class="progress-wrap">
+  <div class="progress-fill" style="width: {{ photobook_progress_pct }}%; background-color: #BE185D;"></div>
+</div>
+<p class="note" style="text-align: center;">{{ photobook_progress_pct }}% voltooid &mdash; drempel: 100%</p>
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" class="cta-button" style="background-color: #BE185D;">Bekijk het babyboek van {{ baby_name }}</a>
+</div>
+{% endblock %}

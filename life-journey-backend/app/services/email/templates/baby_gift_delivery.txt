@@ -1,0 +1,20 @@
+Bewaard voor {{ baby_name }} — jouw babyboek staat klaar
+
+Welkom, {{ recipient_name }}!
+{% if gifter_name %}
+{{ gifter_name }} heeft je het mooiste cadeau gegeven: een plek om alles van dit eerste jaar vast te leggen.
+{% else %}
+Het eerste jaar van {{ baby_name }} verdient een plek. Jouw digitale babyboek is aangemaakt.
+{% endif %}
+
+WAT JE KRIJGT
+- 14 diepgaande hoofdstukken (geboortedag t/m eerste verjaardag)
+- 28 mijlpalen bijhouden met foto en datum
+- Wekelijkse herinneringsvragen
+- Maandelijkse updates voor opa en oma
+- Fotoboek-voucher na een volledig jaar
+
+Start nu: {{ onboarding_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl

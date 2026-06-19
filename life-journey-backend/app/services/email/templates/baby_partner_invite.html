@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ inviter_name }} nodigt je uit voor het babyboek van {{ baby_name }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <div style="font-size: 44px; line-height: 1;">&#128578;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  {{ inviter_name }} nodigt je uit.
+</h1>
+
+<p class="body-text" style="text-align: center;">
+  Samen schrijven jullie het boek van <strong>{{ baby_name }}</strong> &mdash;<br>
+  het verhaal dat hij/zij later voor altijd zal bewaren.
+</p>
+
+<div class="accent-block" style="border-left-color: #BE185D; background-color: #FDF2F8; text-align: center;">
+  <p style="font-size: 14px; color: #9D174D; font-weight: 600; margin-bottom: 6px;">Jouw rol</p>
+  <p style="font-size: 14px; color: #831843; line-height: 1.7; margin: 0;">
+    Voeg jouw eigen herinneringen toe &middot; Beantwoord vragen vanuit jouw perspectief<br>
+    Markeer mijlpalen &middot; Schrijf mee aan de brief aan {{ baby_name }}
+  </p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ invite_url }}" class="cta-button" style="background-color: #BE185D;">Doe mee aan het babyboek</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Je hebt geen apart account nodig &mdash; je deelt de toegang met {{ inviter_name }}.
+</p>
+{% endblock %}

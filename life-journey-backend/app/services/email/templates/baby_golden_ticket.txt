@@ -1,0 +1,21 @@
+{{ baby_name }} wordt 1 — geef opa of oma iets onbetaalbaars
+
+{{ display_name }},
+
+Jij hebt het eerste jaar van {{ baby_name }} bewaard.
+Nu is het tijd voor hun verhaal — Bewaard voor jou.
+
+BEWAARD VOOR JOU — HET LEVENSVERHAAL CADEAU
+- AI-begeleide interviews in 58 hoofdstukken
+- Het levensverhaal van opa of oma — altijd toegankelijk
+- Voor jou, voor {{ baby_name }}, voor altijd
+
+Als gebruiker van Bewaard voor Baby heb je 15% korting — automatisch verrekend.
+
+Geef het cadeau: {{ golden_ticket_url }}
+
+---
+Bewaardvoorjou.nl
+{% if unsubscribe_token %}
+Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}
+{% endif %}

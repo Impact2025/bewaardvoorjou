@@ -1,0 +1,22 @@
+Update van {{ baby_name }} — {{ age_label }} oud
+
+Hallo {{ grandparent_name }}!
+
+{{ baby_name }} is nu {{ age_label }} oud. De ouders hebben dit gedeeld, speciaal voor jou.
+
+{% if milestones %}
+NIEUWE MIJLPALEN DEZE MAAND:
+{% for m in milestones %}
+- {{ m.label }}{% if m.date %} ({{ m.date }}){% endif %}
+{% endfor %}
+{% endif %}
+
+{% if highlight_snippet %}
+WAT DE OUDERS SCHREVEN:
+"{{ highlight_snippet }}"
+{% endif %}
+
+Bekijk het babyboek: {{ digest_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl

@@ -1,0 +1,18 @@
+{{ baby_name }} is vandaag 1 jaar!
+
+Gefeliciteerd, {{ display_name }}!
+
+Een jaar vol eerste keren, slaapgebrek en momenten die je nooit vergeet.
+Jullie hebben het gehaald — en bewaard.
+
+JOUW FOTOBOEK-VOUCHER
+Je hebt {{ photobook_progress_pct }}% van het babyboek voltooid. Rond de resterende hoofdstukken
+af en zet dit jaar om in een echt boek dat {{ baby_name }} later in handen houdt.
+
+Bekijk het babyboek: {{ dashboard_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl
+{% if unsubscribe_token %}
+Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}
+{% endif %}

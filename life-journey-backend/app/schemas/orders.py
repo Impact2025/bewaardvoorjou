@@ -17,6 +17,8 @@ PackageType = Literal[
     "VERHAAL",       # €79/jaar — digitaal
     "ERFGOED",       # €149 jaar 1 (doos inbegrepen), €99/jaar verlenging
     "NALATENSCHAP",  # €229 eenmalig — lifetime
+    # BewaardVoorBaby
+    "BABY_GIFT",     # €59 — digitaal kraamcadeau (incl. jaar toegang + fotoboek-voucher)
     # Legacy (backward compat bestaande orders)
     "BEGIN", "VOOR_ALTIJD", "DIGITAAL",
 ]
@@ -33,6 +35,7 @@ PACKAGE_PRICES: dict[str, int] = {
     "VERHAAL": 7900,       # €79/jaar
     "ERFGOED": 14900,      # €149 eerste jaar (doos inbegrepen)
     "NALATENSCHAP": 22900, # €229 eenmalig (lifetime)
+    "BABY_GIFT": 5900,     # €59 — kraamcadeau (jaar toegang + fotoboek-voucher)
     # Legacy
     "BEGIN": 8900,
     "VOOR_ALTIJD": 39900,

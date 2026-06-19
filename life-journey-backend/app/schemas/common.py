@@ -93,6 +93,31 @@ class ChapterId(str, Enum):
   optional_bucket_list = "optional-bucket-list"
   optional_final_chapter = "optional-final-chapter"
 
+  # ── BewaardVoorBaby ───────────────────────────────────────────────────────
+  # Fase 0: Onboarding interview (geboortedag)
+  baby_birth_story     = "baby-birth-story"       # De geboortedag — rol-bewust
+  baby_week_one        = "baby-week-one"           # Eerste week thuis
+
+  # Maandelijkse diepe interviews (0–12)
+  baby_month_1         = "baby-month-1"
+  baby_month_2         = "baby-month-2"
+  baby_month_3         = "baby-month-3"
+  baby_month_4         = "baby-month-4"
+  baby_month_5         = "baby-month-5"
+  baby_month_6         = "baby-month-6"
+  baby_month_7         = "baby-month-7"
+  baby_month_8         = "baby-month-8"
+  baby_month_9         = "baby-month-9"
+  baby_month_10        = "baby-month-10"
+  baby_month_11        = "baby-month-11"
+  baby_month_12        = "baby-month-12"
+
+  # Bijzondere hoofdstukken
+  baby_chaos_and_laughs = "baby-chaos-and-laughs"  # Blowouts, maffe momenten
+  baby_parent_reflection = "baby-parent-reflection" # Ouder over zichzelf
+  baby_first_birthday   = "baby-first-birthday"    # Terugblik jaar 1
+  baby_letter_to_child  = "baby-letter-to-child"   # Tijdcapsule brief (open op 18e)
+
 
 class ConsentType(str, Enum):
   recording = "recording"

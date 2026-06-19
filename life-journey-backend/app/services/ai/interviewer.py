@@ -829,7 +829,203 @@ CHAPTER_CONTEXTS = {
             "Wat zou je vasthouden in je eigen monument?",
             "Welke quote zou op jouw voetstuk prijken?"
         ]
-    }
+    },
+
+    # ── BewaardVoorBaby ───────────────────────────────────────────────────────
+    # Vragen zijn rol-bewust: de interviewer weet of het de moeder, de partner
+    # of beiden samen vertelt. De AI-aanroep geeft narrator_role mee in de context.
+    # Zie build_baby_prompt() voor de rol-specifieke wrapper.
+
+    ChapterId.baby_birth_story: {
+        "title": "De geboortedag",
+        "theme": "De dag dat alles veranderde — jouw beleving van de komst van jullie kind.",
+        "mood": "warm, intens aanwezig, vol verwondering",
+        "example_prompts_moeder": [
+            "Beschrijf het moment dat [naam] voor het eerst op jouw borst lag — wat voelde, hoorde of rook je?",
+            "Wat was je eerste gedachte toen je [naam]'s gezichtje zag?",
+            "Welk detail van de bevalling vergeet je nooit — een geluid, een licht, een hand die je vasthield?",
+        ],
+        "example_prompts_partner": [
+            "Waar was je toen de bevalling begon, en wat ging er op dat moment door je heen?",
+            "Hoe was het om de bevalling mee te maken als toeschouwer én deelnemer tegelijk?",
+            "Wat was het eerste dat je dacht of deed toen [naam] er eindelijk was?",
+        ],
+        "example_prompts": [
+            "Welk moment van die dag staat voor altijd in jullie geheugen gegrift?",
+            "Hoe zag de wereld er anders uit nadat [naam] er was?",
+            "Wat willen jullie [naam] ooit vertellen over die dag?",
+        ],
+    },
+    ChapterId.baby_week_one: {
+        "title": "De eerste week thuis",
+        "theme": "Die overweldigende, magische, slaapgebrek-gevulde eerste week met jullie pasgeborene.",
+        "mood": "eerlijk, humoristisch én teder",
+        "example_prompts": [
+            "Beschrijf jullie eerste nacht thuis — hoe voelde het om eindelijk met z'n drieën (of vieren) te zijn?",
+            "Wat was het meest onverwachte dat je die eerste week ontdekte over [naam] of over jezelf als ouder?",
+            "Welk moment van die eerste week wil je nooit vergeten?",
+        ],
+    },
+    ChapterId.baby_month_1: {
+        "title": "Maand 1 — Aankomen",
+        "theme": "De eerste vier weken: slapen, drinken, en voor het eerst écht elkaars gezichten leren kennen.",
+        "mood": "zacht, moe maar liefdevol",
+        "example_prompts": [
+            "Hoe ziet een 'gemiddelde dag' eruit nu [naam] er is — wat heeft er het meest veranderd in jullie ritme?",
+            "Op welk moment van deze eerste maand voelde je je voor het eerst echt een ouder?",
+            "Wat verbaast je het meest aan [naam] nu?",
+        ],
+    },
+    ChapterId.baby_month_2: {
+        "title": "Maand 2 — De eerste glimlach",
+        "theme": "De maand van de eerste sociale glimlach — het moment waarop [naam] echt contact lijkt te zoeken.",
+        "mood": "warm en vol verwondering",
+        "example_prompts": [
+            "Vertel over de eerste keer dat [naam] echt naar je glimlachte — waar was je, wat deed je?",
+            "Hoe communiceer jij en [naam] nu al met elkaar zonder woorden?",
+            "Wat vertel je [naam] als jullie samen wakker liggen midden in de nacht?",
+        ],
+    },
+    ChapterId.baby_month_3: {
+        "title": "Maand 3 — Wakker worden",
+        "theme": "Drie maanden oud: alerter, nieuwsgieriger, en steeds meer een eigen persoonlijkheid.",
+        "mood": "energiek en ontdekkend",
+        "example_prompts": [
+            "Wat is een typisch [naam]-trekje dat je nu al duidelijk ziet — een gebaar, een geluidje, een blik?",
+            "Hoe is jullie thuisroutine veranderd vergeleken met de eerste weken?",
+            "Op welk moment dacht je: dit is mijn kind, ik ken je al zo goed?",
+        ],
+    },
+    ChapterId.baby_month_4: {
+        "title": "Maand 4 — Lachen en brabbelen",
+        "theme": "De maand van de eerste schaterlach en het eerste gebrabbel — [naam] ontdekt zijn/haar stem.",
+        "mood": "vrolijk en levendig",
+        "example_prompts": [
+            "Hoe klonk de eerste echte lach van [naam], en wat had je gedaan om die uit te lokken?",
+            "Wat zijn de 'gesprekken' die jij en [naam] voeren?",
+            "Welk geluidje van [naam] wil je voor altijd bewaren?",
+        ],
+    },
+    ChapterId.baby_month_5: {
+        "title": "Maand 5 — Ontdekken",
+        "theme": "Vijf maanden: handen, voeten, speelgoed — alles gaat naar de mond en elk object is een nieuw wonder.",
+        "mood": "speels en leergierig",
+        "example_prompts": [
+            "Wat is het favoriete speelgoed of object van [naam] op dit moment, en waarom denk je dat dat is?",
+            "Hoe reageert [naam] wanneer jullie hem/haar iets nieuws laten zien of horen?",
+            "Wat heb jij als ouder geleerd van de nieuwsgierigheid van [naam]?",
+        ],
+    },
+    ChapterId.baby_month_6: {
+        "title": "Maand 6 — Halverwege het eerste jaar",
+        "theme": "Zes maanden oud: de helft! Eerste hapjes, misschien omrollen, en een kind dat de wereld begint te begrijpen.",
+        "mood": "mijlpaal-bewust, feestelijk",
+        "example_prompts": [
+            "Hoe was de allereerste keer dat [naam] iets anders dan melk proefde?",
+            "Als je terugkijkt op de afgelopen zes maanden: wat heeft jou het meest veranderd als mens?",
+            "Welke kleine gewoonte of ritueel is er de afgelopen maanden tussen jou en [naam] gegroeid?",
+        ],
+    },
+    ChapterId.baby_month_7: {
+        "title": "Maand 7 — Bewegen",
+        "theme": "Zeven maanden: de wereld verkennen — kruipen, tijgeren, staan met hulp.",
+        "mood": "avontuurlijk en trots",
+        "example_prompts": [
+            "Hoe ontdekt [naam] de wereld nu hij/zij mobiel begint te worden?",
+            "Wat is het eerste dat [naam] probeerde te bereiken of aan te raken zodra hij/zij kon bewegen?",
+            "Hoe heb jij thuis de wereld voor [naam] veiliger (of uitdagender) gemaakt?",
+        ],
+    },
+    ChapterId.baby_month_8: {
+        "title": "Maand 8 — Herkennen",
+        "theme": "Acht maanden: vreemdelingenvrees, verlangend kijken naar mama en papa, en de eerste scheiding-angst.",
+        "mood": "empathisch en begripvol",
+        "example_prompts": [
+            "Hoe reageert [naam] nu wanneer jij de kamer verlaat?",
+            "Beschrijf het gezicht van [naam] wanneer jij na een tijdje terugkomt.",
+            "Hoe ga jij om met de eerste tekenen van hechting en scheiding-angst?",
+        ],
+    },
+    ChapterId.baby_month_9: {
+        "title": "Maand 9 — Eerste woordjes",
+        "theme": "Negen maanden: brabbelen gaat richting betekenis — 'mama', 'papa', en een eigen woordenschat.",
+        "mood": "nieuwsgierig en opgewonden",
+        "example_prompts": [
+            "Wat is het eerste woordje of klankcombinatie dat [naam] herhaalt, en wat denk je dat hij/zij ermee bedoelt?",
+            "Hoe communiceert [naam] met jullie — met gebaren, geluiden, blikken?",
+            "Wat wil je [naam] het eerste echt horen zeggen, en waarom?",
+        ],
+    },
+    ChapterId.baby_month_10: {
+        "title": "Maand 10 — Staan",
+        "theme": "Tien maanden: optrekken aan meubels, staan, het eerste wankele moment op twee benen.",
+        "mood": "trots en gespannen",
+        "example_prompts": [
+            "Hoe zag het eruit de eerste keer dat [naam] optrok en rechtop stond?",
+            "Wat deed jij op het moment dat [naam] voor het eerst stond?",
+            "Wat verwacht je dat de eerste zelfstandige stap van [naam] zal voelen voor jou?",
+        ],
+    },
+    ChapterId.baby_month_11: {
+        "title": "Maand 11 — Vlak voor de eerste verjaardag",
+        "theme": "Elf maanden: [naam] staat op het punt om één te worden — terugkijken en vooruitkijken.",
+        "mood": "nostalgisch en feestelijk",
+        "example_prompts": [
+            "Als je de [naam] van nu vergelijkt met de baby die pas geboren was: wat valt je het meest op?",
+            "Welk moment van de afgelopen elf maanden wil je het liefst bewaren in dit boek?",
+            "Hoe bereid je de eerste verjaardag voor — wat wil je vieren en wat wil je bewaren?",
+        ],
+    },
+    ChapterId.baby_month_12: {
+        "title": "Maand 12 — Één jaar!",
+        "theme": "Een jaar oud: het grote feest, de cake smash, en een kind dat zijn/haar eigen persoonlijkheid heeft.",
+        "mood": "feestelijk, nostalgisch, trots",
+        "example_prompts": [
+            "Hoe was de verjaardagsdag van [naam] — beschrijf de sfeer, wie er waren, het moment van de taart?",
+            "Wat is het grootste cadeau dat [naam] jullie dit jaar heeft gegeven?",
+            "Welke eigenschap van [naam] hoop je dat hij/zij voor altijd houdt?",
+        ],
+    },
+    ChapterId.baby_chaos_and_laughs: {
+        "title": "Chaos & lachen — de onbetaalbare momenten",
+        "theme": "De blowouts, de mislukkte foto's, de nacht-om-2-uur-humor — het zijn de verhalen die jullie altijd zullen vertellen.",
+        "mood": "humoristisch, eerlijk, bevrijdend",
+        "example_prompts": [
+            "Wat is het meest chaotische of hilarische moment van het eerste jaar geweest?",
+            "Vertel het verhaal dat jullie al lachend aan [naam] gaan vertellen als hij/zij 18 is.",
+            "Wat dacht je in een moeilijk moment: 'dit is echt niet hoe ik het had voorgesteld'?",
+        ],
+    },
+    ChapterId.baby_parent_reflection: {
+        "title": "Jij als ouder — wie ben jij geworden?",
+        "theme": "Een jaar ouderschap: hoe heeft [naam] jou als mens veranderd, gevormd, geraakt?",
+        "mood": "diep en persoonlijk",
+        "example_prompts": [
+            "Welke eigenschap of kracht in jezelf ontdekte je dit jaar die je niet wist dat je had?",
+            "Wat heeft [naam] je geleerd over liefde, geduld of jezelf?",
+            "Op welke manier ben jij een ander mens dan een jaar geleden?",
+        ],
+    },
+    ChapterId.baby_first_birthday: {
+        "title": "Terugblik op jaar 1",
+        "theme": "Van geboorte tot eerste verjaardag — het complete verhaal van het meest bewogen jaar.",
+        "mood": "mijlpaal-bewust, warm, geëmotioneerd",
+        "example_prompts": [
+            "Als je het jaar in drie woorden samen zou vatten, welke drie woorden zouden dat zijn?",
+            "Welk moment van dit jaar wil je dat [naam] ooit te weten komt?",
+            "Wat wens je [naam] voor het komende jaar — en voor zijn/haar hele leven?",
+        ],
+    },
+    ChapterId.baby_letter_to_child: {
+        "title": "Een brief aan [naam] — te openen op de 18e verjaardag",
+        "theme": "De tijdcapsule-brief: wat wil jij dat [naam] weet als hij/zij volwassen is?",
+        "mood": "intiem, liefdevol, tijdloos",
+        "example_prompts": [
+            "Wat wil je dat [naam] weet over de dag dat hij/zij geboren werd?",
+            "Welk advies of welke wens geef je [naam] mee voor zijn/haar leven als volwassene?",
+            "Wat zou je zeggen als [naam] op zijn/haar 18e voor je staat en vraagt: 'Wie was ik als baby?'",
+        ],
+    },
 }
 
 

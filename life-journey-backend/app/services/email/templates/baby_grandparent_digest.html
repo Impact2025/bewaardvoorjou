@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Update van {{ baby_name }} — {{ age_label }} oud{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <div style="font-size: 44px; line-height: 1;">&#128149;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  Hallo {{ grandparent_name }}!
+</h1>
+<p class="body-text" style="text-align: center;">
+  <strong>{{ baby_name }}</strong> is nu <strong>{{ age_label }}</strong> oud.<br>
+  De ouders hebben dit gedeeld, speciaal voor jou.
+</p>
+
+{% if milestones %}
+<div class="accent-block" style="border-left-color: #BE185D; background-color: #FDF2F8;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #9D174D; font-weight: 600; margin-bottom: 10px;">
+    Nieuwe mijlpalen deze maand
+  </p>
+  {% for m in milestones %}
+  <p style="font-size: 14px; color: #1C1917; margin: 0 0 6px; line-height: 1.5;">
+    &#10003; <strong>{{ m.label }}</strong>
+    {% if m.date %} &mdash; <span style="color: #78350F;">{{ m.date }}</span>{% endif %}
+  </p>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if highlight_snippet %}
+<div class="divider"></div>
+<p style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.7px; color: #BE185D; font-weight: 600; margin-bottom: 8px;">
+  Wat de ouders schreven
+</p>
+<p style="font-size: 15px; color: #44403C; font-style: italic; line-height: 1.7; margin: 0 0 20px;">
+  "{{ highlight_snippet }}"
+</p>
+{% endif %}
+
+<div class="cta-wrap">
+  <a href="{{ digest_url }}" class="cta-button" style="background-color: #BE185D;">Bekijk het babyboek</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Je ontvangt deze update maandelijks, zolang je dit wilt.
+</p>
+{% endblock %}

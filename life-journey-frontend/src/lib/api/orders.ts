@@ -27,7 +27,7 @@ export type AddonCode =
   | "EXTRA_STORAGE"
   | "VIDEO_INTRO";
 
-export type PackageType = "VERHAAL" | "ERFGOED" | "NALATENSCHAP" | "BEGIN" | "VOOR_ALTIJD" | "DIGITAAL";
+export type PackageType = "VERHAAL" | "ERFGOED" | "NALATENSCHAP" | "BABY_GIFT" | "BEGIN" | "VOOR_ALTIJD" | "DIGITAAL";
 
 export type RecipientRelation =
   | "vader" | "moeder" | "opa" | "oma" | "schoonouder" | "partner" | "anders";
@@ -202,6 +202,7 @@ export const PACKAGE_PRICES: Record<PackageType, number> = {
   VERHAAL: 79,
   ERFGOED: 149,
   NALATENSCHAP: 229,
+  BABY_GIFT: 59,
   // Legacy
   BEGIN: 89,
   VOOR_ALTIJD: 399,
@@ -212,6 +213,7 @@ export const PACKAGE_NAMES: Record<PackageType, string> = {
   VERHAAL: "Verhaal",
   ERFGOED: "Erfgoed",
   NALATENSCHAP: "Nalatenschap",
+  BABY_GIFT: "Bewaard voor Baby",
   // Legacy
   BEGIN: "Het Begin",
   VOOR_ALTIJD: "Voor Altijd",

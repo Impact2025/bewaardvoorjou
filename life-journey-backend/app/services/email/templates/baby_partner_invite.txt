@@ -1,0 +1,18 @@
+{{ inviter_name }} nodigt je uit voor het babyboek van {{ baby_name }}
+
+Hoi,
+
+{{ inviter_name }} nodigt je uit om samen het boek van {{ baby_name }} te schrijven.
+
+JOUW ROL:
+- Voeg jouw eigen herinneringen toe
+- Beantwoord vragen vanuit jouw perspectief
+- Markeer mijlpalen met datum en foto
+- Schrijf mee aan de brief aan {{ baby_name }}
+
+Je hebt geen apart account nodig — je deelt de toegang met {{ inviter_name }}.
+
+Doe mee: {{ invite_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl

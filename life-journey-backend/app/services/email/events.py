@@ -606,3 +606,126 @@ def trigger_export_ready_email(
 
     logger.info(f"Email queued: export_ready to {user.email}")
     return enqueue_email_job(event.id)
+
+
+# ── BewaardVoorBaby e-mail triggers ───────────────────────────────────────
+
+def trigger_baby_gift_delivery_email(
+    db: Session,
+    user_id: str,
+    journey_id: str,
+    baby_name: str,
+    gifter_name: Optional[str],
+    onboarding_url: str,
+) -> Optional[str]:
+    """Verstuurd aan de ontvanger (ouder) direct nadat een BABY_GIFT is ingewisseld."""
+    existing = db.query(EmailEventModel).filter(
+        EmailEventModel.user_id == user_id,
+        EmailEventModel.email_type == "baby_gift_delivery",
+    ).first()
+    if existing:
+        return None
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="baby_gift_delivery",
+        sent_to=user.email,
+        context_data={
+            "baby_name": baby_name,
+            "gifter_name": gifter_name,
+            "onboarding_url": onboarding_url,
+            "recipient_name": user.display_name or user.email.split("@")[0],
+        },
+    )
+    logger.info(f"Email queued: baby_gift_delivery to {user.email}")
+    return enqueue_email_job(event.id)
+
+
+def trigger_baby_weekly_question_email(
+    db: Session,
+    user_id: str,
+    journey_id: str,
+    baby_name: str,
+    chapter_id: str,
+    question_text: str,
+    dashboard_url: str,
+    age_weeks: Optional[int] = None,
+) -> Optional[str]:
+    """Wekelijkse herinneringsvraag voor het babyboek — maximaal 1x per 6 dagen."""
+    if not should_send_email(db, user_id, "baby_weekly_question"):
+        return None
+
+    recent = _recent_events(db, user_id, ("baby_weekly_question",), limit=1)
+    if recent:
+        last = _to_aware_utc(recent[0].created_at)
+        if last and (datetime.now(timezone.utc) - last) < timedelta(days=6):
+            logger.info(f"Baby weekly question skipped (within 6d) for user {user_id}")
+            return None
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="baby_weekly_question",
+        sent_to=user.email,
+        context_data={
+            "baby_name": baby_name,
+            "chapter_id": chapter_id,
+            "question_text": question_text,
+            "dashboard_url": dashboard_url,
+            "age_weeks": age_weeks,
+            "display_name": user.display_name or user.email.split("@")[0],
+        },
+    )
+    logger.info(f"Email queued: baby_weekly_question for {chapter_id} to {user.email}")
+    return enqueue_email_job(event.id)
+
+
+def trigger_baby_first_birthday_email(
+    db: Session,
+    user_id: str,
+    journey_id: str,
+    baby_name: str,
+    photobook_progress_pct: int,
+    dashboard_url: str,
+    golden_ticket_url: str,
+) -> Optional[str]:
+    """Eerste verjaardag — combinatie van felicitatie + fotoboek CTA + golden ticket cross-sell."""
+    existing = db.query(EmailEventModel).filter(
+        EmailEventModel.user_id == user_id,
+        EmailEventModel.journey_id == journey_id,
+        EmailEventModel.email_type == "baby_first_birthday",
+    ).first()
+    if existing:
+        return None
+
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        journey_id=journey_id,
+        email_type="baby_first_birthday",
+        sent_to=user.email,
+        context_data={
+            "baby_name": baby_name,
+            "photobook_progress_pct": photobook_progress_pct,
+            "dashboard_url": dashboard_url,
+            "golden_ticket_url": golden_ticket_url,
+            "display_name": user.display_name or user.email.split("@")[0],
+        },
+    )
+    logger.info(f"Email queued: baby_first_birthday to {user.email}")
+    return enqueue_email_job(event.id)

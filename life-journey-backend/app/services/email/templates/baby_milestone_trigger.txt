@@ -1,0 +1,18 @@
+{{ baby_name }}: {{ milestone_label }} — leg dit moment vast!
+
+{{ display_name }},
+
+{{ baby_name }} heeft iets bereikt: {{ milestone_label }}
+
+Leg dit moment vast voordat het vervaagt. Jij bent de enige die dit zo heeft meegemaakt.
+
+JOUW VRAAG:
+"{{ question_text }}"
+
+Vertel het verhaal: {{ dashboard_url }}
+
+---
+Bewaard voor {{ baby_name }} — bewaardvoorjou.nl
+{% if unsubscribe_token %}
+Afmelden: {{ app_base_url }}/api/v1/emails/unsubscribe/{{ unsubscribe_token }}
+{% endif %}

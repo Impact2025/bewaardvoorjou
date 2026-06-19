@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Jouw babyboek staat klaar — Bewaard voor {{ baby_name }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 20px;">
+  <div style="font-size: 48px; line-height: 1;">&#128118;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  Welkom, {{ recipient_name }}!<br>
+  <span style="color: #BE185D;">{{ baby_name }}&rsquo;s boek staat klaar.</span>
+</h1>
+
+{% if gifter_name %}
+<p class="body-text" style="text-align: center;">
+  <strong>{{ gifter_name }}</strong> heeft je het mooiste cadeau gegeven:<br>
+  een plek om alles van dit eerste jaar vast te leggen.
+</p>
+{% else %}
+<p class="body-text" style="text-align: center;">
+  Het eerste jaar van <strong>{{ baby_name }}</strong> verdient een plek.<br>
+  Jouw digitale babyboek is aangemaakt en wacht op jou.
+</p>
+{% endif %}
+
+<div class="accent-block" style="border-left-color: #BE185D; background-color: #FDF2F8; text-align: center;">
+  <p style="font-size: 14px; color: #9D174D; font-weight: 600; margin-bottom: 6px;">Wat je krijgt</p>
+  <p style="font-size: 14px; color: #831843; line-height: 1.7; margin: 0;">
+    14 diepgaande hoofdstukken &middot; 28 mijlpalen bijhouden<br>
+    Wekelijkse herinneringsvragen &middot; Opa/oma-updates<br>
+    Fotoboek-voucher na een volledig jaar
+  </p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ onboarding_url }}" class="cta-button" style="background-color: #BE185D;">Start het babyboek van {{ baby_name }}</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Neem gerust je tijd. Je hoeft niet alles in &eacute;&eacute;n keer — dit boek groeit mee.
+</p>
+{% endblock %}

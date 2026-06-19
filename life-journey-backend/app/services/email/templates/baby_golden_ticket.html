@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Het mooiste cadeau voor opa of oma — {{ baby_name }} wordt 1{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <div style="font-size: 44px; line-height: 1;">&#127775;</div>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  {{ baby_name }} wordt 1 &mdash;<br>
+  <span style="color: #B45309;">geef opa of oma iets onbetaalbaars.</span>
+</h1>
+
+<p class="body-text" style="text-align: center;">
+  Jij hebt het eerste jaar van {{ baby_name }} bewaard.<br>
+  Nu is het tijd voor <em>hun</em> verhaal &mdash; <strong>Bewaard voor jou</strong>.
+</p>
+
+<div class="accent-block" style="text-align: center;">
+  <p style="font-size: 14px; color: #78350F; font-weight: 600; margin-bottom: 6px;">
+    Bewaard voor jou &mdash; het levensverhaal cadeau
+  </p>
+  <p style="font-size: 14px; color: #78350F; line-height: 1.7; margin: 0;">
+    AI-begeleide interviews &middot; 58 hoofdstukken &middot; Altijd toegankelijk<br>
+    Het verhaal van opa of oma &mdash; voor jou, voor {{ baby_name }}, voor altijd
+  </p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ golden_ticket_url }}" class="cta-button">Geef het levensverhaal cadeau</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Als {{ display_name }} van BewaardVoorBaby heb je 15% korting &mdash; automatisch verrekend.
+</p>
+{% endblock %}
