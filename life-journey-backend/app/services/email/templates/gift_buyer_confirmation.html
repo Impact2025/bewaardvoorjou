@@ -1,44 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}Bedankt voor je bestelling — Bewaardvoorjou{% endblock %}
+{% block title %}Bestelbevestiging — Bewaardvoorjou{% endblock %}
 
 {% block content %}
-<h1 class="heading">Bedankt voor je mooie cadeau!</h1>
+<h1 class="heading">Je bestelling is bevestigd</h1>
 
 <p class="body-text">
-  Wat een lief gebaar — je hebt <strong>{{ package_name }}</strong> gekocht voor
-  <strong>{{ recipient_name }}</strong>. Dit is een cadeau dat voor altijd bewaard blijft.
+  Bedankt voor je aankoop. Je hebt <strong>{{ package_name }}</strong> gekocht voor
+  <strong>{{ recipient_name }}</strong>.
 </p>
 
-<div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 16px; padding: 28px; margin: 28px 0;">
-  <p style="margin: 0 0 4px 0; color: #d4af37; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Jouw bestelling</p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 14px;">
-    <tr>
-      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Pakket</td>
-      <td style="color: #fff; font-size: 14px; font-weight: 600; text-align: right; padding: 4px 0;">{{ package_name }}</td>
-    </tr>
-    <tr>
-      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Voor</td>
-      <td style="color: #fff; font-size: 14px; font-weight: 600; text-align: right; padding: 4px 0;">{{ recipient_name }}</td>
-    </tr>
-    <tr>
-      <td style="color: #aaa; font-size: 14px; padding: 4px 0;">Bestelnummer</td>
-      <td style="color: #d4af37; font-size: 13px; font-family: monospace; text-align: right; padding: 4px 0;">{{ order_id_short }}</td>
-    </tr>
-  </table>
-</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #EDE8DF; border-radius: 10px; overflow: hidden; margin: 24px 0;">
+  <tr style="background: #F9F8F6;">
+    <td colspan="2" style="padding: 12px 18px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #A8A29E; border-bottom: 1px solid #EDE8DF;">
+      Jouw bestelling
+    </td>
+  </tr>
+  <tr style="border-bottom: 1px solid #EDE8DF;">
+    <td style="padding: 13px 18px; font-size: 14px; color: #78716C; border-bottom: 1px solid #EDE8DF;">Pakket</td>
+    <td style="padding: 13px 18px; font-size: 14px; font-weight: 600; color: #1C1917; text-align: right; border-bottom: 1px solid #EDE8DF;">{{ package_name }}</td>
+  </tr>
+  <tr style="border-bottom: 1px solid #EDE8DF;">
+    <td style="padding: 13px 18px; font-size: 14px; color: #78716C; border-bottom: 1px solid #EDE8DF;">Voor</td>
+    <td style="padding: 13px 18px; font-size: 14px; font-weight: 600; color: #1C1917; text-align: right; border-bottom: 1px solid #EDE8DF;">{{ recipient_name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 13px 18px; font-size: 14px; color: #78716C;">Bestelnummer</td>
+    <td style="padding: 13px 18px; font-size: 13px; font-family: monospace; font-weight: 600; color: #B45309; text-align: right;">{{ order_id_short }}</td>
+  </tr>
+</table>
 
 {% if has_recipient_email %}
 <p class="body-text">
-  We hebben <strong>{{ recipient_name }}</strong> een persoonlijke uitnodiging gestuurd op
-  <strong>{{ recipient_email }}</strong>{% if delivery_date %} — gepland voor <strong>{{ delivery_date }}</strong>{% endif %}.
-  Zodra ze openen, is jouw persoonlijke bericht het eerste wat ze zien.
+  We hebben <strong>{{ recipient_name }}</strong> een uitnodiging gestuurd op
+  <strong>{{ recipient_email }}</strong>{% if delivery_date %}, gepland voor <strong>{{ delivery_date }}</strong>{% endif %}.
+  Zodra {{ recipient_name }} de uitnodiging opent, is jouw persoonlijke bericht het eerste wat ze zien.
 </p>
 {% else %}
 <p class="body-text">
-  Jij geeft dit cadeau zelf. Hieronder vind je de <strong>startkaart</strong> van
-  <strong>{{ recipient_name }}</strong> — print hem of laat de QR-code op je telefoon zien.
-  Zodra {{ recipient_name }} hem opent, is jouw persoonlijke bericht het eerste wat ze zien.
+  Jij geeft dit cadeau persoonlijk. Hieronder vind je de <strong>startkaart</strong> van
+  <strong>{{ recipient_name }}</strong> — print hem of laat de QR-code zien.
 </p>
 {% endif %}
 
@@ -47,30 +48,26 @@
   <a href="{{ redemption_url }}" class="cta-button">Bekijk &amp; print de startkaart &rarr;</a>
 </div>
 <p class="note" style="text-align: center;">
-  Bewaar deze link goed — hiermee ontgrendelt {{ recipient_name }} het cadeau.
+  Bewaar deze link — hiermee ontgrendelt {{ recipient_name }} het cadeau.
 </p>
 {% endif %}
 
-<div style="background: #fdf8ef; border: 1px solid #e8d8a0; border-radius: 12px; padding: 20px; margin: 24px 0;">
-  <p style="margin: 0 0 8px 0; font-weight: 700; color: #8B6914; font-size: 15px;">💛 Ons mooiste advies</p>
-  <p style="margin: 0; color: #6B6456; font-size: 14px; line-height: 1.6;">
-    Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk —
-    jij aan de telefoon, {{ recipient_name }} met de kaart in de hand. Zo begint het verhaal samen.
-  </p>
+<div class="accent-block">
+  <p><strong>Tip:</strong> Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, {{ recipient_name }} met de kaart in de hand.</p>
 </div>
 
 {% if shipping_city %}
 <div class="divider"></div>
 <p class="body-text" style="font-size: 14px; color: #6B6456;">
-  <strong>Fysieke doos:</strong> De BewaardVoorJou doos wordt naar <strong>{{ shipping_city }}</strong> gestuurd zodra onze eerste voorraad gereed is (verwacht: september 2026). Je ontvangt dan automatisch een e-mail met de track &amp; trace.
+  <strong>Fysieke doos:</strong> De BewaardVoorJou doos wordt naar <strong>{{ shipping_city }}</strong> gestuurd zodra onze eerste voorraad gereed is (verwacht: september 2026). Je ontvangt automatisch een e-mail met de track &amp; trace.
 </p>
 {% endif %}
 
 <div class="divider"></div>
 
 <p class="note">
-  Vragen over je bestelling? Stuur een e-mail naar
-  <a href="mailto:support@bewaardvoorjou.nl" style="color: #8B6914;">support@bewaardvoorjou.nl</a>
-  met je bestelnummer <strong>{{ order_id_short }}</strong>.
+  Vragen over je bestelling? Mail naar
+  <a href="mailto:support@bewaardvoorjou.nl" style="color: #B45309;">support@bewaardvoorjou.nl</a>
+  met bestelnummer <strong>{{ order_id_short }}</strong>.
 </p>
 {% endblock %}

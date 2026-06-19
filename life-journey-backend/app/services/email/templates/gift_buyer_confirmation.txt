@@ -1,7 +1,6 @@
-Bedankt voor je mooie cadeau!
+Je bestelling is bevestigd
 
-Wat een lief gebaar — je hebt {{ package_name }} gekocht voor {{ recipient_name }}.
-Dit is een cadeau dat voor altijd bewaard blijft.
+Bedankt voor je aankoop. Je hebt {{ package_name }} gekocht voor {{ recipient_name }}.
 
 JOUW BESTELLING
 ---------------
@@ -10,29 +9,24 @@ Voor:         {{ recipient_name }}
 Bestelnummer: {{ order_id_short }}
 
 {% if has_recipient_email %}
-We hebben {{ recipient_name }} een persoonlijke uitnodiging gestuurd op {{ recipient_email }}{% if delivery_date %} — gepland voor {{ delivery_date }}{% endif %}.
-Zodra ze openen, is jouw persoonlijke bericht het eerste wat ze zien.
+We hebben {{ recipient_name }} een uitnodiging gestuurd op {{ recipient_email }}{% if delivery_date %}, gepland voor {{ delivery_date }}{% endif %}. Zodra {{ recipient_name }} de uitnodiging opent, is jouw persoonlijke bericht het eerste wat ze zien.
 {% else %}
-Jij geeft dit cadeau zelf. Hieronder vind je de startkaart van {{ recipient_name }} — print hem
-of laat de QR-code op je telefoon zien. Zodra {{ recipient_name }} hem opent, is jouw persoonlijke
-bericht het eerste wat ze zien.
+Jij geeft dit cadeau persoonlijk. Hieronder vind je de startkaart van {{ recipient_name }} — print hem of laat de QR-code zien.
 {% endif %}
 {% if redemption_url %}
-STARTKAART (bewaar deze link goed):
+STARTKAART (bewaar deze link):
 {{ redemption_url }}
 {% endif %}
 
-ONS MOOISTE ADVIES
-Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk —
-jij aan de telefoon, {{ recipient_name }} met de kaart in de hand. Zo begint het verhaal samen.
+TIP
+Bel {{ recipient_name }} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, {{ recipient_name }} met de kaart in de hand.
 
 {% if shipping_city %}
 FYSIEKE DOOS
-De BewaardVoorJou doos wordt naar {{ shipping_city }} gestuurd zodra onze eerste voorraad
-gereed is (verwacht: september 2026). Je ontvangt dan automatisch een e-mail met de track & trace.
+De BewaardVoorJou doos wordt naar {{ shipping_city }} gestuurd zodra onze eerste voorraad gereed is (verwacht: september 2026). Je ontvangt automatisch een e-mail met de track & trace.
 {% endif %}
 
-Vragen over je bestelling? Mail naar support@bewaardvoorjou.nl met bestelnummer {{ order_id_short }}.
+Vragen? Mail naar support@bewaardvoorjou.nl met bestelnummer {{ order_id_short }}.
 
-Met warme groet,
+Met vriendelijke groet,
 Het Bewaardvoorjou team

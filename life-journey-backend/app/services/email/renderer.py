@@ -353,7 +353,7 @@ def build_gift_buyer_confirmation_email(
     has_recipient_email: bool = True,
     delivery_date: str | None = None,
 ) -> tuple[str, str, str]:
-    subject = f"Bedankt! Je cadeau voor {recipient_name} staat klaar 🎁"
+    subject = f"Bestelbevestiging — cadeau voor {recipient_name}"
     context = {
         "recipient_name": recipient_name,
         "recipient_email": recipient_email,
