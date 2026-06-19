@@ -8,11 +8,11 @@ import { Menu, X } from "lucide-react";
 import { useBabyTheme, THEME_CONFIG, type BabyTheme } from "./BabyThemeContext";
 
 const NAV_LINKS = [
-  { href: "/voor-baby#features", label: "Hoe werkt het" },
+  { href: "/voor-baby/hoe-het-werkt", label: "Hoe werkt het" },
   { href: "/voor-baby#tijdlijn", label: "Het eerste jaar" },
   { href: "/voor-baby#prijs", label: "Prijzen" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/about", label: "Over ons" },
+  { href: "/voor-baby/hoe-het-werkt#faq", label: "FAQ" },
+  { href: "/voor-baby/over-ons", label: "Over ons" },
   { href: "/contact", label: "Contact" },
 ];
 
