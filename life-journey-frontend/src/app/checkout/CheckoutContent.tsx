@@ -2,8 +2,19 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
-import { Check, ChevronLeft, XCircle } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  XCircle,
+  BookOpen,
+  Target,
+  Mail,
+  Users,
+  Camera,
+  UserPlus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   PACKAGE_NAMES,
@@ -17,6 +28,7 @@ import {
 import { getEarlyBirdStatus, type EarlyBirdStatus } from "@/lib/api/early-bird";
 import { validatePromoCode } from "@/lib/api/promo-codes";
 import type { RecipientRelation, GiftReveal, MessageMediaType } from "@/lib/api/orders";
+import { useBabyTheme, THEME_CONFIG, type BabyTheme } from "@/components/baby/BabyThemeContext";
 import StepRecipient from "./StepRecipient";
 import StepMessage from "./StepMessage";
 import StepGifting from "./StepGifting";
@@ -27,11 +39,31 @@ const SOLD_OUT_PACKAGES = new Set<string>(["ERFGOED", "NALATENSCHAP"]);
 const DIGITAL_ONLY_PACKAGES = new Set(["DIGITAAL", "VERHAAL", "BABY_GIFT"]);
 const SOLD_OUT_ADDONS = new Set<string>(["GIFT_BOX", "EXTRA_USB", "EXTRA_STORAGE"]);
 
-// Stappen verschillen voor een cadeau (de boodschap is het hart) en een eigen aankoop.
-// We renderen op basis van het label, niet op een vaste index, zodat de 'voor mezelf'-
-// toggle de juiste stappen toont zonder de indicator te breken.
+// Stappen-arrays per flow
 const GIFT_STEPS = ["Pakket", "Voor wie", "Boodschap", "Geven", "Betalen", "Bevestiging"] as const;
 const SELF_STEPS = ["Pakket", "Jouw gegevens", "Betalen", "Bevestiging"] as const;
+const BABY_GIFT_STEPS = ["Jouw cadeau", "Voor wie", "Jouw boodschap", "Geven", "Betalen", "Bevestiging"] as const;
+const BABY_SELF_STEPS = ["Jouw cadeau", "Jouw gegevens", "Betalen", "Bevestiging"] as const;
+
+// Sets voor label-matching (meerdere flows gebruiken andere tekst voor dezelfde stap)
+const PACKAGE_LABELS = new Set(["Pakket", "Jouw cadeau"]);
+const MESSAGE_LABELS = new Set(["Boodschap", "Jouw boodschap"]);
+
+// Statische feature-lijst voor het BABY_GIFT-pakket
+const BABY_FEATURES: { Icon: React.ComponentType<{ size?: number; className?: string }>; text: string }[] = [
+  { Icon: BookOpen, text: "14 diepgaande hoofdstukken — geboorte t/m eerste verjaardag" },
+  { Icon: Target, text: "28 mijlpalen bijhouden met foto en eigen verhaal" },
+  { Icon: Mail, text: "Wekelijkse herinneringsvragen in je inbox" },
+  { Icon: Users, text: "Maandelijkse updates voor opa en oma — geen app nodig" },
+  { Icon: Camera, text: "Fotoboek-voucher na een volledig eerste jaar" },
+  { Icon: UserPlus, text: "Partner schrijft mee vanuit eigen perspectief" },
+];
+
+const BABY_THEME_LOGOS: Record<BabyTheme, string> = {
+  meisje: "/images/logo-baby-meisje.png",
+  jongen: "/images/logo-baby-jongen.png",
+  neutraal: "/images/logo-baby-neutraal.png",
+};
 
 export interface CheckoutState {
   packageType: PackageType;
@@ -68,10 +100,16 @@ const DEFAULT_ADDRESS: ShippingAddress = {
 export default function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
   const rawPackage = searchParams.get("package") ?? "VERHAAL";
   const packageType: PackageType = ["VERHAAL", "ERFGOED", "NALATENSCHAP", "BABY_GIFT", "BEGIN", "VOOR_ALTIJD", "DIGITAAL"].includes(rawPackage)
     ? (rawPackage as PackageType)
     : "VERHAAL";
+  const forSelfParam = searchParams.get("for_self") === "true";
+
+  // Baby-thema (BabyThemeProvider staat in page.tsx en leest uit localStorage)
+  const { t: babyT } = useBabyTheme();
+  const isBaby = packageType === "BABY_GIFT";
 
   // Redirect uitverkochte pakketten terug naar de pricing pagina
   useEffect(() => {
@@ -95,7 +133,7 @@ export default function CheckoutContent() {
   const [state, setState] = useState<CheckoutState>({
     packageType,
     addons: [],
-    forSelf: false,
+    forSelf: forSelfParam,
     recipientName: "",
     recipientEmail: "",
     recipientRelation: "",
@@ -115,13 +153,14 @@ export default function CheckoutContent() {
     promoDiscountCents: 0,
   });
 
-  // Actieve stappen op basis van cadeau vs. eigen aankoop.
-  const steps = state.forSelf ? SELF_STEPS : GIFT_STEPS;
+  // Actieve stappen afhankelijk van pakket en cadeau vs. eigen aankoop
+  const steps = state.packageType === "BABY_GIFT"
+    ? (state.forSelf ? BABY_SELF_STEPS : BABY_GIFT_STEPS)
+    : (state.forSelf ? SELF_STEPS : GIFT_STEPS);
   const currentLabel = steps[Math.min(step, steps.length - 1)];
 
-  // Terugkeer van Stripe-redirect (iDEAL): verifieer de WERKELIJKE betaalstatus
-  // bij de backend. We vertrouwen bewust niet op de `redirect_status` uit de URL —
-  // die mag nooit een geslaagde bevestiging tonen voor een geannuleerde betaling.
+  // Terugkeer van Stripe-redirect (iDEAL): verifieer de WERKELIJKE betaalstatus.
+  // We vertrouwen bewust niet op de `redirect_status` uit de URL.
   const verifiedRef = useRef(false);
   useEffect(() => {
     if (verifiedRef.current) return;
@@ -147,11 +186,10 @@ export default function CheckoutContent() {
               : s.shippingAddress,
           }));
           setReturnStatus(null);
-          // Toon de bevestiging (laatste stap). Een Stripe-redirect keert altijd in
-          // de cadeau-flow terug (forSelf=false), dus GIFT_STEPS is leidend.
+          // GIFT_STEPS en BABY_GIFT_STEPS hebben beide 6 stappen; index 5 = Bevestiging.
+          // Voor BABY_SELF_STEPS (4 stappen) clamt Math.min dit correct naar index 3.
           setStep(GIFT_STEPS.length - 1);
         } else {
-          // pending of failed → geen valse succespagina
           setReturnStatus("failed");
         }
       })
@@ -184,32 +222,49 @@ export default function CheckoutContent() {
   const effectivePromoDiscount = Math.min(promoDiscount, baseAfterEarlyBird);
   const totalPrice = Math.max(0, baseAfterEarlyBird - effectivePromoDiscount);
 
+  // Kleurklassen voor header en stappen-indicator — baby vs. standaard
+  const doneDotBg = isBaby ? babyT.timelineDot : "bg-[#2d5016]";
+  const doneLineBg = isBaby ? babyT.timelineLine : "bg-[#2d5016]";
+  const headerBg = isBaby ? `bg-gradient-to-r ${babyT.gradientHero}` : "bg-white";
+
   return (
     <div className="min-h-screen bg-[#f8f6f2]">
       {/* Header */}
-      <div className="bg-white border-b border-[#e5e0d8] px-4 py-4">
+      <div className={`${headerBg} border-b border-[#e5e0d8] px-4 py-4`}>
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => (step > 0 ? setStep(step - 1) : router.push("/pricing"))}
+            onClick={() =>
+              step > 0
+                ? setStep(step - 1)
+                : router.push(isBaby ? "/voor-baby" : "/pricing")
+            }
             className="flex items-center gap-1 text-sm text-[#888] hover:text-[#1a1a1a] transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            {step === 0 ? "Terug naar pakketten" : "Vorige stap"}
+            {step === 0
+              ? isBaby ? "Terug naar overzicht" : "Terug naar pakketten"
+              : "Vorige stap"}
           </button>
           <div className="text-center">
             <p className="text-xs text-[#888]">Bewaardvoorjou</p>
           </div>
           <div className="text-right">
-            <p className="font-bold text-[#1a1a1a]">{totalPrice === 0 ? "Gratis" : `€${totalPrice}`}</p>
+            <p className="font-bold text-[#1a1a1a]">
+              {totalPrice === 0 ? "Gratis" : `€${totalPrice}`}
+            </p>
             <p className="text-xs text-[#888]">
-              {state.packageType === "NALATENSCHAP" ? "eenmalig" : "5 jaar inbegrepen"}
+              {state.packageType === "NALATENSCHAP"
+                ? "eenmalig"
+                : state.packageType === "BABY_GIFT"
+                ? "1 jaar toegang"
+                : "5 jaar inbegrepen"}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Stappen indicator */}
-      <div className="bg-white border-b border-[#e5e0d8] px-4 py-3">
+      {/* Stappen-indicator */}
+      <div className={`${headerBg} border-b border-[#e5e0d8] px-4 py-3`}>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
             {steps.map((label, i) => (
@@ -219,20 +274,32 @@ export default function CheckoutContent() {
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
                       i < step
-                        ? "bg-[#2d5016] text-white"
+                        ? `${doneDotBg} text-white`
                         : i === step
-                        ? "bg-[#d4af37] text-[#1a1a1a]"
+                        ? isBaby
+                          ? `${babyT.timelineDot} text-white`
+                          : "bg-[#d4af37] text-[#1a1a1a]"
                         : "bg-[#f0ece6] text-[#aaa]"
                     )}
                   >
                     {i < step ? <Check className="h-4 w-4" /> : i + 1}
                   </div>
-                  <span className={cn("text-xs mt-1 hidden sm:block", i === step ? "text-[#1a1a1a] font-medium" : "text-[#aaa]")}>
+                  <span
+                    className={cn(
+                      "text-xs mt-1 hidden sm:block",
+                      i === step ? "text-[#1a1a1a] font-medium" : "text-[#aaa]"
+                    )}
+                  >
                     {label}
                   </span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={cn("h-px w-6 sm:w-12 mx-1 sm:mx-2 transition-colors", i < step ? "bg-[#2d5016]" : "bg-[#e5e0d8]")} />
+                  <div
+                    className={cn(
+                      "h-px w-6 sm:w-12 mx-1 sm:mx-2 transition-colors",
+                      i < step ? doneLineBg : "bg-[#e5e0d8]"
+                    )}
+                  />
                 )}
               </div>
             ))}
@@ -243,39 +310,54 @@ export default function CheckoutContent() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-8">
         {returnStatus === "verifying" && <VerifyingPayment />}
+
         {returnStatus === "failed" && (
           <PaymentFailed
             packageType={state.packageType}
             onRetry={() => {
-              // Verse start: PaymentIntent-state ging verloren bij de redirect.
-              window.location.href = `/checkout?package=${state.packageType}`;
+              window.location.href = `/checkout?package=${state.packageType}${
+                state.forSelf ? "&for_self=true" : ""
+              }`;
             }}
-            onHome={() => router.push("/")}
+            onHome={() => router.push(isBaby ? "/voor-baby" : "/")}
           />
         )}
-        {returnStatus === null && currentLabel === "Pakket" && (
-          <StepSelectPlan
-            state={state}
-            earlyBirdDiscount={earlyBirdDiscount}
-            promoDiscount={effectivePromoDiscount}
-            onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
-            onNext={() => setStep(step + 1)}
-          />
+
+        {returnStatus === null && PACKAGE_LABELS.has(currentLabel) && (
+          state.packageType === "BABY_GIFT" ? (
+            <BabyPackageStep
+              state={state}
+              onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
+              onNext={() => setStep(step + 1)}
+            />
+          ) : (
+            <StepSelectPlan
+              state={state}
+              earlyBirdDiscount={earlyBirdDiscount}
+              promoDiscount={effectivePromoDiscount}
+              onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
+              onNext={() => setStep(step + 1)}
+            />
+          )
         )}
-        {returnStatus === null && (currentLabel === "Voor wie" || currentLabel === "Jouw gegevens") && (
-          <StepRecipient
-            state={state}
-            onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
-            onNext={() => setStep(step + 1)}
-          />
-        )}
-        {returnStatus === null && currentLabel === "Boodschap" && (
+
+        {returnStatus === null &&
+          (currentLabel === "Voor wie" || currentLabel === "Jouw gegevens") && (
+            <StepRecipient
+              state={state}
+              onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
+              onNext={() => setStep(step + 1)}
+            />
+          )}
+
+        {returnStatus === null && MESSAGE_LABELS.has(currentLabel) && (
           <StepMessage
             state={state}
             onChange={(updates) => setState((s) => ({ ...s, ...updates }))}
             onNext={() => setStep(step + 1)}
           />
         )}
+
         {returnStatus === null && currentLabel === "Geven" && (
           <StepGifting
             state={state}
@@ -283,6 +365,7 @@ export default function CheckoutContent() {
             onNext={() => setStep(step + 1)}
           />
         )}
+
         {returnStatus === null && currentLabel === "Betalen" && (
           <StepPayment
             state={state}
@@ -294,15 +377,213 @@ export default function CheckoutContent() {
             }}
           />
         )}
-        {currentLabel === "Bevestiging" && (
-          <StepConfirmation state={state} />
-        )}
+
+        {currentLabel === "Bevestiging" && <StepConfirmation state={state} />}
       </div>
     </div>
   );
 }
 
-// ─── Stap 1: Pakket kiezen + add-ons ─────────────────────────────────────────
+// ─── Stap 1 (BABY_GIFT): Pakketbevestiging met thema-kiezer ──────────────────
+
+function BabyPackageStep({
+  state,
+  onChange,
+  onNext,
+}: {
+  state: CheckoutState;
+  onChange: (updates: Partial<CheckoutState>) => void;
+  onNext: () => void;
+}) {
+  const { theme, setTheme, t } = useBabyTheme();
+  const [promoInput, setPromoInput] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoApplied, setPromoApplied] = useState(!!state.promoCode);
+
+  const total = Math.max(0, PACKAGE_PRICES["BABY_GIFT"] - state.promoDiscountCents / 100);
+  const THEMES: BabyTheme[] = ["meisje", "jongen", "neutraal"];
+
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoError(null);
+    try {
+      const result = await validatePromoCode(code, "BABY_GIFT");
+      if (result.valid) {
+        onChange({ promoCode: code, promoDiscountCents: result.discount_cents });
+        setPromoApplied(true);
+      } else {
+        setPromoError(result.error ?? "Ongeldige code");
+      }
+    } catch {
+      setPromoError("Validatie mislukt, probeer opnieuw");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoInput("");
+    setPromoApplied(false);
+    setPromoError(null);
+    onChange({ promoCode: "", promoDiscountCents: 0 });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">Jouw cadeau</h2>
+        <p className="text-[#888] text-sm">
+          Kies het thema en ga verder — het hele eerste jaar in één cadeau.
+        </p>
+      </div>
+
+      {/* Pakket-kaart */}
+      <div
+        className={`rounded-2xl border-2 ${t.primaryBorderMedium} bg-gradient-to-b ${t.gradientCard} p-6 shadow-sm`}
+      >
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <p className={`text-xs font-semibold uppercase tracking-wide ${t.primaryText} mb-0.5`}>
+              Bewaard voor Baby
+            </p>
+            <h3 className="font-bold text-gray-900 text-xl">Het eerste jaar</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Eenmalig · 1 jaar toegang · Geen abonnement
+            </p>
+          </div>
+          <div className="text-right shrink-0 ml-4">
+            {state.promoDiscountCents > 0 && (
+              <p className="text-sm text-gray-400 line-through">
+                €{PACKAGE_PRICES["BABY_GIFT"]}
+              </p>
+            )}
+            <p className={`text-4xl font-bold ${t.primaryText}`}>€{total}</p>
+          </div>
+        </div>
+
+        <ul className="space-y-2.5">
+          {BABY_FEATURES.map((f) => (
+            <li key={f.text} className="flex items-start gap-2.5">
+              <f.Icon size={15} className={`${t.primaryText} mt-0.5 shrink-0`} />
+              <span className="text-sm text-gray-700">{f.text}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className={`mt-5 pt-4 border-t ${t.primaryBorder} flex flex-wrap gap-x-4 gap-y-1`}>
+          {[
+            "Kinderfoto's altijd van jou",
+            "AVG-compliant",
+            "Geen verborgen kosten",
+          ].map((item) => (
+            <span key={item} className={`text-xs ${t.primaryText} font-medium`}>
+              ✓ {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Thema-kiezer */}
+      <div className="bg-white rounded-xl border border-[#e5e0d8] p-4">
+        <p className="text-xs font-semibold text-[#555] uppercase tracking-wide mb-3">
+          Kies het thema
+        </p>
+        <div className="flex gap-2">
+          {THEMES.map((th) => {
+            const cfg = THEME_CONFIG[th];
+            return (
+              <button
+                key={th}
+                type="button"
+                onClick={() => setTheme(th)}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2.5 px-2 rounded-lg text-sm font-medium border transition-all",
+                  theme === th
+                    ? `${cfg.switcherBg} border-transparent shadow-sm`
+                    : "border-[#e5e0d8] text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                )}
+              >
+                <Image
+                  src={BABY_THEME_LOGOS[th]}
+                  alt={cfg.label}
+                  width={18}
+                  height={18}
+                  className="w-4 h-4 object-contain"
+                />
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Kortingscode */}
+      <div>
+        <h3 className="font-medium text-[#1a1a1a] mb-1 text-sm">Kortingscode</h3>
+        {promoApplied && state.promoCode ? (
+          <div
+            className={`flex items-center justify-between p-3 ${t.primaryBg} border ${t.primaryBorderMedium} rounded-xl`}
+          >
+            <div>
+              <span className={`font-mono font-bold ${t.primaryText} text-sm`}>
+                {state.promoCode}
+              </span>
+              <span className={`${t.primaryText} text-sm ml-2`}>toegepast</span>
+            </div>
+            <button
+              onClick={handleRemovePromo}
+              className="text-xs text-[#888] hover:text-[#e04040] transition-colors underline"
+            >
+              Verwijder
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={promoInput}
+              onChange={(e) => {
+                setPromoInput(e.target.value.toUpperCase());
+                setPromoError(null);
+              }}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+              placeholder="Voer code in"
+              maxLength={32}
+              className="flex-1 px-4 py-3 rounded-xl border border-[#e5e0d8] bg-white text-[#1a1a1a] font-mono text-sm focus:outline-none focus:border-[#d4af37] transition-colors"
+            />
+            <button
+              onClick={handleApplyPromo}
+              disabled={promoLoading || !promoInput.trim()}
+              className="px-5 py-3 bg-[#1a1a1a] text-white text-sm font-medium rounded-xl hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {promoLoading ? "..." : "Toepassen"}
+            </button>
+          </div>
+        )}
+        {promoError && (
+          <p className="text-red-600 text-xs mt-2">{promoError}</p>
+        )}
+      </div>
+
+      {/* CTA */}
+      <button
+        onClick={onNext}
+        className={`w-full ${t.primary} ${t.primaryHover} text-white font-bold py-4 rounded-xl transition-colors text-lg shadow-sm`}
+      >
+        {state.forSelf ? "Begin direct →" : "Volgende: Voor wie? →"}
+      </button>
+
+      <p className="text-center text-xs text-[#aaa]">
+        Eenmalig €{total} · Geen abonnement · 30 dagen niet-goed-geld-terug
+      </p>
+    </div>
+  );
+}
+
+// ─── Stap 1 (niet-baby): Pakket kiezen + add-ons ─────────────────────────────
 
 function StepSelectPlan({
   state,
@@ -326,8 +607,6 @@ function StepSelectPlan({
     const opt = ADDON_OPTIONS.find((o) => o.code === code);
     return sum + (opt?.price ?? 0);
   }, 0);
-  // Gebruik de door de parent per pakket berekende early-bird korting (geldt voor
-  // VERHAAL/ERFGOED/BEGIN/DIGITAAL) — consistent met de betaalstap én de backend.
   const ebDiscount = earlyBirdDiscount;
   const total = Math.max(0, PACKAGE_PRICES[state.packageType] + totalAddons - ebDiscount - promoDiscount);
 
@@ -395,26 +674,44 @@ function StepSelectPlan({
                   name="package"
                   value={pkg}
                   checked={state.packageType === pkg}
-                  onChange={() => !pkgSoldOut && onChange({ packageType: pkg, skipShipping: DIGITAL_ONLY_PACKAGES.has(pkg) })}
+                  onChange={() =>
+                    !pkgSoldOut &&
+                    onChange({
+                      packageType: pkg,
+                      skipShipping: DIGITAL_ONLY_PACKAGES.has(pkg),
+                    })
+                  }
                   disabled={pkgSoldOut}
                   className="accent-[#d4af37]"
                 />
                 <div>
                   <p className="font-medium text-[#1a1a1a]">{PACKAGE_NAMES[pkg]}</p>
-                  {pkgSoldOut
-                    ? <p className="text-xs text-[#e07020] font-medium">Tijdelijk uitverkocht</p>
-                    : pkg === "ERFGOED"
-                    ? <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>
-                    : pkg === "NALATENSCHAP"
-                    ? <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>
-                    : <p className="text-xs text-[#888]">Digitaal · 5 jaar inbegrepen</p>
-                  }
+                  {pkgSoldOut ? (
+                    <p className="text-xs text-[#e07020] font-medium">Tijdelijk uitverkocht</p>
+                  ) : pkg === "ERFGOED" ? (
+                    <p className="text-xs text-[#d4af37]">⭐ Meest gekozen · doos inbegrepen</p>
+                  ) : pkg === "NALATENSCHAP" ? (
+                    <p className="text-xs text-[#888]">Eenmalig — nooit meer betalen</p>
+                  ) : (
+                    <p className="text-xs text-[#888]">Digitaal · 5 jaar inbegrepen</p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
-                <span className={cn("font-bold", pkgSoldOut ? "text-[#aaa]" : "text-[#1a1a1a]")}>€{PACKAGE_PRICES[pkg]}</span>
-                {pkg !== "NALATENSCHAP" && <p className="text-xs text-[#888]">5 jaar inbegrepen</p>}
-                {pkg === "NALATENSCHAP" && <p className="text-xs text-[#888]">eenmalig</p>}
+                <span
+                  className={cn(
+                    "font-bold",
+                    pkgSoldOut ? "text-[#aaa]" : "text-[#1a1a1a]"
+                  )}
+                >
+                  €{PACKAGE_PRICES[pkg]}
+                </span>
+                {pkg !== "NALATENSCHAP" && (
+                  <p className="text-xs text-[#888]">5 jaar inbegrepen</p>
+                )}
+                {pkg === "NALATENSCHAP" && (
+                  <p className="text-xs text-[#888]">eenmalig</p>
+                )}
               </div>
             </label>
           );
@@ -449,13 +746,21 @@ function StepSelectPlan({
                   />
                   <div>
                     <p className="font-medium text-[#1a1a1a] text-sm">{addon.label}</p>
-                    {addonSoldOut
-                      ? <p className="text-xs text-[#e07020] font-medium">Tijdelijk niet beschikbaar</p>
-                      : <p className="text-xs text-[#888]">{addon.description}</p>
-                    }
+                    {addonSoldOut ? (
+                      <p className="text-xs text-[#e07020] font-medium">
+                        Tijdelijk niet beschikbaar
+                      </p>
+                    ) : (
+                      <p className="text-xs text-[#888]">{addon.description}</p>
+                    )}
                   </div>
                 </div>
-                <span className={cn("text-sm font-medium ml-4 flex-shrink-0", addonSoldOut ? "text-[#aaa]" : "text-[#555]")}>
+                <span
+                  className={cn(
+                    "text-sm font-medium ml-4 flex-shrink-0",
+                    addonSoldOut ? "text-[#aaa]" : "text-[#555]"
+                  )}
+                >
                   +€{addon.price}
                 </span>
               </label>
@@ -471,7 +776,9 @@ function StepSelectPlan({
         {promoApplied && state.promoCode ? (
           <div className="flex items-center justify-between p-3 bg-[#2d5016]/5 border border-[#2d5016]/30 rounded-xl">
             <div>
-              <span className="font-mono font-bold text-[#2d5016] text-sm">{state.promoCode}</span>
+              <span className="font-mono font-bold text-[#2d5016] text-sm">
+                {state.promoCode}
+              </span>
               <span className="text-[#2d5016] text-sm ml-2">toegepast</span>
             </div>
             <button
@@ -486,7 +793,10 @@ function StepSelectPlan({
             <input
               type="text"
               value={promoInput}
-              onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(null); }}
+              onChange={(e) => {
+                setPromoInput(e.target.value.toUpperCase());
+                setPromoError(null);
+              }}
               onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
               placeholder="Voer code in"
               maxLength={32}
@@ -501,9 +811,7 @@ function StepSelectPlan({
             </button>
           </div>
         )}
-        {promoError && (
-          <p className="text-red-600 text-xs mt-2">{promoError}</p>
-        )}
+        {promoError && <p className="text-red-600 text-xs mt-2">{promoError}</p>}
       </div>
 
       {/* Totaal + CTA */}
@@ -526,7 +834,9 @@ function StepSelectPlan({
         )}
         {promoDiscount > 0 && (
           <div className="flex justify-between items-center mb-1">
-            <span className="text-[#2d5016] text-sm font-medium">Kortingscode {state.promoCode}</span>
+            <span className="text-[#2d5016] text-sm font-medium">
+              Kortingscode {state.promoCode}
+            </span>
             <span className="text-[#2d5016] font-medium">−€{promoDiscount}</span>
           </div>
         )}
@@ -586,16 +896,17 @@ function PaymentFailed({
             Betaling niet voltooid
           </h2>
           <p className="text-[#888] max-w-md mx-auto">
-            Je betaling voor het pakket <strong>{PACKAGE_NAMES[packageType]}</strong> is
-            geannuleerd of niet afgerond. Er is niets in rekening gebracht.
+            Je betaling voor{" "}
+            <strong>{PACKAGE_NAMES[packageType]}</strong> is geannuleerd of niet
+            afgerond. Er is niets in rekening gebracht.
           </p>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 text-left text-sm text-[#555]">
         <p>
-          Geen zorgen — je kunt het gewoon opnieuw proberen. Heb je toch geld zien afgaan?
-          Neem dan contact met ons op, dan lossen we het direct op.
+          Geen zorgen — je kunt het gewoon opnieuw proberen. Heb je toch geld
+          zien afgaan? Neem dan contact met ons op, dan lossen we het direct op.
         </p>
       </div>
 

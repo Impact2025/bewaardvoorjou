@@ -15,6 +15,7 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
   const name = state.recipientName.trim() || "hen";
   const today = new Date().toISOString().slice(0, 10);
   const isDigital = DIGITAL_PACKAGES.has(state.packageType);
+  const isBaby = state.packageType === "BABY_GIFT";
 
   const setReveal = (reveal: GiftReveal) => onChange({ giftReveal: reveal });
 
@@ -70,10 +71,16 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
       {/* Bezorgmoment */}
       <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-3">
         <h3 className="font-medium text-[#1a1a1a]">
-          {isDigital ? "Wanneer sturen we de uitnodiging?" : "Wanneer mag het bezorgd worden?"}
+          {isBaby
+            ? "Wanneer ontvangen ze de uitnodiging?"
+            : isDigital
+            ? "Wanneer sturen we de uitnodiging?"
+            : "Wanneer mag het bezorgd worden?"}
         </h3>
         <p className="text-xs text-[#888]">
-          {isDigital
+          {isBaby
+            ? `Kies de bevallingsdatum, de kraamdag, of het moment dat je het overhandigt. Laat leeg om direct te versturen zodra de betaling is ontvangen.`
+            : isDigital
             ? `Kies een datum als je wilt dat de digitale uitnodiging op een specifiek moment bij ${name} aankomt. Laat leeg om direct te versturen.`
             : "Kies een dag. We zorgen dat het cadeau op tijd aankomt. Laat leeg om zo snel mogelijk te versturen."}
         </p>

@@ -255,8 +255,9 @@ function PaymentForm({
     setSubmitting(true);
     setError(null);
 
-    // Return URL voor iDEAL redirect (na bank-redirect)
-    const returnUrl = `${window.location.origin}/checkout?step=confirmation&order_id=${orderId}`;
+    // Return URL voor iDEAL redirect — bewaar pakket en for_self zodat de
+    // juiste stappen-flow na terugkeer van de bank wordt hersteld.
+    const returnUrl = `${window.location.origin}/checkout?step=confirmation&order_id=${orderId}&package=${state.packageType}${state.forSelf ? "&for_self=true" : ""}`;
 
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
@@ -337,9 +338,16 @@ function PaymentForm({
       </button>
 
       {/* Trust */}
-      <div className="flex items-center justify-center gap-2 text-xs text-[#aaa]">
-        <Shield className="h-3 w-3" />
-        <span>Beveiligde betaling via Stripe · SSL-versleuteld</span>
+      <div className="flex flex-col items-center gap-1.5">
+        <div className="flex items-center justify-center gap-2 text-xs text-[#aaa]">
+          <Shield className="h-3 w-3" />
+          <span>Beveiligde betaling via Stripe · SSL-versleuteld</span>
+        </div>
+        {state.packageType === "BABY_GIFT" && (
+          <p className="text-xs text-[#aaa]">
+            Kinderfoto&apos;s worden nooit gebruikt voor advertenties · AVG-compliant
+          </p>
+        )}
       </div>
     </form>
   );

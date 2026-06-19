@@ -30,7 +30,9 @@ export type AddonCode =
 export type PackageType = "VERHAAL" | "ERFGOED" | "NALATENSCHAP" | "BABY_GIFT" | "BEGIN" | "VOOR_ALTIJD" | "DIGITAAL";
 
 export type RecipientRelation =
-  | "vader" | "moeder" | "opa" | "oma" | "schoonouder" | "partner" | "anders";
+  | "vader" | "moeder" | "opa" | "oma" | "schoonouder" | "partner" | "anders"
+  // Baby-specifieke relaties (voor BABY_GIFT cadeau-flow)
+  | "zus" | "broer" | "vriend" | "vriendin" | "collega";
 
 export type GiftReveal = "SURPRISE" | "ANNOUNCED";
 

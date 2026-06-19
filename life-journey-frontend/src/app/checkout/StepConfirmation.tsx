@@ -33,6 +33,7 @@ export default function StepConfirmation({ state }: Props) {
   const shippingCity = order?.shipping_city || state.shippingAddress.city;
   const redemptionToken = order?.redemption_token || "";
   const isGift = !state.forSelf && (!!recipientName || !!redemptionToken);
+  const isBaby = state.packageType === "BABY_GIFT";
   const who = recipientName || "de ontvanger";
 
   const startkaartUrl = redemptionToken ? `/cadeau/${redemptionToken}` : "";
@@ -46,13 +47,22 @@ export default function StepConfirmation({ state }: Props) {
         </div>
         <div>
           <h2 className="font-serif text-3xl font-bold text-[#1a1a1a] mb-2">
-            {isGift ? `Je cadeau is onderweg naar ${who}` : "Bedankt voor je bestelling!"}
+            {isGift
+              ? isBaby
+                ? `Het eerste jaar van ${who} kan beginnen`
+                : `Je cadeau is onderweg naar ${who}`
+              : isBaby
+              ? "Gefeliciteerd! Jouw babyboek is klaar."
+              : "Bedankt voor je bestelling!"}
           </h2>
           <p className="text-[#888]">
             {isGift
-              ? "We laten je weten zodra het bezorgd is."
-              : "Je digitale toegang is direct actief."}
-          </p>
+              ? isBaby
+                ? `${who} ontvangt een uitnodiging om direct te starten.`
+                : "We laten je weten zodra het bezorgd is."
+              : isBaby
+              ? "Maak een account aan en leg de eerste herinnering vast."
+              : "Je digitale toegang is direct actief."}</p>
         </div>
       </div>
 
@@ -141,30 +151,40 @@ export default function StepConfirmation({ state }: Props) {
             <NextStep
               icon={Phone}
               title="Ons mooiste advies"
-              desc={`Bel ${who} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, ${who} met de kaart in de hand. Zo begint het verhaal samen.`}
+              desc={
+                isBaby
+                  ? `Bel ${who} op de kraamdag en vertel dat je dit hebt gegeven. Jouw boodschap is het eerste dat ze lezen wanneer ze het eerste hoofdstuk starten.`
+                  : `Bel ${who} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, ${who} met de kaart in de hand. Zo begint het verhaal samen.`
+              }
             />
           )}
           {!isGift && (
             <NextStep
               icon={Package}
-              title="Begin direct"
-              desc="Je digitale toegang is actief. Maak een account aan en leg je eerste herinnering vast."
+              title={isBaby ? "Begin met het eerste hoofdstuk" : "Begin direct"}
+              desc={
+                isBaby
+                  ? "Je babyboek is klaar. Maak een account aan en begin met het allereerste hoofdstuk: de geboortedag."
+                  : "Je digitale toegang is actief. Maak een account aan en leg je eerste herinnering vast."
+              }
             />
           )}
         </div>
       </div>
 
       {!isGift && (
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center flex-wrap">
           <button
-            onClick={() => router.push("/register")}
-            className="bg-[#2d5016] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#3a6620] transition-colors"
+            onClick={() =>
+              router.push(isBaby ? "/voor-baby/onboarding" : "/register")
+            }
+            className="bg-[#2d5016] text-white text-sm px-5 py-2.5 rounded-lg hover:bg-[#3a6620] transition-colors font-medium"
           >
-            Account aanmaken
+            {isBaby ? "Begin het eerste jaar →" : "Account aanmaken"}
           </button>
           <button
             onClick={() => router.push("/login")}
-            className="border border-[#2d5016] text-[#2d5016] text-sm px-4 py-2 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
+            className="border border-[#2d5016] text-[#2d5016] text-sm px-5 py-2.5 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
           >
             Inloggen
           </button>
@@ -172,10 +192,10 @@ export default function StepConfirmation({ state }: Props) {
       )}
 
       <button
-        onClick={() => router.push("/")}
+        onClick={() => router.push(isBaby ? "/voor-baby" : "/")}
         className="text-sm text-[#888] hover:text-[#1a1a1a] underline underline-offset-2 transition-colors"
       >
-        Terug naar de homepage
+        {isBaby ? "Terug naar Bewaard voor Baby" : "Terug naar de homepage"}
       </button>
     </div>
   );

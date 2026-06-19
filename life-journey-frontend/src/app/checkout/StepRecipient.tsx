@@ -19,13 +19,28 @@ const RELATIONS: { value: RecipientRelation; label: string }[] = [
   { value: "anders", label: "Iemand anders" },
 ];
 
+// Baby-specifieke relaties: context van een kraamcadeau aan nieuwe ouder(s)
+const BABY_RELATIONS: { value: RecipientRelation; label: string }[] = [
+  { value: "moeder", label: "Aanstaande mama" },
+  { value: "vader", label: "Aanstaande papa" },
+  { value: "partner", label: "Partner" },
+  { value: "zus", label: "Zus" },
+  { value: "broer", label: "Broer" },
+  { value: "vriendin", label: "Vriendin" },
+  { value: "vriend", label: "Vriend" },
+  { value: "collega", label: "Collega" },
+  { value: "anders", label: "Iemand anders" },
+];
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DIGITAL_PACKAGES = new Set(["VERHAAL", "DIGITAAL", "BABY_GIFT"]);
 
 export default function StepRecipient({ state, onChange, onNext }: Props) {
   const isDigital = DIGITAL_PACKAGES.has(state.packageType);
+  const isBaby = state.packageType === "BABY_GIFT";
   const addr = state.shippingAddress;
   const name = state.recipientName.trim() || "hen";
+  const activeRelations = isBaby ? BABY_RELATIONS : RELATIONS;
 
   const updateAddr = (field: keyof ShippingAddress, value: string) => {
     onChange({ shippingAddress: { ...addr, [field]: value } });
@@ -66,11 +81,17 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
     <div className="space-y-6">
       <div>
         <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] mb-1">
-          {state.forSelf ? "Jouw bestelling" : "Voor wie is dit cadeau?"}
+          {state.forSelf
+            ? "Jouw bestelling"
+            : isBaby
+            ? "Voor welke ouder(s) is dit cadeau?"
+            : "Voor wie is dit cadeau?"}
         </h2>
         <p className="text-[#888] text-sm">
           {state.forSelf
-            ? "Voor wie is dit pakket?"
+            ? "Je toegangslink wordt naar jouw e-mailadres gestuurd."
+            : isBaby
+            ? "De naam van de ouder(s) komt op de cadeaubon te staan."
             : "Vertel ons voor wie het verhaal is. Zijn of haar naam komt op het cadeau te staan."}
         </p>
       </div>
@@ -106,12 +127,13 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
         <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#555] mb-1">
-              Voornaam ontvanger <span className="text-[#e04040]">*</span>
+              {isBaby ? "Naam van de ouder(s)" : "Voornaam ontvanger"}{" "}
+              <span className="text-[#e04040]">*</span>
               <span className="text-[#888] font-normal"> — komt op het cadeau</span>
             </label>
             <input
               type="text"
-              placeholder="bijv. Jan, Els, Opa"
+              placeholder={isBaby ? "bijv. Sara & Tom, of alleen Sara" : "bijv. Jan, Els, Opa"}
               value={state.recipientName}
               onChange={(e) => onChange({ recipientName: e.target.value })}
               maxLength={100}
@@ -121,10 +143,11 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
 
           <div>
             <label className="block text-sm font-medium text-[#555] mb-1">
-              Wat is hij of zij van jou? <span className="text-[#e04040]">*</span>
+              {isBaby ? "Wat zijn ze van jou?" : "Wat is hij of zij van jou?"}{" "}
+              <span className="text-[#e04040]">*</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {RELATIONS.map((r) => (
+              {activeRelations.map((r) => (
                 <button
                   key={r.value}
                   type="button"

@@ -11,6 +11,7 @@ interface Props {
 
 export default function StepMessage({ state, onChange, onNext }: Props) {
   const name = state.recipientName.trim() || "hen";
+  const isBaby = state.packageType === "BABY_GIFT";
 
   const hasMessage =
     state.messageMediaType === "text"
@@ -24,17 +25,24 @@ export default function StepMessage({ state, onChange, onNext }: Props) {
         <p className="text-[#888] text-sm">Dit is het hart van het cadeau — voor {name}.</p>
       </div>
 
-      {/* 3a. Op de kaart in de doos (fysiek) */}
+      {/* Op de kaart / cadeaubon */}
       <div className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-3">
         <div>
-          <h3 className="font-medium text-[#1a1a1a]">Een paar woorden voor op de kaart</h3>
+          <h3 className="font-medium text-[#1a1a1a]">
+            {isBaby ? "Een paar woorden voor op de cadeaubon" : "Een paar woorden voor op de kaart"}
+          </h3>
           <p className="text-xs text-[#888] mt-1 leading-relaxed">
-            Dit is het eerste dat {name} leest bij het openen. Hou het kort en persoonlijk — een
-            reden, een herinnering, of gewoon &ldquo;ik hou van je&rdquo;.
+            {isBaby
+              ? `Dit is het eerste dat ${name} leest als ze de cadeaubon openen. Hou het warm en persoonlijk — vertel waarom je dit cadeau geeft.`
+              : `Dit is het eerste dat ${name} leest bij het openen. Hou het kort en persoonlijk — een reden, een herinnering, of gewoon “ik hou van je”.`}
           </p>
         </div>
         <textarea
-          placeholder={`Voor ${name}, ik geef je dit omdat…`}
+          placeholder={
+            isBaby
+              ? `Lieve ${name}, jullie nieuwe avontuur begint nu. Dit cadeau is er zodat elk moment bewaard blijft…`
+              : `Voor ${name}, ik geef je dit omdat…`
+          }
           value={state.cardMessage}
           onChange={(e) => onChange({ cardMessage: e.target.value })}
           maxLength={280}
