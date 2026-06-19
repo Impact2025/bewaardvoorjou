@@ -105,6 +105,7 @@ export default function CadeaubonPage() {
     recipientName,
     gifterName,
     subtitle,
+    packageType: data.package_type,
     packageName: content.name,
     packageTagline: content.tagline,
     packageFeatures: content.features,

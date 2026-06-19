@@ -1,26 +1,61 @@
 "use client";
 
+import { useState } from "react";
 import { Printer } from "lucide-react";
 import { CertificateLayout } from "../CertificateLayout";
 
-const DEMO = {
+const BASE = {
   recipientName: "Opa Piet",
   gifterName: "Vincent",
   subtitle: "Een bijzonder cadeau voor jouw opa",
-  packageName: "Het Verhaal Pakket",
-  packageTagline: "Jouw levensverhaal, bewaard voor alle generaties",
-  packageFeatures: [
-    "58 verhaalthema's door 7 levensfasen",
-    "Persoonlijke AI-begeleide interviews",
-    "Audio- en video-opnames",
-    "Automatische transcripties in tekst",
-    "5 jaar veilig bewaard",
-  ],
   personalMessage: "Omdat je zo bijzonder voor mij bent",
   activationUrl: "https://bewaardvoorjou.nl/cadeau/voorbeeld",
 };
 
+const VARIANTS = {
+  VERHAAL: {
+    packageType: "VERHAAL",
+    packageName: "Het Verhaal Pakket",
+    packageTagline: "Jouw levensverhaal, bewaard voor alle generaties",
+    packageFeatures: [
+      "58 verhaalthema's door 7 levensfasen",
+      "Persoonlijke AI-begeleide interviews",
+      "Audio- en video-opnames",
+      "Automatische transcripties in tekst",
+      "5 jaar veilig bewaard",
+    ],
+  },
+  ERFGOED: {
+    packageType: "ERFGOED",
+    packageName: "Het Erfgoed Pakket",
+    packageTagline: "Een levensverhaal in een prachtige herinneringsdoos",
+    packageFeatures: [
+      "Alles uit het Verhaal Pakket",
+      "Luxe herinneringsdoos",
+      "USB-stick met alle opnames",
+      "Gedrukt fotoboek (20 pagina's)",
+      "10 jaar veilig bewaard",
+    ],
+  },
+  NALATENSCHAP: {
+    packageType: "NALATENSCHAP",
+    packageName: "Het Nalatenschap Pakket",
+    packageTagline: "Een levensverhaal, bewaard voor altijd",
+    packageFeatures: [
+      "Alles uit het Erfgoed Pakket",
+      "Lifetime opslag — nooit meer betalen",
+      "Uitgebreide familieboom",
+      "Prioriteitsondersteuning",
+    ],
+  },
+} as const;
+
+type VariantKey = keyof typeof VARIANTS;
+
 export default function CadeaubonVoorbeeld() {
+  const [variant, setVariant] = useState<VariantKey>("VERHAAL");
+  const certProps = { ...BASE, ...VARIANTS[variant] };
+
   return (
     <>
       <style>{`
@@ -31,14 +66,26 @@ export default function CadeaubonVoorbeeld() {
         }
       `}</style>
 
-      <div className="screen-only bg-[#222] py-4 px-4 sticky top-0 z-10 shadow-xl border-b border-white/10">
+      {/* ── Schermchrome ── */}
+      <div className="screen-only bg-[#1e1e1e] py-4 px-4 sticky top-0 z-10 shadow-xl border-b border-white/10">
         <div style={{ maxWidth: "794px", margin: "0 auto" }} className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-white text-sm font-semibold tracking-tight">
-              Voorbeeld — Opa Piet, van Vincent
-            </p>
-            <p className="text-[#888] text-xs mt-0.5">
-              Afdrukken &rarr; &ldquo;Opslaan als PDF&rdquo; voor een perfecte A4
+          <div className="flex items-center gap-3">
+            {/* Pakket-toggle */}
+            <div className="flex gap-1 bg-white/10 rounded-lg p-1">
+              {(Object.keys(VARIANTS) as VariantKey[]).map((k) => (
+                <button
+                  key={k}
+                  onClick={() => setVariant(k)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                    variant === k ? "bg-[#d4af37] text-[#1a1a1a]" : "text-[#aaa] hover:text-white"
+                  }`}
+                >
+                  {k.charAt(0) + k.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
+            <p className="text-[#666] text-xs hidden sm:block">
+              Opa Piet · van Vincent
             </p>
           </div>
           <button
@@ -51,14 +98,16 @@ export default function CadeaubonVoorbeeld() {
         </div>
       </div>
 
+      {/* ── Schermpreview ── */}
       <div className="screen-only" style={{ background: "#2a2a2a", padding: "24px 16px", minHeight: "calc(100vh - 60px)" }}>
         <div style={{ maxWidth: "794px", margin: "0 auto", boxShadow: "0 25px 60px rgba(0,0,0,0.6)" }}>
-          <CertificateLayout {...DEMO} />
+          <CertificateLayout {...certProps} />
         </div>
       </div>
 
+      {/* ── Printversie ── */}
       <div className="hidden print:block">
-        <CertificateLayout {...DEMO} />
+        <CertificateLayout {...certProps} />
       </div>
     </>
   );
