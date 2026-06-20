@@ -16,6 +16,11 @@ interface Props {
   onSuccess: (orderId: string) => void;
 }
 
+const VALID_RELATIONS = new Set(["vader", "moeder", "opa", "oma", "schoonouder", "partner", "anders"]);
+function normalizeRelation(r: string): string {
+  return VALID_RELATIONS.has(r) ? r : "anders";
+}
+
 export default function StepPayment({ state, totalPrice, onChange, onSuccess }: Props) {
   const { t, theme } = useBabyTheme();
   const isBaby = state.packageType === "BABY_GIFT";
@@ -41,7 +46,7 @@ export default function StepPayment({ state, totalPrice, onChange, onSuccess }: 
           for_self: state.forSelf,
           recipient_name: state.recipientName,
           recipient_email: state.forSelf ? state.guestEmail : (state.recipientEmail || undefined),
-          recipient_relation: !state.forSelf && state.recipientRelation ? state.recipientRelation : undefined,
+          recipient_relation: !state.forSelf && state.recipientRelation ? normalizeRelation(state.recipientRelation) as import("@/lib/api/orders").RecipientRelation : undefined,
           personal_message: state.personalMessage,
           card_message: !state.forSelf && state.cardMessage ? state.cardMessage : undefined,
           message_media_url: !state.forSelf && state.messageMediaUrl ? state.messageMediaUrl : undefined,
