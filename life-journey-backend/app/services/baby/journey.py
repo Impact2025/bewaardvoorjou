@@ -144,6 +144,11 @@ def get_baby_journey_with_progress(
     # Volgende chapter
     next_chapter_id, next_chapter_label = _next_chapter(age_weeks, progress_dict)
 
+    completed_chapter_ids = [
+        cid for cid in (progress_dict or {})
+        if progress_dict.get(cid, {}).get("completed")
+    ]
+
     base = BabyJourneyWithProgress.model_validate(bj)
     base.milestones_completed = completed
     base.milestones_total = total
@@ -151,6 +156,7 @@ def get_baby_journey_with_progress(
     base.current_age_weeks = age_weeks
     base.next_chapter_id = next_chapter_id
     base.next_chapter_label = next_chapter_label
+    base.completed_chapter_ids = completed_chapter_ids
     return base
 
 

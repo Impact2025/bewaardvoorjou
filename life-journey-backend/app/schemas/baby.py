@@ -78,6 +78,7 @@ class BabyJourneyWithProgress(BabyJourneyPublic):
     current_age_weeks: int | None = None
     next_chapter_id: str | None = None
     next_chapter_label: str | None = None
+    completed_chapter_ids: list[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------

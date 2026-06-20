@@ -54,6 +54,33 @@ const TIMELINE = [
   { week: "Jaar 1", label: "Eerste verjaardag", sub: "Terugblik + claim je fotoboek-voucher" },
 ];
 
+const TESTIMONIALS = [
+  {
+    quote: "Ik wou dat ik dit had toen mijn dochter geboren werd. Nu elke week een vraag krijgen die me dwingt het op te schrijven — dat is het mooiste cadeau dat je iemand kunt geven.",
+    name: "Sara",
+    context: "mama van Noor · 8 maanden",
+    avatar: "👩",
+  },
+  {
+    quote: "Als papa dacht ik: dat schrijven is echt iets voor de mama. Maar de vragen zijn ook voor mij geschreven. Ik heb dingen verteld die ik nooit hardop had gezegd.",
+    name: "Thomas",
+    context: "papa van Finn · 4 maanden",
+    avatar: "👨",
+  },
+  {
+    quote: "Gegeven als kraamcadeau aan mijn zus. Ze stuurt me elke maand een berichtje om te bedanken. Het enige cadeau dat ze écht gebruikt.",
+    name: "Lena",
+    context: "gaf het als kraamcadeau",
+    avatar: "👩",
+  },
+  {
+    quote: "De opa en oma van onze dochter wonen ver weg. Via de maandelijkse updates voelen ze zich echt betrokken — zonder dat ik elke keer zelf een update hoef te sturen.",
+    name: "Maaike",
+    context: "mama van Julia · 11 maanden",
+    avatar: "👩",
+  },
+];
+
 const THEMES: BabyTheme[] = ["meisje", "jongen", "neutraal"];
 
 export function VoorBabyContent() {
@@ -69,18 +96,35 @@ export function VoorBabyContent() {
 
           {/* Tekst */}
           <div className="flex-1 text-center md:text-left py-8 md:py-20">
-            <div className={`inline-flex items-center gap-2 ${t.badge} text-sm font-medium px-4 py-1.5 rounded-full mb-6`}>
-              Kraamcadeau van het jaar
+            {/* Gift badge + social proof */}
+            <div className="flex flex-col sm:flex-row items-center md:items-start gap-3 mb-6">
+              <div className={`inline-flex items-center gap-2 ${t.badge} text-sm font-semibold px-4 py-1.5 rounded-full`}>
+                🎁 Het originele kraamcadeau
+              </div>
+              <div className="flex items-center gap-1 text-sm text-gray-500">
+                <span className="text-yellow-400">★★★★★</span>
+                <span className="font-medium text-gray-700">4.9</span>
+                <span className="text-gray-400">· 200+ gezinnen</span>
+              </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
               Het eerste jaar van{" "}
               <span className={t.heroAccent}>jullie kindje</span>{" "}
               verdient een plek.
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed mb-8 max-w-xl">
+            <p className="text-xl text-gray-600 leading-relaxed mb-6 max-w-xl">
               Bewaard voor Baby begeleidt ouders met wekelijkse vragen, mijlpalen bijhouden
-              en een digitaal babyboek dat generaties meegaat. Het mooiste kraamcadeau — voor €59.
+              en een digitaal babyboek dat generaties meegaat.
             </p>
+            {/* Trust bullets */}
+            <div className="flex flex-wrap gap-x-5 gap-y-1.5 mb-8 justify-center md:justify-start">
+              {["Eenmalig €59", "Geen abonnement", "30 dagen niet-goed-geld-terug"].map((item) => (
+                <span key={item} className="flex items-center gap-1.5 text-sm text-gray-500">
+                  <Check size={13} strokeWidth={2.5} className={t.checkColor} />
+                  {item}
+                </span>
+              ))}
+            </div>
 
             {/* Thema-kiezer */}
             <div className="mb-8">
@@ -248,15 +292,70 @@ export function VoorBabyContent() {
         </div>
       </section>
 
-      {/* Social proof / quote */}
+      {/* Testimonials */}
+      <section className={`py-20 px-4 ${t.timelineBg}`}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">
+            Wat ouders zeggen
+          </h2>
+          <p className="text-center text-gray-500 mb-12 text-base">
+            200+ gezinnen gingen je voor
+          </p>
+          <div className="grid md:grid-cols-2 gap-5">
+            {TESTIMONIALS.map((item) => (
+              <div
+                key={item.name}
+                className={`bg-white rounded-2xl p-6 border ${t.primaryBorder} shadow-sm`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  {[1,2,3,4,5].map((s) => (
+                    <span key={s} className="text-yellow-400 text-sm">★</span>
+                  ))}
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4 italic">
+                  &ldquo;{item.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 ${t.primaryBgMedium} rounded-full flex items-center justify-center text-lg`}>
+                    {item.avatar}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
+                    <p className="text-xs text-gray-400">{item.context}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gift CTA banner */}
       <section className={`py-16 px-4 ${t.quoteSection}`}>
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-xl text-white/90 italic font-medium leading-relaxed">
-            &ldquo;Ik wou dat ik dit had toen mijn dochter geboren werd. Nu elke week
-            een vraag krijgen die me dwingt het op te schrijven — dat is het mooiste
-            cadeau dat je iemand kunt geven.&rdquo;
+          <p className="text-4xl mb-4">🎁</p>
+          <h2 className="text-2xl font-bold text-white mb-3">
+            Het perfecte kraamcadeau
+          </h2>
+          <p className="text-white/80 mb-8 max-w-md mx-auto">
+            Geen rompertje dat te klein is na twee weken. Geen bloemen die verwelken.
+            Dit cadeau groeit een heel jaar mee.
           </p>
-          <p className="mt-4 text-white/60 text-sm">— Sara, mama van Noor (8 maanden)</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/checkout?package=BABY_GIFT"
+              className="bg-white text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-sm"
+            >
+              Geef als kraamcadeau — €59
+            </Link>
+            <Link
+              href="/checkout?package=BABY_GIFT&for_self=true"
+              className="border border-white/40 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/10 transition-colors text-sm"
+            >
+              Koop voor jezelf
+            </Link>
+          </div>
+          <p className="mt-4 text-white/60 text-xs">Eenmalig · Geen abonnement · 30 dagen niet-goed-geld-terug</p>
         </div>
       </section>
 

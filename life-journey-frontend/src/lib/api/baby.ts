@@ -118,6 +118,7 @@ export interface BabyJourneyWithProgress extends BabyJourneyPublic {
   current_age_weeks: number | null;
   next_chapter_id: string | null;
   next_chapter_label: string | null;
+  completed_chapter_ids: string[];
 }
 
 export interface BabyMilestoneCreate {

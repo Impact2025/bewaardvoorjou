@@ -6,7 +6,7 @@ import { Check, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import { createBabyJourney, type NarratorRole, type GrandparentEntry } from "@/lib/api/baby";
 import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
-type Step = 0 | 1 | 2 | 3;
+type Step = -1 | 0 | 1 | 2 | 3;
 
 interface WizardState {
   babyName: string;
@@ -51,7 +51,7 @@ const NARRATOR_OPTIONS: { role: NarratorRole; label: string; description: string
 export default function BabyOnboardingPage() {
   const router = useRouter();
   const { t } = useBabyTheme();
-  const [step, setStep] = useState<Step>(0);
+  const [step, setStep] = useState<Step>(-1);
   const [state, setState] = useState<WizardState>({
     babyName: "",
     babyBirthDate: "",
@@ -80,6 +80,7 @@ export default function BabyOnboardingPage() {
   };
 
   const canNext = () => {
+    if (step === -1) return true;
     if (step === 0) return state.babyName.trim().length >= 1;
     if (step === 1) return true; // geboortecijfers zijn optioneel
     if (step === 2) return state.narratorRole !== "";
@@ -117,6 +118,51 @@ export default function BabyOnboardingPage() {
       setLoading(false);
     }
   };
+
+  /* ── Welkomstscherm (step -1) ── */
+  if (step === -1) {
+    return (
+      <div className={`min-h-screen ${t.primaryBg} flex flex-col items-center justify-center px-4 py-12`}>
+        <div className="w-full max-w-md text-center">
+          <div className="text-7xl mb-6">👶</div>
+          <div className={`inline-flex items-center gap-2 ${t.badge} text-xs font-semibold px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider`}>
+            Bewaard voor Baby
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-4">
+            Je gaat iets maken wat<br />
+            <span className={t.heroAccent}>generaties meegaat.</span>
+          </h1>
+          <p className="text-gray-500 leading-relaxed mb-8 max-w-sm mx-auto">
+            In een paar minuten staat het babyboek van jouw kindje klaar.
+            Daarna hoef je alleen maar te schrijven wanneer het jou uitkomt —
+            wekelijks een warme vraag in je inbox.
+          </p>
+
+          <div className={`bg-white rounded-2xl border ${t.primaryBorder} p-5 mb-8 text-left space-y-3`}>
+            {[
+              { emoji: "✍️", text: "14 diepgaande hoofdstukken — van geboorte tot eerste verjaardag" },
+              { emoji: "🏅", text: "28 mijlpalen bijhouden op het moment zelf" },
+              { emoji: "📬", text: "Elke week een herinnering in je inbox" },
+              { emoji: "📖", text: "Na een jaar: een gedrukt fotoboek" },
+            ].map(({ emoji, text }) => (
+              <div key={text} className="flex items-start gap-3 text-sm text-gray-600">
+                <span className="text-base shrink-0">{emoji}</span>
+                {text}
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setStep(0)}
+            className={`w-full ${t.primary} ${t.primaryHover} text-white font-bold py-4 rounded-2xl text-lg shadow-sm transition-colors`}
+          >
+            Begin het babyboek →
+          </button>
+          <p className="mt-4 text-xs text-gray-400">Duurt minder dan 5 minuten · Alles aanpasbaar achteraf</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${t.primaryBg} flex flex-col items-center justify-center px-4 py-12`}>
@@ -328,7 +374,7 @@ export default function BabyOnboardingPage() {
 
           {/* Navigation */}
           <div className="flex gap-3 mt-8">
-            {step > 0 && (
+            {step >= 0 && (
               <button
                 onClick={() => setStep((s) => (s - 1) as Step)}
                 className="flex items-center gap-1 px-5 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
