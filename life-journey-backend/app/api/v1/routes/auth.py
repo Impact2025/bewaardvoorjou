@@ -1,9 +1,11 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Request
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.order import Order as OrderModel
 from app.core.rate_limiter import limiter, RateLimits
 from app.db.session import get_db
 from app.schemas.auth import (
@@ -25,6 +27,14 @@ from loguru import logger
 
 
 router = APIRouter()
+
+
+def _has_baby_gift(db: Session, user_id: str, email: str) -> bool:
+    return db.query(OrderModel).filter(
+        or_(OrderModel.user_id == user_id, OrderModel.recipient_email == email),
+        OrderModel.package_type == "BABY_GIFT",
+        OrderModel.status == "PAID",
+    ).first() is not None
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=201, tags=["auth"])
@@ -107,6 +117,7 @@ def verify_email(request: Request, payload: VerifyEmailRequest, db: Session = De
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
     onboarding_completed=user.onboarding_completed_at is not None,
+    has_baby_gift=_has_baby_gift(db, user.id, user.email),
   )
 
 
@@ -182,6 +193,7 @@ def verify_magic_link(request: Request, token: str, db: Session = Depends(get_db
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
     onboarding_completed=user.onboarding_completed_at is not None,
+    has_baby_gift=_has_baby_gift(db, user.id, user.email),
   )
 
 
@@ -199,4 +211,5 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
     user=UserPublic.model_validate(user),
     primary_journey_id=primary_journey.id if primary_journey else None,
     onboarding_completed=user.onboarding_completed_at is not None,
+    has_baby_gift=_has_baby_gift(db, user.id, user.email),
   )

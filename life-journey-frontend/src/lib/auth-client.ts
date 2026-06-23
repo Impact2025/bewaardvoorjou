@@ -20,6 +20,7 @@ interface AuthResponseDto {
   };
   primary_journey_id?: string | null;
   onboarding_completed?: boolean;
+  has_baby_gift?: boolean;
 }
 
 interface RegisterResponseDto {
@@ -57,6 +58,7 @@ function mapAuthResponse(payload: AuthResponseDto): AuthSession {
     tokenType: payload.token_type,
     primaryJourneyId: payload.primary_journey_id ?? null,
     onboardingCompleted: payload.onboarding_completed ?? false,
+    hasBabyGift: payload.has_baby_gift ?? false,
     user: {
       id: payload.user.id,
       displayName: payload.user.display_name,

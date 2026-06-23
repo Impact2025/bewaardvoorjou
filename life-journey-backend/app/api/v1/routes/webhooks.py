@@ -189,6 +189,7 @@ _PACKAGE_SETTINGS = {
     "VERHAAL":     {"package_tier": "VERHAAL",     "max_family_members": 0, "max_chapters": None, "storage_years": 5},
     "ERFGOED":     {"package_tier": "ERFGOED",     "max_family_members": 5, "max_chapters": None, "storage_years": 5},
     "NALATENSCHAP":{"package_tier": "NALATENSCHAP","max_family_members": 5, "max_chapters": None, "storage_years": 999},
+    "BABY_GIFT":   {"package_tier": "BABY_GIFT",   "max_family_members": 5, "max_chapters": None, "storage_years": 5},
     # Legacy (backward compat)
     "BEGIN":       {"package_tier": "BEGIN",       "max_family_members": 2, "max_chapters": 3,    "storage_years": 3},
     "VOOR_ALTIJD": {"package_tier": "VOOR_ALTIJD", "max_family_members": 10,"max_chapters": None, "storage_years": 999},

@@ -40,6 +40,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           parsed.user.email = parsed.user.email || "";
         }
         parsed.primaryJourneyId = parsed.primaryJourneyId ?? null;
+        parsed.hasBabyGift = parsed.hasBabyGift ?? false;
         setSessionState(parsed);
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -56,6 +57,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         displayName: newSession.user.displayName || newSession.user.email || "User"
       },
       primaryJourneyId: newSession.primaryJourneyId ?? null,
+      hasBabyGift: newSession.hasBabyGift ?? false,
     };
     setSessionState(normalized);
     if (typeof window !== "undefined") {

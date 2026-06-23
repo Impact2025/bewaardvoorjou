@@ -46,7 +46,12 @@ export default function UitnodigingPage({ params }: PageProps) {
       .then((session) => {
         setSession(session);
         setState("success");
-        const destination = session.onboardingCompleted ? "/vertel" : "/onboarding";
+        let destination: string;
+        if (session.hasBabyGift) {
+          destination = session.onboardingCompleted ? "/voor-baby/dashboard" : "/voor-baby/onboarding";
+        } else {
+          destination = session.onboardingCompleted ? "/vertel" : "/onboarding";
+        }
         setTimeout(() => {
           router.push(destination);
         }, 1800);

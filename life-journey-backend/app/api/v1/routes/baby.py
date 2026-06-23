@@ -17,6 +17,8 @@ Endpoints:
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -82,6 +84,8 @@ def create_journey(
             detail="Je hebt al een actief babyboek. Gebruik PATCH om bij te werken.",
         )
     bj = create_baby_journey(db, current_user.id, payload)
+    current_user.onboarding_completed_at = datetime.now(timezone.utc)
+    db.commit()
     return BabyJourneyPublic.model_validate(bj)
 
 

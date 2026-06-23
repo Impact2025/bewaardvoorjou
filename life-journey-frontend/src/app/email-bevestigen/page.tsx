@@ -32,7 +32,11 @@ function EmailBevestigenContent() {
         setSession(session);
         setState("success");
         redirectTimer = setTimeout(() => {
-          router.push(session.primaryJourneyId ? "/dashboard" : "/onboarding");
+          if (session.hasBabyGift) {
+            router.push("/voor-baby/onboarding");
+          } else {
+            router.push(session.primaryJourneyId ? "/dashboard" : "/onboarding");
+          }
         }, 2000);
       })
       .catch((err: { message?: string }) => {

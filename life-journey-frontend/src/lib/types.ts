@@ -278,4 +278,5 @@ export interface AuthSession {
   user: AuthUser;
   primaryJourneyId: string | null;
   onboardingCompleted: boolean;
+  hasBabyGift: boolean;
 }

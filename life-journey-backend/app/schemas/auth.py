@@ -50,6 +50,7 @@ class AuthResponse(BaseModel):
   user: UserPublic
   primary_journey_id: str | None = None
   onboarding_completed: bool = False
+  has_baby_gift: bool = False
 
 
 class ForgotPasswordRequest(BaseModel):

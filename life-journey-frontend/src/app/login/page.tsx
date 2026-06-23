@@ -49,6 +49,8 @@ function LoginContent() {
       setSession(session);
       if (session.user.isAdmin) {
         router.push("/admin");
+      } else if (session.hasBabyGift) {
+        router.push(session.onboardingCompleted ? "/voor-baby/dashboard" : "/voor-baby/onboarding");
       } else if (!session.onboardingCompleted) {
         router.push("/onboarding");
       } else {
