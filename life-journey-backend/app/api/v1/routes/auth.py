@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -30,8 +30,16 @@ router = APIRouter()
 
 
 def _has_baby_gift(db: Session, user_id: str, email: str) -> bool:
+    """Geeft True als de user zelf een BABY_GIFT heeft gekocht (for_self)
+    OF als ontvanger van een BABY_GIFT cadeau is aangewezen.
+    Gift-KOPERS die het voor iemand anders kopen tellen niet mee."""
     return db.query(OrderModel).filter(
-        or_(OrderModel.user_id == user_id, OrderModel.recipient_email == email),
+        or_(
+            # Zelfaankoop: user is koper én er is geen cadeau-ontvanger
+            and_(OrderModel.user_id == user_id, OrderModel.recipient_email.is_(None)),
+            # Cadeau-ontvanger: user's email staat als recipient op de order
+            OrderModel.recipient_email == email,
+        ),
         OrderModel.package_type == "BABY_GIFT",
         OrderModel.status == "PAID",
     ).first() is not None
