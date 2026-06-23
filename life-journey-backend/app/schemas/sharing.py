@@ -10,6 +10,7 @@ class ShareInviteRequest(BaseModel):
   recipient_email: EmailStr
   chapter_ids: list[ChapterId]
   expires_at: datetime | None = None
+  role_label: str = "Familie"
 
 
 class ShareInviteResponse(BaseModel):

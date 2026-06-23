@@ -166,6 +166,7 @@ def _gift_personalization_kwargs(payload: CreatePaymentIntentRequest) -> dict:
         "gift_reveal": payload.gift_reveal,
         "delivery_date": payload.delivery_date,
         "redemption_token": _secrets_token.token_urlsafe(16) if is_gift else None,
+        "baby_theme": payload.baby_theme if payload.package_type == "BABY_GIFT" else None,
     }
 
 
@@ -556,7 +557,7 @@ def start_gift_redemption(
         if user:
             contact_email = user.email
 
-    _send_storyteller_magic_link(
+    sent = _send_storyteller_magic_link(
         db,
         str(payload.email),
         order.recipient_name or "je dierbare",
@@ -564,6 +565,9 @@ def start_gift_redemption(
         package_type=order.package_type,
         personal_message=order.personal_message,
     )
+
+    if not sent:
+        raise HTTPException(status_code=503, detail="We konden je uitnodigingsmail niet versturen. Probeer het opnieuw.")
 
     # Onthoud het e-mailadres + markeer verzonden (voorkomt dubbele geplande send)
     if not order.recipient_email:

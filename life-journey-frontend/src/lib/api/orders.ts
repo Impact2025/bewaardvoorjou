@@ -56,6 +56,7 @@ export interface CreatePaymentIntentPayload {
   shipping_address?: ShippingAddress;
   guest_email?: string;
   promo_code?: string;
+  baby_theme?: "meisje" | "jongen" | "neutraal";
 }
 
 export interface CreatePaymentIntentResponse {

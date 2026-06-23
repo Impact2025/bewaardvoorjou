@@ -71,6 +71,9 @@ class Order(Base):
     paid_at = Column(DateTime, nullable=True)
     fulfilled_at = Column(DateTime, nullable=True)
 
+    # BewaardVoorBaby — thema gekozen tijdens checkout (meisje | jongen | neutraal)
+    baby_theme = Column(String(16), nullable=True)
+
     # USB-export tracking
     usb_burned_at = Column(DateTime, nullable=True)       # moment van branden
     usb_burned_by = Column(String(255), nullable=True)    # e-mail van de admin

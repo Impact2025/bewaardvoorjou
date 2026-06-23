@@ -56,6 +56,7 @@ export default function StepPayment({ state, totalPrice, onChange, onSuccess }: 
           shipping_address: state.skipShipping ? undefined : state.shippingAddress,
           guest_email: state.guestEmail || undefined,
           promo_code: state.promoCode || undefined,
+          baby_theme: isBaby ? theme : undefined,
         });
         if (!cancelled) {
           if (result.amount_cents === 0) {

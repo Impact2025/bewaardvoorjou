@@ -76,6 +76,7 @@ class CreatePaymentIntentRequest(BaseModel):
     shipping_address: ShippingAddress | None = None  # optioneel bij digitale start
     guest_email: EmailStr | None = None  # voor niet-ingelogde gebruikers (koper)
     promo_code: str | None = Field(default=None, max_length=32)  # optionele kortingscode
+    baby_theme: Literal["meisje", "jongen", "neutraal"] | None = None  # BABY_GIFT thema
 
 
 class GiftMessagePresignRequest(BaseModel):

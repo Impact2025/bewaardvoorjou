@@ -398,7 +398,11 @@ function RecordingsContent() {
       if (mediaUrls[recording.id]) return mediaUrls[recording.id];
       const url = getMediaUrl(recording);
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, {
+          headers: session?.token
+            ? { Authorization: `Bearer ${session.token}` }
+            : undefined,
+        });
         const data = await res.json();
         if (data.type === "s3" && data.url) {
           setMediaUrls((prev) => ({ ...prev, [recording.id]: data.url }));
@@ -409,7 +413,7 @@ function RecordingsContent() {
       }
       return url;
     },
-    [mediaUrls, getMediaUrl]
+    [mediaUrls, getMediaUrl, session?.token]
   );
 
   // ── Load text content ──────────────────────────────────────────────────────
@@ -429,7 +433,11 @@ function RecordingsContent() {
         }
       }
       const url = getMediaUrl(recording);
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: session?.token
+          ? { Authorization: `Bearer ${session.token}` }
+          : undefined,
+      });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data.content) return data.content;

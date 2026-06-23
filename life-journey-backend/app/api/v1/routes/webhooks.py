@@ -346,11 +346,16 @@ def _send_storyteller_magic_link(
     gifter_email: str,
     package_type: str = "BEGIN",
     personal_message: str | None = None,
-) -> None:
-    """Create (or fetch) a storyteller account, activate their package, and send a magic link."""
+    baby_theme: str | None = None,
+) -> bool:
+    """Create (or fetch) a storyteller account, activate their package, and send a magic link.
+
+    Returns True on success, False on failure. Never raises — callers must check
+    the return value before marking redemption_email_sent_at.
+    """
     from datetime import datetime, timezone
     from app.services.auth import get_or_create_storyteller, create_magic_link_token
-    from app.services.email.events import trigger_magic_link_email
+    from app.services.email.events import trigger_magic_link_email, trigger_baby_magic_link_email
     from app.core.config import settings as _settings
 
     try:
@@ -372,14 +377,25 @@ def _send_storyteller_magic_link(
         magic_link_url = f"{_settings.app_base_url}/uitnodiging/{token}"
         raw_name = gifter_email.split("@")[0] if gifter_email else ""
         gifter_name = raw_name.capitalize() if raw_name else "iemand die van je houdt"
-        trigger_magic_link_email(
-            db, user.id, magic_link_url,
-            gifter_name=gifter_name,
-            personal_message=personal_message,
-        )
+
+        if package_type == "BABY_GIFT":
+            trigger_baby_magic_link_email(
+                db, user.id, magic_link_url,
+                baby_theme=baby_theme or "neutraal",
+                gifter_name=gifter_name,
+                personal_message=personal_message,
+            )
+        else:
+            trigger_magic_link_email(
+                db, user.id, magic_link_url,
+                gifter_name=gifter_name,
+                personal_message=personal_message,
+            )
         logger.info(f"Magic link verstuurd naar begiftigde storyteller {recipient_email}")
+        return True
     except Exception as exc:
         logger.error(f"Kon magic link niet sturen naar {recipient_email}: {exc}")
+        return False
 
 
 _PACKAGE_NAMES = {
@@ -473,13 +489,15 @@ def _dispatch_gift_emails(db: Session, order: "OrderModel", contact_email: str) 
     recipient_name = order.recipient_name or "je dierbare"
 
     if order.recipient_email and not order.redemption_email_sent_at and _delivery_is_due(order):
-        _send_storyteller_magic_link(
+        sent = _send_storyteller_magic_link(
             db, order.recipient_email, recipient_name, contact_email or "",
             package_type=order.package_type,
             personal_message=order.personal_message,
+            baby_theme=getattr(order, "baby_theme", None),
         )
-        order.redemption_email_sent_at = datetime.now(timezone.utc)
-        db.commit()
+        if sent:
+            order.redemption_email_sent_at = datetime.now(timezone.utc)
+            db.commit()
     elif order.recipient_email and not _delivery_is_due(order):
         logger.info(f"Ontvanger-mail uitgesteld tot {order.delivery_date} voor order {order.id}")
 

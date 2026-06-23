@@ -308,6 +308,29 @@ def build_magic_link_email(
     return subject, html, text
 
 
+def build_baby_magic_link_email(
+    user_display_name: str,
+    magic_link_url: str,
+    baby_theme: str = "neutraal",
+    gifter_name: str | None = None,
+    personal_message: str | None = None,
+) -> tuple[str, str, str]:
+    subject = (
+        f"{gifter_name} heeft je het mooiste kraamcadeau gegeven"
+        if gifter_name
+        else "Jouw babyboek staat klaar – Bewaard voor Baby"
+    )
+    context = {
+        "display_name": user_display_name,
+        "magic_link_url": magic_link_url,
+        "baby_theme": baby_theme,
+        "gifter_name": gifter_name,
+        "personal_message": personal_message,
+    }
+    html, text = render_email("baby_magic_link", context)
+    return subject, html, text
+
+
 def build_waitlist_confirmation_email(
     email: str,
     package_name: str,

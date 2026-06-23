@@ -610,6 +610,36 @@ def trigger_export_ready_email(
 
 # ── BewaardVoorBaby e-mail triggers ───────────────────────────────────────
 
+def trigger_baby_magic_link_email(
+    db: Session,
+    user_id: str,
+    magic_link_url: str,
+    baby_theme: str = "neutraal",
+    gifter_name: Optional[str] = None,
+    personal_message: Optional[str] = None,
+) -> Optional[str]:
+    """Queue een baby-themed magic link email voor BABY_GIFT ontvangers."""
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        return None
+
+    event = _create_email_event(
+        db,
+        user_id=user_id,
+        email_type="baby_magic_link",
+        sent_to=user.email,
+        context_data={
+            "magic_link_url": magic_link_url,
+            "baby_theme": baby_theme,
+            "gifter_name": gifter_name,
+            "personal_message": personal_message,
+        },
+    )
+
+    logger.info(f"Email queued: baby_magic_link ({baby_theme}) to {user.email}")
+    return enqueue_email_job(event.id)
+
+
 def trigger_baby_gift_delivery_email(
     db: Session,
     user_id: str,

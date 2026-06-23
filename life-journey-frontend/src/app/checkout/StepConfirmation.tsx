@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle, Mail, Package, Truck, Printer, Phone, FileText } from "lucide-react";
 import { PACKAGE_NAMES, getOrderStatus, type OrderStatusResponse } from "@/lib/api/orders";
 import { type CheckoutState } from "./CheckoutContent";
+import { useBabyTheme } from "@/components/baby/BabyThemeContext";
 
 interface Props {
   state: CheckoutState;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function StepConfirmation({ state }: Props) {
   const router = useRouter();
+  const { t: babyT } = useBabyTheme();
   const [order, setOrder] = useState<OrderStatusResponse | null>(null);
 
   // Haal de gezaghebbende orderdata op (o.a. de redemption-token voor de startkaart).
@@ -42,8 +44,8 @@ export default function StepConfirmation({ state }: Props) {
     <div className="space-y-8 text-center">
       {/* Succes */}
       <div className="flex flex-col items-center gap-4">
-        <div className="w-20 h-20 bg-[#2d5016]/10 rounded-full flex items-center justify-center">
-          <CheckCircle className="h-10 w-10 text-[#2d5016]" />
+        <div className={`w-20 h-20 rounded-full flex items-center justify-center ${isBaby ? babyT.primaryBgMedium : "bg-[#2d5016]/10"}`}>
+          <CheckCircle className={`h-10 w-10 ${isBaby ? babyT.primaryText : "text-[#2d5016]"}`} />
         </div>
         <div>
           <h2 className="font-serif text-3xl font-bold text-[#1a1a1a] mb-2">
@@ -138,6 +140,9 @@ export default function StepConfirmation({ state }: Props) {
               icon={Mail}
               title={`Uitnodiging onderweg naar ${recipientEmail}`}
               desc={`${who} ontvangt een persoonlijke link${state.deliveryDate ? ` op ${state.deliveryDate}` : ""}. Jouw bericht is het eerste wat ze zien.`}
+              isBaby={isBaby}
+              babyIconBg={babyT.primaryBgMedium}
+              babyIconColor={babyT.primaryText}
             />
           )}
           {hasShipping && (
@@ -145,6 +150,9 @@ export default function StepConfirmation({ state }: Props) {
               icon={Truck}
               title="Doos wordt verzonden"
               desc={`We sturen de fysieke doos naar ${shippingCity}. Je ontvangt een track & trace zodra het pakket onderweg is.`}
+              isBaby={isBaby}
+              babyIconBg={babyT.primaryBgMedium}
+              babyIconColor={babyT.primaryText}
             />
           )}
           {isGift && (
@@ -156,6 +164,9 @@ export default function StepConfirmation({ state }: Props) {
                   ? `Bel ${who} op de kraamdag en vertel dat je dit hebt gegeven. Jouw boodschap is het eerste dat ze lezen wanneer ze het eerste hoofdstuk starten.`
                   : `Bel ${who} op het moment dat ze het cadeau openen en doe samen het eerste hoofdstuk — jij aan de telefoon, ${who} met de kaart in de hand. Zo begint het verhaal samen.`
               }
+              isBaby={isBaby}
+              babyIconBg={babyT.primaryBgMedium}
+              babyIconColor={babyT.primaryText}
             />
           )}
           {!isGift && (
@@ -167,6 +178,9 @@ export default function StepConfirmation({ state }: Props) {
                   ? "Je babyboek is klaar. Maak een account aan en begin met het allereerste hoofdstuk: de geboortedag."
                   : "Je digitale toegang is actief. Maak een account aan en leg je eerste herinnering vast."
               }
+              isBaby={isBaby}
+              babyIconBg={babyT.primaryBgMedium}
+              babyIconColor={babyT.primaryText}
             />
           )}
         </div>
@@ -178,13 +192,19 @@ export default function StepConfirmation({ state }: Props) {
             onClick={() =>
               router.push(isBaby ? "/voor-baby/onboarding" : "/register")
             }
-            className="bg-[#2d5016] text-white text-sm px-5 py-2.5 rounded-lg hover:bg-[#3a6620] transition-colors font-medium"
+            className={`text-sm px-5 py-2.5 rounded-lg transition-colors font-medium ${
+              isBaby
+                ? `${babyT.primary} ${babyT.primaryHover} text-white`
+                : "bg-[#2d5016] text-white hover:bg-[#3a6620]"
+            }`}
           >
             {isBaby ? "Begin het eerste jaar →" : "Account aanmaken"}
           </button>
           <button
             onClick={() => router.push("/login")}
-            className="border border-[#2d5016] text-[#2d5016] text-sm px-5 py-2.5 rounded-lg hover:bg-[#2d5016]/5 transition-colors"
+            className={`text-sm px-5 py-2.5 rounded-lg transition-colors border ${
+              isBaby ? babyT.outlineBtn : "border-[#2d5016] text-[#2d5016] hover:bg-[#2d5016]/5"
+            }`}
           >
             Inloggen
           </button>
@@ -214,15 +234,21 @@ function NextStep({
   icon: Icon,
   title,
   desc,
+  isBaby,
+  babyIconBg,
+  babyIconColor,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   desc: string;
+  isBaby?: boolean;
+  babyIconBg?: string;
+  babyIconColor?: string;
 }) {
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 bg-[#d4af37]/20 rounded-full flex items-center justify-center flex-shrink-0">
-        <Icon className="h-4 w-4 text-[#d4af37]" />
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isBaby ? babyIconBg : "bg-[#d4af37]/20"}`}>
+        <Icon className={`h-4 w-4 ${isBaby ? babyIconColor : "text-[#d4af37]"}`} />
       </div>
       <div>
         <p className="font-medium text-[#1a1a1a] text-sm">{title}</p>

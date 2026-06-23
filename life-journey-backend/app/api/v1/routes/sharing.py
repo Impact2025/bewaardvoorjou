@@ -50,7 +50,30 @@ def issue_share_invite(
 ) -> ShareInviteResponse:
   """Create a new share invite for a journey."""
   _ensure_journey_access(journey_id, db, current_user)
-  return create_share_invite(journey_id, payload, db)
+  result = create_share_invite(journey_id, payload, db)
+
+  from app.services.email.events import trigger_family_invite_email
+
+  if payload.expires_at is not None:
+    _DUTCH_MONTHS = [
+      "", "januari", "februari", "maart", "april", "mei", "juni",
+      "juli", "augustus", "september", "oktober", "november", "december",
+    ]
+    expires_date = f"{payload.expires_at.day} {_DUTCH_MONTHS[payload.expires_at.month]} {payload.expires_at.year}"
+  else:
+    expires_date = "geen vervaldatum"
+
+  trigger_family_invite_email(
+    db,
+    recipient_email=str(payload.recipient_email),
+    recipient_name=payload.recipient_name,
+    inviter_name=current_user.display_name,
+    role_label=payload.role_label,
+    invite_url=result.magic_link,
+    expires_date=expires_date,
+  )
+
+  return result
 
 
 @router.get("/{journey_id}/grants", response_model=list[ShareGrantSchema])

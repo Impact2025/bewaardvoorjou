@@ -640,21 +640,21 @@ def send_scheduled_gift_redemptions_task() -> None:
                 user = db.query(UserModel).filter(UserModel.id == order.user_id).first()
                 if user:
                     contact_email = user.email
-            try:
-                _send_storyteller_magic_link(
-                    db,
-                    order.recipient_email,
-                    order.recipient_name or "je dierbare",
-                    contact_email,
-                    package_type=order.package_type,
-                    personal_message=order.personal_message,
-                )
+            ok = _send_storyteller_magic_link(
+                db,
+                order.recipient_email,
+                order.recipient_name or "je dierbare",
+                contact_email,
+                package_type=order.package_type,
+                personal_message=order.personal_message,
+                baby_theme=getattr(order, "baby_theme", None),
+            )
+            if ok:
                 order.redemption_email_sent_at = datetime.now(timezone.utc)
                 db.commit()
                 sent += 1
-            except Exception as e:
-                logger.error(f"Geplande redemption-mail mislukt voor order {order.id}: {e}")
-                db.rollback()
+            else:
+                logger.error(f"Redemption-mail mislukt voor order {order.id} — redemption_email_sent_at niet gezet zodat het morgen opnieuw wordt geprobeerd")
         logger.info(f"Geplande cadeau-redemptions verzonden: {sent}")
     except Exception as e:
         logger.error(f"Scheduled gift redemptions task failed: {e}")

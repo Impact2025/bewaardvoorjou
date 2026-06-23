@@ -27,6 +27,7 @@ from app.services.email.renderer import (
     build_progress_milestone_email,
     build_family_notification_email,
     build_magic_link_email,
+    build_baby_magic_link_email,
     build_export_ready_email,
     # BewaardVoorBaby
     build_baby_gift_delivery_email,
@@ -300,6 +301,15 @@ def _build_email(
         return build_magic_link_email(
             user_display_name=user.display_name,
             magic_link_url=ctx["magic_link_url"],
+            gifter_name=ctx.get("gifter_name"),
+            personal_message=ctx.get("personal_message"),
+        )
+
+    if email_event.email_type == "baby_magic_link":
+        return build_baby_magic_link_email(
+            user_display_name=user.display_name,
+            magic_link_url=ctx["magic_link_url"],
+            baby_theme=ctx.get("baby_theme", "neutraal"),
             gifter_name=ctx.get("gifter_name"),
             personal_message=ctx.get("personal_message"),
         )

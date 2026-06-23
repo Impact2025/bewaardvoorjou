@@ -32,27 +32,30 @@ export function BabyHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
 
         {/* Sub-brand logo */}
-        <Link href="/voor-baby" className="flex items-center gap-3 shrink-0">
-          <Image
-            key={theme}
-            src={THEME_LOGOS[theme]}
-            alt="Bewaard voor Baby logo"
-            width={40}
-            height={40}
-            className="w-10 h-10 object-contain transition-all duration-300"
-            priority
-          />
+        <div className="flex items-center gap-3 shrink-0">
+          <Link href="/voor-baby">
+            <Image
+              key={theme}
+              src={THEME_LOGOS[theme]}
+              alt="Bewaard voor Baby logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain transition-all duration-300"
+              priority
+            />
+          </Link>
           <div className="flex flex-col leading-tight">
-            <span className="font-bold text-gray-900 text-base">Bewaard voor Baby</span>
+            <Link href="/voor-baby" className="font-bold text-gray-900 text-base hover:text-gray-700 transition-colors">
+              Bewaard voor Baby
+            </Link>
             <Link
               href="/"
               className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors leading-tight"
-              onClick={(e) => e.stopPropagation()}
             >
               door BewaardVoorJou.nl
             </Link>
           </div>
-        </Link>
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-5 text-sm text-slate-600">

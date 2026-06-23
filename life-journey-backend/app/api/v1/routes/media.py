@@ -34,6 +34,36 @@ def _ensure_journey(journey_id: str, db: Session, user: User) -> JourneyModel:
   return journey
 
 
+def _authorize_object_key(object_key: str, db: Session, user: User) -> str:
+  """
+  Valideer een object_key en controleer of de ingelogde gebruiker eigenaar is.
+
+  De key heeft de vorm ``journey_id/chapter_id/asset_id/filename``. We leiden de
+  asset_id af (segment 2), zoeken het bijbehorende media-item op en controleren
+  dat de journey van de gebruiker is. Beschermt tegen path traversal én tegen
+  het opvragen van andermans privé-opnames (IDOR).
+
+  Returns:
+    De gesaneerde object_key (veilig voor opslag-toegang).
+  """
+  safe_key = validate_object_key(object_key)
+  parts = safe_key.split("/")
+  asset_id = parts[2] if len(parts) >= 3 else None
+
+  asset = (
+    db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id).first()
+    if asset_id else None
+  )
+  if asset is None:
+    raise HTTPException(status_code=404, detail="Media-item niet gevonden")
+
+  journey = db.query(JourneyModel).filter(JourneyModel.id == asset.journey_id).first()
+  if journey is None or journey.user_id != user.id:
+    raise HTTPException(status_code=403, detail="Geen toegang tot dit media-item")
+
+  return safe_key
+
+
 @router.post("/presign", response_model=MediaPresignResponse)
 @limiter.limit(RateLimits.MEDIA_UPLOAD)
 def presign_upload(
@@ -210,18 +240,28 @@ def get_transcript(
 async def local_upload(
   request: Request,
   object_key: str,
+  exp: int = 0,
+  sig: str = "",
   db: Session = Depends(get_db),
 ) -> dict[str, str]:
   """
   Upload endpoint: proxies to S3/R2 when configured, falls back to local storage.
 
   Security features:
+  - Capability-based autorisatie: alleen een door /media/presign ondertekende
+    URL (HMAC over object_key + vervaltijd) wordt geaccepteerd. De presign-stap
+    heeft de eigenaarscheck al uitgevoerd.
   - File type validation (only allowed extensions)
   - Filename sanitization
   - Path traversal protection
   """
   import io
   from app.core.config import settings as app_settings
+  from app.services.media.presigner import verify_upload_signature
+
+  # Autoriseer via de ondertekende upload-URL voordat we iets accepteren.
+  if not verify_upload_signature(object_key, exp, sig):
+    raise HTTPException(status_code=403, detail="Ongeldige of verlopen upload-URL")
 
   try:
     logger.info(f"Upload attempt - object_key: {object_key}")
@@ -309,11 +349,18 @@ async def local_upload(
 
 @router.get("/local-file/{object_key:path}")
 @limiter.limit(RateLimits.MEDIA_READ)
-async def serve_local_file(request: Request, object_key: str) -> FileResponse:
+async def serve_local_file(
+  request: Request,
+  object_key: str,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> FileResponse:
   """
-  Serve files from local storage (for development without S3)
+  Serve files from local storage (for development without S3).
+  Vereist authenticatie en eigenaarschap van het media-item.
   """
-  file_path = local_storage.get_file_path(object_key)
+  safe_key = _authorize_object_key(object_key, db, current_user)
+  file_path = local_storage.get_file_path(safe_key)
 
   if not file_path.exists():
     raise HTTPException(status_code=404, detail="File not found")
@@ -339,12 +386,20 @@ async def serve_local_file(request: Request, object_key: str) -> FileResponse:
 
 @router.get("/file/{object_key:path}")
 @limiter.limit(RateLimits.MEDIA_READ)
-async def serve_file(request: Request, object_key: str):
+async def serve_file(
+  request: Request,
+  object_key: str,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+):
   """
   Serve files from S3 (production) or local storage (development).
+  Vereist authenticatie en eigenaarschap van het media-item.
   Text files (.txt) are proxied server-side to avoid browser CORS issues with R2.
   Audio/video files return a presigned URL for direct browser playback.
   """
+  object_key = _authorize_object_key(object_key, db, current_user)
+
   if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
     try:
       endpoint_url = settings.s3_endpoint_url
