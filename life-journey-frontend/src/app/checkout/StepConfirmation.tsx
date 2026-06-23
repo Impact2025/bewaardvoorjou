@@ -13,7 +13,7 @@ interface Props {
 
 export default function StepConfirmation({ state }: Props) {
   const router = useRouter();
-  const { t: babyT } = useBabyTheme();
+  const { t: babyT, theme: babyTheme } = useBabyTheme();
   const [order, setOrder] = useState<OrderStatusResponse | null>(null);
 
   // Haal de gezaghebbende orderdata op (o.a. de redemption-token voor de startkaart).
@@ -92,7 +92,7 @@ export default function StepConfirmation({ state }: Props) {
                 Mooie, drukbare cadeaubon met naam, bericht en QR-code. Perfect om in een envelop te doen.
               </p>
               <button
-                onClick={() => window.open(`/cadeaubon/${redemptionToken}`, "_blank")}
+                onClick={() => window.open(`/cadeaubon/${redemptionToken}${isBaby ? `?thema=${babyTheme}` : ""}`, "_blank")}
                 className={`w-full font-bold px-4 py-2.5 rounded-lg transition-colors text-sm ${isBaby ? `${babyT.primary} ${babyT.primaryHover} text-white` : "bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a]"}`}
               >
                 Download cadeaubon →

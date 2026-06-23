@@ -12,11 +12,13 @@ export interface CertificateProps {
   packageFeatures: readonly string[];
   personalMessage: string | null;
   activationUrl: string;
+  themeHex?: string;
 }
 
 const BOX_PACKAGES = new Set(["ERFGOED", "NALATENSCHAP"]);
+const GOLD = "#d4af37";
 
-function Divider({ tight = false }: { tight?: boolean }) {
+function Divider({ tight = false, accent = GOLD }: { tight?: boolean; accent?: string }) {
   return (
     <div
       style={{
@@ -26,14 +28,14 @@ function Divider({ tight = false }: { tight?: boolean }) {
         margin: tight ? "4mm 0" : "6mm 0",
       }}
     >
-      <div style={{ flex: 1, height: "0.5px", background: "linear-gradient(to right, transparent, #d4af37)" }} />
-      <div style={{ width: "5px", height: "5px", background: "#d4af37", transform: "rotate(45deg)", flexShrink: 0 }} />
-      <div style={{ flex: 1, height: "0.5px", background: "linear-gradient(to left, transparent, #d4af37)" }} />
+      <div style={{ flex: 1, height: "0.5px", background: `linear-gradient(to right, transparent, ${accent})` }} />
+      <div style={{ width: "5px", height: "5px", background: accent, transform: "rotate(45deg)", flexShrink: 0 }} />
+      <div style={{ flex: 1, height: "0.5px", background: `linear-gradient(to left, transparent, ${accent})` }} />
     </div>
   );
 }
 
-function BoxDeliveryAnnouncement() {
+function BoxDeliveryAnnouncement({ accent = GOLD }: { accent?: string }) {
   return (
     <div
       style={{
@@ -47,8 +49,7 @@ function BoxDeliveryAnnouncement() {
         marginTop: "5mm",
       }}
     >
-      {/* Gouden verticale accentlijn */}
-      <div style={{ width: "2px", background: "#d4af37", borderRadius: "1px", flexShrink: 0 }} />
+      <div style={{ width: "2px", background: accent, borderRadius: "1px", flexShrink: 0 }} />
       <div>
         <p
           style={{
@@ -79,8 +80,15 @@ export function CertificateLayout({
   packageFeatures,
   personalMessage,
   activationUrl,
+  themeHex,
 }: CertificateProps) {
   const isBoxPackage = BOX_PACKAGES.has(packageType);
+  const isBaby = packageType === "BABY_GIFT";
+  const accent = themeHex ?? GOLD;
+  // For baby: light QR background with theme-colored dots; classic: dark bg with gold dots
+  const qrBg = isBaby ? "#ffffff" : "#1a1a1a";
+  const qrFg = isBaby ? accent : GOLD;
+  const outerBorder = isBaby ? accent : "#1a1a1a";
 
   return (
     <div
@@ -95,10 +103,10 @@ export function CertificateLayout({
         flexDirection: "column",
       }}
     >
-      {/* Buitenste donkere rand */}
-      <div style={{ flex: 1, border: "2px solid #1a1a1a", display: "flex", flexDirection: "column" }}>
-        {/* Ivoor tussenruimte + gouden binnenrand */}
-        <div style={{ flex: 1, margin: "3.5mm", border: "1px solid #d4af37", display: "flex", flexDirection: "column" }}>
+      {/* Buitenste rand */}
+      <div style={{ flex: 1, border: `2px solid ${outerBorder}`, display: "flex", flexDirection: "column" }}>
+        {/* Accent binnenrand */}
+        <div style={{ flex: 1, margin: "3.5mm", border: `1px solid ${accent}`, display: "flex", flexDirection: "column" }}>
           {/* Inhoud */}
           <div style={{ flex: 1, padding: "9mm 11mm", display: "flex", flexDirection: "column" }}>
 
@@ -118,11 +126,11 @@ export function CertificateLayout({
               </p>
             </div>
 
-            <Divider />
+            <Divider accent={accent} />
 
             {/* ── Cadeaubon — naam — ondertitel — van ── */}
             <div style={{ textAlign: "center" }}>
-              <p style={{ color: "#d4af37", fontSize: "6.5pt", letterSpacing: "8px", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4mm" }}>
+              <p style={{ color: accent, fontSize: "6.5pt", letterSpacing: "8px", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4mm" }}>
                 Cadeaubon
               </p>
               <h1
@@ -143,12 +151,12 @@ export function CertificateLayout({
                   {subtitle}
                 </p>
               )}
-              <p style={{ color: "#d4af37", fontSize: "7pt", letterSpacing: "4px", textTransform: "uppercase", margin: 0, fontWeight: 600 }}>
+              <p style={{ color: accent, fontSize: "7pt", letterSpacing: "4px", textTransform: "uppercase", margin: 0, fontWeight: 600 }}>
                 Van {gifterName}
               </p>
             </div>
 
-            <Divider />
+            <Divider accent={accent} />
 
             {/* ── Pakket ── */}
             <div>
@@ -165,7 +173,7 @@ export function CertificateLayout({
                   const desc = colonIdx > -1 ? f.slice(colonIdx + 2) : f;
                   return (
                     <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: "3mm" }}>
-                      <div style={{ width: "4px", height: "4px", background: "#d4af37", transform: "rotate(45deg)", flexShrink: 0, marginTop: "5px" }} />
+                      <div style={{ width: "4px", height: "4px", background: accent, transform: "rotate(45deg)", flexShrink: 0, marginTop: "5px" }} />
                       <span style={{ color: "#444", fontSize: "8pt", lineHeight: 1.55 }}>
                         {title && (
                           <span style={{ color: "#1a1a1a", fontWeight: 700, fontFamily: "Georgia, 'Times New Roman', serif" }}>
@@ -180,13 +188,13 @@ export function CertificateLayout({
               </div>
 
               {/* Aankondiging doos — alleen voor box-pakketten */}
-              {isBoxPackage && <BoxDeliveryAnnouncement />}
+              {isBoxPackage && <BoxDeliveryAnnouncement accent={accent} />}
             </div>
 
             {/* ── Persoonlijk bericht ── */}
             {personalMessage && (
               <>
-                <Divider />
+                <Divider accent={accent} />
                 <div style={{ textAlign: "center" }}>
                   <p style={{ color: "#bbb", fontSize: "6pt", letterSpacing: "4px", textTransform: "uppercase", margin: "0 0 4mm" }}>
                     Persoonlijk bericht
@@ -210,7 +218,7 @@ export function CertificateLayout({
               </>
             )}
 
-            <Divider />
+            <Divider accent={accent} />
 
             {/* ── QR + activatie ── */}
             <div
@@ -218,20 +226,21 @@ export function CertificateLayout({
                 display: "flex",
                 alignItems: "center",
                 gap: "6mm",
-                background: "#1a1a1a",
+                background: qrBg,
+                border: isBaby ? `1px solid ${accent}` : undefined,
                 borderRadius: "2.5mm",
                 padding: "5mm 6mm",
               }}
             >
               <div style={{ flexShrink: 0, lineHeight: 0 }}>
                 {activationUrl && (
-                  <QRCodeSVG value={activationUrl} size={76} level="M" bgColor="#1a1a1a" fgColor="#d4af37" />
+                  <QRCodeSVG value={activationUrl} size={76} level="M" bgColor={qrBg} fgColor={qrFg} />
                 )}
               </div>
               <div>
                 <p
                   style={{
-                    color: "#d4af37",
+                    color: accent,
                     fontSize: "9.5pt",
                     fontFamily: "Georgia, 'Times New Roman', serif",
                     fontWeight: 700,
@@ -240,12 +249,12 @@ export function CertificateLayout({
                 >
                   {isBoxPackage ? "Begin alvast digitaal" : "Scan om te starten"}
                 </p>
-                <p style={{ color: "#aaa", fontSize: "7.5pt", lineHeight: 1.55, margin: "0 0 2.5mm" }}>
+                <p style={{ color: isBaby ? "#555" : "#aaa", fontSize: "7.5pt", lineHeight: 1.55, margin: "0 0 2.5mm" }}>
                   {isBoxPackage
                     ? "De herinneringsdoos arriveert binnenkort. Scan de QR-code om alvast digitaal te beginnen — geen wachtwoord nodig."
                     : "Scan de QR-code met je telefoon of ga naar het onderstaand adres om het cadeau te activeren. Geen wachtwoord nodig."}
                 </p>
-                <p style={{ color: "#d4af37", fontSize: "6.5pt", fontFamily: "monospace", wordBreak: "break-all", opacity: 0.75, margin: 0 }}>
+                <p style={{ color: accent, fontSize: "6.5pt", fontFamily: "monospace", wordBreak: "break-all", opacity: 0.75, margin: 0 }}>
                   {activationUrl}
                 </p>
               </div>
@@ -255,7 +264,7 @@ export function CertificateLayout({
             <div style={{ flex: 1, minHeight: "5mm" }} />
 
             {/* ── Footer ── */}
-            <Divider tight />
+            <Divider tight accent={accent} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "2.5mm" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-bewaardvoorjou.png" alt="" style={{ width: "5mm", height: "5mm", objectFit: "contain", opacity: 0.35 }} />

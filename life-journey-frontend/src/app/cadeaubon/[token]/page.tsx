@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Printer, Loader2 } from "lucide-react";
 import { getGiftRedemption, type GiftRedemption } from "@/lib/api/orders";
 import { CertificateLayout } from "../CertificateLayout";
+import { THEME_CONFIG, type BabyTheme } from "@/components/baby/BabyThemeContext";
 
 const PACKAGE_CONTENT: Record<string, { name: string; tagline: string; features: string[] }> = {
   VERHAAL: {
@@ -53,7 +54,10 @@ const RELATION_SUBTITLE: Record<string, string> = {
 
 export default function CadeaubonPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const token = params.token as string;
+  const themaParam = searchParams.get("thema") as BabyTheme | null;
+  const babyThemeHex = themaParam && themaParam in THEME_CONFIG ? THEME_CONFIG[themaParam].hex : null;
 
   const [data, setData] = useState<GiftRedemption | null>(null);
   const [error, setError] = useState(false);
@@ -101,6 +105,8 @@ export default function CadeaubonPage() {
     ? (RELATION_SUBTITLE[data.recipient_relation] ?? "Een bijzonder cadeau voor iemand die je dierbaar is")
     : null;
 
+  const isBaby = data.package_type === "BABY_GIFT";
+
   const certProps = {
     recipientName,
     gifterName,
@@ -111,6 +117,7 @@ export default function CadeaubonPage() {
     packageFeatures: content.features,
     personalMessage: data.personal_message || data.card_message,
     activationUrl,
+    themeHex: babyThemeHex ?? undefined,
   };
 
   return (
@@ -135,7 +142,8 @@ export default function CadeaubonPage() {
           </div>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-5 py-2.5 rounded-xl transition-colors flex-shrink-0 text-sm"
+            className="flex items-center gap-2 font-bold px-5 py-2.5 rounded-xl transition-colors flex-shrink-0 text-sm"
+            style={isBaby && babyThemeHex ? { background: babyThemeHex, color: "#fff" } : { background: "#d4af37", color: "#1a1a1a" }}
           >
             <Printer className="h-4 w-4" />
             Afdrukken als PDF
