@@ -3,6 +3,12 @@ Bewaard voor {{ baby_name }} — jouw babyboek staat klaar
 Welkom, {{ recipient_name }}!
 {% if gifter_name %}
 {{ gifter_name }} heeft je het mooiste cadeau gegeven: een plek om alles van dit eerste jaar vast te leggen.
+
+{% if personal_message %}
+Bericht van {{ gifter_name }}:
+"{{ personal_message }}"
+
+{% endif %}
 {% else %}
 Het eerste jaar van {{ baby_name }} verdient een plek. Jouw digitale babyboek is aangemaakt.
 {% endif %}

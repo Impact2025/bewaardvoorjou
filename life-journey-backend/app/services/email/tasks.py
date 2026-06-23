@@ -31,6 +31,7 @@ from app.services.email.renderer import (
     build_export_ready_email,
     # BewaardVoorBaby
     build_baby_gift_delivery_email,
+    build_baby_self_welcome_email,
     build_baby_weekly_question_email,
     build_baby_milestone_trigger_email,
     build_baby_first_birthday_email,
@@ -329,6 +330,13 @@ def _build_email(
             gifter_name=ctx.get("gifter_name"),
             baby_name=ctx.get("baby_name", "jullie kindje"),
             onboarding_url=ctx.get("onboarding_url", f"{settings.app_base_url}/voor-baby/onboarding"),
+            personal_message=ctx.get("personal_message"),
+        )
+
+    if email_event.email_type == "baby_self_welcome":
+        return build_baby_self_welcome_email(
+            onboarding_url=ctx.get("onboarding_url", f"{settings.app_base_url}/voor-baby/onboarding"),
+            baby_theme=ctx.get("baby_theme", "neutraal"),
         )
 
     if email_event.email_type == "baby_weekly_question":

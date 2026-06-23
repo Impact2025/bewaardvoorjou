@@ -432,6 +432,7 @@ def build_baby_gift_delivery_email(
     gifter_name: str | None,
     baby_name: str,
     onboarding_url: str,
+    personal_message: str | None = None,
 ) -> tuple[str, str, str]:
     """Verstuurd aan de ontvanger (ouder) zodra een BABY_GIFT order is ingewisseld."""
     subject = f"Bewaard voor {baby_name} — jouw digitale babyboek staat klaar!"
@@ -440,9 +441,25 @@ def build_baby_gift_delivery_email(
         "gifter_name": gifter_name,
         "baby_name": baby_name,
         "onboarding_url": onboarding_url,
+        "personal_message": personal_message,
     }
     html, text = render_email("baby_gift_delivery", context)
     logger.info(f"Built baby_gift_delivery email for {recipient_name}")
+    return subject, html, text
+
+
+def build_baby_self_welcome_email(
+    onboarding_url: str,
+    baby_theme: str = "neutraal",
+) -> tuple[str, str, str]:
+    """Warme welkomstmail voor ouders die Bewaard voor Baby voor zichzelf kopen."""
+    subject = "Jouw babyboek staat klaar — het eerste jaar kan beginnen"
+    context = {
+        "onboarding_url": onboarding_url,
+        "baby_theme": baby_theme,
+    }
+    html, text = render_email("baby_self_welcome", context)
+    logger.info("Built baby_self_welcome email")
     return subject, html, text
 
 

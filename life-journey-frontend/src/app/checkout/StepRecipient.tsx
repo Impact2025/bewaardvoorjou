@@ -172,23 +172,35 @@ export default function StepRecipient({ state, onChange, onNext }: Props) {
 
           <div>
             <label className="block text-sm font-medium text-[#555] mb-1">
-              E-mail of telefoon van {name} <span className="text-[#888] font-normal">(optioneel)</span>
+              E-mail van {name}{" "}
+              {isBaby ? (
+                <span className={`font-semibold text-xs ${t.primaryText}`}>(sterk aanbevolen)</span>
+              ) : (
+                <span className="text-[#888] font-normal">(optioneel)</span>
+              )}
             </label>
             <input
               type="email"
               placeholder={`${name.toLowerCase()}@email.nl`}
               value={state.recipientEmail}
               onChange={(e) => onChange({ recipientEmail: e.target.value })}
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 ${
                 state.recipientEmail && !recipientEmailValid ? "border-red-300 bg-red-50" : "border-[#e5e0d8]"
               }`}
             />
-            <p className="text-xs text-[#888] mt-1">
-              Hiermee kunnen we {name} een vriendelijk zetje geven om te starten.
-              {isDigital
-                ? " Geen contactgegevens? Geen probleem — je ontvangt na betaling een cadeaubon om te overhandigen."
-                : " Geen contactgegevens? Geen probleem — de doos bevat een eigen startkaart."}
-            </p>
+            {isBaby && !state.recipientEmail ? (
+              <div className={`mt-2 px-3 py-2 rounded-lg text-xs ${t.primaryBg} ${t.primaryText} leading-relaxed`}>
+                <strong>Tip:</strong> Zonder e-mailadres ontvangt {name} geen automatische uitnodiging. Je kunt de cadeaubon dan zelf overhandigen — maar de mail is het warmste begin.
+              </div>
+            ) : (
+              <p className="text-xs text-[#888] mt-1">
+                {isBaby
+                  ? `${name} ontvangt direct een persoonlijk bericht van jou + een link om het babyboek te starten.`
+                  : isDigital
+                  ? " Geen contactgegevens? Geen probleem — je ontvangt na betaling een cadeaubon om te overhandigen."
+                  : " Geen contactgegevens? Geen probleem — de doos bevat een eigen startkaart."}
+              </p>
+            )}
           </div>
         </div>
       )}

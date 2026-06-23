@@ -17,6 +17,14 @@
   <strong>{{ gifter_name }}</strong> heeft je het mooiste cadeau gegeven:<br>
   een plek om alles van dit eerste jaar vast te leggen.
 </p>
+
+{% if personal_message %}
+<div style="background: #FDF2F8; border-left: 4px solid #BE185D; border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+  <p style="margin: 0 0 6px 0; font-size: 12px; color: #9D174D; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Bericht van {{ gifter_name }}</p>
+  <p style="margin: 0; font-size: 15px; color: #3B3028; line-height: 1.6; font-style: italic;">&ldquo;{{ personal_message }}&rdquo;</p>
+</div>
+{% endif %}
+
 {% else %}
 <p class="body-text" style="text-align: center;">
   Het eerste jaar van <strong>{{ baby_name }}</strong> verdient een plek.<br>

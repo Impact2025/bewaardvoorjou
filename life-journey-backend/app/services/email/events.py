@@ -647,6 +647,7 @@ def trigger_baby_gift_delivery_email(
     baby_name: str,
     gifter_name: Optional[str],
     onboarding_url: str,
+    personal_message: Optional[str] = None,
 ) -> Optional[str]:
     """Verstuurd aan de ontvanger (ouder) direct nadat een BABY_GIFT is ingewisseld."""
     existing = db.query(EmailEventModel).filter(
@@ -671,6 +672,7 @@ def trigger_baby_gift_delivery_email(
             "gifter_name": gifter_name,
             "onboarding_url": onboarding_url,
             "recipient_name": user.display_name or user.email.split("@")[0],
+            "personal_message": personal_message,
         },
     )
     logger.info(f"Email queued: baby_gift_delivery to {user.email}")

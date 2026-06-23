@@ -82,9 +82,9 @@ export default function StepGifting({ state, onChange, onNext }: Props) {
         </h3>
         <p className="text-xs text-[#888]">
           {isBaby
-            ? `Kies de bevallingsdatum, de kraamdag, of het moment dat je het overhandigt. Laat leeg om direct te versturen zodra de betaling is ontvangen.`
+            ? `De uitnodiging wordt direct verstuurd zodra de betaling is ontvangen. Wil je wachten tot de kraamdag of een ander bijzonder moment? Kies dan een datum.`
             : isDigital
-            ? `Kies een datum als je wilt dat de digitale uitnodiging op een specifiek moment bij ${name} aankomt. Laat leeg om direct te versturen.`
+            ? `De uitnodiging wordt direct verstuurd na betaling. Wil je dat ${name} het op een specifiek moment ontvangt? Kies dan een datum.`
             : "Kies een dag. We zorgen dat het cadeau op tijd aankomt. Laat leeg om zo snel mogelijk te versturen."}
         </p>
         <input

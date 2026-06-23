@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% if baby_theme == "meisje" %}
+  {% set theme_color = "#db2777" %}
+  {% set theme_bg    = "#fdf2f8" %}
+  {% set theme_text  = "#9d174d" %}
+{% elif baby_theme == "jongen" %}
+  {% set theme_color = "#0ea5e9" %}
+  {% set theme_bg    = "#f0f9ff" %}
+  {% set theme_text  = "#075985" %}
+{% else %}
+  {% set theme_color = "#0d9488" %}
+  {% set theme_bg    = "#f0fdfa" %}
+  {% set theme_text  = "#134e4a" %}
+{% endif %}
+
+{% block title %}Jouw babyboek is klaar — Bewaard voor Baby{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding-bottom: 16px;">
+  <span style="font-size: 44px; line-height: 1;">&#128118;</span>
+</div>
+
+<h1 class="heading" style="text-align: center;">
+  Het eerste jaar kan beginnen.
+</h1>
+
+<p class="body-text" style="text-align: center;">
+  Jouw digitale babyboek staat klaar. Alles wat je nodig hebt om het eerste jaar van jullie kindje te bewaren &mdash; in jouw eigen woorden, op jouw tempo.
+</p>
+
+<div style="background: {{ theme_bg }}; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="font-size: 13px; font-weight: 700; color: {{ theme_text }}; text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 12px;">Wat je hebt</p>
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding: 5px 0; vertical-align: top; width: 24px; font-size: 16px;">&#9997;&#65039;</td>
+      <td style="padding: 5px 0 5px 10px; font-size: 14px; color: #57534E; line-height: 1.5;">14 diepgaande hoofdstukken &mdash; geboortedag tot eerste verjaardag</td>
+    </tr>
+    <tr>
+      <td style="padding: 5px 0; vertical-align: top; font-size: 16px;">&#127942;</td>
+      <td style="padding: 5px 0 5px 10px; font-size: 14px; color: #57534E; line-height: 1.5;">28 mijlpalen vastleggen op het moment dat ze gebeuren</td>
+    </tr>
+    <tr>
+      <td style="padding: 5px 0; vertical-align: top; font-size: 16px;">&#128140;</td>
+      <td style="padding: 5px 0 5px 10px; font-size: 14px; color: #57534E; line-height: 1.5;">Elke week een warme herinneringsvraag in je inbox</td>
+    </tr>
+    <tr>
+      <td style="padding: 5px 0; vertical-align: top; font-size: 16px;">&#128101;</td>
+      <td style="padding: 5px 0 5px 10px; font-size: 14px; color: #57534E; line-height: 1.5;">Maandelijkse updates voor opa en oma &mdash; geen app nodig</td>
+    </tr>
+    <tr>
+      <td style="padding: 5px 0; vertical-align: top; font-size: 16px;">&#128218;</td>
+      <td style="padding: 5px 0 5px 10px; font-size: 14px; color: #57534E; line-height: 1.5;">Na een volledig jaar: een gedrukt fotoboek</td>
+    </tr>
+  </table>
+</div>
+
+<div style="background: {{ theme_bg }}; border-left: 4px solid {{ theme_color }}; border-radius: 8px; padding: 14px 18px; margin: 0 0 24px;">
+  <p style="margin: 0; font-size: 14px; color: {{ theme_text }}; line-height: 1.6;">
+    <strong>Tip:</strong> Begin met het eerste hoofdstuk: de geboortedag. Noteer alvast wat je nu al weet &mdash; ook als de bevalling nog niet achter de rug is.
+  </p>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ onboarding_url }}" class="cta-button" style="background-color: {{ theme_color }};">Begin het babyboek &rarr;</a>
+</div>
+
+<p class="body-text" style="font-size: 13px; text-align: center; color: #A8A29E; margin-top: 0;">
+  Geen app nodig &nbsp;&middot;&nbsp; Werkt op tablet, telefoon &amp; computer &nbsp;&middot;&nbsp; Volledig in het Nederlands
+</p>
+
+<div class="divider"></div>
+
+<p class="note" style="text-align: center;">
+  Je hebt eenmalig &euro;59 betaald &mdash; geen abonnement, geen verborgen kosten. Je toegang is 1 jaar geldig.
+</p>
+
+{% endblock %}

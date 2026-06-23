@@ -483,7 +483,9 @@ def _dispatch_gift_emails(db: Session, order: "OrderModel", contact_email: str) 
     """
     is_gift = bool(order.redemption_token or order.recipient_email or order.recipient_name)
     if not is_gift:
-        # 'Voor mezelf' — de koper is zelf de gebruiker; geen aparte cadeau-mail.
+        # 'Voor mezelf' — stuur BABY_GIFT kopers een warme welkomstmail.
+        if order.package_type == "BABY_GIFT" and contact_email:
+            _send_baby_self_welcome(db, order, contact_email)
         return
 
     recipient_name = order.recipient_name or "je dierbare"
@@ -505,6 +507,35 @@ def _dispatch_gift_emails(db: Session, order: "OrderModel", contact_email: str) 
         _send_gift_buyer_confirmation(
             db, order, contact_email, recipient_name, order.recipient_email or "",
         )
+
+
+def _send_baby_self_welcome(db: Session, order: "OrderModel", contact_email: str) -> None:
+    """Warme welkomstmail voor ouders die BABY_GIFT voor zichzelf kopen."""
+    from app.services.email.renderer import build_baby_self_welcome_email
+    from app.services.email.audit import log_and_send
+    from app.core.config import settings as _settings
+
+    try:
+        onboarding_url = f"{_settings.app_base_url}/voor-baby/onboarding"
+        baby_theme = getattr(order, "baby_theme", None) or "neutraal"
+        subject, html, text = build_baby_self_welcome_email(
+            onboarding_url=onboarding_url,
+            baby_theme=baby_theme,
+        )
+    except Exception as exc:
+        logger.error(f"Kon baby_self_welcome niet opbouwen voor order {order.id}: {exc}")
+        return
+
+    log_and_send(
+        db,
+        email_type="baby_self_welcome",
+        to=contact_email,
+        subject=subject,
+        html=html,
+        text=text,
+        user_id=order.user_id,
+        order_id=order.id,
+    )
 
 
 def _maybe_assign_founding_member(db: Session, user_id: str) -> None:
