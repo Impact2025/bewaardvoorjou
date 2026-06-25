@@ -29,37 +29,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     fetchPublishedSlugs("knowledge"),
   ]);
 
+  const now = new Date();
+
+  // ── Core statische pagina's (hoogste prioriteit) ──
   const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE_URL}/kennisbank`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/pricing`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/veilig-digitaal-familiearchief`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/cadeau-opa-80-jaar`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/levensverhaal-bewaren-usb`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/autobiografie-hulp`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/levensverhaal-opschrijven`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/vaderdag`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.6 },
-    { url: `${BASE_URL}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.4 },
-    { url: `${BASE_URL}/security`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.4 },
+    { url: BASE_URL, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${BASE_URL}/kennisbank`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/faq`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
   ];
 
+  // ── Subpagina's met SEO-waarde ──
+  const seoPages: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    { url: `${BASE_URL}/security`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE_URL}/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+  ];
+
+  // ── Landingspagina's (thematisch, CTA-gericht) ──
+  const landingPages: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/autobiografie-hulp`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/veilig-digitaal-familiearchief`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/levensverhaal-opschrijven`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/levensverhaal-bewaren-usb`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/cadeau-opa-80-jaar`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/cadeau`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/cadeaubon`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/vaderdag`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+    { url: `${BASE_URL}/voor-baby`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/ouder-interview`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+  ];
+
+  // ── Blog artikelen ──
   const blogPages: MetadataRoute.Sitemap = blogArticles.map((a) => ({
     url: `${BASE_URL}/blog/${a.slug}`,
-    lastModified: a.published_at ? new Date(a.published_at) : new Date(),
+    lastModified: a.published_at ? new Date(a.published_at) : now,
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
 
+  // ── Kennisbank artikelen ──
   const kennisbankPages: MetadataRoute.Sitemap = kennisbankArticles.map((a) => ({
     url: `${BASE_URL}/kennisbank/${a.slug}`,
-    lastModified: a.published_at ? new Date(a.published_at) : new Date(),
+    lastModified: a.published_at ? new Date(a.published_at) : now,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  return [...staticPages, ...blogPages, ...kennisbankPages];
+  return [...staticPages, ...seoPages, ...landingPages, ...blogPages, ...kennisbankPages];
 }

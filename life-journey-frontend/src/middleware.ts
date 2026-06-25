@@ -20,7 +20,16 @@ function isSafeRedirect(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || "";
 
+  // ── WWW → non-www 301 redirect (canonical fix) ──
+  if (host.startsWith("www.")) {
+    const nonWww = host.replace(/^www\./, "");
+    const url = new URL(`https://${nonWww}${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(url, { status: 301 });
+  }
+
+  // ── Admin auth check ──
   if (pathname.startsWith("/admin")) {
     const token = request.cookies.get("ljauth")?.value;
     if (!isValidToken(token)) {
@@ -35,5 +44,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!api|_next|static|public|favicon|apple-touch|manifest|sw|workbox|\.well-known).*)"],
 };

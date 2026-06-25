@@ -131,11 +131,25 @@ export default async function KennisbankArtikelPage({
     mainEntityOfPage: `https://bewaardvoorjou.nl/kennisbank/${slug}`,
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl/" },
+      { "@type": "ListItem", position: 2, name: "Kennisbank", item: "https://bewaardvoorjou.nl/kennisbank" },
+      { "@type": "ListItem", position: 3, name: article.title, item: `https://bewaardvoorjou.nl/kennisbank/${slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <PublicHeader />
 

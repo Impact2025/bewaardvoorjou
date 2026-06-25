@@ -182,11 +182,25 @@ export default async function BlogArtikelPage({
     image: article.og_image ?? article.header_image_url ?? "https://bewaardvoorjou.nl/Header-Image-min.png",
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl/" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://bewaardvoorjou.nl/blog" },
+      { "@type": "ListItem", position: 3, name: article.title, item: `https://bewaardvoorjou.nl/blog/${slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       {/* Track view silently on load */}
       <BlogViewTracker slug={slug} />
