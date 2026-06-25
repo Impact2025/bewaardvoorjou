@@ -1,0 +1,6 @@
+------WebKitFormBoundary71Ja4QWZ2TugVzmW
+Content-Disposition: form-data; name="file"; filename="text-1766147092766.txt"
+Content-Type: text/plain
+
+geen ideee
+------WebKitFormBoundary71Ja4QWZ2TugVzmW--
