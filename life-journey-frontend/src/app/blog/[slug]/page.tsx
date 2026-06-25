@@ -340,36 +340,55 @@ export default async function BlogArtikelPage({
           </div>
         </article>
 
-        {/* Gerelateerde artikelen */}
-        {related.length > 0 && (
-          <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
-            <h2 className="font-serif font-semibold text-slate-900 text-xl mb-6">
-              Meer lezen
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {related.map((rel) => (
-                <Link
-                  key={rel.id}
-                  href={`/blog/${rel.slug}`}
-                  className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all"
-                >
-                  <div
-                    className="h-1"
-                    style={{ backgroundColor: rel.header_color ?? "#E8773C" }}
-                  />
+        {/* Gerelateerde artikelen — API of fallback */}
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
+          <h2 className="font-serif font-semibold text-slate-900 text-xl mb-6">
+            {related.length > 0 ? "Meer lezen" : "Lees ook"}
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {related.length > 0 ? related.map((rel) => (
+              <Link
+                key={rel.id}
+                href={`/blog/${rel.slug}`}
+                className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all"
+              >
+                <div
+                  className="h-1"
+                  style={{ backgroundColor: rel.header_color ?? "#E8773C" }}
+                />
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">
+                    {rel.title}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-2">
+                    {formatDate(rel.published_at ?? rel.created_at)}
+                  </p>
+                </div>
+              </Link>
+            )) : (
+              <>
+                <Link href="/kennisbank/hoe-begin-ik-met-het-vastleggen-van-mijn-levensverhaal" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#3B82F6" }} />
                   <div className="p-4">
-                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">
-                      {rel.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-2">
-                      {formatDate(rel.published_at ?? rel.created_at)}
-                    </p>
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Hoe begin ik met mijn levensverhaal? (stap-voor-stap)</h3>
                   </div>
                 </Link>
-              ))}
-            </div>
-          </section>
-        )}
+                <Link href="/kennisbank/wat-doet-de-ai-interviewer-precies" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#3B82F6" }} />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Wat doet de AI-interviewer precies?</h3>
+                  </div>
+                </Link>
+                <Link href="/autobiografie-hulp" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#3B82F6" }} />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Autobiografie schrijven — hulp & AI-begeleiding</h3>
+                  </div>
+                </Link>
+              </>
+            )}
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="bg-white border-t border-neutral-sand py-14 px-4 sm:px-6">

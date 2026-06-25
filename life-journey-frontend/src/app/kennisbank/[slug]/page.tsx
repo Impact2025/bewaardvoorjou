@@ -210,33 +210,52 @@ export default async function KennisbankArtikelPage({
           />
         </article>
 
-        {/* Gerelateerde artikelen */}
-        {related.length > 0 && (
-          <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
-            <h2 className="font-serif font-semibold text-slate-900 text-xl mb-6">
-              Meer uit de kennisbank
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {related.map((rel) => (
-                <Link
-                  key={rel.id}
-                  href={`/kennisbank/${rel.slug}`}
-                  className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all"
-                >
-                  <div
-                    className="h-1"
-                    style={{ backgroundColor: rel.header_color ?? "#E8773C" }}
-                  />
+        {/* Gerelateerde artikelen — API of fallback */}
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
+          <h2 className="font-serif font-semibold text-slate-900 text-xl mb-6">
+            {related.length > 0 ? "Meer uit de kennisbank" : "Lees ook"}
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {related.length > 0 ? related.map((rel) => (
+              <Link
+                key={rel.id}
+                href={`/kennisbank/${rel.slug}`}
+                className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all"
+              >
+                <div
+                  className="h-1"
+                  style={{ backgroundColor: rel.header_color ?? "#E8773C" }}
+                />
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">
+                    {rel.title}
+                  </h3>
+                </div>
+              </Link>
+            )) : (
+              <>
+                <Link href="/blog/levensverhaal-bewaren-geschenk-kinderen" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#E8773C" }} />
                   <div className="p-4">
-                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">
-                      {rel.title}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Levensverhaal bewaren: het grootste geschenk aan je kinderen</h3>
                   </div>
                 </Link>
-              ))}
-            </div>
-          </section>
-        )}
+                <Link href="/blog/interview-ouder-starten-praktische-gids" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#E8773C" }} />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Interview met je ouder starten: praktische gids</h3>
+                  </div>
+                </Link>
+                <Link href="/kennisbank/waar-worden-mijn-levensverhalen-opgeslagen-nederlandse-servers" className="group block bg-white rounded-xl border border-neutral-sand overflow-hidden hover:shadow-sm hover:border-orange/30 transition-all">
+                  <div className="h-1" style={{ backgroundColor: "#E8773C" }} />
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-orange transition-colors line-clamp-3 leading-snug">Waar worden mijn verhalen opgeslagen? 🇳🇱</h3>
+                  </div>
+                </Link>
+              </>
+            )}
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="bg-white border-t border-neutral-sand py-12 px-4 sm:px-6">
