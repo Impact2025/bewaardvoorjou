@@ -563,6 +563,88 @@ export default function AutobiografieHulpPage() {
         </div>
       </section>
 
+      {/* Lange content — SEO deep-dive */}
+      <section className="py-20 px-4 sm:px-6 bg-white border-t border-neutral-sand/50">
+        <div className="max-w-3xl mx-auto prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:text-slate-900 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-strong:text-slate-900 prose-a:text-orange prose-a:no-underline hover:prose-a:underline prose-hr:border-neutral-sand">
+          <blockquote>
+            <p><strong>In het kort:</strong> Hulp bij het schrijven van je autobiografie hoeft niet duur of ingewikkeld te zijn. BewaardVoorJou.nl begeleidt je stap voor stap met een AI-interviewer die de juiste vragen stelt — jij hoeft alleen te vertellen. Geen schrijfervaring, geen stress, gewoon jouw verhaal.</p>
+          </blockquote>
+
+          <h2>Waarom autobiografie schrijven hulp zo waardevol is</h2>
+          <p>Een autobiografie schrijven is een van de mooiste dingen die je voor jezelf — en je familie — kunt doen. Toch beginnen de meeste mensen er nooit aan. Waarom? Omdat het schrijven van een heel levensverhaal voelt als een onmogelijke opgave. Waar begin je? Wat laat je weg? Hoe zorg je dat het leesbaar is?</p>
+          <p>Die vragen weerhouden talloze mensen ervan om hun herinneringen vast te leggen. En dat is zonde, want onderzoek toont aan dat het delen van levensverhalen niet alleen waardevol is voor de volgende generatie, maar ook therapeutisch werkt voor de verteller zelf.</p>
+          <p>BewaardVoorJou.nl is ontworpen om precies die drempel weg te nemen. Geen leeg scherm, geen schrijversblok, geen prestatiedruk. Onze AI-interviewer stelt je warme, open vragen — zoals een goed gesprek aan de keukentafel. Jij antwoordt, de structuur regelen wij.</p>
+
+          <blockquote>
+            <p>"Ik dacht altijd dat ik een schrijver moest zijn om mijn autobiografie te maken. Maar BewaardVoorJou stelde me gewoon de juiste vragen. Na drie maanden had ik meer dan honderd pagina's." — Henk, 74 jaar</p>
+          </blockquote>
+
+          <h2>Wat maakt autobiografie schrijven met AI anders?</h2>
+          <p>Traditionele hulp bij autobiografie schrijven bestaat uit dure schrijfcoaches (€3.000 - €6.500), invulboeken die aanvoelen als huiswerk, of het helemaal alleen doen. Geen van deze opties werkt structureel voor de meeste mensen.</p>
+          <p>AI-schrijfhulp voor autobiografieën combineert het beste van beide werelden:</p>
+          <ul>
+            <li><strong>Geen leeg scherm</strong> — de AI stelt de vragen, jij hoeft alleen te antwoorden</li>
+            <li><strong>Structuur zonder dwang</strong> — 78 hoofdstukken verdeeld over 7 levensfasen, maar je begint waar jij wilt</li>
+            <li><strong>Meerdere invoermethoden</strong> — typen, inspreken of video, jij kiest per hoofdstuk</li>
+            <li><strong>Betaalbaar</strong> — een fractie van wat een professionele schrijver kost</li>
+            <li><strong>Eigen regie</strong> — jij bepaalt wie wat mag zien, en wanneer</li>
+          </ul>
+
+          <h2>Hoe schrijf je een autobiografie met hulp van AI?</h2>
+          <p>Het proces is verrassend eenvoudig. Je hoeft geen technische kennis te hebben, geen apps te installeren en geen handleidingen te lezen.</p>
+
+          <h3>1. Begin met één herinnering</h3>
+          <p>Niet met je geboorte, niet met een complete tijdlijn. Gewoon één herinnering die op dit moment bij je opkomt. Een geur uit je kindertijd, de dag dat je je partner ontmoette, je eerste baan. De AI-interviewer pakt dat draadje op en vraagt door — precies zoals een goede gesprekspartner dat doet.</p>
+          <p>Lees ook: <a href="/kennisbank/hoe-begin-ik-met-het-vastleggen-van-mijn-levensverhaal">hoe begin ik met mijn levensverhaal? Stap-voor-stap gids</a></p>
+
+          <h3>2. Kies je manier van vertellen</h3>
+          <p>Sommige mensen denken sneller dan ze typen. Anderen worden emotioneel van hun eigen stem. Weer anderen willen hun gezicht en expressie bewaren voor later. Bij BewaardVoorJou.nl kun je per hoofdstuk kiezen:</p>
+          <ul>
+            <li><strong>Audio:</strong> spreek in met je telefoon — automatisch omgezet naar tekst</li>
+            <li><strong>Video:</strong> neem jezelf op — bewaar niet alleen je woorden, maar ook je stem en glimlach</li>
+            <li><strong>Tekst:</strong> type zelf, op je eigen tempo</li>
+          </ul>
+          <p>Je mag per hoofdstuk wisselen. Het ene hoofdstuk spreek je in, het andere type je. Alles wordt veilig bewaard op Nederlandse servers.</p>
+
+          <h3>3. Bouw stap voor stap je autobiografie op</h3>
+          <p>De 78 hoofdstukken zijn verdeeld over 7 fases: van je wortels en jeugd, via liefde en gezin, naar je levenslessen en nalatenschap. Je hoeft niet chronologisch te werken — spring naar het onderwerp dat jou het meest raakt. De AI-interviewer helpt je als je vastloopt met doorvragen.</p>
+
+          <h3>4. Deel met wie jij wilt</h3>
+          <p>Elk hoofdstuk is standaard privé. Jij bepaalt wie wat mag zien, of je het wilt delen met familie, en of er een tijdcapsule moet worden ingesteld voor later. Lees meer over <a href="/veilig-digitaal-familiearchief">veilig digitaal familiearchief</a>.</p>
+
+          <hr />
+
+          <h2>Autobiografie vs memoires: wat is het verschil?</h2>
+          <p>Veel mensen gebruiken de termen door elkaar, maar er is een wezenlijk verschil:</p>
+          <ul>
+            <li><strong>Autobiografie:</strong> beschrijft je hele leven, van vroegste herinneringen tot nu. Chronologisch, volledig, compleet.</li>
+            <li><strong>Memoires:</strong> richten zich op een specifieke periode, thema of gebeurtenis in je leven. Bijvoorbeeld je oorlogservaringen, je carrière, of een bijzondere reis.</li>
+          </ul>
+          <p>BewaardVoorJou.nl is ontworpen voor een complete autobiografie, maar je kunt net zo goed alleen bepaalde fases invullen. Jij bepaalt de reikwijdte.</p>
+
+          <h2>Veelvoorkomende struikelblokken (en hoe wij ze oplossen)</h2>
+          <table>
+            <thead>
+              <tr><th>Struikelblok</th><th>Traditionele aanpak</th><th>BewaardVoorJou</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Ik weet niet waar ik moet beginnen</td><td>Zelf uitzoeken, schrijftips lezen</td><td>AI stelt de eerste vraag voor je</td></tr>
+              <tr><td>Ik ben geen schrijver</td><td>Schrijfcoach inhuren (duur)</td><td>Inspreken of video opnemen</td></tr>
+              <tr><td>Ik vergeet de helft</td><td>Notities maken, oude foto's zoeken</td><td>Doorvragen haalt verborgen herinneringen boven</td></tr>
+              <tr><td>Het voelt als een te grote klus</td><td>Nooit beginnen</td><td>Eén hoofdstuk tegelijk, geen deadline</td></tr>
+              <tr><td>Ik wil het privé houden</td><td>In een la stoppen (verloren risico)</td><td>Versleuteld op NL-servers, jij bepaalt</td></tr>
+            </tbody>
+          </table>
+
+          <p>Benieuwd naar ervaringen? Lees ook: <a href="/blog/levensverhaal-bewaren-geschenk-kinderen">levensverhaal bewaren — het grootste geschenk aan je kinderen</a>.</p>
+
+          <hr />
+
+          <p><strong>Klaar om te beginnen? Je eerste hoofdstuk duurt 10 minuten. Geen schrijfervaring nodig, geen creditcard, geen verplichtingen.</strong></p>
+          <p><a href="https://bewaardvoorjou.nl/register" className="font-semibold">Begin gratis met jouw autobiografie →</a></p>
+        </div>
+      </section>
+
       {/* Internal links */}
       <section className="py-16 px-4 sm:px-6 bg-gradient-to-br from-cream via-white to-warm-sand/20">
         <div className="max-w-5xl mx-auto">
@@ -580,13 +662,13 @@ export default function AutobiografieHulpPage() {
               <p className="text-sm text-slate-600">Alles over het vastleggen van herinneringen</p>
             </Link>
             <Link
-              href="/pricing"
+              href="/kennisbank/hoe-begin-ik-met-het-vastleggen-van-mijn-levensverhaal"
               className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
             >
               <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Bekijk onze abonnementen
+                Stap-voor-stap beginnen
               </h3>
-              <p className="text-sm text-slate-600">Gratis starten, altijd opzegbaar</p>
+              <p className="text-sm text-slate-600">Lees onze uitgebreide gids voor beginners</p>
             </Link>
             <Link
               href="/blog"
@@ -595,7 +677,7 @@ export default function AutobiografieHulpPage() {
               <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
                 Schrijftips & inspiratie
               </h3>
-              <p className="text-sm text-slate-600">Lees onze blogs over autobiografieën</p>
+              <p className="text-sm text-slate-600">Lees onze blogs over autobiografieën en herinneringen</p>
             </Link>
           </div>
         </div>
