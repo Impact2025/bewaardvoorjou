@@ -16,6 +16,37 @@ export const metadata: Metadata = {
   },
 };
 
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Bewaard voor Baby",
+  description:
+    "Het digitale babyboek als kraamcadeau. Een jaar lang herinneringen bewaren met AI-begeleide vragen, mijlpalen bijhouden en maandelijkse updates voor opa en oma.",
+  offers: {
+    "@type": "Offer",
+    price: "59",
+    priceCurrency: "EUR",
+    priceValidUntil: "2027-06-26",
+    availability: "https://schema.org/InStock",
+    url: "https://bewaardvoorjou.nl/checkout?package=BABY_GIFT",
+  },
+  category: "Digital Baby Book",
+  audience: {
+    "@type": "Audience",
+    audienceType: "New parents, gift givers",
+  },
+  featureList:
+    "14 diepgaande hoofdstukken, 28 mijlpalen, wekelijkse AI-vragen, partner meeschrijven, grootouder-updates, fotoboek-voucher",
+};
+
 export default function VoorBabyPage() {
-  return <VoorBabyContent />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <VoorBabyContent />
+    </>
+  );
 }
