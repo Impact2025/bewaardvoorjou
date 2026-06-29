@@ -90,7 +90,7 @@ const pricingJsonLd = {
           availability: "https://schema.org/InStock",
         },
       },
-    },
+    }
   ],
 };
 
