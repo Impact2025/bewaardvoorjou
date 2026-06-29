@@ -126,10 +126,30 @@ const organizationJsonLd = {
     contactType: "customer support",
     availableLanguage: "Dutch",
   },
-  sameAs: [],
+  sameAs: [
+    "https://www.instagram.com/bewaardvoorjou/",
+    "https://www.facebook.com/bewaardvoorjou",
+  ],
   foundingLocation: {
     "@type": "Place",
     addressCountry: "NL",
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Bewaard voor jou",
+  url: "https://bewaardvoorjou.nl",
+  description:
+    "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://bewaardvoorjou.nl/kennisbank?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -144,6 +164,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body

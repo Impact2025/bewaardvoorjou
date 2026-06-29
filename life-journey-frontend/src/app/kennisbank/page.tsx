@@ -45,8 +45,26 @@ async function getArticles(): Promise<ArticleListItem[]> {
 export default async function KennisbankPage() {
   const articles = await getArticles();
 
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Kennisbank — Alles over levensverhalen vastleggen",
+    description:
+      "Praktische gidsen, tips en antwoorden op veelgestelde vragen over het vastleggen van je levensverhaal.",
+    url: "https://bewaardvoorjou.nl/kennisbank",
+    publisher: {
+      "@type": "Organization",
+      name: "BewaardVoorJou.nl",
+      url: "https://bewaardvoorjou.nl",
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <PublicHeader />
 
       <main className="min-h-screen bg-warm-50">

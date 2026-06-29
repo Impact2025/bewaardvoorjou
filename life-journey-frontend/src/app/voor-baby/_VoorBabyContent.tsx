@@ -110,7 +110,7 @@ export function VoorBabyContent() {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
               Het eerste jaar van{" "}
               <span className={t.heroAccent}>jullie kindje</span>{" "}
-              verdient een plek.
+              verdient een digitaal babyboek.
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed mb-6 max-w-xl">
               Bewaard voor Baby begeleidt ouders met wekelijkse vragen, mijlpalen bijhouden
@@ -200,7 +200,7 @@ export function VoorBabyContent() {
       <section id="features" className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
-            Alles in één babyboek
+            Alles in één digitaal babyboek
           </h2>
           <p className="text-center text-gray-500 mb-14 text-lg">
             Geen losse apps, geen Instagram-stories die verdwijnen. Eén plek voor alles.
@@ -356,6 +356,44 @@ export function VoorBabyContent() {
             </Link>
           </div>
           <p className="mt-4 text-white/60 text-xs">Eenmalig · Geen abonnement · 30 dagen niet-goed-geld-terug</p>
+        </div>
+      </section>
+
+      {/* Interne links: KB artikelen over baby */}
+      <section className={`py-16 px-4 sm:px-6 ${t.quoteSection.replace('py-16','').includes('cream') ? 'bg-gradient-to-br from-cream via-white to-warm-sand/20' : 'bg-gradient-to-br from-cream via-white to-warm-sand/20'}`}>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
+            Lees meer over het eerste jaar
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            <Link
+              href="/kennisbank/mijlpalen-baby-eerste-jaar"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Mijlpalen baby eerste jaar
+              </h3>
+              <p className="text-sm text-slate-600">Van eerste glimlach tot eerste stapje</p>
+            </Link>
+            <Link
+              href="/kennisbank/digitaal-vs-papieren-babyboek-vergelijking"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Digitaal vs papieren babyboek
+              </h3>
+              <p className="text-sm text-slate-600">Welke past bij jou?</p>
+            </Link>
+            <Link
+              href="/kennisbank/originele-kraamcadeau-ideeen"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                15 originele kraamcadeau ideeën
+              </h3>
+              <p className="text-sm text-slate-600">Cadeautips voor de kraamvisite</p>
+            </Link>
+          </div>
         </div>
       </section>
 

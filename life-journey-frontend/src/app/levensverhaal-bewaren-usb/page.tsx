@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title:
     "Levensverhaal bewaren op USB én in de cloud — nooit vendor lock-in | BewaardVoorJou.nl",
   description:
-    "Bewaar jouw levensverhaal veilig op een USB-stick én in de cloud. Onze hybride aanpak betekent: altijd toegankelijk, deelbaar met familie, én fysiek in je eigen handen. Geen vendor lock-in — jouw data blijft van jou.",
+    "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard. Vanaf €149 eenmalig.",
   keywords: [
     "levensverhaal bewaren op usb",
     "levensverhaal op usb stick",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title:
       "Levensverhaal bewaren op USB én in de cloud — nooit vendor lock-in",
     description:
-      "Jouw levensverhaal hoort van jou te blijven. Bij BewaardVoorJou.nl bewaar je het zowel in de cloud als op een USB-stick in walnotenhout. Geen lock-in, altijd exporteerbaar.",
+      "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard. Vanaf €149 eenmalig.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -84,6 +84,34 @@ const jsonLd = {
           },
         ],
       },
+    },
+    {
+      "@type": "Product",
+      name: "Erfgoed Box — Levensverhaal bewaren op USB",
+      image: "https://bewaardvoorjou.nl/erfgoed-box.jpg",
+      description:
+        "Een hybride aanpak: bewaar je levensverhaal veilig in de cloud én op een fysieke USB-stick in walnotenhout. Geen vendor lock-in, altijd exporteerbaar in open bestandsformaten.",
+      brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Erfgoed Box",
+          price: "149",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-06-26",
+          availability: "https://schema.org/InStock",
+          url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED",
+        },
+        {
+          "@type": "Offer",
+          name: "Nalatenschap",
+          price: "229",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-06-26",
+          availability: "https://schema.org/InStock",
+          url: "https://bewaardvoorjou.nl/checkout?package=NALATENSCHAP",
+        },
+      ],
     },
     {
       "@type": "FAQPage",
@@ -629,6 +657,44 @@ export default function LevensverhaalBewarenUsbPage() {
           <p className="text-sm opacity-80 mt-6">
             Digitale toegang start direct · USB & doos bezorging binnen 2 weken · 14 dagen bedenktijd
           </p>
+        </div>
+      </section>
+
+      {/* Interne links: verdiepende KB-artikelen */}
+      <section className="py-16 px-4 sm:px-6 bg-gradient-to-br from-cream via-white to-warm-sand/20">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
+            Verdiep je in digitale nalatenschap
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            <Link
+              href="/kennisbank/waar-worden-mijn-levensverhalen-opgeslagen-nederlandse-servers"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Waar worden mijn verhalen opgeslagen?
+              </h3>
+              <p className="text-sm text-slate-600">Nederlandse servers & privacy</p>
+            </Link>
+            <Link
+              href="/kennisbank/hoe-werkt-de-tijdgestuurde-vrijgave-voor-familie"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Tijdsgestuurde vrijgave voor familie
+              </h3>
+              <p className="text-sm text-slate-600">Jouw verhalen op het juiste moment</p>
+            </Link>
+            <Link
+              href="/kennisbank/hoe-exporteer-ik-mijn-eigen-data-en-herinneringen"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Data exporteren: hoe werkt dat?
+              </h3>
+              <p className="text-sm text-slate-600">Jouw data blijft altijd van jou</p>
+            </Link>
+          </div>
         </div>
       </section>
 

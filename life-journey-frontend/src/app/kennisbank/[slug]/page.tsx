@@ -117,18 +117,30 @@ export default async function KennisbankArtikelPage({
   const headerBg = article.header_color ?? "#F5E6D3";
   const headerTextColor = article.header_text_color ?? "#5C3D2E";
 
+  const readTime = Math.max(1, Math.ceil((article.content || "").replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length / 200));
+
+  const articleImage = article.header_image_url || "https://bewaardvoorjou.nl/Logo_Bewaardvoorjou.png";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.excerpt ?? undefined,
     datePublished: article.published_at ?? article.created_at,
+    dateModified: article.published_at ?? article.created_at,
+    author: {
+      "@type": "Organization",
+      name: "BewaardVoorJou.nl",
+    },
     publisher: {
       "@type": "Organization",
       name: "BewaardVoorJou.nl",
       url: "https://bewaardvoorjou.nl",
     },
     mainEntityOfPage: `https://bewaardvoorjou.nl/kennisbank/${slug}`,
+    image: articleImage,
+    timeRequired: `PT${readTime}M`,
+    keywords: article.keywords ?? undefined,
   };
 
   const breadcrumbLd = {

@@ -24,7 +24,7 @@ import {
 export const metadata: Metadata = {
   title: "Levensverhaal opschrijven — AI-begeleiding in het Nederlands | BewaardVoorJou.nl",
   description:
-    "Jouw levensverhaal opschrijven was nog nooit zo eenvoudig. Onze warme AI-interviewer stelt de juiste vragen, jij vertelt. Veilig bewaard, voor altijd beschikbaar voor je familie.",
+    "Jouw levensverhaal opschrijven was nog nooit zo eenvoudig. Onze warme AI begeleidt jou. Veilig bewaard voor altijd. Begin vandaag gratis.",
   keywords: [
     "levensverhaal opschrijven",
     "memoires schrijven",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     url: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
     title: "Levensverhaal opschrijven — AI-begeleiding in het Nederlands",
     description:
-      "Jouw levensverhaal opschrijven was nog nooit zo eenvoudig. Onze warme AI-interviewer stelt de juiste vragen, jij vertelt.",
+      "Jouw levensverhaal opschrijven was nog nooit zo eenvoudig. Onze warme AI begeleidt jou. Veilig bewaard, voor altijd. Begin vandaag gratis.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -61,60 +61,90 @@ export const metadata: Metadata = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: "Levensverhaal opschrijven",
-  description:
-    "Jouw levensverhaal opschrijven met AI-begeleiding. BewaardVoorJou.nl begeleidt je door 58 hoofdstukken van je leven.",
-  url: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
-  breadcrumb: {
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl" },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Levensverhaal opschrijven",
-        item: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      name: "Levensverhaal opschrijven",
+      description:
+        "Jouw levensverhaal opschrijven met AI-begeleiding. BewaardVoorJou.nl begeleidt je door 58 hoofdstukken van je leven.",
+      url: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl" },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Levensverhaal opschrijven",
+            item: "https://bewaardvoorjou.nl/levensverhaal-opschrijven",
+          },
+        ],
       },
-    ],
-  },
-  mainEntity: {
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Hoe begin ik met mijn levensverhaal opschrijven?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Bij BewaardVoorJou.nl begin je met een gratis account. Onze AI-interviewer stelt je warme, open vragen waardoor herinneringen vanzelf naar boven komen. Je hoeft niet te weten waar je begint — wij begeleiden je stap voor stap door 58 hoofdstukken.",
+    },
+    {
+      "@type": "HowTo",
+      name: "Jouw levensverhaal opschrijven met AI-begeleiding",
+      description:
+        "In drie stappen je levensverhaal opschrijven met hulp van een AI-interviewer.",
+      step: [
+        {
+          "@type": "HowToStep",
+          position: 1,
+          name: "Maak gratis een account",
+          text: "Registreren duurt minder dan een minuut. Geen creditcard nodig.",
         },
-      },
-      {
-        "@type": "Question",
-        name: "Is mijn levensverhaal veilig opgeslagen?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Ja. Alle verhalen zijn end-to-end versleuteld opgeslagen op beveiligde Nederlandse servers. Alleen jij bepaalt wie toegang krijgt. We voldoen volledig aan de AVG/GDPR-wetgeving.",
+        {
+          "@type": "HowToStep",
+          position: 2,
+          name: "Kies een hoofdstuk en vertel je verhaal",
+          text: "Onze AI-interviewer begeleidt je met warme, open vragen. Jij vertelt in tekst, audio of video — wij zorgen voor de structuur.",
         },
-      },
-      {
-        "@type": "Question",
-        name: "Kan ik ook video of audio opnemen in plaats van schrijven?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Absoluut. Je kiest zelf per herinnering of je liever schrijft, een audio-opname maakt of een video opneemt. Elk formaat wordt veilig bewaard en kan worden gedeeld met familie.",
+        {
+          "@type": "HowToStep",
+          position: 3,
+          name: "Bewaar & deel jouw verhaal",
+          text: "Je verhaal blijft veilig bewaard op Nederlandse servers. Deel het wanneer jij wilt met de mensen die voor jou tellen.",
         },
-      },
-      {
-        "@type": "Question",
-        name: "Voor wie is BewaardVoorJou.nl bedoeld?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Voor iedereen die een verhaal heeft om te vertellen — van ouderen die hun leven willen doorgeven aan kleinkinderen, tot mensen die hun ouders willen helpen hun verhaal vast te leggen. Het platform is ontworpen voor alle leeftijden.",
+      ],
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "Hoe begin ik met mijn levensverhaal opschrijven?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Bij BewaardVoorJou.nl begin je met een gratis account. Onze AI-interviewer stelt je warme, open vragen waardoor herinneringen vanzelf naar boven komen. Je hoeft niet te weten waar je begint — wij begeleiden je stap voor stap door 58 hoofdstukken.",
+          },
         },
-      },
-    ],
-  },
+        {
+          "@type": "Question",
+          name: "Is mijn levensverhaal veilig opgeslagen?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Ja. Alle verhalen zijn end-to-end versleuteld opgeslagen op beveiligde Nederlandse servers. Alleen jij bepaalt wie toegang krijgt. We voldoen volledig aan de AVG/GDPR-wetgeving.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Kan ik ook video of audio opnemen in plaats van schrijven?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Absoluut. Je kiest zelf per herinnering of je liever schrijft, een audio-opname maakt of een video opneemt. Elk formaat wordt veilig bewaard en kan worden gedeeld met familie.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Voor wie is BewaardVoorJou.nl bedoeld?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Voor iedereen die een verhaal heeft om te vertellen — van ouderen die hun leven willen doorgeven aan kleinkinderen, tot mensen die hun ouders willen helpen hun verhaal vast te leggen. Het platform is ontworpen voor alle leeftijden.",
+          },
+        },
+      ],
+    },
+  ],
 };
 
 const benefits = [
@@ -546,7 +576,7 @@ export default function LevensverhaalOpschrijvenPage() {
         </div>
       </section>
 
-      {/* Internal links / related content */}
+      {/* Internal links / related content — naar KB */}
       <section className="py-16 px-4 sm:px-6 bg-gradient-to-br from-cream via-white to-warm-sand/20">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
@@ -554,31 +584,31 @@ export default function LevensverhaalOpschrijvenPage() {
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
             <Link
-              href="/pricing"
+              href="/kennisbank/complete-gids-levensverhaal-vastleggen"
               className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
             >
               <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Bekijk onze abonnementen
+                Complete gids: levensverhaal vastleggen
               </h3>
-              <p className="text-sm text-slate-600">Gratis starten, altijd opzegbaar</p>
+              <p className="text-sm text-slate-600">Stap-voor-stap je verhaal vastleggen</p>
             </Link>
             <Link
-              href="/blog"
+              href="/kennisbank/memoires-schrijven-voorbeelden-en-tips"
               className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
             >
               <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Tips voor je levensverhaal
+                Memoires schrijven: voorbeelden & tips
               </h3>
-              <p className="text-sm text-slate-600">Lees onze blogs en inspiratie</p>
+              <p className="text-sm text-slate-600">Inspiratie voor jouw autobiografie</p>
             </Link>
             <Link
-              href="/about"
+              href="/kennisbank/levensverhaal-laten-schrijven-kosten"
               className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
             >
               <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Over BewaardVoorJou.nl
+                Wat kost een levensverhaal laten schrijven?
               </h3>
-              <p className="text-sm text-slate-600">Het verhaal achter het platform</p>
+              <p className="text-sm text-slate-600">Vergelijk prijzen en opties</p>
             </Link>
           </div>
         </div>

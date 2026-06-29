@@ -180,6 +180,7 @@ export default async function BlogArtikelPage({
     mainEntityOfPage: `https://bewaardvoorjou.nl/blog/${slug}`,
     keywords: article.keywords ?? undefined,
     image: article.og_image ?? article.header_image_url ?? "https://bewaardvoorjou.nl/Header-Image-min.png",
+    timeRequired: `PT${readTime}M`,
   };
 
   const breadcrumbLd = {
