@@ -97,12 +97,14 @@ export default function BabyOnboardingPage() {
 
   const goNext = () => {
     setDirection(1);
+    setError(null);
     if (step < 3) setStep((s) => (s + 1) as Step);
     else handleSubmit();
   };
 
   const goBack = () => {
     setDirection(-1);
+    setError(null);
     setStep((s) => (s - 1) as Step);
   };
 

@@ -3,6 +3,8 @@
  * Alle aanroepen naar /api/v1/baby/*
  */
 
+import { extractDetail } from "./api-error";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
 
 function getToken(): string | null {
@@ -27,7 +29,7 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string, string>).detail ?? "API-fout");
+    throw new Error(extractDetail((err as Record<string, unknown>).detail, "API-fout"));
   }
   return res.json();
 }
@@ -36,7 +38,7 @@ async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string, string>).detail ?? "API-fout");
+    throw new Error(extractDetail((err as Record<string, unknown>).detail, "API-fout"));
   }
   return res.json();
 }
@@ -49,7 +51,7 @@ async function apiPatch<T>(path: string, body: unknown): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string, string>).detail ?? "API-fout");
+    throw new Error(extractDetail((err as Record<string, unknown>).detail, "API-fout"));
   }
   return res.json();
 }
@@ -62,7 +64,7 @@ async function apiDelete<T>(path: string, body?: unknown): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string, string>).detail ?? "API-fout");
+    throw new Error(extractDetail((err as Record<string, unknown>).detail, "API-fout"));
   }
   return res.json();
 }
