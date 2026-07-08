@@ -99,6 +99,12 @@ class Settings(BaseSettings):
   indexnow_key: str | None = None
   google_service_account_json: str | None = None
 
+  # Machine-publicatie (Agent OS → live). Deze key moet gelijk zijn aan
+  # BEWAARDVOORJOU_PUBLISH_KEY in de Agent OS .env. Timing-safe gecheckt.
+  publish_api_key: str | None = None
+  # Default sectie voor vanuit Agent OS gepubliceerde artikelen.
+  publish_default_section: str = "blog"
+
   # JWT Security - CRITICAL: Must be set via environment variable
   # For development, if not set, a random key will be generated (sessions won't persist across restarts)
   # For production, this MUST be set to a secure, persistent value
