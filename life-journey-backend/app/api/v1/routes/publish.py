@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 import httpx
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Depends, Request, Response
 from loguru import logger
 from sqlalchemy.orm import Session
 
