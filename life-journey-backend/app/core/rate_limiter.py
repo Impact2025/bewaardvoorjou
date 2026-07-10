@@ -2,20 +2,38 @@
 Centralized rate limiting configuration for the API.
 """
 
+import jwt
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from starlette.requests import Request
+
+from app.core.config import settings
 
 
 def get_user_or_ip(request: Request) -> str:
     """
     Get rate limit key based on user ID (if authenticated) or IP address.
     This allows authenticated users to have separate limits from anonymous users.
+
+    Auth loopt via FastAPI-dependencies en zet niets op request.state, en de
+    limiter draait vóór de dependencies — dus we lezen het Bearer-token hier
+    zelf. Alleen signature/expiry-verificatie, bewust géén DB-lookup: de key
+    hoeft niet te bewijzen dat de user bestaat, alleen stabiel en onvervalsbaar
+    per user te zijn.
     """
-    # Try to get user from request state (set by auth middleware)
-    user = getattr(request.state, "user", None)
-    if user and hasattr(user, "id"):
-        return f"user:{user.id}"
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        try:
+            payload = jwt.decode(
+                auth_header[7:],
+                settings.jwt_secret_key,
+                algorithms=[settings.jwt_algorithm],
+            )
+        except jwt.InvalidTokenError:
+            payload = {}
+        subject = payload.get("sub")
+        if subject:
+            return f"user:{subject}"
 
     # Fall back to IP address
     return get_remote_address(request)
