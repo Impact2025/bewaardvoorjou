@@ -1,3 +1,5 @@
+> **⚠️ GEARCHIVEERD (10 juli 2026)** — Livegang-checklist van rond de lancering. De vakjes zijn nooit afgevinkt, maar het platform draait inmiddels in productie (Railway + Vercel + Neon, Stripe live, Resend). Nog bruikbaar als naslag bij het opzetten van een nieuwe omgeving; niet als actuele takenlijst.
+
 # Bewaardvoorjou — Livegang Checklist
 
 ## 1. Infrastructure opzetten

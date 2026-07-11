@@ -1,3 +1,5 @@
+> **⚠️ GEARCHIVEERD (10 juli 2026)** — Momentopname van oktober 2025, toen het project nog "Life Journey" heette. De inhoud (o.a. "production ready"-claim) beschrijft de stand van toen en is achterhaald door de doorontwikkeling naar Bewaardvoorjou (Stripe, e-mailsysteem, baby-variant, kennisbank). Alleen bewaard als historie.
+
 # Life Journey - Final Implementation Summary
 
 ## 🎉 Project Status: PRODUCTION READY
