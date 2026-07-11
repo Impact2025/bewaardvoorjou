@@ -34,3 +34,6 @@ node_modules/
 BOX/
 *_files/
 *.download
+
+# Persoonlijke notities (Obsidian-vault, hoort niet in de productrepo)
+AI Brein/
