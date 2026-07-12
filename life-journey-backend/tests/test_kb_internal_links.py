@@ -73,3 +73,28 @@ def test_count_kb_links():
         '<p><a href="/kennisbank/a">x</a> en <a href="/kennisbank/b">y</a></p>'
     )
     assert count_kb_links(html) == 2
+
+
+# ---------------------------------------------------------------------------
+# publish.py excerpt-sanitization (voorkomt markup-lek in blog-excerpt)
+# ---------------------------------------------------------------------------
+
+def test_clean_excerpt_strips_html_code_fence():
+    from app.api.v1.routes.publish import _clean_excerpt
+    raw = "```html\nLevensverhaal vastleggen: complete gids + casestudy Anton"
+    assert _clean_excerpt(raw, "") == (
+        "Levensverhaal vastleggen: complete gids + casestudy Anton"
+    )
+
+
+def test_clean_excerpt_strips_backticks_and_blockquote():
+    from app.api.v1.routes.publish import _clean_excerpt
+    raw = "> citeer dit\n>Een levensverhaal met `code` erin"
+    out = _clean_excerpt(raw, "")
+    assert ">" not in out and "`" not in out
+    assert out == "citeer dit Een levensverhaal met code erin"
+
+
+def test_clean_excerpt_prefers_explicit_seo():
+    from app.api.v1.routes.publish import _clean_excerpt
+    assert _clean_excerpt("```html rotzooi", "Mooie excerpt") == "Mooie excerpt"

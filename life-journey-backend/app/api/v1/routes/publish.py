@@ -129,6 +129,30 @@ def _strip_html(html: str) -> str:
     return re.sub(r"<[^>]+>", " ", html or "").replace(r"\s+", " ").strip()
 
 
+def _clean_excerpt(content: str, explicit: str = "") -> str:
+    """Bouw een leesbare excerpt uit de body, zonder lekken van markup.
+
+    Verwijdert HTML-tags én markdown-artefacten (code-fences zoals ```html,
+    losse backticks, '>'-quote-markeringen) zodat de excerpt nooit raw
+    template-tekst toont. Als er een expliciete seoDescription is, wint die.
+    """
+    src = explicit.strip() or (content or "")
+    if not src:
+        return ""
+    # Markdown code-fence verwijderen: ```lang ... ``` of ``` ... ```
+    src = re.sub(r"^```[a-zA-Z0-9_-]*\s*", "", src)
+    src = re.sub(r"```", "", src)
+    # Losse backticks en blockquote-markeringen weg
+    src = src.replace("`", "")
+    src = re.sub(r"(?m)^\s*>+\s?", "", src)
+    # HTML tags weg + witruimte normaliseren
+    text = _strip_html(src)
+    # Als de tekst nog steeds met een code-artefact begint, sla die over
+    text = re.sub(r"^(html|css|json|md|markdown)\b[：:\s]*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:500]
+
+
 def _section_path(section: str) -> str:
     return "kennisbank" if section == "knowledge" else "blog"
 
@@ -196,9 +220,8 @@ async def agent_os_publish(request: Request, db: Session = Depends(get_db)):
     if section not in ("blog", "knowledge"):
         section = "blog"
 
-    plain = _strip_html(content)
     seo_desc = (body.get("seoDescription") or "").strip()
-    excerpt = (seo_desc or plain[:200]).strip()[:500]
+    excerpt = _clean_excerpt(content, seo_desc)
     tags = body.get("tags") or []
     tags_str = ",".join(tags) if isinstance(tags, list) else str(tags)
     meta_title = (body.get("seoTitle") or title)[:70]
