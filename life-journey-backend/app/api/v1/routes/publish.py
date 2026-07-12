@@ -40,6 +40,60 @@ from app.services.indexing import ping_google_indexing_api, ping_index_now
 router = APIRouter()
 
 
+# ── Korte healthcheck (monitoring) ──────────────────────────────────────────
+@router.get("/health", tags=["publish"])
+async def publish_health(db: Session = Depends(get_db)):
+    """Compacte health-probe voor de publish-flow: DB-reachable + key config.
+
+    Gebruik dit endpoint in externe monitoring (bijv. UptimeRobot) in plaats
+    van de volledige app-/healthz-check. Geen auth vereist."""
+    db_ok = False
+    try:
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception as e:  # pragma: no cover - alleen bij DB-down
+        logger.warning(f"Publish-health DB-check faalde: {e}")
+    key_ok = bool(getattr(settings, "publish_api_key", None))
+    return {
+        "status": "ok" if (db_ok and key_ok) else "degraded",
+        "db": "ok" if db_ok else "unreachable",
+        "publish_key": "configured" if key_ok else "missing",
+        "service": "agent-os-publish",
+    }
+
+
+# ── Verwijder een Agent OS-gepubliceerd artikel (slug) ─────────────────────
+@router.delete("/{slug}", tags=["publish"])
+async def delete_published(request: Request, slug: str, db: Session = Depends(get_db)):
+    """Verwijder een via Agent OS gepubliceerd artikel op basis van slug.
+
+    Dezelfde Bearer-auth als POST /api/v1/publish (PUBLISH_API_KEY). Bedoeld
+    om duplicate/verkeerde Agent OS-posts op te ruimen zónder admin-token."""
+    if not _is_authorized(request):
+        return Response(
+            content='{"error":"Unauthorized"}',
+            status_code=401,
+            media_type="application/json",
+        )
+    post = db.query(BlogPost).filter(BlogPost.slug == slug).first()
+    if not post:
+        return Response(
+            content='{"error":"Niet gevonden"}',
+            status_code=404,
+            media_type="application/json",
+        )
+    db.delete(post)
+    db.commit()
+    logger.info(f"Agent OS artikel verwijderd: {slug}")
+    return Response(
+        content='{"success":true,"slug":"' + slug + '"}',
+        status_code=200,
+        media_type="application/json",
+    )
+
+
+
 # ── Auth ────────────────────────────────────────────────────────────────────
 def _is_authorized(request: Request) -> bool:
     """Timing-safe check van de PUBLISH_API_KEY (Bearer)."""
