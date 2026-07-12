@@ -15,8 +15,15 @@ Gebruik:
 """
 
 import argparse
+import os
 import sys
 import requests
+
+# Idempotente injector voor contextuele interne links (Bijeen-parity).
+# Voegt natuurlijke, niet-gelinkte ankerparen toe aan de body — veilig om
+# meerdere keren te draaien (bestaande links worden overgeslagen).
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.lib.kb_internal_links import inject_kb_internal_links
 
 
 def login(base_url: str, email: str, password: str) -> str:
@@ -1228,6 +1235,10 @@ def main():
     print(f"Bijwerken van {len(ARTICLES)} kennisbank artikelen...\n")
     for article in ARTICLES:
         slug = article.pop("slug")
+        # Verrijk de body met contextuele interne links (idempotent).
+        article["content"] = inject_kb_internal_links(
+            article.get("content", ""), exclude_slug=slug
+        )
         update_article(args.url, token, slug, article.copy())
 
     print(f"\nKlaar! {len(ARTICLES)} artikelen verwerkt.")
