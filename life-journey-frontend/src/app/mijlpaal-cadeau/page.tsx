@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Mijlpaal cadeau 50, 60 of 65 jaar — geef betekenis | BewaardVoorJou.nl",
+  title: { absolute: "Mijlpaal cadeau 50, 60 of 65 jaar — geef betekenis | BewaardVoorJou.nl" },
   description:
     "Wat geef je iemand van 50, 60 of 65 die alles al heeft? Geen ding, maar een tastbaar eerbetoon dat neurologisch dieper raakt dan een envelop met geld. Samen te maken.",
   keywords: [
@@ -75,6 +75,15 @@ const jsonLd = {
   },
 };
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl/" },
+    { "@type": "ListItem", position: 2, name: "Mijlpaal cadeau 50, 60 of 65 jaar", item: "https://bewaardvoorjou.nl/mijlpaal-cadeau" },
+  ],
+};
+
 const receptoren = [
   {
     title: "Fijne vormen en blinddruk",
@@ -96,6 +105,10 @@ export default function MijlpaalCadeauPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <PublicHeader />
 

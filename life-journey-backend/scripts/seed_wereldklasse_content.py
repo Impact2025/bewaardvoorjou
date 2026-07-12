@@ -406,7 +406,7 @@ ARTICLES = [
 <p>Een afscheid dat blijft hangen, verzamelt de verhalen: de anekdotes van collega's, de momenten die ertoe deden, de betekenis van iemands werk. Precies daarvoor heb ik BewaardVoorJou.nl gebouwd. De <strong>empathische AI-interviewer</strong> haalt die verhalen naar boven en de <strong>eenvoudige export</strong> maakt er iets tastbaars van, zonder dat een overwerkt secretariaat er twintig uur in hoeft te steken.</p>
 
 <h2>Van vertrekkende collega naar ambassadeur</h2>
-<p>Een goed afscheid is geen kostenpost, maar een investering. Wie warm vertrekt, blijft over je praten, stuurt talent jouw kant op en komt soms zelf terug. Het is de goedkoopste vorm van werving die er bestaat. Wil je meer weten over de psychologie van bewaren die hieronder ligt? Dat lees je in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit kennisbankartikel</a>.</p>
+<p>Een goed afscheid is geen kostenpost, maar een investering. Wie warm vertrekt, blijft over je praten, stuurt talent jouw kant op en komt soms zelf terug. Het is de goedkoopste vorm van werving die er bestaat. Meer over hoe je zo'n afscheid concreet aanpakt lees je op de pagina over het <a href="/pensioen-afscheidscadeau">pensioen-afscheidscadeau</a>, en de psychologie eronder in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit kennisbankartikel</a>.</p>
 
 <hr>
 <h2>Twee manieren om vandaag te beginnen</h2>
@@ -452,7 +452,7 @@ ARTICLES = [
 <p>Je hebt geen uren en geen schrijftalent nodig. Met de <strong>multimodale invoer</strong> spreek je gewoon een herinnering in terwijl je kind slaapt, of vertel je iets recht in de camera. De app zet het om naar tekst en bewaart je stem erbij. Een minuut is genoeg. De <strong>empathische AI-interviewer</strong> stelt af en toe een vraag die je anders nooit had bedacht, zodat er meer boven komt dan alleen "het was druk maar mooi".</p>
 
 <h2>Een cadeau aan je kind van later</h2>
-<p>Ooit is dat kind volwassen, en wil het misschien weten hoe die eerste jaren echt waren. Niet de geregisseerde foto's, maar het echte verhaal, in jouw stem. Dat is een cadeau dat je alleen nú kunt maken. Waarom die tastbare herinnering later zo diep raakt, lees je in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit artikel over de psychologie van bewaren</a>.</p>
+<p>Ooit is dat kind volwassen, en wil het misschien weten hoe die eerste jaren echt waren. Niet de geregisseerde foto's, maar het echte verhaal, in jouw stem. Dat is een cadeau dat je alleen nú kunt maken. Op de pagina over <a href="/baby-herinneringen-vastleggen">baby-herinneringen vastleggen</a> lees je hoe je rustig begint, en waarom die tastbare herinnering later zo diep raakt in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit artikel over de psychologie van bewaren</a>.</p>
 
 <hr>
 <h2>Twee manieren om vandaag te beginnen</h2>
@@ -493,7 +493,7 @@ ARTICLES = [
 <p>Vroeger kostte zoiets iemand dagen knip- en plakwerk. Nu niet meer. Met BewaardVoorJou.nl nodig je iedereen uit om in zijn eigen tempo een herinnering bij te dragen, in tekst, audio of video, dankzij de <strong>multimodale invoer</strong>. De <strong>empathische AI-interviewer</strong> helpt mensen die niet weten wat ze moeten zeggen op gang, met een concrete vraag in plaats van een leeg vak. En met de <strong>eenvoudige export</strong> maak je er een gedrukt levensboek van om cadeau te geven.</p>
 
 <h2>Voor 50, 60 én 65</h2>
-<p>Of het nu gaat om een vijftigste verjaardag, een zestigste, of een pensioen rond je vijfenzestigste: het idee is hetzelfde. Vier de mens, niet de spullen. Waarom zo'n tastbaar eerbetoon neurologisch dieper raakt dan een felicitatie-appje, lees je in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit artikel over de psychologie van bewaren</a>.</p>
+<p>Of het nu gaat om een vijftigste verjaardag, een zestigste, of een pensioen rond je vijfenzestigste: het idee is hetzelfde. Vier de mens, niet de spullen. Zie de pagina over het <a href="/mijlpaal-cadeau">mijlpaal cadeau voor 50, 60 of 65 jaar</a> voor de aanpak, en waarom zo'n tastbaar eerbetoon neurologisch dieper raakt dan een felicitatie-appje in <a href="/kennisbank/de-psychologie-van-bewaren-waarom-je-niets-wilt-weggooien">dit artikel over de psychologie van bewaren</a>.</p>
 
 <hr>
 <h2>Twee manieren om vandaag te beginnen</h2>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HoeHetWerktContent } from "./_content";
 
 export const metadata: Metadata = {
-  title: "Hoe werkt Bewaard voor Baby? | BewaardVoorJou.nl",
+  title: { absolute: "Hoe werkt Bewaard voor Baby? | BewaardVoorJou.nl" },
   description:
     "In 7 stappen leg je het complete eerste jaar van jullie baby vast. Wekelijkse vragen in je inbox, mijlpalen bijhouden, grootouder-updates en een gedrukt fotoboek na een jaar.",
   alternates: {

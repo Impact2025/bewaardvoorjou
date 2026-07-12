@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { OverOnsContent } from "./_content";
 
 export const metadata: Metadata = {
-  title: "Over Bewaard voor Baby | BewaardVoorJou.nl",
+  title: { absolute: "Over Bewaard voor Baby | BewaardVoorJou.nl" },
   description:
     "Waarom wij Bewaard voor Baby gebouwd hebben — het verhaal achter het digitale babyboek dat ouders helpt het eerste jaar te bewaren met wekelijkse vragen, mijlpalen en een gedrukt fotoboek.",
   alternates: {

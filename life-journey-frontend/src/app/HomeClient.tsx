@@ -450,6 +450,9 @@ export default function Home() {
             <Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal bewaren op USB →</Link>
             <Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa & oma →</Link>
             <Link href="/vaderdag" className="hover:text-orange transition-colors">Een betekenisvol vaderdag-cadeau →</Link>
+            <Link href="/pensioen-afscheidscadeau" className="hover:text-orange transition-colors">Een pensioen-afscheid dat blijft →</Link>
+            <Link href="/mijlpaal-cadeau" className="hover:text-orange transition-colors">Cadeau voor 50, 60 of 65 jaar →</Link>
+            <Link href="/baby-herinneringen-vastleggen" className="hover:text-orange transition-colors">Baby-herinneringen vastleggen →</Link>
             <Link href="/kennisbank" className="hover:text-orange transition-colors">Kennisbank: hoe begin je? →</Link>
             <Link href="/blog" className="hover:text-orange transition-colors">Verhalen & inspiratie op de blog →</Link>
             <Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen →</Link>

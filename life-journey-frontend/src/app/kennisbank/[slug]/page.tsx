@@ -6,6 +6,7 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { BlogViewTracker } from "@/components/blog/BlogViewTracker";
 import { ShareButtons } from "@/components/blog/ShareButtons";
+import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -151,6 +152,8 @@ export default async function KennisbankArtikelPage({
     ],
   };
 
+  const faqLd = buildFaqPageJsonLd(extractFaqFromHtml(article.content));
+
   return (
     <>
       <script
@@ -161,6 +164,12 @@ export default async function KennisbankArtikelPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {faqLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
+      )}
       <BlogViewTracker slug={slug} />
       <PublicHeader />
 

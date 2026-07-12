@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Baby herinneringen vastleggen — de eerste duizend dagen | BewaardVoorJou.nl",
+  title: { absolute: "Baby herinneringen vastleggen — de eerste duizend dagen | BewaardVoorJou.nl" },
   description:
     "De dagen duren lang, de jaren vliegen. Leg de eerste duizend dagen van je kind vast in tekst, audio of video — zonder je telefoon vol te zetten. Rustig, veilig, blijvend.",
   keywords: [
@@ -75,12 +75,25 @@ const jsonLd = {
   },
 };
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl/" },
+    { "@type": "ListItem", position: 2, name: "Baby herinneringen vastleggen", item: "https://bewaardvoorjou.nl/baby-herinneringen-vastleggen" },
+  ],
+};
+
 export default function BabyHerinneringenPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <PublicHeader />
 

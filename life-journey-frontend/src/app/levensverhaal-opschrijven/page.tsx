@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Levensverhaal opschrijven — AI-begeleiding in het Nederlands | BewaardVoorJou.nl",
+  title: { absolute: "Levensverhaal opschrijven — AI-begeleiding in het Nederlands | BewaardVoorJou.nl" },
   description:
     "Jouw levensverhaal opschrijven was nog nooit zo eenvoudig. Onze warme AI-interviewer stelt de juiste vragen, jij vertelt. Veilig bewaard, voor altijd beschikbaar voor je familie.",
   keywords: [

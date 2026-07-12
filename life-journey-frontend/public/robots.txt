@@ -23,21 +23,82 @@ Disallow: /instellingen
 # Sitemap
 Sitemap: https://bewaardvoorjou.nl/sitemap.xml
 
-# Block AI scrapers from training on user content
+# AI-zoekmachines mogen de publieke marketingcontent (/blog, /kennisbank,
+# landingspagina's) lezen, zodat we zichtbaar zijn in AI-antwoorden. De
+# privépaden hierboven blijven voor iedereen geblokkeerd, want deze bots
+# vallen terug op de regels van "User-agent: *".
 User-agent: GPTBot
-Disallow: /
+Allow: /
+Disallow: /dashboard/
+Disallow: /chapters/
+Disallow: /onboarding/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /vertel
+Disallow: /record
+Disallow: /recordings
+Disallow: /memos
+Disallow: /overview
+Disallow: /timeline
+Disallow: /journey
+Disallow: /legacy
+Disallow: /family
+Disallow: /checkout
+Disallow: /instellingen
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /chapters/
+Disallow: /onboarding/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /vertel
+Disallow: /record
+Disallow: /recordings
+Disallow: /memos
+Disallow: /overview
+Disallow: /timeline
+Disallow: /journey
+Disallow: /legacy
+Disallow: /family
+Disallow: /checkout
+Disallow: /instellingen
 
 User-agent: ChatGPT-User
-Disallow: /
+Allow: /
+Disallow: /dashboard/
+Disallow: /chapters/
+Disallow: /onboarding/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /vertel
+Disallow: /record
+Disallow: /recordings
+Disallow: /memos
+Disallow: /overview
+Disallow: /timeline
+Disallow: /journey
+Disallow: /legacy
+Disallow: /family
+Disallow: /checkout
+Disallow: /instellingen
 
-User-agent: CCBot
-Disallow: /
-
-User-agent: anthropic-ai
-Disallow: /
-
-User-agent: Claude-Web
-Disallow: /
-
-User-agent: Google-Extended
-Disallow: /
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /chapters/
+Disallow: /onboarding/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /vertel
+Disallow: /record
+Disallow: /recordings
+Disallow: /memos
+Disallow: /overview
+Disallow: /timeline
+Disallow: /journey
+Disallow: /legacy
+Disallow: /family
+Disallow: /checkout
+Disallow: /instellingen

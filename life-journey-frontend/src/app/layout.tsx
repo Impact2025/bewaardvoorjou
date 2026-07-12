@@ -126,7 +126,10 @@ const organizationJsonLd = {
     contactType: "customer support",
     availableLanguage: "Dutch",
   },
-  sameAs: [],
+  sameAs: [
+    "https://www.instagram.com/bewaardvoorjou/",
+    "https://www.facebook.com/bewaardvoorjou",
+  ],
   foundingLocation: {
     "@type": "Place",
     addressCountry: "NL",

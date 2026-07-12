@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Pensioen afscheidscadeau — een afscheid dat blijft | BewaardVoorJou.nl",
+  title: { absolute: "Pensioen afscheidscadeau — een afscheid dat blijft | BewaardVoorJou.nl" },
   description:
     "Het einde bepaalt de herinnering aan een hele loopbaan. Zo maak je van een pensioen of afscheid een betekenisvol eerbetoon — voor collega's, familie en werkgeversmerk.",
   keywords: [
@@ -76,6 +76,15 @@ const jsonLd = {
   },
 };
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl/" },
+    { "@type": "ListItem", position: 2, name: "Pensioen afscheidscadeau", item: "https://bewaardvoorjou.nl/pensioen-afscheidscadeau" },
+  ],
+};
+
 const pijlers = [
   {
     icon: <Building2 className="h-6 w-6 text-orange" />,
@@ -111,6 +120,10 @@ export default function PensioenAfscheidscadeauPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <PublicHeader />
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import LandingClient from "./LandingClient";
 
 export const metadata: Metadata = {
-  title: "Levensverhaal vastleggen? De complete oplossing [2026] | BewaardVoorJou.nl",
+  title: { absolute: "Levensverhaal vastleggen? De complete oplossing [2026] | BewaardVoorJou.nl" },
   description:
     "Je levensverhaal vastleggen in je eigen woorden, met AI die de vragen stelt. Geen dure ghostwriter, geen schrijfervaring nodig. Gratis te starten.",
   alternates: {
