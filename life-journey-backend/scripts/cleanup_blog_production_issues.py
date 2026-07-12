@@ -27,6 +27,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Laad .env automatisch als DATABASE_URL nog niet in de omgeving staat,
+# zodat het script met één commando draait (geen handmatige export).
+if not os.environ.get("DATABASE_URL"):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        pass
+
 from app.db.session import SessionLocal
 from app.models.blog_post import BlogPost
 from app.api.v1.routes.publish import _clean_excerpt
