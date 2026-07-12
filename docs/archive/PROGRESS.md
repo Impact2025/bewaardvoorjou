@@ -1,3 +1,5 @@
+> **⚠️ GEARCHIVEERD (10 juli 2026)** — Voortgangsrapport uit oktober 2025 ("Life Journey"-fase). Achterhaald; alleen bewaard als historie.
+
 # Life Journey - Voortgang Rapport
 
 ## ✅ Fase 1: Backend Foundation (Voltooid)

@@ -38,23 +38,49 @@ try:
         "video": {"src", "controls", "style", "width", "height"},
         "*": {"class", "id"},
     }
+    # Alleen iframes van vertrouwde video-embedders toestaan (voorkomt
+    # clickjacking / kwaadaardige embeds, ook al is content admin-only).
+    _ALLOWED_IFRAME_HOSTS = (
+        "www.youtube.com",
+        "youtube.com",
+        "www.youtube-nocookie.com",
+        "player.vimeo.com",
+    )
+
+    def _strip_untrusted_iframes(html: str) -> str:
+        """Verwijder iframes waarvan de src niet naar een vertrouwde host wijst."""
+        import re as _re
+        from urllib.parse import urlparse
+
+        def _repl(match: "_re.Match[str]") -> str:
+            src_match = _re.search(r'src\s*=\s*["\']([^"\']+)["\']', match.group(0), _re.I)
+            if not src_match:
+                return ""
+            host = (urlparse(src_match.group(1)).hostname or "").lower()
+            return match.group(0) if host in _ALLOWED_IFRAME_HOSTS else ""
+
+        return _re.sub(r"<iframe\b[^>]*>.*?</iframe>|<iframe\b[^>]*/?>", _repl, html, flags=_re.I | _re.S)
+
     def _sanitize_html(html: str | None) -> str | None:
         if html is None:
             return None
-        return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS, link_rel=None)
+        cleaned = nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS, link_rel=None)
+        return _strip_untrusted_iframes(cleaned)
 except ImportError:
     def _sanitize_html(html: str | None) -> str | None:  # type: ignore[misc]
         return html
 
 import boto3
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
 from loguru import logger
 from openai import AsyncOpenAI
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.core.config import settings
+from app.core.rate_limiter import RateLimits, limiter
 from app.models.blog_post import BlogPost
 from app.models.user import User
 from app.schemas.blog_post import (
@@ -662,7 +688,9 @@ async def unpublish_blog_post(
 # ---------------------------------------------------------------------------
 
 @router.get("/public/list", response_model=List[BlogPostListItem])
+@limiter.limit(RateLimits.READ_STANDARD)
 async def list_public_posts(
+    request: Request,
     section: Optional[str] = Query(None),
     tag: Optional[str] = Query(None),
     limit: int = Query(50, le=200),
@@ -674,13 +702,20 @@ async def list_public_posts(
     if section:
         q = q.filter(BlogPost.section == section)
     if tag:
-        # Tags zijn kommagescheiden opgeslagen, bijv. "vaderdag,cadeau,familie"
-        q = q.filter(BlogPost.tags.ilike(f"%{tag}%"))
+        # Tags zijn kommagescheiden opgeslagen, bijv. "vaderdag,cadeau,familie".
+        # Exact op token matchen — voorkomt dat "va" ook "vaderdag" raakt.
+        # We normaliseren spaties rond komma's zodat " tag " ook matcht.
+        normalized = tag.strip().lower()
+        pattern = f"%,{normalized},%"
+        wrapped = func.replace(func.lower(BlogPost.tags), " ", "")
+        q = q.filter(("," + wrapped + ",").like(pattern))
     return q.order_by(BlogPost.published_at.desc()).offset(offset).limit(limit).all()
 
 
 @router.get("/public/most-read", response_model=List[BlogPostListItem])
+@limiter.limit(RateLimits.READ_STANDARD)
 async def get_most_read_posts(
+    request: Request,
     section: Optional[str] = Query(None),
     limit: int = Query(5, le=20),
     db: Session = Depends(get_db),
@@ -697,7 +732,9 @@ async def get_most_read_posts(
 
 
 @router.post("/public/{slug}/view", status_code=204)
+@limiter.limit(RateLimits.WRITE_STANDARD)
 async def increment_view_count(
+    request: Request,
     slug: str,
     db: Session = Depends(get_db),
 ):
@@ -713,7 +750,9 @@ async def increment_view_count(
 
 
 @router.get("/public/slug/{slug}", response_model=BlogPostResponse)
+@limiter.limit(RateLimits.READ_STANDARD)
 async def get_public_post_by_slug(
+    request: Request,
     slug: str,
     db: Session = Depends(get_db),
 ):

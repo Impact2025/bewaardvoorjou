@@ -35,3 +35,6 @@ BOX/
 *_files/
 *.download
 .vercel
+
+# Persoonlijke notities (Obsidian-vault, hoort niet in de productrepo)
+AI Brein/

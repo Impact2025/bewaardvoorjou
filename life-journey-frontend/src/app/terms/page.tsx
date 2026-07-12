@@ -4,7 +4,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "Algemene voorwaarden | BewaardVoorJou.nl",
+  title: { absolute: "Algemene voorwaarden | BewaardVoorJou.nl" },
   description:
     "De volledige algemene voorwaarden van BewaardVoorJou.nl — inclusief bepalingen over AI-verwerking, familie-ecosysteem en nalatenschap.",
   openGraph: {

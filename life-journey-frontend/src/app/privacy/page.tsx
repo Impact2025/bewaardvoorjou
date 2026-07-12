@@ -4,7 +4,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "Privacyverklaring | BewaardVoorJou.nl",
+  title: { absolute: "Privacyverklaring | BewaardVoorJou.nl" },
   description:
     "Volledig privacybeleid van BewaardVoorJou.nl — hoe wij uw persoonsgegevens verwerken, welke rechten u heeft en hoe u contact kunt opnemen.",
   openGraph: {

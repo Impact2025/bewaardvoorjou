@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { BlogViewTracker } from "@/components/blog/BlogViewTracker";
+import { ShareButtons } from "@/components/blog/ShareButtons";
+import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -34,10 +37,16 @@ interface ArticleListItem {
   created_at: string;
 }
 
+function estimateReadingTime(html: string): number {
+  const text = html.replace(/<[^>]+>/g, " ");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 async function getArticle(slug: string): Promise<BlogPost | null> {
   try {
     const res = await fetch(`${API_BASE}/blog/public/slug/${slug}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 900 },
     });
     if (res.status === 404) return null;
     if (!res.ok) return null;
@@ -53,7 +62,7 @@ async function getRelatedArticles(
   try {
     const res = await fetch(
       `${API_BASE}/blog/public/list?section=knowledge&limit=12`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 900 } }
     );
     if (!res.ok) return [];
     const articles: ArticleListItem[] = await res.json();
@@ -116,9 +125,8 @@ export default async function KennisbankArtikelPage({
 
   const headerBg = article.header_color ?? "#F5E6D3";
   const headerTextColor = article.header_text_color ?? "#5C3D2E";
-
-  const readTime = Math.max(1, Math.ceil((article.content || "").replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length / 200));
-
+  const readTime = estimateReadingTime(article.content);
+  const articleUrl = `https://bewaardvoorjou.nl/kennisbank/${slug}`;
   const articleImage = article.header_image_url || "https://bewaardvoorjou.nl/Logo_Bewaardvoorjou.png";
 
   const jsonLd = {
@@ -153,6 +161,8 @@ export default async function KennisbankArtikelPage({
     ],
   };
 
+  const faqLd = buildFaqPageJsonLd(extractFaqFromHtml(article.content));
+
   return (
     <>
       <script
@@ -163,6 +173,13 @@ export default async function KennisbankArtikelPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {faqLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
+      )}
+      <BlogViewTracker slug={slug} />
       <PublicHeader />
 
       <main className="min-h-screen bg-warm-50">
@@ -188,6 +205,11 @@ export default async function KennisbankArtikelPage({
                 month: "long",
                 year: "numeric",
               })}
+              {" · "}
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {readTime} min lezen
+              </span>
             </p>
             <h1
               className="text-3xl sm:text-4xl font-serif font-semibold leading-tight"
@@ -220,6 +242,8 @@ export default async function KennisbankArtikelPage({
               prose-hr:border-neutral-sand"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
+
+          <ShareButtons url={articleUrl} title={article.title} />
         </article>
 
         {/* Gerelateerde artikelen — API of fallback */}

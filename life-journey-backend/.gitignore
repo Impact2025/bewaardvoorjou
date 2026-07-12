@@ -11,7 +11,11 @@ ENV/
 
 # Runtime artifacts
 journey.db
+*.db
 *.sqlite
+
+# Lokale media-opslag (user-data, mag nooit in git)
+media_storage/
 __pycache__/
 *.pyc
 alembic/*.pyc

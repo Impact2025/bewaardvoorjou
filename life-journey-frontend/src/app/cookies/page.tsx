@@ -4,7 +4,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "Cookieverklaring | BewaardVoorJou.nl",
+  title: { absolute: "Cookieverklaring | BewaardVoorJou.nl" },
   description:
     "Informatie over het gebruik van cookies op BewaardVoorJou.nl. Wij gebruiken uitsluitend functionele cookies.",
   openGraph: {

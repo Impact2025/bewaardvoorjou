@@ -173,12 +173,22 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     published_at: publishedAt ? new Date(publishedAt).toISOString() : undefined,
   });
 
-  const revalidate = (slug: string) =>
-    fetch("/api/revalidate", {
+  const revalidate = (slug: string) => {
+    let token: string | null = null;
+    try {
+      token = JSON.parse(localStorage.getItem("life-journey.auth") ?? "{}").token ?? null;
+    } catch {
+      token = null;
+    }
+    return fetch("/api/revalidate", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ slug, section }),
     }).catch(() => null);
+  };
 
   const handleSave = async (contentOverride?: string): Promise<BlogPost | null> => {
     if (!title.trim() || !seo.slug) {

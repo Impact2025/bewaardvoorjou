@@ -5,7 +5,7 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { BookOpen, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Kennisbank — Alles over levensverhalen vastleggen | BewaardVoorJou.nl",
+  title: { absolute: "Kennisbank — Alles over levensverhalen vastleggen | BewaardVoorJou.nl" },
   description:
     "Ontdek hoe je jouw levensverhaal vastlegt, herinneringen ophaalt en je verhaal deelt met familie. Praktische gidsen en tips van BewaardVoorJou.nl.",
   alternates: { canonical: "https://bewaardvoorjou.nl/kennisbank" },
@@ -45,17 +45,31 @@ async function getArticles(): Promise<ArticleListItem[]> {
 export default async function KennisbankPage() {
   const articles = await getArticles();
 
-  const collectionJsonLd = {
+  const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Kennisbank — Alles over levensverhalen vastleggen",
     description:
       "Praktische gidsen, tips en antwoorden op veelgestelde vragen over het vastleggen van je levensverhaal.",
     url: "https://bewaardvoorjou.nl/kennisbank",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "BewaardVoorJou.nl",
+      url: "https://bewaardvoorjou.nl",
+    },
     publisher: {
       "@type": "Organization",
       name: "BewaardVoorJou.nl",
       url: "https://bewaardvoorjou.nl",
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: articles.map((a, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `https://bewaardvoorjou.nl/kennisbank/${a.slug}`,
+        name: a.title,
+      })),
     },
   };
 
@@ -63,7 +77,7 @@ export default async function KennisbankPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <PublicHeader />
 

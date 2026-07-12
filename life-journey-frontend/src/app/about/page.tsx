@@ -20,7 +20,7 @@ const PAGE_DESCRIPTION =
   "Het verhaal achter BewaardVoorJou.nl — ontstaan uit een persoonlijke familiebehoefte en de missie om levensverhalen te bewaren voor volgende generaties.";
 
 export const metadata: Metadata = {
-  title: "Over ons | BewaardVoorJou.nl",
+  title: { absolute: "Over ons | BewaardVoorJou.nl" },
   description: PAGE_DESCRIPTION,
   alternates: {
     canonical: PAGE_URL,

@@ -5,7 +5,7 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Blog — Verhalen, tips & inspiratie | BewaardVoorJou.nl",
+  title: { absolute: "Blog — Verhalen, tips & inspiratie | BewaardVoorJou.nl" },
   description:
     "Lees onze blog over het vastleggen van levensverhalen, cadeautips voor bijzondere momenten, en inspiratie om herinneringen te bewaren voor toekomstige generaties.",
   alternates: { canonical: "https://bewaardvoorjou.nl/blog" },

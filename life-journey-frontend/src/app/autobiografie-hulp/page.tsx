@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Autobiografie schrijven — Hulp & AI-begeleiding in het Nederlands | BewaardVoorJou.nl",
+  title: { absolute: "Autobiografie schrijven — Hulp & AI-begeleiding in het Nederlands | BewaardVoorJou.nl" },
   description:
     "Autobiografie hulp nodig? Schrijf jouw levensverhaal met AI-begeleiding. Geen schrijfervaring nodig. Jij vertelt, wij helpen structureren. Gratis starten.",
   keywords: [

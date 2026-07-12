@@ -4,175 +4,103 @@
 
 ## Project Overzicht
 
-**Bewaardvoorjou** is een digitaal platform waarmee gebruikers hun levensverhaal vastleggen voor toekomstige generaties. De app begeleidt gebruikers door een empathisch, AI-gestuurd interviewproces in het Nederlands.
+**Bewaardvoorjou** (bewaardvoorjou.nl) is een digitaal platform waarmee gebruikers hun levensverhaal vastleggen voor toekomstige generaties. De app begeleidt gebruikers door een empathisch, AI-gestuurd interviewproces in het Nederlands. Het platform is **live in productie** en wordt commercieel geëxploiteerd (Stripe-betalingen, pakketten, cadeau-flows).
 
 ### Missie
-Transformeren van "verhalen opnemen tool" naar **De Digitale Familiebibliotheek** — het platform waar generaties samen bouwen aan een levend familiearchief.
+De Digitale Familiebibliotheek — het platform waar generaties samen bouwen aan een levend familiearchief.
 
 ### Doelgroep
 - Ouderen die hun levensverhaal willen bewaren
-- Familiehistorici
-- Mensen die herinneringen willen doorgeven aan kinderen/kleinkinderen
+- Kinderen/kleinkinderen die het verhaal van een ouder cadeau geven
+- Jonge ouders (aparte **baby-variant** onder `/voor-baby`)
 
 ---
 
 ## Technologie Stack
 
-| Component | Technologie | Versie |
-|-----------|-------------|--------|
-| Backend | FastAPI | Python 3.11+ |
-| Frontend | Next.js | 15 |
-| React | React | 19 |
-| TypeScript | TypeScript | Latest |
-| Database | PostgreSQL | Neon.tech |
-| Styling | Tailwind CSS | 4 |
-| State Management | Zustand + React Context | |
-| AI Interviewer | Claude 3.5 Sonnet | via OpenRouter |
-| Transcriptie | Whisper large-v3 | via OpenRouter |
-| Queue | Celery + Redis | |
+| Component | Technologie | Details |
+|-----------|-------------|---------|
+| Backend | FastAPI (Python 3.11+) | 29 route-modules, ~169 endpoints |
+| Frontend | Next.js 15 + React 19 | App Router, standalone output, PWA |
+| Mobile | Expo SDK 51 (React Native) | pre-release, offline-first (WatermelonDB) |
+| Database | PostgreSQL (Neon.tech) | Alembic-migraties |
+| Styling | Tailwind CSS 4 | CSS-first config in `globals.css`, géén tailwind.config |
+| State | Zustand (via context-wrapper) + React Context | |
+| AI Interviewer | Claude (Sonnet) via OpenRouter | model in config: `anthropic/claude-sonnet-4-6` |
+| Transcriptie | Whisper large-v3 via OpenRouter | |
+| Queue | Celery + Redis | media-verwerking, e-mail |
+| Betalingen | Stripe | iDEAL/card/Bancontact expliciet (géén Link) |
+| E-mail | Resend | eigen scheduler, events, audit-log |
+| Storage | S3/Cloudflare R2 | presigned uploads (HMAC capability-URLs) |
+| Monitoring | Sentry | backend + frontend |
 
 ---
 
 ## Projectstructuur
 
 ```
-D:\Memories/
-├── life-journey-backend/          # FastAPI Backend
+D:\apps\memories/
+├── life-journey-backend/          # FastAPI backend (deploy: Railway)
 │   ├── app/
-│   │   ├── api/v1/routes/         # API Endpoints
-│   │   │   ├── auth.py            # Authenticatie
-│   │   │   ├── journeys.py        # Levensverhalen
-│   │   │   ├── chapters.py        # Hoofdstukken
-│   │   │   ├── media.py           # Audio/Video upload
-│   │   │   ├── transcriptions.py  # Whisper transcripties
-│   │   │   ├── highlights.py      # Emotionele highlights
-│   │   │   ├── notes.py           # Notities/memo's
-│   │   │   ├── sharing.py         # Deelfunctionaliteit
-│   │   │   └── legacy.py          # Nalatenschap planning
-│   │   ├── services/
-│   │   │   ├── ai/
-│   │   │   │   ├── interviewer.py # AI vraag-generatie
-│   │   │   │   ├── transcriber.py # Whisper integratie
-│   │   │   │   ├── highlights.py  # Emotie-detectie
-│   │   │   │   └── chat.py        # Chat assistent
-│   │   │   └── media/
-│   │   │       └── upload.py      # S3 upload handling
-│   │   ├── models/                # SQLAlchemy modellen
-│   │   ├── schemas/               # Pydantic schemas
-│   │   └── core/
-│   │       ├── config.py          # Configuratie
-│   │       ├── security.py        # JWT, Argon2
-│   │       └── database.py        # DB connectie
-│   ├── celery_app/                # Achtergrondtaken
-│   └── tests/
+│   │   ├── api/v1/routes/         # 29 route-modules (auth, journeys, media,
+│   │   │                          #   orders, webhooks, family, baby, blog, admin…)
+│   │   ├── services/              # ai/, email/, media/, sharing/, baby/,
+│   │   │                          #   export/, legacy/, entitlements.py …
+│   │   ├── models/                # SQLAlchemy (21 modules)
+│   │   ├── schemas/               # Pydantic (23 modules)
+│   │   ├── core/                  # config, rate_limiter, security_headers
+│   │   └── db/                    # session, crud
+│   ├── alembic/versions/          # migraties (chronologisch benoemd)
+│   ├── scripts/                   # ad-hoc ops/debug/seed-scripts (GEEN app-code)
+│   ├── tests/                     # pytest-suite (CI draait `pytest tests/`)
+│   └── index.py                   # Vercel serverless entrypoint (niet verwijderen)
 │
-├── life-journey-frontend/         # Next.js Frontend
-│   ├── src/
-│   │   ├── app/                   # App Router pages
-│   │   │   ├── (auth)/            # Login/Register
-│   │   │   ├── dashboard/         # Hoofdoverzicht
-│   │   │   ├── chapters/[id]/     # Hoofdstuk detail
-│   │   │   ├── record/            # Opname interface
-│   │   │   ├── timeline/          # Visuele tijdlijn
-│   │   │   ├── family/            # Familie functies
-│   │   │   └── settings/          # Instellingen
-│   │   ├── components/
-│   │   │   ├── ui/                # Basis UI componenten
-│   │   │   ├── interview/         # Interview componenten
-│   │   │   ├── recorder/          # Audio/Video recorder
-│   │   │   ├── timeline/          # Tijdlijn componenten
-│   │   │   └── sharing/           # Deel componenten
-│   │   ├── lib/
-│   │   │   ├── api/               # API client
-│   │   │   ├── stores/            # Zustand stores
-│   │   │   └── utils/             # Hulpfuncties
-│   │   └── styles/
-│   └── public/
+├── life-journey-frontend/         # Next.js frontend (deploy: Vercel)
+│   └── src/
+│       ├── app/                   # ~75 pagina's: dashboard, record, vertel,
+│       │                          #   checkout, voor-baby (8), admin (17),
+│       │                          #   blog/kennisbank, family, timeline
+│       ├── components/            # 86 componenten (recorder/, journey/, baby/…)
+│       ├── lib/                   # api-client.ts + ~36 client-modules
+│       └── store/                 # auth-context, journey-store
 │
-└── Documentation/                 # Documentatie
-    ├── CLAUDE.md                  # Dit bestand
-    ├── masterplan.md              # Strategisch plan
-    └── api-docs/
+├── life-journey-mobile/           # Expo-app v0.1.0 — echte code in src/,
+│                                  #   app/ + components/ zijn template-restanten
+├── docs/                          # documentatie (babydocs/, legal/, archive/)
+├── scripts/                       # root ops-scripts (usb_setup, sql-checks)
+└── .github/workflows/ci.yml      # CI: ruff + mypy(advies) + pytest | tsc + vitest
 ```
 
 ---
 
-## Huidige Functionaliteiten (v1.0)
+## Deployment — LET OP
 
-### ✅ Werkend
-1. **Gebruikersbeheer** - Registratie, login, profiel (Argon2 encryptie)
-2. **58 Hoofdstukken** - Gestructureerd in 7 levensfasen + 20 optionele verdiepingsvragen (78 totaal)
-3. **AI Interviewer** - Claude 3.5 Sonnet, Nederlandse toon
-4. **Audio/Video Opname** - Browser-based, S3 upload
-5. **Transcriptie** - Whisper large-v3, Nederlands geoptimaliseerd
-6. **Emotionele Highlights** - Lach, inzicht, liefde, wijsheid
-7. **AI Chat Assistent** - Realtime hulp
-8. **Notities** - Memo's per hoofdstuk
-9. **Delen** - Deellinks met verlooptijd
-10. **Legacy Planning** - Dead man's switch, tijdcapsule
+- **Push naar `main` deployt automatisch**: backend via Railway, frontend via Vercel. Commit gerust, maar push bewust.
+- Migratie-valkuil: Railway draait migraties van `main`; feature-branches met migraties niet laten achterlopen (zie geheugen/DEPLOYMENT.md).
+- Healthcheck: `/healthz`. Start: `bash start.sh` (Railway), `index.py` (Vercel serverless variant).
+- SEO: **non-www is canoniek** (bewaardvoorjou.nl); Vercel-host moet daarop matchen (308).
 
-### ⚠️ Beperkingen v1.0
-- Individuele ervaring (geen familie-ecosysteem)
-- Basis UI (functioneel maar niet emotioneel)
-- Geen offline support
-- Geen native apps
-- Beperkte personalisatie AI
+## Testen & CI
+
+- Backend: `cd life-journey-backend && venv\Scripts\python -m pytest tests/` (SQLite + dummy `JWT_SECRET_KEY` volstaat, zie ci.yml).
+- Frontend: `cd life-journey-frontend && npm test` (vitest) en `npx tsc --noEmit`.
+- CI (GitHub Actions, push/PR op main): ruff (blokkerend), mypy (niet-blokkerend), pytest, tsc, vitest.
+- `life-journey-backend/scripts/test_*.py` zijn **handmatige debugscripts**, geen pytest-tests.
 
 ---
 
-## Ontwikkelplan v2.0
+## Kernfunctionaliteiten (live)
 
-### Fase 1: Foundation (Maand 1-4)
-**Focus:** Kernervaring perfectioneren
-
-#### Prioriteit 1: Onboarding 2.0
-- [ ] Video-welkom component
-- [ ] "Eerste herinnering in 60 seconden" flow
-- [ ] Familiefoto upload bij start
-- [ ] Intentie vastleggen ("Waarom doe je dit?")
-
-#### Prioriteit 2: Visuele Tijdlijn
-- [ ] Interactieve levensloop component
-- [ ] Foto-integratie per periode
-- [ ] Audio-fragmenten inline afspelen
-- [ ] Responsive design (mobile-first)
-
-#### Prioriteit 3: AI Interviewer 2.0
-- [ ] Emotie-detectie in stem (sentiment analysis)
-- [ ] Doorvraag-logica ("Je noemde X, vertel meer...")
-- [ ] Context-awareness (herinner eerdere antwoorden)
-- [ ] Langere stiltes respecteren
-
-#### Prioriteit 4: Emotioneel Design
-- [ ] "Memory Lane" navigatie-metafoor
-- [ ] Micro-interacties (confetti, hartslag-animatie)
-- [ ] Seizoensgebonden thema's
-- [ ] Warme kleurenpalet
-
-### Fase 2: Familie (Maand 5-8)
-**Focus:** Van individu naar ecosysteem
-
-- [ ] Familieboom visualisatie
-- [ ] Familiepods (gedeelde ruimte)
-- [ ] Reacties & aanvullingen op verhalen
-- [ ] "Interview je Ouders" module
-- [ ] Gezamenlijke tijdlijn
-
-### Fase 3: Premium (Maand 9-12)
-**Focus:** Verdienmodel
-
-- [ ] Pricing tiers (Gratis/Familie/Legacy/Eeuwig)
-- [ ] Fysiek boek generatie (print-on-demand)
-- [ ] B2B portal voor zorginstellingen
-- [ ] Voice cloning beta
-
-### Fase 4: Schaal (Maand 13-18)
-**Focus:** Internationaal
-
-- [ ] Native iOS/Android apps
-- [ ] Lokalisatie (DE, FR, EN)
-- [ ] Offline-first architectuur
-- [ ] VR Experience beta
+1. **AI-interviewer** — hoofdstukgestuurd levensverhaal-interview (58 kern / 78 totaal hoofdstukken), doorvraag-logica, context-geheugen (`services/ai/interviewer.py`)
+2. **Opname & transcriptie** — audio/video/tekst, presigned S3-upload, Whisper, emotionele highlights
+3. **Checkout & entitlements** — pakketten VERHAAL/ERFGOED/NALATENSCHAP, promo-codes, cadeaubonnen, gratis-limiet afgedwongen via 402 op `/media/presign`
+4. **E-mailsysteem** — Resend met scheduler, events, engagement-tracking, unsubscribe, audit
+5. **Familie** — pods, uitnodigingen, ouder-interview module, reacties
+6. **Baby-variant** — aparte sub-app `/voor-baby` met eigen thema, onboarding en dashboard
+7. **Kennisbank/blog CMS** — TipTap-editor in admin, content via backend-API, dynamische sitemap + schema.org
+8. **Legacy** — nalatenschapsplanning, dead man's switch, export (PDF/USB)
+9. **Admin** — 17 routes: orders, users, coupons, support, analytics, content
+10. **Sharing** — deellinks met verlooptijd; media-reads met Bearer + ownership-check
 
 ---
 
@@ -181,247 +109,64 @@ D:\Memories/
 ### Backend (Python/FastAPI)
 
 ```python
-# Gebruik async waar mogelijk
-async def get_chapter(chapter_id: int, db: AsyncSession) -> Chapter:
-    ...
-
-# Type hints altijd
-def generate_question(context: InterviewContext) -> str:
-    ...
-
-# Docstrings in Nederlands
-async def create_highlight(
-    transcription_id: int,
-    emotion: EmotionType,
-    start_ms: int,
-    end_ms: int
-) -> Highlight:
-    """
-    Maak een emotionele highlight aan voor een transcriptie.
-    
-    Args:
-        transcription_id: ID van de transcriptie
-        emotion: Type emotie (LACH, INZICHT, LIEFDE, WIJSHEID)
-        start_ms: Starttijd in milliseconden
-        end_ms: Eindtijd in milliseconden
-    
-    Returns:
-        Nieuwe Highlight instantie
-    """
+# Async waar mogelijk, type hints altijd, docstrings in het Nederlands
+async def create_highlight(transcription_id: int, emotion: EmotionType) -> Highlight:
+    """Maak een emotionele highlight aan voor een transcriptie."""
     ...
 ```
+
+- Nieuwe endpoints: route in `app/api/v1/routes/` → schema in `app/schemas/` → logica in `app/services/` → test in `tests/`.
+- Rate limiting: gebruik `limiter` + presets uit `app/core/rate_limiter.py` (key = user-id uit JWT, fallback IP).
+- Auth: dependencies uit `app/api/deps.py` (`get_current_user`, `get_current_admin_user`, `get_authorized_journey`).
 
 ### Frontend (React/TypeScript)
 
-```typescript
-// Functionele componenten met TypeScript
-interface TimelineProps {
-  userId: string;
-  chapters: Chapter[];
-  onChapterSelect: (id: string) => void;
-}
-
-export function Timeline({ userId, chapters, onChapterSelect }: TimelineProps) {
-  // Zustand voor lokale state
-  const { currentPhase } = useTimelineStore();
-  
-  return (
-    // Tailwind CSS voor styling
-    <div className="flex flex-col gap-4 p-6 bg-warm-50">
-      ...
-    </div>
-  );
-}
-
-// Custom hooks voor logica
-function useInterview(chapterId: string) {
-  const [question, setQuestion] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // ...
-  
-  return { question, isLoading, generateNext };
-}
-```
+- Functionele componenten, Tailwind, `apiFetch<T>` uit `src/lib/api-client.ts` voor alle API-calls (heeft retry, NL-foutteksten, 401-logout).
+- Server component als dunne wrapper + `*Content`-clientcomponent is het bestaande patroon.
+- Nederlandse UI-teksten; toegankelijkheid serieus nemen (AccessibilityProvider, aria-labels).
 
 ### Naamgeving
-- **Componenten:** PascalCase (`ChapterCard`, `AudioRecorder`)
-- **Functies:** camelCase (`generateQuestion`, `uploadMedia`)
-- **Constanten:** SCREAMING_SNAKE_CASE (`MAX_RECORDING_DURATION`)
-- **Database tabellen:** snake_case (`user_chapters`, `emotional_highlights`)
-- **API endpoints:** kebab-case (`/api/v1/chapters/{id}/highlights`)
+- Componenten PascalCase, functies camelCase, constanten SCREAMING_SNAKE_CASE
+- DB-tabellen snake_case, API-endpoints kebab-case
 
 ### Git Commits
 ```
 feat(interview): voeg emotie-detectie toe aan AI interviewer
 fix(recorder): los audio-sync probleem op in Safari
-refactor(timeline): verbeter performance met virtualisatie
-docs(api): update OpenAPI specificatie voor sharing endpoints
 ```
+Nederlandse commit-messages, conventional-commits-stijl.
 
 ---
 
 ## AI Prompt Richtlijnen
 
-### Interviewer Persona
-De AI interviewer moet voelen als een **warme, wijze vriend** — niet als een systeem.
+De AI-interviewer moet voelen als een **warme, wijze vriend** — niet als een systeem.
 
 ```
-TOON:
-- Warm en empathisch
-- Geduldig (haast nooit)
-- Nieuwsgierig maar respectvol
-- Nederlandse spreektaal (niet formeel)
-
-NIET DOEN:
-- Geen jargon of technische termen
-- Geen dubbele vragen in één keer
-- Geen oordelende taal
-- Niet onderbreken of afronden
-
-WEL DOEN:
-- Doorvragen op emotionele momenten
-- Namen en details onthouden
-- Stiltes toelaten
-- Bevestigen en waarderen
+TOON: warm, empathisch, geduldig, nieuwsgierig maar respectvol, Nederlandse spreektaal
+NIET: jargon, dubbele vragen, oordelen, onderbreken
+WEL: doorvragen op emotie, namen/details onthouden, stiltes toelaten, bevestigen
 ```
 
-### Voorbeeld Prompts
-
-**Vraag genereren:**
-```
-Je bent een warme, empathische interviewer die helpt bij het vastleggen 
-van levensverhalen. De gebruiker is bezig met het hoofdstuk "{chapter_name}" 
-in de fase "{phase_name}".
-
-Eerdere antwoorden in dit hoofdstuk:
-{previous_answers}
-
-Genereer één open, uitnodigende vraag die:
-1. Aansluit bij wat al verteld is
-2. Dieper graaft in emoties of details
-3. In natuurlijk Nederlands is geformuleerd
-4. Niet te lang is (max 2 zinnen)
-
-Vraag:
-```
-
-**Emotie detecteren:**
-```
-Analyseer de volgende transcriptie en identificeer emotionele hoogtepunten.
-
-Transcriptie:
-{transcription_text}
-
-Markeer fragmenten met deze emoties:
-- 🎭 LACH: Grappige, vrolijke momenten
-- 💡 INZICHT: Realisaties, ontdekkingen
-- ❤️ LIEFDE: Warme herinneringen
-- 🦉 WIJSHEID: Levenslessen, adviezen
-
-Output als JSON:
-[
-  {
-    "emotion": "LACH|INZICHT|LIEFDE|WIJSHEID",
-    "start_word_index": int,
-    "end_word_index": int,
-    "text": "het relevante fragment",
-    "confidence": 0.0-1.0
-  }
-]
-```
+Prompts staan in `app/services/ai/` (zie ook `WORLD_CLASS_INTERVIEWER.md` in de backend). Wijzigingen eerst testen, implementeren met fallback, kwaliteit monitoren via logging.
 
 ---
 
 ## Environment Variables
 
-### Backend (.env)
-```bash
-# Database
-DATABASE_URL=postgresql+asyncpg://user:pass@host/db
+Zie `.env.example` in backend en frontend. Kern: `DATABASE_URL`, `JWT_SECRET_KEY` (≥32 tekens, verplicht in prod), `OPENROUTER_API_KEY`, S3/R2-keys, `STRIPE_*`, `RESEND_*`, `REDIS_URL`, `SENTRY_DSN`. Frontend: `NEXT_PUBLIC_API_BASE_URL`.
 
-# Security
-SECRET_KEY=your-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# AI Services (OpenRouter)
-OPENROUTER_API_KEY=your-key
-CLAUDE_MODEL=anthropic/claude-3.5-sonnet
-WHISPER_MODEL=openai/whisper-large-v3
-
-# Storage
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-AWS_BUCKET_NAME=bewaardvoorjou-media
-AWS_REGION=eu-west-1
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-```
-
-### Frontend (.env.local)
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
-```
-
----
-
-## Veelvoorkomende Taken
-
-### Nieuwe API endpoint toevoegen
-1. Maak route in `app/api/v1/routes/`
-2. Definieer schemas in `app/schemas/`
-3. Implementeer service logica in `app/services/`
-4. Voeg tests toe in `tests/`
-5. Update OpenAPI docs
-
-### Nieuwe React component maken
-1. Maak component in `src/components/`
-2. Voeg TypeScript types toe
-3. Style met Tailwind CSS
-4. Voeg Storybook story toe (indien van toepassing)
-5. Schrijf unit tests
-
-### AI prompt aanpassen
-1. Prompts staan in `app/services/ai/prompts/`
-2. Test eerst in Claude.ai playground
-3. Implementeer met fallback
-4. Monitor kwaliteit via logging
+**Nooit** `.env`-bestanden of media/DB-bestanden committen (staan in .gitignore).
 
 ---
 
 ## Belangrijke Opmerkingen
 
-### Performance
-- Gebruik `React.memo()` voor zware componenten
-- Lazy load grote modules
-- Optimaliseer afbeeldingen (next/image)
-- Cache API responses waar mogelijk
-
-### Toegankelijkheid
-- ARIA labels op interactieve elementen
-- Keyboard navigatie ondersteunen
-- Hoog contrast modus
-- Grote tekst optie
-- Screen reader compatibiliteit
-
-### Privacy & Security
-- Geen PII in logs
-- Alle data encrypted at rest
-- JWT tokens kort houden
-- Rate limiting op alle endpoints
-- Input sanitization
+- **Privacy & security**: geen PII in logs, input-sanitization (nh3), rate limiting op alle publieke endpoints, media-toegang altijd via ownership-check.
+- **Performance**: let op N+1 queries (eager loading), React.memo voor zware componenten, `next/image`.
+- **Bekende schuld**: lage testdekking op frontend-flows (checkout/recorder), veel grote bestanden (`interviewer.py` 1.6k regels, `recorder-frame.tsx` 1.1k), mypy nog niet-blokkerend (legacy Column-typing).
+- Gearchiveerde/verouderde plannen staan in `docs/archive/` — niet als actuele status lezen.
 
 ---
 
-## Contactgegevens
-
-**Project Owner:** [Jouw naam]
-**Repository:** D:\Memories\
-
----
-
-*Laatste update: November 2025*
-*Versie: 2.0-development*
+*Laatste update: 10 juli 2026*

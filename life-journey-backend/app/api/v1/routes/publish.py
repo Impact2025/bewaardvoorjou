@@ -26,7 +26,6 @@ import hashlib
 import hmac
 import re
 from datetime import datetime, timezone
-from typing import List, Optional
 
 import httpx
 from fastapi import APIRouter, Depends, Request, Response
