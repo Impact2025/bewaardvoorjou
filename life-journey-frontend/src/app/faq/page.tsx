@@ -6,11 +6,11 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 export const metadata: Metadata = {
   title: "Veelgestelde vragen",
   description:
-    "Antwoorden op alle vragen over BewaardVoorJou.nl — van privacy en veiligheid tot hoe de AI-interviewer werkt, wat het kost en hoe je verhalen deelt met familie.",
+    "Antwoorden op alle vragen over BewaardVoorJou.nl — van privacy en veiligheid tot hoe de AI-interviewer werkt, wat het kost en hoe je verhalen deelt met familie. Vind snel antwoord op al je vragen.",
   openGraph: {
     title: "Veelgestelde vragen | BewaardVoorJou.nl",
     description:
-      "Antwoorden op alle vragen over BewaardVoorJou.nl — van privacy en veiligheid tot hoe de AI-interviewer werkt, wat het kost en hoe je verhalen deelt met familie.",
+      "Antwoorden op alle vragen over BewaardVoorJou.nl — van privacy en veiligheid tot hoe de AI-interviewer werkt, wat het kost en hoe je verhalen deelt met familie. Vind snel antwoord op al je vragen.",
     url: "https://bewaardvoorjou.nl/faq",
   },
   alternates: {

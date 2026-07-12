@@ -4,7 +4,7 @@ import LandingClient from "./LandingClient";
 export const metadata: Metadata = {
   title: { absolute: "Levensverhaal vastleggen? De complete oplossing [2026] | BewaardVoorJou.nl" },
   description:
-    "Je levensverhaal vastleggen in je eigen woorden, met AI die de vragen stelt. Geen dure ghostwriter, geen schrijfervaring nodig. Gratis te starten.",
+    "Je levensverhaal vastleggen in eigen woorden, met AI die de vragen stelt. Geen dure ghostwriter, geen ervaring nodig. Gratis te starten zonder creditcard.",
   alternates: {
     canonical: "https://bewaardvoorjou.nl/levensverhaal-vastleggen",
   },
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     url: "https://bewaardvoorjou.nl/levensverhaal-vastleggen",
     title: "Levensverhaal vastleggen? De complete oplossing [2026]",
     description:
-      "Je levensverhaal vastleggen met AI-begeleiding. Geen ghostwriter nodig, geen schrijfervaring. Gratis starten.",
+      "Je levensverhaal vastleggen met AI-begeleiding. Geen dure ghostwriter, geen ervaring nodig. Gratis te starten zonder creditcard.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -27,6 +27,75 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      name: "Levensverhaal vastleggen",
+      description:
+        "Je levensverhaal vastleggen met AI die de vragen stelt. Geen ghostwriter, geen schrijfervaring nodig. Gratis starten.",
+      url: "https://bewaardvoorjou.nl/levensverhaal-vastleggen",
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl" },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Levensverhaal vastleggen",
+            item: "https://bewaardvoorjou.nl/levensverhaal-vastleggen",
+          },
+        ],
+      },
+    },
+    {
+      "@type": "Product",
+      name: "BewaardVoorJou.nl — Levensverhaal vastleggen",
+      description:
+        "Je levensverhaal vastleggen met een AI-interviewer die de vragen stelt. Kies uit drie pakketten: Verhaal, Erfgoed of Nalatenschap.",
+      brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Verhaal",
+          price: "79",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-06-26",
+          availability: "https://schema.org/InStock",
+          url: "https://bewaardvoorjou.nl/checkout?package=VERHAAL",
+        },
+        {
+          "@type": "Offer",
+          name: "Erfgoed",
+          price: "149",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-06-26",
+          availability: "https://schema.org/InStock",
+          url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED",
+        },
+        {
+          "@type": "Offer",
+          name: "Nalatenschap",
+          price: "229",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-06-26",
+          availability: "https://schema.org/InStock",
+          url: "https://bewaardvoorjou.nl/checkout?package=NALATENSCHAP",
+        },
+      ],
+    },
+  ],
+};
+
 export default function Page() {
-  return <LandingClient />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LandingClient />
+    </>
+  );
 }

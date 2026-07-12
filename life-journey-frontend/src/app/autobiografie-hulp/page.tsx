@@ -25,7 +25,7 @@ import {
 export const metadata: Metadata = {
   title: { absolute: "Autobiografie schrijven — Hulp & AI-begeleiding in het Nederlands | BewaardVoorJou.nl" },
   description:
-    "Autobiografie schrijven hoeft niet moeilijk te zijn. BewaardVoorJou.nl begeleidt je stap voor stap met warme AI-interviews. Geen schrijfervaring nodig — jij vertelt, wij helpen structureren.",
+    "Autobiografie hulp nodig? Schrijf jouw levensverhaal met AI-begeleiding. Geen schrijfervaring nodig. Jij vertelt, wij helpen structureren. Gratis starten.",
   keywords: [
     "autobiografie hulp",
     "autobiografie schrijven",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     url: "https://bewaardvoorjou.nl/autobiografie-hulp",
     title: "Autobiografie schrijven — Hulp & AI-begeleiding in het Nederlands",
     description:
-      "Autobiografie schrijven hoeft niet moeilijk te zijn. BewaardVoorJou.nl begeleidt je stap voor stap. Geen schrijfervaring nodig.",
+      "Autobiografie hulp nodig? Schrijf jouw levensverhaal met AI-begeleiding. Jij vertelt, wij helpen structureren. Gratis starten.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {

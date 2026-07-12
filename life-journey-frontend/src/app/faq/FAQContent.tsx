@@ -207,7 +207,7 @@ export default function FAQContent() {
       <section className="py-16 md:py-20 bg-gradient-to-br from-orange via-warm-amber to-orange/90">
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6">
-            Klaar om je verhaal vast te leggen?
+            Veelgestelde vragen? Klaar om je verhaal vast te leggen
           </h2>
           <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
             Je eerste hoofdstuk duurt maar 10 minuten. Begin vandaag en maak iets

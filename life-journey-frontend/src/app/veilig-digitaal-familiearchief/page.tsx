@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   title:
     "Veilig digitaal familiearchief — AVG-compliant & Nederlandse servers | BewaardVoorJou.nl",
   description:
-    "Bewaar je familieverhalen in een veilig digitaal familiearchief. Nederlandse servers, AES-256-encryptie, privacy-by-design en volledig AVG/GDPR-compliant. Jij bepaalt wie toegang krijgt — niemand anders.",
+    "Veilig digitaal familiearchief, op Nederlandse servers. AES-256-encryptie, privacy-by-design en AVG-compliant. Jij bepaalt wie leest. Ontdek hoe het werkt.",
   keywords: [
     "veilig digitaal familiearchief",
     "digitaal familiearchief AVG",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title:
       "Veilig digitaal familiearchief — AVG-compliant & Nederlandse servers",
     description:
-      "Nederlandse servers, AES-256-encryptie en privacy-by-design. Jouw familieverhalen veilig bewaard, volledig AVG/GDPR-compliant.",
+      "Veilig digitaal familiearchief op Nederlandse servers. AES-256, privacy-by-design, AVG-compliant. Jij bepaalt wie leest. Ontdek hoe het werkt.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -574,6 +574,44 @@ export default function VeiligDigitaalFamiliearchiefPage() {
           <p className="text-sm opacity-80 mt-6">
             Geen creditcard nodig · Altijd exporteerbaar · 100% AVG-compliant
           </p>
+        </div>
+      </section>
+
+      {/* Interne links: verdiepende KB-artikelen */}
+      <section className="py-16 px-4 sm:px-6 bg-gradient-to-br from-cream via-white to-warm-sand/20">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
+            Lees meer over veiligheid & privacy
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            <Link
+              href="/kennisbank/waar-worden-mijn-levensverhalen-opgeslagen-nederlandse-servers"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Waar worden mijn verhalen opgeslagen?
+              </h3>
+              <p className="text-sm text-slate-600">Nederlandse servers & AVG</p>
+            </Link>
+            <Link
+              href="/kennisbank/wie-heeft-er-toegang-tot-mijn-verhalen"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Wie heeft toegang tot mijn verhalen?
+              </h3>
+              <p className="text-sm text-slate-600">Jij bepaalt wie meeluistert</p>
+            </Link>
+            <Link
+              href="/kennisbank/hoe-exporteer-ik-mijn-eigen-data-en-herinneringen"
+              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
+            >
+              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
+                Data exporteren: hoe werkt dat?
+              </h3>
+              <p className="text-sm text-slate-600">Jouw data blijft altijd van jou</p>
+            </Link>
+          </div>
         </div>
       </section>
 

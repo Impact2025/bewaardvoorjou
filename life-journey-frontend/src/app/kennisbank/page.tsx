@@ -48,12 +48,17 @@ export default async function KennisbankPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Kennisbank",
+    name: "Kennisbank — Alles over levensverhalen vastleggen",
     description:
-      "Praktische gidsen over levensverhalen vastleggen, herinneringen ophalen en veilig delen met familie.",
+      "Praktische gidsen, tips en antwoorden op veelgestelde vragen over het vastleggen van je levensverhaal.",
     url: "https://bewaardvoorjou.nl/kennisbank",
     isPartOf: {
       "@type": "WebSite",
+      name: "BewaardVoorJou.nl",
+      url: "https://bewaardvoorjou.nl",
+    },
+    publisher: {
+      "@type": "Organization",
       name: "BewaardVoorJou.nl",
       url: "https://bewaardvoorjou.nl",
     },

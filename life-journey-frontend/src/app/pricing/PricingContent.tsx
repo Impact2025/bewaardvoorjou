@@ -134,7 +134,7 @@ export default function PricingContent() {
       {/* ── Hero ── */}
       <section className="py-16 px-4 text-center max-w-3xl mx-auto">
         <h1 className="font-serif text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-4 leading-tight">
-          Bewaar het verhaal van je ouder(s)<br className="hidden md:block" /> — voor altijd
+          Bewaar het verhaal van je ouder(s)<br className="hidden md:block" /> — bekijk de pakketten &amp; prijzen
         </h1>
         <p className="text-lg text-[#555] mb-8 max-w-xl mx-auto leading-relaxed">
           Een geduldige gespreksleider in het Nederlands begeleidt het gesprek. Jij luistert. De verhalen blijven.
@@ -417,7 +417,7 @@ export default function PricingContent() {
       {/* ── FAQ ── */}
       <section className="py-16 px-4 max-w-2xl mx-auto">
         <h2 className="font-serif text-3xl font-bold text-center text-[#1a1a1a] mb-10">
-          Veelgestelde vragen
+          Veelgestelde vragen over prijzen &amp; pakketten
         </h2>
         <div className="space-y-3">
           {faqs.map((faq, i) => (

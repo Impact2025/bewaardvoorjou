@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   title:
     "Origineel cadeau opa 80 jaar — De Erfgoed Box met zijn herinneringen | BewaardVoorJou.nl",
   description:
-    "Op zoek naar een origineel cadeau voor opa van 80? De Erfgoed Box legt zijn levensverhaal vast voor altijd. Een luxe magneetdoos, een rustgevende thee en een zandloper — zodat hij de tijd neemt om te vertellen.",
+    "Origineel cadeau opa 80 jaar? De Erfgoed Box legt zijn levensverhaal vast. Luxe magneetdoos, thee en zandloper. Bestel vandaag, binnen 2 weken in huis.",
   keywords: [
     "origineel cadeau opa 80 jaar",
     "cadeau opa 80 jaar",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title:
       "Origineel cadeau opa 80 jaar — De Erfgoed Box met zijn herinneringen",
     description:
-      "Geen gadget dat stof verzamelt. De Erfgoed Box legt opa's levensverhaal vast voor altijd — luxe magneetdoos, thee en een zandloper om de tijd te nemen.",
+      "Origineel cadeau opa 80 jaar? De Erfgoed Box legt zijn levensverhaal vast. Luxe magneetdoos, thee en zandloper. Bestel vandaag, binnen 2 weken in huis.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
