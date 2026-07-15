@@ -2,9 +2,14 @@
 set -e
 
 # Run database migrations (met retry voor Neon.tech cold-start)
-echo "Running alembic migrations..."
+# Gebruik een specifieke target-revisie in plaats van `upgrade head`:
+# de migratie-graaf heeft meerdere heads, waardoor `head` crasht met
+# "Multiple head revisions are present". Een vaste leaf is idempotent
+# (Alembic slaat over als hij al toegepast is).
+LATEST_REVISION="20260715_blog_podcast_audio"
+echo "Running alembic migrations (target: $LATEST_REVISION)..."
 for attempt in 1 2 3; do
-  python -m alembic upgrade head && break
+  python -m alembic upgrade "$LATEST_REVISION" && break
   echo "Migration poging $attempt mislukt, opnieuw proberen in 5s..."
   sleep 5
   if [ "$attempt" -eq 3 ]; then
