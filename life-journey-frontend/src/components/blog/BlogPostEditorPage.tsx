@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BlogEditor, type BlogEditorHandle } from "@/components/blog/BlogEditor";
+import { PodcastPanel, type PodcastFields } from "@/components/blog/PodcastPanel";
 import { SeoPanel } from "@/components/blog/SeoPanel";
 import { HeaderBuilder, type HeaderSettings } from "@/components/blog/HeaderBuilder";
 import { blogApi, type BlogPost, type BlogPostCreate } from "@/lib/api/blog";
@@ -64,6 +65,12 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
   const [seo, setSeo] = useState<SeoFields>(emptySeo);
   const [header, setHeader] = useState<HeaderSettings>(defaultHeader);
   const [publishedAt, setPublishedAt] = useState("");
+  const [podcast, setPodcast] = useState<PodcastFields>({
+    audio_url: null,
+    audio_title: null,
+    audio_duration: null,
+    transcript: null,
+  });
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const editorRef = useRef<BlogEditorHandle>(null);
@@ -98,6 +105,12 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
           header_color: p.header_color ?? "#FF8C42",
           header_text_color: p.header_text_color ?? "#FFFFFF",
           header_image_url: p.header_image_url ?? "",
+        });
+        setPodcast({
+          audio_url: p.audio_url ?? null,
+          audio_title: p.audio_title ?? null,
+          audio_duration: p.audio_duration ?? null,
+          transcript: p.transcript ?? null,
         });
         if (p.published_at) {
           // Zet om naar datetime-local formaat (YYYY-MM-DDTHH:mm)
@@ -143,6 +156,18 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     return blogApi.uploadVideo(file);
   }, []);
 
+  const handleAudioUpload = useCallback(async (file: File): Promise<string> => {
+    return blogApi.uploadAudio(file);
+  }, []);
+
+  const handlePodcastChange = useCallback(
+    (field: keyof PodcastFields, value: string | number | null) => {
+      setPodcast((prev) => ({ ...prev, [field]: value }));
+      setIsDirty(true);
+    },
+    [],
+  );
+
   const handleInsertLink = useCallback((href: string, text: string) => {
     editorRef.current?.insertLink(href, text);
   }, []);
@@ -171,6 +196,10 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
     keywords: seo.keywords || undefined,
     tags: seo.tags || undefined,
     published_at: publishedAt ? new Date(publishedAt).toISOString() : undefined,
+    audio_url: podcast.audio_url ?? undefined,
+    audio_title: podcast.audio_title ?? undefined,
+    audio_duration: podcast.audio_duration ?? undefined,
+    transcript: podcast.transcript ?? undefined,
   });
 
   const revalidate = (slug: string) => {
@@ -389,6 +418,13 @@ export function BlogPostEditorPage({ postId, section = "blog" }: Props) {
               Leeg = datum wordt ingesteld op het moment van publiceren
             </p>
           </div>
+
+          {/* Podcast / NotebookLM audio */}
+          <PodcastPanel
+            values={podcast}
+            onChange={handlePodcastChange}
+            onUpload={handleAudioUpload}
+          />
 
           {/* SEO panel */}
           <SeoPanel

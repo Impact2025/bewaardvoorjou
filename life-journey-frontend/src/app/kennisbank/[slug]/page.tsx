@@ -6,6 +6,7 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { BlogViewTracker } from "@/components/blog/BlogViewTracker";
 import { ShareButtons } from "@/components/blog/ShareButtons";
+import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 
 const API_BASE =
@@ -24,6 +25,10 @@ interface BlogPost {
   meta_title: string | null;
   meta_description: string | null;
   keywords: string | null;
+  audio_url: string | null;
+  audio_title: string | null;
+  audio_duration: number | null;
+  transcript: string | null;
   published_at: string | null;
   created_at: string;
 }
@@ -227,6 +232,15 @@ export default async function KennisbankArtikelPage({
             )}
           </div>
         </div>
+
+        {/* Podcast player (NotebookLM audio) */}
+        <PodcastPlayer
+          audioUrl={article.audio_url ?? ""}
+          title={article.audio_title}
+          durationSeconds={article.audio_duration}
+          transcript={article.transcript}
+          articleUrl={`https://bewaardvoorjou.nl/kennisbank/${slug}`}
+        />
 
         {/* Artikel content */}
         <article className="max-w-3xl mx-auto px-4 sm:px-6 py-12">

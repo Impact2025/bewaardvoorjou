@@ -39,9 +39,11 @@ class BlogPostUpdate(BaseModel):
     keywords: Optional[str] = Field(None, max_length=500)
     tags: Optional[str] = Field(None, max_length=500)
     published_at: Optional[datetime] = None
-
-
-class BlogPostResponse(BaseModel):
+    # Podcast / NotebookLM audio
+    audio_url: Optional[str] = Field(None, max_length=1024)
+    audio_title: Optional[str] = Field(None, max_length=300)
+    audio_duration: Optional[int] = None
+    transcript: Optional[str] = None
     id: str
     author_id: str
     section: str
@@ -63,6 +65,11 @@ class BlogPostResponse(BaseModel):
     published_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
+    # Podcast / NotebookLM audio
+    audio_url: Optional[str] = None
+    audio_title: Optional[str] = None
+    audio_duration: Optional[int] = None
+    transcript: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -125,3 +132,8 @@ class EnhanceContentRequest(BaseModel):
 
 class ImageUploadResponse(BaseModel):
     url: str
+
+
+class AudioUploadResponse(BaseModel):
+    url: str
+    duration: Optional[int] = None

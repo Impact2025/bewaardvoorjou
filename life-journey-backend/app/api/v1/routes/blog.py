@@ -88,6 +88,7 @@ from app.schemas.blog_post import (
     BlogPostListItem,
     BlogPostResponse,
     BlogPostUpdate,
+    AudioUploadResponse,
     EnhanceContentRequest,
     ExternalLinkSuggestion,
     ImageUploadResponse,
@@ -160,6 +161,18 @@ _MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 
 _ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
 _MAX_VIDEO_BYTES = 200 * 1024 * 1024  # 200 MB
+
+_ALLOWED_AUDIO_TYPES = {
+    "audio/m4a",
+    "audio/mp4",
+    "audio/aac",
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/x-m4a",
+}
+_MAX_AUDIO_BYTES = 150 * 1024 * 1024  # 150 MB
 
 
 def _get_post_or_404(db: Session, post_id: str) -> BlogPost:
@@ -596,8 +609,80 @@ async def serve_blog_video(filename: str):
 
 
 # ---------------------------------------------------------------------------
+# Audio Upload (podcast / NotebookLM .m4a)
+# ---------------------------------------------------------------------------
+
+@router.post("/audio/upload", response_model=AudioUploadResponse)
+async def upload_blog_audio(
+    file: UploadFile = File(...),
+    admin: User = Depends(get_current_admin_user),
+):
+    """Upload een podcast-aflevering (.m4a/.mp3/.wav) voor blog of kennisbank.
+
+    NotebookLM produceert .m4a (audio/mp4) — dat is het primaire formaat.
+    Max 150 MB. Geeft de publieke URL terug.
+    """
+    if file.content_type not in _ALLOWED_AUDIO_TYPES:
+        raise HTTPException(
+            400,
+            detail="Alleen M4A, MP3 en WAV zijn toegestaan",
+        )
+
+    content = await file.read()
+    if len(content) > _MAX_AUDIO_BYTES:
+        raise HTTPException(400, detail="Audio mag maximaal 150 MB zijn")
+
+    ext = Path(file.filename or "audio.m4a").suffix.lower() or ".m4a"
+    filename = f"{uuid4()}{ext}"
+
+    if settings.s3_bucket and settings.aws_access_key_id:
+        try:
+            s3 = boto3.client(
+                "s3",
+                region_name=settings.s3_region,
+                aws_access_key_id=settings.aws_access_key_id,
+                aws_secret_access_key=settings.aws_secret_access_key,
+                **({"endpoint_url": settings.s3_endpoint_url} if settings.s3_endpoint_url else {}),
+            )
+            object_key = f"blog/audio/{filename}"
+            s3.put_object(
+                Bucket=settings.s3_bucket,
+                Key=object_key,
+                Body=content,
+                ContentType=file.content_type or "audio/mp4",
+            )
+            if settings.s3_public_url:
+                url = f"{settings.s3_public_url.rstrip('/')}/{object_key}"
+            elif settings.s3_endpoint_url:
+                url = f"{settings.s3_endpoint_url.rstrip('/')}/{settings.s3_bucket}/{object_key}"
+            else:
+                url = f"https://{settings.s3_bucket}.s3.{settings.s3_region}.amazonaws.com/{object_key}"
+            return AudioUploadResponse(url=url)
+        except Exception as exc:
+            logger.warning(f"S3 audio upload mislukt, lokale opslag: {exc}")
+
+    audio_dir = Path("media_storage/blog/audio")
+    audio_dir.mkdir(parents=True, exist_ok=True)
+    (audio_dir / filename).write_bytes(content)
+
+    url = f"{settings.api_base_url.rstrip('/')}{settings.api_v1_prefix}/blog/audio/{filename}"
+    return AudioUploadResponse(url=url)
+
+
+@router.get("/audio/{filename}")
+async def serve_blog_audio(filename: str):
+    """Serveert lokaal opgeslagen podcast-audio (development)."""
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(400, detail="Ongeldig bestandspad")
+    file_path = Path("media_storage/blog/audio") / filename
+    if not file_path.exists():
+        raise HTTPException(404, detail="Audio niet gevonden")
+    return FileResponse(str(file_path))
+
+# ---------------------------------------------------------------------------
 # Individuele post endpoints (NA de statische routes!)
 # ---------------------------------------------------------------------------
+
 
 @router.get("/{post_id}", response_model=BlogPostResponse)
 async def get_blog_post(
