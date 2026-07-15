@@ -26,14 +26,6 @@ const webSiteJsonLd = {
   "@type": "WebSite",
   name: "BewaardVoorJou.nl",
   url: "https://bewaardvoorjou.nl",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: "https://bewaardvoorjou.nl/search?q={search_term_string}",
-    },
-    "query-input": "required name=search_term_string",
-  },
 };
 
 export default function HomePage() {

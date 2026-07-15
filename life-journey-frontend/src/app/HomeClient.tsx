@@ -23,7 +23,7 @@ import {
   Upload,
 } from "lucide-react";
 
-const VADERDAG_ACTIVE = true; // zet op false na 21 juni
+const VADERDAG_ACTIVE = false; // seizoensvlag: alleen aanzetten rond Vaderdag
 
 export default function Home() {
   const { session, isLoading } = useAuth();
@@ -177,29 +177,31 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2 text-white/95">
                 <CheckCircle className="h-5 w-5 text-green-400" />
-                <span className="font-medium drop-shadow text-sm sm:text-base">GDPR veilig</span>
+                <span className="font-medium drop-shadow text-sm sm:text-base">AVG veilig</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Vaderdag banner */}
-      <section className="bg-[#1a1a1a] py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <p className="text-[#d4af37] text-xs font-bold tracking-widest uppercase mb-1">Vaderdag — 15 juni</p>
-            <p className="text-white font-serif text-xl font-bold">Het mooiste cadeau dat je kunt geven</p>
-            <p className="text-[#aaa] text-sm mt-0.5">Digitale toegang direct · Doos bezorgd binnen 2 weken</p>
+      {/* Vaderdag banner — alleen tonen wanneer de seizoenscampagne actief is */}
+      {VADERDAG_ACTIVE && (
+        <section className="bg-[#1a1a1a] py-6 px-4">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <p className="text-[#d4af37] text-xs font-bold tracking-widest uppercase mb-1">Vaderdag — zondag 21 juni</p>
+              <p className="text-white font-serif text-xl font-bold">Het mooiste cadeau dat je kunt geven</p>
+              <p className="text-[#aaa] text-sm mt-0.5">Digitale toegang direct · Doos bezorgd binnen 2 weken</p>
+            </div>
+            <Link
+              href="/vaderdag"
+              className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
+            >
+              Bekijk het cadeau →
+            </Link>
           </div>
-          <Link
-            href="/vaderdag"
-            className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
-          >
-            Bekijk het cadeau →
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Features Section */}
       <section id="features" className="py-20 px-4 sm:px-6 bg-white scroll-mt-20">
@@ -329,15 +331,15 @@ export default function Home() {
               <CardContent className="p-8">
                 <Shield className="h-12 w-12 text-green-600 mb-4" />
                 <h3 className="text-xl font-serif font-semibold text-slate-900 mb-3">
-                  Bank-niveau versleuteling
+                  Versleutelde opslag
                 </h3>
                 <p className="text-slate-700 leading-relaxed mb-4">
-                  Alle verhalen worden versleuteld opgeslagen. Niemand kan ze lezen zonder jouw toestemming.
+                  Al je verhalen en media worden versleuteld opgeslagen. Toegang is altijd afgeschermd en gekoppeld aan jouw account.
                 </p>
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>End-to-end versleuteling</span>
+                    <span>Versleutelde opslag van je media</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -345,7 +347,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>GDPR-compliant</span>
+                    <span>AVG-compliant</span>
                   </li>
                 </ul>
               </CardContent>
@@ -416,7 +418,7 @@ export default function Home() {
           </div>
 
           <p className="text-sm opacity-90 mb-12">
-            Geen creditcard nodig • Altijd opzegbaar • 100% GDPR veilig
+            Geen creditcard nodig • Altijd opzegbaar • 100% AVG veilig
           </p>
 
           {/* Trust badges */}
