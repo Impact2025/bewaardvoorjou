@@ -56,6 +56,10 @@ export interface BlogPost {
   og_image: string | null;
   keywords: string | null;
   tags: string | null;
+  audio_url: string | null;
+  audio_title: string | null;
+  audio_duration: number | null;
+  transcript: string | null;
   status: "draft" | "published";
   published_at: string | null;
   created_at: string;
@@ -88,6 +92,10 @@ export interface BlogPostCreate {
   og_image?: string;
   keywords?: string;
   tags?: string;
+  audio_url?: string | null;
+  audio_title?: string | null;
+  audio_duration?: number | null;
+  transcript?: string | null;
   published_at?: string | null;
 }
 
@@ -191,6 +199,23 @@ export const blogApi = {
       throw new Error(err.detail ?? "Content verbetering mislukt");
     }
     return res.text();
+  },
+
+  uploadAudio: async (file: File): Promise<string> => {
+    const token = getToken();
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_BASE}/blog/audio/upload`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail ?? "Audio upload mislukt");
+    }
+    const { url } = await res.json();
+    return url as string;
   },
 
   uploadVideo: async (file: File): Promise<string> => {

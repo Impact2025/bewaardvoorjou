@@ -50,6 +50,12 @@ class BlogPost(Base):
     keywords = Column(String(500), nullable=True)
     tags = Column(String(500), nullable=True)
 
+    # Podcast / NotebookLM audio
+    audio_url = Column(String(1024), nullable=True)
+    audio_title = Column(String(300), nullable=True)
+    audio_duration = Column(Integer, nullable=True)
+    transcript = Column(Text, nullable=True)
+
     # Statistieken
     view_count = Column(Integer, nullable=False, default=0, server_default="0")
 
@@ -79,6 +85,10 @@ class BlogPost(Base):
             "og_image": self.og_image,
             "keywords": self.keywords,
             "tags": self.tags,
+            "audio_url": self.audio_url,
+            "audio_title": self.audio_title,
+            "audio_duration": self.audio_duration,
+            "transcript": self.transcript,
             "view_count": self.view_count,
             "status": self.status,
             "published_at": self.published_at.isoformat() if self.published_at else None,
