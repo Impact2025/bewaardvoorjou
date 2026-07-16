@@ -5,6 +5,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { buildProductJsonLd } from "@/lib/pricing";
 import {
   ArrowRight,
   CheckCircle,
@@ -84,32 +85,16 @@ const jsonLd = {
         ],
       },
     },
-    {
-      "@type": "Product",
+    buildProductJsonLd({
       name: "De Erfgoed Box — cadeau voor opa van 80 jaar",
-      image: "https://bewaardvoorjou.nl/erfgoed-box.jpg",
       description:
-        "Een luxe cadeaubox waarmee opa zijn complete levensverhaal vastlegt: 58 hoofdstukken, een persoonlijke gespreksleider, een magneetdoos met goudfolie, een rustgevende thee, een zandloper en een USB-stick in walnotenhout.",
-      brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
+        "Een luxe cadeaubox waarmee opa zijn complete levensverhaal vastlegt: 58 hoofdstukken, een persoonlijke gespreksleider, een A5 magneetdoos, een grafiet potlood, een A6 notitieboekje en een USB-stick in walnotenhout.",
+      url: PAGE_URL,
       offers: [
-        {
-          "@type": "Offer",
-          name: "Erfgoed Box (Pakket 1)",
-          price: "149.00",
-          priceCurrency: "EUR",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED&gift=true",
-        },
-        {
-          "@type": "Offer",
-          name: "Nalatenschap (Pakket 2)",
-          price: "229.00",
-          priceCurrency: "EUR",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=NALATENSCHAP&gift=true",
-        },
+        { code: "ERFGOED", name: "Erfgoed Box (Pakket 1)", gift: true },
+        { code: "NALATENSCHAP", name: "Nalatenschap (Pakket 2)", gift: true },
       ],
-    },
+    }),
     {
       "@type": "FAQPage",
       mainEntity: [

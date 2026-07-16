@@ -5,6 +5,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { buildProductJsonLd } from "@/lib/pricing";
 import {
   ArrowRight,
   CheckCircle,
@@ -85,34 +86,13 @@ const jsonLd = {
         ],
       },
     },
-    {
-      "@type": "Product",
+    buildProductJsonLd({
       name: "Erfgoed Box — Levensverhaal bewaren op USB",
-      image: "https://bewaardvoorjou.nl/erfgoed-box.jpg",
       description:
         "Een hybride aanpak: bewaar je levensverhaal veilig in de cloud én op een fysieke USB-stick in walnotenhout. Geen vendor lock-in, altijd exporteerbaar in open bestandsformaten.",
-      brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
-      offers: [
-        {
-          "@type": "Offer",
-          name: "Erfgoed Box",
-          price: "149",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-06-26",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED",
-        },
-        {
-          "@type": "Offer",
-          name: "Nalatenschap",
-          price: "229",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-06-26",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=NALATENSCHAP",
-        },
-      ],
-    },
+      url: PAGE_URL,
+      offers: [{ code: "ERFGOED", name: "Erfgoed Box" }, { code: "NALATENSCHAP" }],
+    }),
     {
       "@type": "FAQPage",
       mainEntity: [

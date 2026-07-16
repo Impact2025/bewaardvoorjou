@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Check, Shield, Truck, Phone, Star, Gift, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  BOX_IS_PREORDER,
+  ERFGOED_SOLD_OUT,
+  NALATENSCHAP_SOLD_OUT,
+  priceLabel,
+} from "@/lib/pricing";
 
 // ─── Configuratie ─────────────────────────────────────────────────────────────
 
-// Zet op false zodra dozen beschikbaar zijn (over 2 weken)
-const BOX_IS_PREORDER = true;
-const ERFGOED_SOLD_OUT = true;
-const NALATENSCHAP_SOLD_OUT = true;
+// Prijzen en voorraadvlaggen komen uit @/lib/pricing, zodat de kaarten en de
+// structured data op deze pagina nooit uit elkaar kunnen lopen.
 
 // Vaderdag deal actief t/m 15 juni 2026
 const VADERDAG_DEAL_ACTIVE = true;
@@ -209,7 +213,7 @@ export default function PricingContent() {
           <PackageCard
             id="VERHAAL"
             name="Verhaal"
-            price="€79"
+            price={priceLabel("VERHAAL")}
             priceSub={VADERDAG_DEAL_ACTIVE ? "5 jaar inbegrepen — Vaderdag deal" : "5 jaar inbegrepen"}
             subtitle="Het complete digitale levensverhaal"
             hero={false}
@@ -236,7 +240,7 @@ export default function PricingContent() {
           <PackageCard
             id="ERFGOED"
             name="Erfgoed"
-            price="€149"
+            price={priceLabel("ERFGOED")}
             priceSub={VADERDAG_DEAL_ACTIVE ? "5 jaar inbegrepen + doos — Vaderdag deal" : "5 jaar inbegrepen (doos inbegrepen)"}
             priceNote={undefined}
             image="/erfgoed-box.jpg"
@@ -267,7 +271,7 @@ export default function PricingContent() {
           <PackageCard
             id="NALATENSCHAP"
             name="Nalatenschap"
-            price="€229"
+            price={priceLabel("NALATENSCHAP")}
             priceSub="eenmalig — nooit meer betalen"
             subtitle="Eén keer betalen, voor altijd bewaard"
             hero={false}

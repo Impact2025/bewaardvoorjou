@@ -2,37 +2,41 @@ import type { Metadata } from "next";
 import PricingContent from "./PricingContent";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { buildProductJsonLd, priceLabel, SITE_URL } from "@/lib/pricing";
+
+const PAGE_URL = `${SITE_URL}/pricing`;
+
+const PACKAGE_SUMMARY = `Verhaal (${priceLabel("VERHAAL")}), Erfgoed (${priceLabel(
+  "ERFGOED",
+)}) of Nalatenschap (${priceLabel("NALATENSCHAP")} eenmalig, levenslang)`;
+
+const DESCRIPTION = `Bekijk de BewaardVoorJou prijzen. Kies het pakket dat past bij jouw moment: ${PACKAGE_SUMMARY}. Gratis te starten, geen creditcard nodig.`;
 
 export const metadata: Metadata = {
   title: "Pakketten & Prijzen — Bewaardvoorjou",
-  description:
-    "Bekijk de BewaardVoorJou prijzen: eenmalige betaling. Geen abonnement. Kies het pakket dat past bij jouw moment: Het Begin (€89), De Erfgoed Box (€249) of Voor Altijd (€399).",
+  description: DESCRIPTION,
   openGraph: {
     title: "Pakketten & Prijzen | BewaardVoorJou.nl",
-    description:
-      "Bekijk de BewaardVoorJou prijzen: eenmalige betaling. Geen abonnement. Kies het pakket dat past bij jouw moment: Het Begin (€89), De Erfgoed Box (€249) of Voor Altijd (€399).",
-    url: "https://bewaardvoorjou.nl/pricing",
+    description: DESCRIPTION,
+    url: PAGE_URL,
   },
   alternates: {
-    canonical: "https://bewaardvoorjou.nl/pricing",
+    canonical: PAGE_URL,
   },
 };
-
-const PAGE_URL = "https://bewaardvoorjou.nl/pricing";
 
 const pricingJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebPage",
-      name: "Pakketten & Prijzen — Eenmalige betaling, geen abonnement",
-      description:
-        "Bekijk de pakketten van BewaardVoorJou.nl: Het Begin (€89), De Erfgoed Box (€249) of Voor Altijd (€399). Eenmalige betaling, geen abonnement.",
+      name: "Pakketten & Prijzen — Bewaardvoorjou",
+      description: DESCRIPTION,
       url: PAGE_URL,
       breadcrumb: {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://bewaardvoorjou.nl" },
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
           {
             "@type": "ListItem",
             position: 2,
@@ -42,57 +46,30 @@ const pricingJsonLd = {
         ],
       },
     },
-    {
-      "@type": "ItemList",
-      name: "BewaardVoorJou.nl Pakketten",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          item: {
-            "@type": "Product",
-            name: "Het Begin",
-            description: "Voor wie voorzichtig wil beginnen. 3 levensfasen, 30 AI-interviews, 50 foto's, 3 jaar cloud-opslag.",
-            offers: {
-              "@type": "Offer",
-              price: "89",
-              priceCurrency: "EUR",
-              availability: "https://schema.org/InStock",
-            },
-          },
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          item: {
-            "@type": "Product",
-            name: "De Erfgoed Box",
-            description: "De complete ervaring om samen te beleven. Premium magneetdoos, onbeperkte AI-interviews, 10 jaar cloud-opslag.",
-            offers: {
-              "@type": "Offer",
-              price: "249",
-              priceCurrency: "EUR",
-              availability: "https://schema.org/InStock",
-            },
-          },
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          item: {
-            "@type": "Product",
-            name: "Voor Altijd",
-            description: "Het ultieme erfstuk voor generaties. Levenslange cloud-opslag, 60 min biografie video-consult, testament-integratie.",
-            offers: {
-              "@type": "Offer",
-              price: "399",
-              priceCurrency: "EUR",
-              availability: "https://schema.org/InStock",
-            },
-          },
-        },
-      ],
-    },
+    // Losse Product-nodes, geen ItemList: producten die als ListItem in een
+    // ItemList hangen tellen niet mee als product-snippet en waren daardoor
+    // onzichtbaar in Search Console.
+    buildProductJsonLd({
+      name: "Verhaal — het complete digitale levensverhaal",
+      description:
+        "Het complete digitale levensverhaal: alle 58 hoofdstukken, onbeperkte gesprekssessies met de persoonlijke gespreksleider, digitaal archief, deellinks met verlooptijd en PDF-export.",
+      url: PAGE_URL,
+      offers: [{ code: "VERHAAL" }],
+    }),
+    buildProductJsonLd({
+      name: "Erfgoed — met de fysieke herinneringsdoos",
+      description:
+        "Alles van Verhaal, plus de Erfgoed Box: een A5 magneetdoos, een handgemaakte USB-stick in walnotenhout, een grafiet potlood en een A6 notitieboekje. Tot 5 familieleden lezen mee.",
+      url: PAGE_URL,
+      offers: [{ code: "ERFGOED" }],
+    }),
+    buildProductJsonLd({
+      name: "Nalatenschap — eenmalig betalen, voor altijd bewaard",
+      description:
+        "Levenslange digitale toegang voor een eenmalig bedrag. Inclusief de Erfgoed Box, een certificaat in waszegel-envelop, toegang voor 5 familieleden en een jaarlijkse USB-export backup.",
+      url: PAGE_URL,
+      offers: [{ code: "NALATENSCHAP" }],
+    }),
   ],
 };
 

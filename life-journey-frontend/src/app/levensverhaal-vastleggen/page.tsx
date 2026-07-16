@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LandingClient from "./LandingClient";
+import { buildProductJsonLd } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: { absolute: "Levensverhaal vastleggen? De complete oplossing [2026] | BewaardVoorJou.nl" },
@@ -49,42 +50,13 @@ const jsonLd = {
         ],
       },
     },
-    {
-      "@type": "Product",
+    buildProductJsonLd({
       name: "BewaardVoorJou.nl — Levensverhaal vastleggen",
       description:
         "Je levensverhaal vastleggen met een AI-interviewer die de vragen stelt. Kies uit drie pakketten: Verhaal, Erfgoed of Nalatenschap.",
-      brand: { "@type": "Brand", name: "BewaardVoorJou.nl" },
-      offers: [
-        {
-          "@type": "Offer",
-          name: "Verhaal",
-          price: "79",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-06-26",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=VERHAAL",
-        },
-        {
-          "@type": "Offer",
-          name: "Erfgoed",
-          price: "149",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-06-26",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED",
-        },
-        {
-          "@type": "Offer",
-          name: "Nalatenschap",
-          price: "229",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-06-26",
-          availability: "https://schema.org/InStock",
-          url: "https://bewaardvoorjou.nl/checkout?package=NALATENSCHAP",
-        },
-      ],
-    },
+      url: "https://bewaardvoorjou.nl/levensverhaal-vastleggen",
+      offers: [{ code: "VERHAAL" }, { code: "ERFGOED" }, { code: "NALATENSCHAP" }],
+    }),
   ],
 };
 
