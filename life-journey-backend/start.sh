@@ -18,6 +18,13 @@ for attempt in 1 2 3; do
   fi
 done
 
+# One-shot self-healing: herstel tekst-inhoud (text_content) uit R2/S3 voor
+# bestaande tekst-opnames die hun inhoud alleen als .txt hadden. Idempotent
+# (raakt alleen rijen met text_content IS NULL) en niet-fataal: faalt dit, dan
+# start de app gewoon door.
+echo "Backfilling text_content from R2 (self-healing, non-fatal)..."
+python scripts/backfill_text_from_r2.py --apply || echo "Backfill overgeslagen/mislukt (niet-fataal)."
+
 # Start Celery workers in background
 echo "Starting Celery email worker..."
 python -m celery -A app.services.email.tasks:celery_app worker --loglevel=info -Q celery --concurrency=2 &
