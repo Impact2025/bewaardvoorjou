@@ -212,6 +212,14 @@ def generate_transcript(asset_id: str) -> None:
         db.commit()
         logger.info(f"Successfully created {len(segments)} transcript segments for asset {asset_id}")
 
+        # Mark the asset ready now that transcription succeeded. The transcribe
+        # task only re-encodes; without this the record stays 'processing' forever
+        # (transcript was the only thing that could advance audio/video state).
+        asset.storage_state = "ready"
+        db.add(asset)
+        db.commit()
+        logger.info(f"Asset {asset_id} marked ready after transcription")
+
         # Detect highlights in the transcribed text
         try:
             logger.info(f"Detecting highlights for asset {asset_id}")

@@ -74,6 +74,24 @@ def presign_upload(
 ) -> MediaPresignResponse:
   _ensure_journey(payload.journey_id, db, current_user)
   assert_can_record(db, current_user, payload.journey_id, payload.chapter_id.value)
+
+  # Text is edited repeatedly per chapter: keep a single "current" record and
+  # supersede the previous one so the recordings list doesn't pile up duplicates.
+  if payload.modality.value == "text":
+    prev = (
+      db.query(MediaAssetModel)
+      .filter(
+        MediaAssetModel.journey_id == payload.journey_id,
+        MediaAssetModel.chapter_id == payload.chapter_id.value,
+        MediaAssetModel.modality == "text",
+        MediaAssetModel.is_current.is_(True),
+      )
+      .first()
+    )
+    if prev:
+      prev.is_current = False
+      db.add(prev)
+
   response = build_presigned_upload(payload)
 
   # Use the object_key from the presign response (which includes chapter_id in the path)
@@ -87,6 +105,7 @@ def presign_upload(
     size_bytes=payload.size_bytes,
     storage_state="pending",
     recorded_at=datetime.now(timezone.utc),
+    is_current=True,
   )
 
   db.add(asset)
@@ -138,9 +157,13 @@ def list_media(
   current_user: User = Depends(get_current_user),
 ) -> list[MediaAsset]:
   _ensure_journey(journey_id, db, current_user)
+  # Hide superseded (old) text versions; show the current version of each save.
   assets = (
     db.query(MediaAssetModel)
-    .filter(MediaAssetModel.journey_id == journey_id)
+    .filter(
+      MediaAssetModel.journey_id == journey_id,
+      MediaAssetModel.is_current.is_(True),
+    )
     .order_by(MediaAssetModel.recorded_at.desc())
     .all()
   )
@@ -176,20 +199,27 @@ def finalize_upload(
   if journey is None or journey.user_id != current_user.id:
     raise HTTPException(status_code=403, detail="Geen toegang tot dit media-item")
 
-  # Text assets are fully stored the moment /complete runs: transcode (ffmpeg)
-  # and transcription (Whisper) are audio/video-only, so the async jobs would
-  # early-return and the state could never advance past 'processing'. Mark text
-  # as 'ready' immediately; still enqueue the jobs (no-op for text) for parity.
-  if asset.modality == "text":
-    asset.storage_state = "ready"
-  else:
-    asset.storage_state = "processing"
-    enqueue_transcode_job(asset_id)
-    enqueue_transcript_job(asset_id)
-
+  # Text is fully stored on /complete (transcribe/transcript are audio/video-only),
+  # so mark it ready immediately. Audio/video start in 'processing' and are advanced
+  # by the worker; if the worker is unavailable we still flip to 'ready' so playback
+  # works (transcript/highlights are best-effort and simply absent).
   asset.recorded_at = asset.recorded_at or datetime.now(timezone.utc)
   db.add(asset)
   db.commit()
+
+  if asset.modality != "text":
+    asset.storage_state = "processing"
+    db.add(asset)
+    db.commit()
+    enqueue_transcode_job(asset_id)
+    if not enqueue_transcript_job(asset_id):
+      logger.warning(
+        f"Transcript job not enqueued for {asset_id} (worker unavailable); "
+        f"marking asset ready without transcript."
+      )
+      asset.storage_state = "ready"
+      db.add(asset)
+      db.commit()
 
   # Milestone unlock emails (fired on upload, not on chapter-complete)
   try:

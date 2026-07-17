@@ -4,6 +4,7 @@ def utc_now():
     """Returns current UTC time as timezone-aware datetime."""
     return datetime.now(timezone.utc)
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, JSON, String
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from app.models.base import Base
@@ -20,6 +21,17 @@ class MediaAsset(Base):
   size_bytes = Column(Integer, nullable=False, default=0)
   storage_state = Column(String(32), nullable=False, default="pending")
   recorded_at = Column(DateTime, default=utc_now, nullable=False)
+  # Versioning for text: only the latest save per (journey, chapter) is current.
+  # Superseded saves point replaced_by at the newer asset id and is_current=False.
+  is_current = Column(Boolean, nullable=False, default=True, index=False)
+  replaced_by = Column(String, nullable=True)
+
+  __table_args__ = (
+    sa.Index(
+      "ix_mediaasset_current",
+      "journey_id", "chapter_id", "modality", "is_current",
+    ),
+  )
 
   # Relationships for eager loading
   transcripts = relationship("TranscriptSegment", backref="media_asset", lazy="select", cascade="all, delete-orphan")
