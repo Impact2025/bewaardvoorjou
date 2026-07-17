@@ -176,13 +176,20 @@ def finalize_upload(
   if journey is None or journey.user_id != current_user.id:
     raise HTTPException(status_code=403, detail="Geen toegang tot dit media-item")
 
-  asset.storage_state = "processing"
+  # Text assets are fully stored the moment /complete runs: transcode (ffmpeg)
+  # and transcription (Whisper) are audio/video-only, so the async jobs would
+  # early-return and the state could never advance past 'processing'. Mark text
+  # as 'ready' immediately; still enqueue the jobs (no-op for text) for parity.
+  if asset.modality == "text":
+    asset.storage_state = "ready"
+  else:
+    asset.storage_state = "processing"
+    enqueue_transcode_job(asset_id)
+    enqueue_transcript_job(asset_id)
+
   asset.recorded_at = asset.recorded_at or datetime.now(timezone.utc)
   db.add(asset)
   db.commit()
-
-  enqueue_transcode_job(asset_id)
-  enqueue_transcript_job(asset_id)
 
   # Milestone unlock emails (fired on upload, not on chapter-complete)
   try:
