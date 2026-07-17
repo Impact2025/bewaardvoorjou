@@ -44,6 +44,9 @@ class BlogPostUpdate(BaseModel):
     audio_title: Optional[str] = Field(None, max_length=300)
     audio_duration: Optional[int] = None
     transcript: Optional[str] = None
+
+
+class BlogPostResponse(BaseModel):
     id: str
     author_id: str
     section: str
