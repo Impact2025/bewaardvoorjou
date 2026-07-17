@@ -2,11 +2,11 @@
 set -e
 
 # Run database migrations (met retry voor Neon.tech cold-start)
-# Gebruik een specifieke target-revisie in plaats van `upgrade head`:
-# de migratie-graaf heeft meerdere heads, waardoor `head` crasht met
-# "Multiple head revisions are present". Een vaste leaf is idempotent
-# (Alembic slaat over als hij al toegepast is).
-LATEST_REVISION="20260715_blog_podcast_audio"
+# Gebruik de huidige merge-head als target. Alembic `upgrade head` kan nog steeds
+# crashen als er tijdelijk meerdere heads zijn; een vaste leaf is idempotent
+# (Alembic slaat over als hij al toegepast is) en garandeert dat alle kolommen
+# (o.a. mediaasset.is_current) bestaan voordat de app opstart.
+LATEST_REVISION="20260717_merge_heads"
 echo "Running alembic migrations (target: $LATEST_REVISION)..."
 for attempt in 1 2 3; do
   python -m alembic upgrade "$LATEST_REVISION" && break
