@@ -178,6 +178,7 @@ def list_media(
       storage_state=item.storage_state,
       recorded_at=item.recorded_at,
       object_key=item.object_key,
+      text_content=item.text_content if item.modality == "text" else None,
     )
     for item in assets
   ]
@@ -265,7 +266,10 @@ def get_transcript(
   )
 
   if not segments:
-    # Still processing
+    # Text assets keep their content in text_content (DB is source of truth).
+    if asset.modality == "text" and asset.text_content is not None:
+      return {"ready": True, "text": asset.text_content, "segment_count": 0}
+    # Audio/video still transcribing (or worker unavailable).
     return {"ready": False, "text": None, "storage_state": asset.storage_state}
 
   text = " ".join(s.text for s in segments)
@@ -327,6 +331,23 @@ async def local_upload(
     # Determine asset_id (format: journey_id/chapter_id/asset_id/filename)
     parts = safe_object_key.split("/")
     asset_id_from_key = parts[2] if len(parts) >= 3 else None
+
+    # --- Text: store content IN the database (source of truth). ---
+    # Object storage is ephemeral on Railway; keeping text only as a .txt caused
+    # "Kon tekst niet laden" after every redeploy. We still attempt the object
+    # upload below for backward-compat, but the DB copy is authoritative.
+    if filename.lower().endswith(".txt") and asset_id_from_key:
+      try:
+        text_value = body.decode("utf-8")
+      except UnicodeDecodeError:
+        text_value = body.decode("utf-8", errors="replace")
+      asset = db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id_from_key).first()
+      if asset:
+        asset.text_content = text_value
+        asset.storage_state = "ready"
+        db.add(asset)
+        db.commit()
+        logger.info(f"Stored text_content in DB for asset {asset_id_from_key} ({len(text_value)} chars)")
 
     # --- Upload to S3/R2 server-side when configured ---
     if app_settings.s3_bucket and app_settings.aws_access_key_id and app_settings.aws_secret_access_key:
@@ -437,6 +458,17 @@ async def serve_file(
   """
   object_key = _authorize_object_key(object_key, db, current_user)
 
+  # Text: the database is the source of truth (object storage is ephemeral).
+  if object_key.endswith(".txt"):
+    parts = object_key.split("/")
+    asset_id = parts[2] if len(parts) >= 3 else None
+    asset = (
+      db.query(MediaAssetModel).filter(MediaAssetModel.id == asset_id).first()
+      if asset_id else None
+    )
+    if asset is not None and asset.text_content is not None:
+      return {"content": asset.text_content, "type": "local"}
+
   if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
     try:
       endpoint_url = settings.s3_endpoint_url
@@ -503,3 +535,88 @@ async def serve_file(
     media_type=media_type,
     filename=file_path.name,
   )
+
+
+@router.post("/admin/backfill-text-content")
+@limiter.limit(RateLimits.WRITE_STANDARD)
+def backfill_text_content(
+  request: Request,
+  dry_run: bool = True,
+  db: Session = Depends(get_db),
+  current_user: User = Depends(get_current_user),
+) -> dict:
+  """
+  Self-healing recovery: for every text asset without text_content, read the
+  original .txt from R2/S3 (or local disk) and store it in the DB.
+
+  Runs in production where the R2 credentials live. Admin-only. Idempotent.
+  Call with ?dry_run=false to write.
+  """
+  if not current_user.is_admin:
+    raise HTTPException(status_code=403, detail="Admin vereist")
+
+  assets = (
+    db.query(MediaAssetModel)
+    .filter(MediaAssetModel.modality == "text", MediaAssetModel.text_content.is_(None))
+    .all()
+  )
+
+  s3_client = None
+  if settings.s3_bucket and settings.aws_access_key_id and settings.aws_secret_access_key:
+    endpoint_url = settings.s3_endpoint_url
+    if not endpoint_url and settings.s3_region:
+      endpoint_url = f"https://s3.{settings.s3_region}.amazonaws.com"
+    s3_client = boto3.client(
+      "s3",
+      region_name=settings.s3_region,
+      endpoint_url=endpoint_url,
+      aws_access_key_id=settings.aws_access_key_id,
+      aws_secret_access_key=settings.aws_secret_access_key,
+    )
+
+  recovered, from_s3, from_local, missing = 0, 0, 0, 0
+  missing_ids: list[str] = []
+
+  for asset in assets:
+    text_value = None
+    if s3_client is not None:
+      try:
+        obj = s3_client.get_object(Bucket=settings.s3_bucket, Key=asset.object_key)
+        text_value = obj["Body"].read().decode("utf-8", errors="replace")
+        from_s3 += 1
+      except Exception:
+        text_value = None
+    if text_value is None:
+      try:
+        fp = local_storage.get_file_path(asset.object_key)
+        if fp.exists():
+          text_value = fp.read_text(encoding="utf-8", errors="replace")
+          from_local += 1
+      except Exception:
+        text_value = None
+
+    if text_value is None:
+      missing += 1
+      if len(missing_ids) < 50:
+        missing_ids.append(asset.id)
+      continue
+
+    recovered += 1
+    if not dry_run:
+      asset.text_content = text_value
+      asset.storage_state = "ready"
+      db.add(asset)
+
+  if not dry_run:
+    db.commit()
+
+  return {
+    "dry_run": dry_run,
+    "candidates": len(assets),
+    "recovered": recovered,
+    "from_s3": from_s3,
+    "from_local": from_local,
+    "missing": missing,
+    "missing_sample": missing_ids,
+    "s3_configured": s3_client is not None,
+  }

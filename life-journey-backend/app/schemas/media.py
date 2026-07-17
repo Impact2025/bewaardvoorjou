@@ -15,6 +15,7 @@ class MediaAsset(BaseModel):
   storage_state: str
   recorded_at: datetime
   object_key: str | None = None
+  text_content: str | None = None
 
 
 class MediaPresignRequest(BaseModel):

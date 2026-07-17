@@ -368,6 +368,7 @@ def submit_text_answer(
     sentiment=None,
     emotion_hint=None,
   )
+  asset.text_content = content
   db.add(asset)
   db.add(segment)
   db.commit()

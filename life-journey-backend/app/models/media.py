@@ -21,6 +21,10 @@ class MediaAsset(Base):
   size_bytes = Column(Integer, nullable=False, default=0)
   storage_state = Column(String(32), nullable=False, default="pending")
   recorded_at = Column(DateTime, default=utc_now, nullable=False)
+  # Text content lives IN the database (plain text, <=5000 chars). Object storage
+  # (R2/local disk) is ephemeral on Railway and wiped on redeploy, which lost text.
+  # For text assets this column is the source of truth; object_key is a legacy path.
+  text_content = Column(sa.Text, nullable=True)
   # Versioning for text: only the latest save per (journey, chapter) is current.
   # Superseded saves point replaced_by at the newer asset id and is_current=False.
   is_current = Column(Boolean, nullable=False, default=True, index=False)

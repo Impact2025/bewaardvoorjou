@@ -6,7 +6,7 @@ set -e
 # crashen als er tijdelijk meerdere heads zijn; een vaste leaf is idempotent
 # (Alembic slaat over als hij al toegepast is) en garandeert dat alle kolommen
 # (o.a. mediaasset.is_current) bestaan voordat de app opstart.
-LATEST_REVISION="20260717_merge_heads"
+LATEST_REVISION="20260717_text_content"
 echo "Running alembic migrations (target: $LATEST_REVISION)..."
 for attempt in 1 2 3; do
   python -m alembic upgrade "$LATEST_REVISION" && break
