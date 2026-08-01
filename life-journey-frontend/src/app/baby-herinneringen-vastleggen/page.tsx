@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { BabyKennisbankLinks } from "@/components/baby/BabyKennisbankLinks";
 import {
   ArrowRight,
   Mic,
@@ -241,6 +242,12 @@ export default function BabyHerinneringenPage() {
             </div>
           </div>
         </section>
+
+        <BabyKennisbankLinks
+          title="Verder lezen over het eerste jaar"
+          intro="Praktische gidsen uit onze kennisbank — over wat je vastlegt, hoe je het bewaart en wie je erbij betrekt."
+          className="bg-white"
+        />
 
         {/* Duale CTA */}
         <section className="bg-warm-50 py-16 px-4 sm:px-6">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BookOpen, Target, Mail, Users, Camera, UserPlus, Check, type LucideIcon } from "lucide-react";
 import { BabyHeader } from "@/components/baby/BabyHeader";
 import { BabyFooter } from "@/components/baby/BabyFooter";
+import { BabyKennisbankLinks } from "@/components/baby/BabyKennisbankLinks";
 import { useBabyTheme, THEME_CONFIG, type BabyTheme } from "@/components/baby/BabyThemeContext";
 
 const THEME_LOGOS: Record<BabyTheme, string> = {
@@ -360,42 +361,7 @@ export function VoorBabyContent() {
       </section>
 
       {/* Interne links: KB artikelen over baby */}
-      <section className={`py-16 px-4 sm:px-6 ${t.quoteSection.replace('py-16','').includes('cream') ? 'bg-gradient-to-br from-cream via-white to-warm-sand/20' : 'bg-gradient-to-br from-cream via-white to-warm-sand/20'}`}>
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-serif font-semibold text-slate-900 mb-8 text-center">
-            Lees meer over het eerste jaar
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-6">
-            <Link
-              href="/kennisbank/mijlpalen-baby-eerste-jaar"
-              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
-            >
-              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Mijlpalen baby eerste jaar
-              </h3>
-              <p className="text-sm text-slate-600">Van eerste glimlach tot eerste stapje</p>
-            </Link>
-            <Link
-              href="/kennisbank/digitaal-vs-papieren-babyboek-vergelijking"
-              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
-            >
-              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                Digitaal vs papieren babyboek
-              </h3>
-              <p className="text-sm text-slate-600">Welke past bij jou?</p>
-            </Link>
-            <Link
-              href="/kennisbank/originele-kraamcadeau-ideeen"
-              className="bg-white rounded-xl p-6 border-2 border-neutral-sand hover:border-orange/30 hover:shadow-md transition-all group"
-            >
-              <h3 className="font-serif font-semibold text-slate-900 mb-2 group-hover:text-orange transition-colors">
-                15 originele kraamcadeau ideeën
-              </h3>
-              <p className="text-sm text-slate-600">Cadeautips voor de kraamvisite</p>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <BabyKennisbankLinks />
 
       <BabyFooter />
     </div>
