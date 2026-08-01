@@ -36,7 +36,9 @@ interface ArticleListItem {
 async function getBlogArticles(): Promise<ArticleListItem[]> {
   try {
     const res = await fetch(
-      `${API_BASE}/blog/public/list?section=blog&limit=50`,
+      // limit gelijk aan sitemap.ts (backend max = 200), zodat elk gepubliceerd
+      // artikel vanaf het overzicht bereikbaar blijft als de blog groeit.
+      `${API_BASE}/blog/public/list?section=blog&limit=200`,
       { next: { revalidate: 900 } }
     );
     if (!res.ok) return [];

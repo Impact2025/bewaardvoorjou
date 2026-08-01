@@ -32,7 +32,9 @@ interface ArticleListItem {
 async function getArticles(): Promise<ArticleListItem[]> {
   try {
     const res = await fetch(
-      `${API_BASE}/blog/public/list?section=knowledge&limit=50`,
+      // limit gelijk aan sitemap.ts (backend max = 200): bij limit=50 vielen
+      // de oudste artikelen buiten de lijst en waren ze nergens meer gelinkt.
+      `${API_BASE}/blog/public/list?section=knowledge&limit=200`,
       { next: { revalidate: 3600 } }
     );
     if (!res.ok) return [];
