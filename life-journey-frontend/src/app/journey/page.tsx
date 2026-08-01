@@ -1,10 +1,8 @@
-import { AppShell } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
-import { JourneyExperience } from "@/components/journey/journey-experience";
-import { ProtectedRoute } from "@/components/protected-route";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
-// Redirect from /journey to /chapters for a cleaner URL structure
+// Permanente redirect van /journey naar /chapters voor een schonere URL-structuur.
+// Bewust 308 en geen 307: het is een blijvende verhuizing, zodat Google de oude
+// URL laat vallen in plaats van hem te blijven crawlen.
 export default function JourneyPage() {
-  redirect('/chapters');
+  permanentRedirect("/chapters");
 }

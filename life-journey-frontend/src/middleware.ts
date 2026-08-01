@@ -18,6 +18,46 @@ function isSafeRedirect(pathname: string): boolean {
   return pathname.startsWith("/") && !pathname.startsWith("//");
 }
 
+/**
+ * Privépaden die nooit in de zoekresultaten horen. We zetten hier een
+ * X-Robots-Tag in plaats van een `metadata.robots` per route, omdat een deel
+ * van deze layouts client components zijn (o.a. /admin) en dus geen metadata
+ * kan exporteren. Eén centrale lijst voorkomt bovendien dat een nieuwe
+ * subroute het per ongeluk mist.
+ */
+const PRIVATE_PREFIXES = [
+  "/admin",
+  "/chapter",
+  "/chapters",
+  "/checkout",
+  "/dashboard",
+  "/email-bevestigen",
+  "/email-verificeren",
+  "/family",
+  "/instellingen",
+  "/journey",
+  "/legacy",
+  "/login",
+  "/memos",
+  "/onboarding",
+  "/onboarding-wizard",
+  "/overview",
+  "/record",
+  "/recordings",
+  "/register",
+  "/timeline",
+  "/uitnodiging",
+  "/vertel",
+  "/wachtwoord-resetten",
+  "/wachtwoord-vergeten",
+];
+
+function isPrivatePath(pathname: string): boolean {
+  return PRIVATE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") || "";
@@ -36,11 +76,23 @@ export function middleware(request: NextRequest) {
       const loginUrl = new URL("/login", request.url);
       const redirect = isSafeRedirect(pathname) ? pathname : "/admin";
       loginUrl.searchParams.set("redirect", redirect);
-      return NextResponse.redirect(loginUrl);
+      const res = NextResponse.redirect(loginUrl);
+      res.headers.set("X-Robots-Tag", "noindex, nofollow");
+      return res;
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // ── Privépaden uit de index houden ──
+  // Deze paden zijn bewust wél crawlbaar in robots.txt: Google moet de pagina
+  // kunnen ophalen om deze noindex te zien. Blokkeren via robots.txt zou juist
+  // betekenen dat reeds geïndexeerde URL's blijven staan.
+  if (isPrivatePath(pathname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  return response;
 }
 
 export const config = {

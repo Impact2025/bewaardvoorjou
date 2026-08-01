@@ -1,104 +1,108 @@
 # robots.txt for Bewaard voor jou
 # https://bewaardvoorjou.nl
+#
+# Opzet:
+#  - Googlebot mag álles crawlen behalve /api/. De privépaden (dashboard,
+#    checkout, admin, …) sturen een `X-Robots-Tag: noindex` mee vanuit
+#    src/middleware.ts. Google moet die pagina's kúnnen ophalen om de noindex
+#    te lezen; een Disallow zou dat blokkeren en reeds geïndexeerde URL's
+#    juist in de index laten staan.
+#  - Alle overige bots krijgen de privépaden helemaal niet te zien.
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+# Google-Extended stuurt of onze content gebruikt mag worden voor Gemini/
+# AI-antwoorden. Bewust toegestaan: we willen zichtbaar zijn in AI-overzichten.
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /chapter
+Disallow: /chapters
+Disallow: /checkout
+Disallow: /dashboard
+Disallow: /email-bevestigen
+Disallow: /email-verificeren
+Disallow: /family
+Disallow: /instellingen
+Disallow: /journey
+Disallow: /legacy
+Disallow: /login
+Disallow: /memos
+Disallow: /onboarding
+Disallow: /overview
+Disallow: /record
+Disallow: /recordings
+Disallow: /register
+Disallow: /timeline
+Disallow: /uitnodiging
+Disallow: /vertel
+Disallow: /wachtwoord-resetten
+Disallow: /wachtwoord-vergeten
+
+# AI-zoekmachines mogen de publieke marketingcontent (/blog, /kennisbank,
+# landingspagina's) lezen, zodat we zichtbaar zijn in AI-antwoorden.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /chapter
+Disallow: /chapters
+Disallow: /checkout
+Disallow: /dashboard
+Disallow: /email-bevestigen
+Disallow: /email-verificeren
+Disallow: /family
+Disallow: /instellingen
+Disallow: /journey
+Disallow: /legacy
+Disallow: /login
+Disallow: /memos
+Disallow: /onboarding
+Disallow: /overview
+Disallow: /record
+Disallow: /recordings
+Disallow: /register
+Disallow: /timeline
+Disallow: /uitnodiging
+Disallow: /vertel
+Disallow: /wachtwoord-resetten
+Disallow: /wachtwoord-vergeten
 
 User-agent: *
 Allow: /
-Disallow: /dashboard/
-Disallow: /chapters/
-Disallow: /onboarding/
-Disallow: /admin/
 Disallow: /api/
-Disallow: /vertel
-Disallow: /record
-Disallow: /recordings
-Disallow: /memos
-Disallow: /overview
-Disallow: /timeline
+Disallow: /admin
+Disallow: /chapter
+Disallow: /chapters
+Disallow: /checkout
+Disallow: /dashboard
+Disallow: /email-bevestigen
+Disallow: /email-verificeren
+Disallow: /family
+Disallow: /instellingen
 Disallow: /journey
 Disallow: /legacy
-Disallow: /family
-Disallow: /checkout
-Disallow: /instellingen
+Disallow: /login
+Disallow: /memos
+Disallow: /onboarding
+Disallow: /overview
+Disallow: /record
+Disallow: /recordings
+Disallow: /register
+Disallow: /timeline
+Disallow: /uitnodiging
+Disallow: /vertel
+Disallow: /wachtwoord-resetten
+Disallow: /wachtwoord-vergeten
 
 # Sitemap
 Sitemap: https://bewaardvoorjou.nl/sitemap.xml
-
-# AI-zoekmachines mogen de publieke marketingcontent (/blog, /kennisbank,
-# landingspagina's) lezen, zodat we zichtbaar zijn in AI-antwoorden. De
-# privépaden hierboven blijven voor iedereen geblokkeerd, want deze bots
-# vallen terug op de regels van "User-agent: *".
-User-agent: GPTBot
-Allow: /
-Disallow: /dashboard/
-Disallow: /chapters/
-Disallow: /onboarding/
-Disallow: /admin/
-Disallow: /api/
-Disallow: /vertel
-Disallow: /record
-Disallow: /recordings
-Disallow: /memos
-Disallow: /overview
-Disallow: /timeline
-Disallow: /journey
-Disallow: /legacy
-Disallow: /family
-Disallow: /checkout
-Disallow: /instellingen
-
-User-agent: OAI-SearchBot
-Allow: /
-Disallow: /dashboard/
-Disallow: /chapters/
-Disallow: /onboarding/
-Disallow: /admin/
-Disallow: /api/
-Disallow: /vertel
-Disallow: /record
-Disallow: /recordings
-Disallow: /memos
-Disallow: /overview
-Disallow: /timeline
-Disallow: /journey
-Disallow: /legacy
-Disallow: /family
-Disallow: /checkout
-Disallow: /instellingen
-
-User-agent: ChatGPT-User
-Allow: /
-Disallow: /dashboard/
-Disallow: /chapters/
-Disallow: /onboarding/
-Disallow: /admin/
-Disallow: /api/
-Disallow: /vertel
-Disallow: /record
-Disallow: /recordings
-Disallow: /memos
-Disallow: /overview
-Disallow: /timeline
-Disallow: /journey
-Disallow: /legacy
-Disallow: /family
-Disallow: /checkout
-Disallow: /instellingen
-
-User-agent: PerplexityBot
-Allow: /
-Disallow: /dashboard/
-Disallow: /chapters/
-Disallow: /onboarding/
-Disallow: /admin/
-Disallow: /api/
-Disallow: /vertel
-Disallow: /record
-Disallow: /recordings
-Disallow: /memos
-Disallow: /overview
-Disallow: /timeline
-Disallow: /journey
-Disallow: /legacy
-Disallow: /family
-Disallow: /checkout
-Disallow: /instellingen
