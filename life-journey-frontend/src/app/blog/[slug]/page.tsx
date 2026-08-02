@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
@@ -8,6 +8,7 @@ import { BlogViewTracker } from "@/components/blog/BlogViewTracker";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
+import { pickRelatedArticles } from "@/lib/related-articles";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -16,6 +17,7 @@ interface BlogPost {
   id: string;
   title: string;
   slug: string;
+  section: string;
   content: string;
   excerpt: string | null;
   tags: string | null;
@@ -62,20 +64,20 @@ async function getArticle(slug: string): Promise<BlogPost | null> {
 }
 
 async function getRelatedArticles(
-  tags: string | null,
   excludeSlug: string
 ): Promise<ArticleListItem[]> {
-  if (!tags) return [];
-  const firstTag = tags.split(",")[0]?.trim();
-  if (!firstTag) return [];
   try {
+    // Voorheen: filteren op de eerste tag. Dat gaf niets terug voor de 6
+    // blogartikelen zonder tags, en weinig voor de rest — de meeste tags
+    // komen precies één keer voor. pickRelatedArticles gebruikt tags nog wel
+    // voor relevantie, maar leunt er niet meer op voor de dekking.
     const res = await fetch(
-      `${API_BASE}/blog/public/list?section=blog&tag=${encodeURIComponent(firstTag)}&limit=4`,
+      `${API_BASE}/blog/public/list?section=blog&limit=200`,
       { next: { revalidate: 900 } }
     );
     if (!res.ok) return [];
     const articles: ArticleListItem[] = await res.json();
-    return articles.filter((a) => a.slug !== excludeSlug).slice(0, 3);
+    return pickRelatedArticles(articles, excludeSlug, 3);
   } catch {
     return [];
   }
@@ -157,8 +159,9 @@ export default async function BlogArtikelPage({
   const article = await getArticle(slug);
 
   if (!article) notFound();
+  if (article.section !== "blog") redirect(`/kennisbank/${slug}`);
 
-  const related = await getRelatedArticles(article.tags, slug);
+  const related = await getRelatedArticles(slug);
   const tags = parseTags(article.tags);
   const readTime = estimateReadingTime(article.content);
   const headerBg = article.header_color ?? "#F5E6D3";

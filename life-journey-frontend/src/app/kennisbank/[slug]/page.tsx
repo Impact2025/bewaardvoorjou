@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
@@ -8,6 +8,7 @@ import { BlogViewTracker } from "@/components/blog/BlogViewTracker";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
+import { pickRelatedArticles } from "@/lib/related-articles";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -16,6 +17,7 @@ interface BlogPost {
   id: string;
   title: string;
   slug: string;
+  section: string;
   content: string;
   excerpt: string | null;
   header_type: "color" | "image";
@@ -38,6 +40,7 @@ interface ArticleListItem {
   title: string;
   slug: string;
   header_color: string | null;
+  tags: string | null;
   published_at: string | null;
   created_at: string;
 }
@@ -65,13 +68,16 @@ async function getRelatedArticles(
   excludeSlug: string
 ): Promise<ArticleListItem[]> {
   try {
+    // Volledige lijst (backend max = 200), niet de nieuwste 12: pickRelated-
+    // Articles heeft de complete volgorde nodig om de rotatie te bepalen die
+    // elk artikel inkomende links garandeert.
     const res = await fetch(
-      `${API_BASE}/blog/public/list?section=knowledge&limit=12`,
+      `${API_BASE}/blog/public/list?section=knowledge&limit=200`,
       { next: { revalidate: 900 } }
     );
     if (!res.ok) return [];
     const articles: ArticleListItem[] = await res.json();
-    return articles.filter((a) => a.slug !== excludeSlug).slice(0, 3);
+    return pickRelatedArticles(articles, excludeSlug, 3);
   } catch {
     return [];
   }
@@ -127,6 +133,7 @@ export default async function KennisbankArtikelPage({
   ]);
 
   if (!article) notFound();
+  if (article.section !== "knowledge") redirect(`/blog/${slug}`);
 
   const headerBg = article.header_color ?? "#F5E6D3";
   const headerTextColor = article.header_text_color ?? "#5C3D2E";
