@@ -9,6 +9,7 @@ import { ShareButtons } from "@/components/blog/ShareButtons";
 import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 import { pickRelatedArticles } from "@/lib/related-articles";
+import { PillarLinks } from "@/components/blog/PillarLinks";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -338,6 +339,11 @@ export default async function BlogArtikelPage({
             title={article.title}
           />
         </article>
+
+        {/* Contextuele links naar de landingspagina's */}
+        <PillarLinks
+          article={{ slug, tags: article.tags, keywords: article.keywords }}
+        />
 
         {/* Gerelateerde artikelen — API of fallback */}
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">

@@ -444,6 +444,7 @@ export default function Home() {
             Ontdek meer
           </h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-3 text-slate-700">
+            <Link href="/levensverhaal-vastleggen" className="hover:text-orange transition-colors">Je levensverhaal vastleggen →</Link>
             <Link href="/levensverhaal-opschrijven" className="hover:text-orange transition-colors">Je levensverhaal opschrijven →</Link>
             <Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Hulp bij je autobiografie →</Link>
             <Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Een digitaal familiearchief →</Link>

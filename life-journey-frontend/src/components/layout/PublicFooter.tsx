@@ -50,6 +50,7 @@ export function PublicFooter() {
           <div>
             <h3 className="font-semibold text-slate-900 mb-3">Onderwerpen</h3>
             <ul className="space-y-2 text-sm text-slate-600">
+              <li><Link href="/levensverhaal-vastleggen" className="hover:text-orange transition-colors">Levensverhaal vastleggen</Link></li>
               <li><Link href="/levensverhaal-opschrijven" className="hover:text-orange transition-colors">Levensverhaal opschrijven</Link></li>
               <li><Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Autobiografie schrijven</Link></li>
               <li><Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Digitaal familiearchief</Link></li>
