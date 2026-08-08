@@ -23,7 +23,7 @@ import {
   Upload,
 } from "lucide-react";
 
-const VADERDAG_ACTIVE = true; // zet op false na 21 juni
+const VADERDAG_ACTIVE = false;
 
 export default function Home() {
   const { session, isLoading } = useAuth();
@@ -181,23 +181,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Vaderdag banner */}
-      <section className="bg-[#1a1a1a] py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <p className="text-[#d4af37] text-xs font-bold tracking-widest uppercase mb-1">Vaderdag — 15 juni</p>
-            <p className="text-white font-serif text-xl font-bold">Het mooiste cadeau dat je kunt geven</p>
-            <p className="text-[#aaa] text-sm mt-0.5">Digitale toegang direct · Doos bezorgd binnen 2 weken</p>
-          </div>
-          <Link
-            href="/vaderdag"
-            className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
-          >
-            Bekijk het cadeau →
-          </Link>
         </div>
       </section>
 
