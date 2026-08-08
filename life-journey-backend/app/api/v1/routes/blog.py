@@ -220,6 +220,20 @@ async def create_blog_post(
     return post
 
 
+def _truncate_at_word(text: str, max_len: int) -> str:
+    """Knip op max_len tekens af zonder een woord doormidden te breken.
+
+    Een kale `text[:max_len]` sneed eerder titels/descriptions af midden in
+    een woord (bv. "...de basis van jouw n") zodra het model de opgegeven
+    lengte-richtlijn negeerde. We zoeken de laatste spatie binnen de limiet.
+    """
+    if len(text) <= max_len:
+        return text
+    cut = text[:max_len]
+    last_space = cut.rfind(" ")
+    return cut[:last_space].rstrip(" ,.-") if last_space > 0 else cut
+
+
 # ---------------------------------------------------------------------------
 # AI SEO — VOOR /{id} routes anders matcht "seo-optimize" als post_id
 # ---------------------------------------------------------------------------
@@ -330,8 +344,8 @@ Geef terug als JSON:
                 ))
 
         return SeoOptimizeResponse(
-            meta_title=data.get("meta_title", "")[:70],
-            meta_description=data.get("meta_description", "")[:160],
+            meta_title=_truncate_at_word(data.get("meta_title", ""), 70),
+            meta_description=_truncate_at_word(data.get("meta_description", ""), 160),
             keywords=data.get("keywords", ""),
             tags=data.get("tags", ""),
             excerpt=data.get("excerpt", ""),

@@ -19,6 +19,17 @@ function isSafeRedirect(pathname: string): boolean {
 }
 
 /**
+ * Blogslugs die zijn samengevoegd om keyword-cannibalisatie op te lossen
+ * (twee artikelen die op hetzelfde zoekwoord targetten). De bronpost is in
+ * de DB gearchiveerd; deze 301 zorgt dat bestaande links/indexering naar de
+ * survivor wijzen in plaats van een 404 te geven.
+ */
+const BLOG_SLUG_REDIRECTS: Record<string, string> = {
+  "/blog/digitale-erfenis-meer-dan-alleen-wachtwoorden":
+    "/blog/digitale-erfenis-regelen-meer-dan-alleen-wachtwoorden",
+};
+
+/**
  * Privépaden die nooit in de zoekresultaten horen. We zetten hier een
  * X-Robots-Tag in plaats van een `metadata.robots` per route, omdat een deel
  * van deze layouts client components zijn (o.a. /admin) en dus geen metadata
@@ -67,6 +78,12 @@ export function middleware(request: NextRequest) {
     const nonWww = host.replace(/^www\./, "");
     const url = new URL(`https://${nonWww}${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url, { status: 301 });
+  }
+
+  // ── Samengevoegde blogposts 301'en naar de survivor ──
+  const mergedTarget = BLOG_SLUG_REDIRECTS[pathname];
+  if (mergedTarget) {
+    return NextResponse.redirect(new URL(mergedTarget, request.url), { status: 301 });
   }
 
   // ── Admin auth check ──
