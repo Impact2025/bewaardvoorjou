@@ -27,6 +27,21 @@ function isSafeRedirect(pathname: string): boolean {
 const BLOG_SLUG_REDIRECTS: Record<string, string> = {
   "/blog/digitale-erfenis-meer-dan-alleen-wachtwoorden":
     "/blog/digitale-erfenis-regelen-meer-dan-alleen-wachtwoorden",
+
+  // Contentaudit aug 2026 (scripts/fix_blog_content_audit_aug2026.py).
+  // Dit artikel targette hetzelfde zoekwoord als de pijlerpagina
+  // /levensverhaal-vastleggen; het is hertarget op de long tail en kreeg
+  // daarom een nieuwe slug.
+  "/blog/levensverhaal-vastleggen-complete-gids-voor-2026":
+    "/blog/levensverhaal-vastleggen-audio-video-of-opschrijven",
+
+  // Restant van een genummerde serie in de slug.
+  "/blog/1-start-met-een-digitaal-levensverhaal-de-basis-van-jouw":
+    "/blog/start-met-een-digitaal-levensverhaal-de-basis-van-jouw-nalatenschap",
+
+  // Slug zei 30 hoofdstukken, titel en inhoud zeggen er 58.
+  "/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten":
+    "/kennisbank/de-58-hoofdstukken-van-je-leven-wat-kun-je-verwachten",
 };
 
 /**
