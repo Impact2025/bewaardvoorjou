@@ -38,6 +38,7 @@ interface BlogPost {
   transcript: string | null;
   published_at: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 interface ArticleListItem {
@@ -174,10 +175,11 @@ export default async function BlogArtikelPage({
     headline: article.title,
     description: article.excerpt ?? undefined,
     datePublished: article.published_at ?? article.created_at,
-    dateModified: article.published_at ?? article.created_at,
+    dateModified: article.updated_at ?? article.published_at ?? article.created_at,
     author: {
-      "@type": "Organization",
-      name: "BewaardVoorJou.nl",
+      "@type": "Person",
+      name: "Vincent van Munster",
+      url: "https://bewaardvoorjou.nl/about",
     },
     publisher: {
       "@type": "Organization",
