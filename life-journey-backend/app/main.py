@@ -86,16 +86,13 @@ def create_app() -> FastAPI:
 
   @app.get("/healthz", tags=["system"], summary="Lightweight health probe")
   async def healthz() -> dict[str, str]:
+    from app.core.health_cache import db_healthy
     from app.db.session import SessionLocal
-    from sqlalchemy import text
-    db_ok = False
+    db = SessionLocal()
     try:
-      db = SessionLocal()
-      db.execute(text("SELECT 1"))
+      db_ok = db_healthy(db)
+    finally:
       db.close()
-      db_ok = True
-    except Exception:
-      pass
     return {
       "status": "ok" if db_ok else "degraded",
       "db": "ok" if db_ok else "unreachable",

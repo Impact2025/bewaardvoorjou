@@ -46,14 +46,15 @@ async def publish_health(db: Session = Depends(get_db)):
     """Compacte health-probe voor de publish-flow: DB-reachable + key config.
 
     Gebruik dit endpoint in externe monitoring (bijv. UptimeRobot) in plaats
-    van de volledige app-/healthz-check. Geen auth vereist."""
-    db_ok = False
-    try:
-        from sqlalchemy import text
-        db.execute(text("SELECT 1"))
-        db_ok = True
-    except Exception as e:  # pragma: no cover - alleen bij DB-down
-        logger.warning(f"Publish-health DB-check faalde: {e}")
+    van de volledige app-/healthz-check. Geen auth vereist.
+
+    De DB-check is gecached (`app.core.health_cache`, zelfde cache als
+    /healthz) - anders wekt elke monitoring-ping Neon opnieuw en schaalt de
+    database nooit naar nul."""
+    from app.core.health_cache import db_healthy
+    db_ok = db_healthy(db)
+    if not db_ok:  # pragma: no cover - alleen bij DB-down
+        logger.warning("Publish-health DB-check faalde")
     key_ok = bool(getattr(settings, "publish_api_key", None))
     return {
         "status": "ok" if (db_ok and key_ok) else "degraded",
