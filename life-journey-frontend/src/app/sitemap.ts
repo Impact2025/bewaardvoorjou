@@ -57,8 +57,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/levensverhaal-opschrijven`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/levensverhaal-bewaren-usb`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/cadeau-opa-80-jaar`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/cadeau`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/cadeaubon`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    // ⚠️ /cadeau en /cadeaubon hebben géén page.tsx (alleen subfolders) → 404 live.
+    // Niet in de sitemap zetten zolang de route niet bestaat. Hetzelfde geldt
+    // voor /ouder-interview. Zodra de pagina's gebouwd zijn, hier weer
+    // toevoegen. (Geverifieerd aug 2026: curl → 404.)
     { url: `${BASE_URL}/vaderdag`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
     { url: `${BASE_URL}/levensverhaal-vastleggen`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/pensioen-afscheidscadeau`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.8 },
@@ -67,7 +69,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/voor-baby`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/voor-baby/hoe-het-werkt`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/voor-baby/over-ons`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE_URL}/ouder-interview`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 
   // ── Blog artikelen ──

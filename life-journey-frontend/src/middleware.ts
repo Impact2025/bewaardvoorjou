@@ -19,30 +19,29 @@ function isSafeRedirect(pathname: string): boolean {
 }
 
 /**
- * Blogslugs die zijn samengevoegd om keyword-cannibalisatie op te lossen
- * (twee artikelen die op hetzelfde zoekwoord targetten). De bronpost is in
- * de DB gearchiveerd; deze 301 zorgt dat bestaande links/indexering naar de
- * survivor wijzen in plaats van een 404 te geven.
+ * Blogslugs die zijn samengevoegd om keyword-cannibalisatie op te lossen.
+ * Deze 301's laten bestaande links/indexering naar de survivor wijzen.
+ *
+ * ⚠️ ONDERHOUD: de vorige versie van deze map verwees naar doel-slugs die
+ * niet (meer) bestaan in de DB (o.a. `…-audio-video-of-opschrijven`,
+ * `de-58-hoofdstukken-…`). Die 301'ten een LIVE, gepubliceerde post naar een
+ * 404 → GSC "Fout met omleiding" + "Pagina met omleiding" + "Niet gevonden
+ * (404)". Elke regel hieronder MOET gevalideerd zijn tegen de gepubliceerde
+ * slugs in de DB (GET /blog/public/list) vóór merge. Een regel waarvan het
+ * doel 404t is erger dan geen regel.
+ *
+ * Huidige stand (geverifieerd aug 2026):
+ *  - `/blog/digitale-erfenis-meer-dan-alleen-wachtwoorden` → doel bestaat niet
+ *    én bron bestaat niet meer in DB → regel verwijderd.
+ *  - `/blog/levensverhaal-vastleggen-complete-gids-voor-2026` → DEZE slug is
+ *    zélf de gepubliceerd post; de oude doel-slug bestaat niet → regel
+ *    verwijderd zodat de live post gewoon serveert.
+ *  - `/blog/1-start-met-een-digitaal-…` → bron bestaat, doel 404t → verwijderd.
+ *  - `/kennisbank/de-30-hoofdstukken-…` → bron én doel bestaan niet → verwijderd.
+ *
+ * Leeg totdat er een gevalideerde samenvoeging bijkomt.
  */
-const BLOG_SLUG_REDIRECTS: Record<string, string> = {
-  "/blog/digitale-erfenis-meer-dan-alleen-wachtwoorden":
-    "/blog/digitale-erfenis-regelen-meer-dan-alleen-wachtwoorden",
-
-  // Contentaudit aug 2026 (scripts/fix_blog_content_audit_aug2026.py).
-  // Dit artikel targette hetzelfde zoekwoord als de pijlerpagina
-  // /levensverhaal-vastleggen; het is hertarget op de long tail en kreeg
-  // daarom een nieuwe slug.
-  "/blog/levensverhaal-vastleggen-complete-gids-voor-2026":
-    "/blog/levensverhaal-vastleggen-audio-video-of-opschrijven",
-
-  // Restant van een genummerde serie in de slug.
-  "/blog/1-start-met-een-digitaal-levensverhaal-de-basis-van-jouw":
-    "/blog/start-met-een-digitaal-levensverhaal-de-basis-van-jouw-nalatenschap",
-
-  // Slug zei 30 hoofdstukken, titel en inhoud zeggen er 58.
-  "/kennisbank/de-30-hoofdstukken-van-je-leven-wat-kun-je-verwachten":
-    "/kennisbank/de-58-hoofdstukken-van-je-leven-wat-kun-je-verwachten",
-};
+const BLOG_SLUG_REDIRECTS: Record<string, string> = {};
 
 /**
  * Privépaden die nooit in de zoekresultaten horen. We zetten hier een
@@ -95,7 +94,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, { status: 301 });
   }
 
-  // ── Samengevoegde blogposts 301'en naar de survivor ──
+  // ── Samengevoegde blogposts 301'en naar de survivor (zie BLOG_SLUG_REDIRECTS) ──
   const mergedTarget = BLOG_SLUG_REDIRECTS[pathname];
   if (mergedTarget) {
     return NextResponse.redirect(new URL(mergedTarget, request.url), { status: 301 });
