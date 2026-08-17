@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { STATIC_SITEMAP_PAGES } from "@/lib/seo/static-pages";
 
 const BASE_URL = "https://bewaardvoorjou.nl";
 const API_BASE =
@@ -31,45 +32,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const now = new Date();
 
-  // ── Core statische pagina's (hoogste prioriteit) ──
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE_URL, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
-    { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE_URL}/kennisbank`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE_URL}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE_URL}/faq`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-  ];
-
-  // ── Subpagina's met SEO-waarde ──
-  const seoPages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
-    { url: `${BASE_URL}/security`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
-    { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE_URL}/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-  ];
-
-  // ── Landingspagina's (thematisch, CTA-gericht) ──
-  const landingPages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/autobiografie-hulp`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/veilig-digitaal-familiearchief`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/levensverhaal-opschrijven`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/levensverhaal-bewaren-usb`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/cadeau-opa-80-jaar`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    // ⚠️ /cadeau en /cadeaubon hebben géén page.tsx (alleen subfolders) → 404 live.
-    // Niet in de sitemap zetten zolang de route niet bestaat. Hetzelfde geldt
-    // voor /ouder-interview. Zodra de pagina's gebouwd zijn, hier weer
-    // toevoegen. (Geverifieerd aug 2026: curl → 404.)
-    { url: `${BASE_URL}/vaderdag`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
-    { url: `${BASE_URL}/levensverhaal-vastleggen`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/pensioen-afscheidscadeau`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/baby-herinneringen-vastleggen`, lastModified: new Date("2026-06-03"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/mijlpaal-cadeau`, lastModified: new Date("2026-06-24"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/voor-baby`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/voor-baby/hoe-het-werkt`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/voor-baby/over-ons`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-  ];
+  // ── Statische / marketing pagina's (bron: @/lib/seo/static-pages) ──
+  const staticPages: MetadataRoute.Sitemap = STATIC_SITEMAP_PAGES.map((p) => ({
+    url: `${BASE_URL}${p.path}`,
+    lastModified: now,
+    changeFrequency: p.changeFrequency,
+    priority: p.priority,
+  }));
 
   // ── Blog artikelen ──
   const blogPages: MetadataRoute.Sitemap = blogArticles.map((a) => ({
@@ -87,5 +56,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...seoPages, ...landingPages, ...blogPages, ...kennisbankPages];
+  return [...staticPages, ...blogPages, ...kennisbankPages];
 }

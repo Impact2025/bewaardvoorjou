@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BLOG_SLUG_REDIRECTS } from "@/lib/seo/redirects";
 
 function isValidToken(cookie: string | undefined): boolean {
   if (!cookie) return false;
@@ -19,29 +20,9 @@ function isSafeRedirect(pathname: string): boolean {
 }
 
 /**
- * Blogslugs die zijn samengevoegd om keyword-cannibalisatie op te lossen.
- * Deze 301's laten bestaande links/indexering naar de survivor wijzen.
- *
- * ⚠️ ONDERHOUD: de vorige versie van deze map verwees naar doel-slugs die
- * niet (meer) bestaan in de DB (o.a. `…-audio-video-of-opschrijven`,
- * `de-58-hoofdstukken-…`). Die 301'ten een LIVE, gepubliceerde post naar een
- * 404 → GSC "Fout met omleiding" + "Pagina met omleiding" + "Niet gevonden
- * (404)". Elke regel hieronder MOET gevalideerd zijn tegen de gepubliceerde
- * slugs in de DB (GET /blog/public/list) vóór merge. Een regel waarvan het
- * doel 404t is erger dan geen regel.
- *
- * Huidige stand (geverifieerd aug 2026):
- *  - `/blog/digitale-erfenis-meer-dan-alleen-wachtwoorden` → doel bestaat niet
- *    én bron bestaat niet meer in DB → regel verwijderd.
- *  - `/blog/levensverhaal-vastleggen-complete-gids-voor-2026` → DEZE slug is
- *    zélf de gepubliceerd post; de oude doel-slug bestaat niet → regel
- *    verwijderd zodat de live post gewoon serveert.
- *  - `/blog/1-start-met-een-digitaal-…` → bron bestaat, doel 404t → verwijderd.
- *  - `/kennisbank/de-30-hoofdstukken-…` → bron én doel bestaan niet → verwijderd.
- *
- * Leeg totdat er een gevalideerde samenvoeging bijkomt.
+ * Samengevoegde blog/kennisbank-slug redirects.
+ * Bron van waarheid: @/lib/seo/redirects (incl. onderhoudsregels + tests).
  */
-const BLOG_SLUG_REDIRECTS: Record<string, string> = {};
 
 /**
  * Privépaden die nooit in de zoekresultaten horen. We zetten hier een
