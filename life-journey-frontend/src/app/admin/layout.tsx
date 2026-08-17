@@ -37,6 +37,7 @@ const adminNavItems = [
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/kennisbank", label: "Kennisbank", icon: GraduationCap },
   { href: "/admin/content", label: "Content", icon: FileText },
+  { href: "/admin/seo", label: "SEO-score", icon: BarChart3 },
   { href: "/admin/security", label: "Security", icon: Shield },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

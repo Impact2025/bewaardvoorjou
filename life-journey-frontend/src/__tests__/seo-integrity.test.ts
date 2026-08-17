@@ -12,6 +12,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { BLOG_SLUG_REDIRECTS } from "@/lib/seo/redirects";
 import { STATIC_SITEMAP_PAGES } from "@/lib/seo/static-pages";
+import { scoreIndexability, INDEXABILITY_THRESHOLD } from "@/lib/seo/indexability";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
@@ -132,6 +133,50 @@ describe("SEO redirect & sitemap integrity", () => {
       for (const dead of ["/cadeau<", "/cadeaubon<", "/ouder-interview<"]) {
         expect(xml.includes(`https://bewaardvoorjou.nl${dead}`)).toBe(false);
       }
+    });
+
+    itLive("indexeerbaarheid: niet meer dan een baseline aantal risico-posts", async () => {
+      // Haalt content + meta op per post en telt hoeveel onder de drempel
+      // zakken. Failt niet hard op het absolute aantal (content-uitbreiding is
+      // een redactioneel traject), maar waakt wél dat een deploy het aantal
+      // risico-posts niet LATER doet stijgen dan de bekende baseline.
+      const BASELINE_RISK = Number(process.env.SEO_BASELINE_RISK ?? "86");
+      const API = process.env.NEXT_PUBLIC_API_BASE_URL ??
+        "https://bewaardvoorjou-production.up.railway.app/api/v1";
+      const htmlToWords = (h?: string | null) =>
+        h ? h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split(/\s+/).filter(Boolean).length : 0;
+
+      const posts: { slug: string; section: "blog" | "knowledge"; tags?: string | null; view_count?: number; meta?: string | null }[] = [];
+      for (const sec of ["blog", "knowledge"] as const) {
+        const list = (await (
+          await fetch(`${API}/blog/public/list?section=${sec}&limit=200`)
+        ).json()) as any[];
+        for (const a of list) posts.push({ slug: a.slug, section: sec, tags: a.tags, view_count: a.view_count, meta: a.meta_description });
+      }
+
+      let risk = 0;
+      for (const p of posts) {
+        const j = await (
+          await fetch(`${API}/blog/public/slug/${p.slug}`)
+        ).json().catch(() => null);
+        const wc = htmlToWords(j?.content);
+        const md = (j?.meta_description ?? p.meta ?? "").length;
+        const s = scoreIndexability({
+          slug: p.slug,
+          section: p.section,
+          wordCount: wc,
+          hasMetaDescription: md > 0,
+          metaDescriptionLength: md,
+          inboundLinks: 3, // rotatie-graaf garandeert >=2; hier conservatief 3
+          hasTags: !!p.tags,
+          views: p.view_count ?? 0,
+        });
+        if (s.score < INDEXABILITY_THRESHOLD) risk++;
+      }
+      // Log voor zichtbaarheid in CI-output; faalt alleen als het de baseline
+      // overschrijdt (zodat een slechte deploy niet ongemerkt live gaat).
+      console.log(`[seo] risico-posts: ${risk} (baseline ${BASELINE_RISK})`);
+      expect(risk, `aantal risico-posts (${risk}) overschrijdt baseline ${BASELINE_RISK}`).toBeLessThanOrEqual(BASELINE_RISK);
     });
   });
 });
