@@ -105,6 +105,12 @@ class Settings(BaseSettings):
   # Default sectie voor vanuit Agent OS gepubliceerde artikelen.
   publish_default_section: str = "blog"
 
+  # Machine-leestoegang (Impact OS <- bestellingen, voor het bestellingen-
+  # dashboard + inkoop-signalering). Alléén leesrechten — géén schrijftoegang
+  # zoals publish_api_key. Moet gelijk zijn aan BEWAARDVOORJOU_ORDERS_KEY in
+  # de Impact OS .env. Timing-safe gecheckt.
+  orders_api_key: str | None = None
+
   # JWT Security - CRITICAL: Must be set via environment variable
   # For development, if not set, a random key will be generated (sessions won't persist across restarts)
   # For production, this MUST be set to a secure, persistent value
