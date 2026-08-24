@@ -64,8 +64,14 @@ api_router.include_router(publish.router, prefix="/publish", tags=["publish"])
 api_router.include_router(support.router, prefix="/support", tags=["support"])
 api_router.include_router(support.admin_router, prefix="/admin", tags=["admin-support"])
 api_router.include_router(helpdesk.router, prefix="/helpdesk", tags=["helpdesk"])
-api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
+
+# LET OP: vóór admin_orders.router — die kent een catch-all GET /{order_id}
+# op dezelfde prefix, en Starlette matcht in registratievolgorde. Stond
+# orders_sync hierna, dan las admin_orders "impactos-sync" als order_id en
+# liep het verzoek tegen de mens-JWT-check aan i.p.v. de eigen Bearer-key-check
+# (gemeten: 401 "Ongeldig token" i.p.v. het juiste antwoord).
 api_router.include_router(orders_sync.router, prefix="/admin/orders", tags=["admin-orders-agentos"])
+api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
 api_router.include_router(usb_export.router, prefix="/admin/usb", tags=["admin-usb"])
 api_router.include_router(backup.router, prefix="/account", tags=["account"])
 api_router.include_router(baby.router, prefix="/baby", tags=["baby"])
