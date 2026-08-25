@@ -255,6 +255,17 @@ def create_payment_intent(
         db.refresh(order)
         logger.info(f"Gratis order aangemaakt: {order.id} ({payload.package_type}, promo={promo_code_used})")
 
+        # Zelfde teller als de Stripe-webhook (_handle_payment_succeeded) ophoogt na
+        # betaling — een 100%-korting gaat nooit via Stripe, dus zonder dit blijft
+        # used_count op 0 staan terwijl de code wel degelijk wordt verzilverd, en
+        # wordt een max_uses-limiet op zo'n code onbetrouwbaar (VADERDAG26/VRIEND26,
+        # aug 2026: used_count telde 0/5 terwijl er in werkelijkheid 15/6 gratis
+        # orders op stonden).
+        if promo_code_used:
+            from app.api.v1.routes.promo_codes import increment_promo_usage
+            increment_promo_usage(db, promo_code_used)
+            db.commit()
+
         # Transcribeer een eventueel audio/video cadeaubericht (meeleesversie). Best-effort.
         if order.message_media_url and order.message_media_type in ("audio", "video"):
             try:
