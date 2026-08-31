@@ -82,6 +82,8 @@ jobs:
     name: Live SEO integrity (daily)
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      issues: write
     defaults:
       run:
         working-directory: life-journey-frontend

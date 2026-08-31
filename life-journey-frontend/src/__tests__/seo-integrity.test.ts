@@ -177,6 +177,6 @@ describe("SEO redirect & sitemap integrity", () => {
       // overschrijdt (zodat een slechte deploy niet ongemerkt live gaat).
       console.log(`[seo] risico-posts: ${risk} (baseline ${BASELINE_RISK})`);
       expect(risk, `aantal risico-posts (${risk}) overschrijdt baseline ${BASELINE_RISK}`).toBeLessThanOrEqual(BASELINE_RISK);
-    });
+    }, 120_000);
   });
 });

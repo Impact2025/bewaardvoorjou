@@ -148,10 +148,8 @@ def inject_kb_internal_links(
                 continue
             href = f"/kennisbank/{anchor.target}"
             # Injecteer hooguit max_per_anchor keer.
-            repl = (
-                lambda m, _h=href, _a=anchor.anchor:  # noqa: E731
-                f'<a href="{_h}">{m.group(0)}</a>'
-            )
+            def repl(m: re.Match, _h: str = href) -> str:
+                return f'<a href="{_h}">{m.group(0)}</a>'
             out, n = _phrase_re(anchor.anchor).subn(repl, out, count=max_per_anchor)
             if n:
                 # één anchor per blok volstaat voor leesbaarheid; break niet
