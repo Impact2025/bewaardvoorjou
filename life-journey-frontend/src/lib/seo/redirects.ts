@@ -19,7 +19,15 @@
  * have not verified is published.
  */
 export const BLOG_SLUG_REDIRECTS: Record<string, string> = {
-  // Empty by default. Add verified, DB-backed merges here only.
+  // 1 sep 2026: kannibalisatie-cluster "levensverhaal vastleggen" (7 live
+  // pagina's op dezelfde kernquery, beste positie 8,2 — zie waarheidsaudit
+  // invariant cluster_kannibalisatie). Beide bronposts hieronder zijn in de
+  // DB op status=draft gezet (published_at=NULL) vóórdat deze redirects
+  // live gingen, zodat de live-asserts in seo-integrity.test.ts slagen.
+  "/blog/levensverhaal-vastleggen-complete-gids-voor-2026":
+    "/blog/alles-over-je-levensverhaal-vastleggen-complete-gids-voor-2026",
+  "/kennisbank/levensverhaal-cadeau-geven":
+    "/blog/levensverhaal-bewaren-geschenk-kinderen",
 };
 
 export type RedirectSource = keyof typeof BLOG_SLUG_REDIRECTS & string;
