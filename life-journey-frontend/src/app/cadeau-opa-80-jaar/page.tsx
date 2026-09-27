@@ -271,7 +271,7 @@ export default function CadeauOpa80JaarPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Geef opa het mooiste cadeau:
+              Geef opa het mooiste cadeau:{" "}
               <span className="text-orange block mt-2">zijn eigen verhaal</span>
             </h1>
 

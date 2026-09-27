@@ -143,14 +143,8 @@ const websiteJsonLd = {
   url: "https://bewaardvoorjou.nl",
   description:
     "Leg je levensverhaal stap voor stap vast met een empathische AI-interviewer en deel het veilig met je dierbaren.",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: "https://bewaardvoorjou.nl/kennisbank?q={search_term_string}",
-    },
-    "query-input": "required name=search_term_string",
-  },
+  // Geen SearchAction: /kennisbank doet niets met ?q=, en een zoekactie
+  // die nergens heen gaat is ongeldige structured data.
 };
 
 export default function RootLayout({

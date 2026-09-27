@@ -35,7 +35,11 @@ export default function Home() {
     }
   }, [session, isLoading, router]);
 
-  if (isLoading || session) {
+  // Alleen verbergen als er client-side een sessie is. Tijdens `isLoading`
+  // (altijd waar op de server) moet de inhoud juist renderen: anders krijgen
+  // crawlers een lege pagina. Ingelogde gebruikers stuurt de middleware al
+  // op het ljauth-cookie door naar /dashboard.
+  if (session) {
     return null;
   }
 
@@ -107,8 +111,8 @@ export default function Home() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Vertel het vandaag,
-              <span className="text-orange block mt-2">bewaar het</span>
+              Vertel het vandaag,{" "}
+              <span className="text-orange block mt-2">bewaar het</span>{" "}
               <span className="block mt-2">voor altijd</span>
             </h1>
 

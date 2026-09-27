@@ -272,8 +272,8 @@ export default function AutobiografieHulpPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Hulp bij het schrijven
-              <span className="text-orange block mt-2">van jouw</span>
+              Hulp bij het schrijven{" "}
+              <span className="text-orange block mt-2">van jouw</span>{" "}
               <span className="block mt-2">autobiografie</span>
             </h1>
 

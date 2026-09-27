@@ -159,8 +159,8 @@ export default function LandingClient() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Je levensverhaal
-              <span className="text-orange block mt-2">vastleggen?</span>
+              Je levensverhaal{" "}
+              <span className="text-orange block mt-2">vastleggen?</span>{" "}
               <span className="block mt-2">Wij helpen</span>
             </h1>
 

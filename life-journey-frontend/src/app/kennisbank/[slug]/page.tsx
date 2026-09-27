@@ -10,6 +10,7 @@ import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 import { pickRelatedArticles } from "@/lib/related-articles";
 import { PillarLinks } from "@/components/blog/PillarLinks";
+import { articleTitle, normalizeArticleHtml } from "@/lib/seo/article-html";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -109,7 +110,7 @@ export async function generateMetadata({
   if (!article) return { title: "Artikel niet gevonden" };
 
   return {
-    title: article.meta_title ?? article.title,
+    title: articleTitle(article.meta_title ?? article.title),
     description: article.meta_description ?? article.excerpt ?? undefined,
     keywords: article.keywords ?? undefined,
     alternates: {
@@ -264,7 +265,7 @@ export default async function KennisbankArtikelPage({
               prose-strong:text-slate-900
               prose-a:text-orange prose-a:no-underline hover:prose-a:underline
               prose-hr:border-neutral-sand"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: normalizeArticleHtml(article.content) }}
           />
 
           <ShareButtons url={articleUrl} title={article.title} />

@@ -10,6 +10,7 @@ import { PodcastPlayer } from "@/components/blog/PodcastPlayer";
 import { extractFaqFromHtml, buildFaqPageJsonLd } from "@/lib/faq-schema";
 import { pickRelatedArticles } from "@/lib/related-articles";
 import { PillarLinks } from "@/components/blog/PillarLinks";
+import { articleTitle, normalizeArticleHtml } from "@/lib/seo/article-html";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8001/api/v1";
@@ -135,7 +136,7 @@ export async function generateMetadata({
   const ogImage = article.og_image ?? article.header_image_url ?? DEFAULT_OG;
 
   return {
-    title: article.meta_title ?? `${article.title} | BewaardVoorJou.nl`,
+    title: articleTitle(article.meta_title ?? article.title),
     description: article.meta_description ?? article.excerpt ?? undefined,
     keywords: article.keywords ?? undefined,
     alternates: {
@@ -314,7 +315,7 @@ export default async function BlogArtikelPage({
               prose-a:text-orange prose-a:no-underline hover:prose-a:underline
               prose-blockquote:border-orange prose-blockquote:bg-orange/5 prose-blockquote:py-1 prose-blockquote:rounded-r-lg
               prose-hr:border-neutral-sand"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: normalizeArticleHtml(article.content) }}
           />
 
           {/* Tags onderaan */}

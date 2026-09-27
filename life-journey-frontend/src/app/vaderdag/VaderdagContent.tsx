@@ -88,7 +88,7 @@ export default function VaderdagContent() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Geef je vader
+              Geef je vader{" "}
               <span className="text-orange block mt-2">zijn levensverhaal</span>
             </h1>
 

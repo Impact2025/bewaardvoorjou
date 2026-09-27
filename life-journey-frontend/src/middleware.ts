@@ -81,6 +81,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(mergedTarget, request.url), { status: 301 });
   }
 
+  // ── Ingelogde bezoekers van de homepage direct naar het dashboard ──
+  // De homepage rendert altijd volledig (voor crawlers); zo zien ingelogde
+  // gebruikers geen flits van de marketingpagina.
+  if (pathname === "/" && isValidToken(request.cookies.get("ljauth")?.value)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   // ── Admin auth check ──
   if (pathname.startsWith("/admin")) {
     const token = request.cookies.get("ljauth")?.value;

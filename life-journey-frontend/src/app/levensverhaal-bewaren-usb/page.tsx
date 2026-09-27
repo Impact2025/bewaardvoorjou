@@ -274,7 +274,7 @@ export default function LevensverhaalBewarenUsbPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
-              Jouw levensverhaal
+              Jouw levensverhaal{" "}
               <span className="text-orange block mt-2">blijft van jou</span>
             </h1>
 
