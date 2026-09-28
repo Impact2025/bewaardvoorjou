@@ -16,6 +16,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 
 const PAGE_URL = "https://bewaardvoorjou.nl/astoldby-alternatief";
 const TITLE = "AsToldBy alternatief: vertellen in plaats van schrijven";
+const OG_IMAGE = `${PAGE_URL}/opengraph-image`;
 const DESCRIPTION =
   "AsToldBy of BewaardVoorJou.nl? Een eerlijke vergelijking: schrijven met 52 weekvragen en een gedrukt boek, of vertellen tegen een gespreksleider met je stem bewaard.";
 
@@ -44,6 +45,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     siteName: "BewaardVoorJou.nl",
+  },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+    creator: "@bewaardvoorjou",
   },
 };
 

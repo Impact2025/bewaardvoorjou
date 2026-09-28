@@ -23,6 +23,7 @@ import { ArrowRight, BookHeart, CheckCircle, Heart, Mic, Users } from "lucide-re
 const PAGE_URL = "https://bewaardvoorjou.nl/cadeau-oma";
 const GIFT_CODE = giftPackage();
 const TITLE = "Origineel cadeau voor oma: haar verhaal, voor altijd bewaard";
+const OG_IMAGE = `${PAGE_URL}/opengraph-image`;
 const DESCRIPTION =
   "Op zoek naar een origineel cadeau voor oma, voor haar 70e, 80e of 90e verjaardag? Laat haar vertellen over vroeger. Haar stem en verhalen blijven bewaard.";
 
@@ -46,6 +47,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     siteName: "BewaardVoorJou.nl",
+  },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+    creator: "@bewaardvoorjou",
   },
 };
 
@@ -97,6 +106,7 @@ const jsonLd = {
       description:
         "Een digitaal cadeau waarmee oma haar levensverhaal vastlegt met hulp van een geduldige gespreksleider: 58 hoofdstukken, inspreken, video of typen.",
       url: PAGE_URL,
+      image: OG_IMAGE,
       offers: [{ code: GIFT_CODE, gift: true }],
     }),
     faqJsonLd(faqs),

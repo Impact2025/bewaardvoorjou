@@ -23,11 +23,13 @@ import { ArrowRight, CalendarDays, CheckCircle, Gift, Mic, Printer, Sparkles } f
 const PAGE_URL = "https://bewaardvoorjou.nl/kerstcadeau-ouders";
 const GIFT_CODE = giftPackage();
 const TITLE = "Kerstcadeau voor ouders die alles al hebben: hun eigen verhaal";
+const OG_IMAGE = `${PAGE_URL}/opengraph-image`;
 const DESCRIPTION =
   "Een kerst- of sinterklaascadeau voor ouders of opa en oma die alles al hebben? Geef ze de kans hun levensverhaal te vertellen. Digitaal, dus nooit te laat.";
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | BewaardVoorJou.nl` },
+  // Korter dan de H1, zodat Google de titel niet afkapt.
+  title: { absolute: "Kerstcadeau voor ouders die alles al hebben | BewaardVoorJou.nl" },
   description: DESCRIPTION,
   keywords: [
     "kerstcadeau ouders",
@@ -45,6 +47,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     siteName: "BewaardVoorJou.nl",
+  },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+    creator: "@bewaardvoorjou",
   },
 };
 
@@ -96,6 +106,7 @@ const jsonLd = {
       description:
         "Een digitaal cadeau waarmee ouders of grootouders hun levensverhaal vastleggen met hulp van een geduldige gespreksleider: 58 hoofdstukken, inspreken, video of typen.",
       url: PAGE_URL,
+      image: OG_IMAGE,
       offers: [{ code: GIFT_CODE, gift: true }],
     }),
     faqJsonLd(faqs),

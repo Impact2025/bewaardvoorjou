@@ -87,6 +87,10 @@ describe("pricing — structured data", () => {
       priceValidUntil: "2027-07-16",
       url: "https://bewaardvoorjou.nl/checkout?package=ERFGOED&gift=true",
     });
+    expect(offer.hasMerchantReturnPolicy).toMatchObject({
+      "@type": "MerchantReturnPolicy",
+      merchantReturnDays: 14,
+    });
   });
 
   it("levert een Product met brand en één offer-object bij één pakket", () => {

@@ -158,7 +158,22 @@ interface OfferJsonLd {
   priceValidUntil: string;
   availability: string;
   url: string;
+  hasMerchantReturnPolicy: typeof RETURN_POLICY;
 }
+
+/**
+ * Het wettelijke herroepingsrecht van 14 dagen (Algemene Voorwaarden art. 9),
+ * zoals het ook zichtbaar op de pakket- en cadeaupagina's staat. Google vraagt
+ * dit veld bij productaanbiedingen; zonder retourbeleid is een offer minder
+ * goed toonbaar.
+ */
+const RETURN_POLICY = {
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "NL",
+  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+  merchantReturnDays: 14,
+  returnFees: "https://schema.org/FreeReturn",
+} as const;
 
 export function buildOffer(spec: OfferSpec, now: Date = new Date()): OfferJsonLd {
   const pkg = PACKAGES[spec.code];
@@ -170,6 +185,7 @@ export function buildOffer(spec: OfferSpec, now: Date = new Date()): OfferJsonLd
     priceValidUntil: priceValidUntil(now),
     availability: availabilityFor(spec.code),
     url: checkoutUrl(spec.code, { gift: spec.gift }),
+    hasMerchantReturnPolicy: RETURN_POLICY,
   };
 }
 
