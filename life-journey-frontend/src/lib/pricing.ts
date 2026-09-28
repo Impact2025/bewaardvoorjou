@@ -120,6 +120,24 @@ export function priceValidUntil(from: Date = new Date()): string {
   return until.toISOString().slice(0, 10);
 }
 
+/**
+ * Het pakket dat een cadeaupagina nu daadwerkelijk kan verkopen.
+ *
+ * Waarom: de cadeaupagina's stuurden hard naar `package=ERFGOED`. Zolang de
+ * doos uitverkocht is, stuurt de checkout die bezoeker stil terug naar
+ * /pricing — elke klik die we op een cadeauterm winnen, liep dood. Met deze
+ * helper schakelt een pagina vanzelf terug naar het digitale pakket en weer
+ * naar de doos zodra ERFGOED_SOLD_OUT op false gaat.
+ */
+export function giftPackage(): PackageCode {
+  return ERFGOED_SOLD_OUT ? "VERHAAL" : "ERFGOED";
+}
+
+/** Relatief checkoutpad voor een cadeau (voor `<Link href>`). */
+export function giftCheckoutPath(code: PackageCode = giftPackage()): string {
+  return `/checkout?package=${code}&gift=true`;
+}
+
 export function checkoutUrl(code: PackageCode, opts: { gift?: boolean } = {}): string {
   const gift = opts.gift ? "&gift=true" : "";
   return `${SITE_URL}/checkout?package=${code}${gift}`;

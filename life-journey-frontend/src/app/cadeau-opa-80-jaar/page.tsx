@@ -5,7 +5,15 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { buildProductJsonLd } from "@/lib/pricing";
+import {
+  buildProductJsonLd,
+  ERFGOED_SOLD_OUT,
+  giftCheckoutPath,
+  giftPackage,
+  PACKAGES,
+  priceLabel,
+} from "@/lib/pricing";
+import { BoxSoldOutNotice, GiftOffer } from "@/components/gift/GiftOffer";
 import {
   ArrowRight,
   CheckCircle,
@@ -23,11 +31,18 @@ import {
 
 const PAGE_URL = "https://bewaardvoorjou.nl/cadeau-opa-80-jaar";
 
+// Wat een bezoeker nu echt kan bestellen (zie giftPackage in lib/pricing.ts).
+const GIFT_CODE = giftPackage();
+const GIFT_LABEL = `Geef ${GIFT_CODE === "ERFGOED" ? "de Erfgoed Box" : "zijn levensverhaal"} — ${priceLabel(GIFT_CODE)}`;
+const GIFT_HREF = giftCheckoutPath(GIFT_CODE);
+const PAGE_DESCRIPTION =
+  "Origineel cadeau voor opa van 80 jaar? Geef hem de kans zijn levensverhaal te vertellen. Een geduldige gespreksleider stelt de vragen, zijn stem blijft bewaard.";
+
 export const metadata: Metadata = {
-  title:
-    "Origineel cadeau opa 80 jaar — De Erfgoed Box met zijn herinneringen | BewaardVoorJou.nl",
-  description:
-    "Origineel cadeau opa 80 jaar? De Erfgoed Box legt zijn levensverhaal vast. Luxe magneetdoos, thee en zandloper. Bestel vandaag, binnen 2 weken in huis.",
+  title: {
+    absolute: "Origineel cadeau opa 80 jaar: zijn levensverhaal, voor altijd bewaard | BewaardVoorJou.nl",
+  },
+  description: PAGE_DESCRIPTION,
   keywords: [
     "origineel cadeau opa 80 jaar",
     "cadeau opa 80 jaar",
@@ -47,10 +62,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "nl_NL",
     url: PAGE_URL,
-    title:
-      "Origineel cadeau opa 80 jaar — De Erfgoed Box met zijn herinneringen",
-    description:
-      "Origineel cadeau opa 80 jaar? De Erfgoed Box legt zijn levensverhaal vast. Luxe magneetdoos, thee en zandloper. Bestel vandaag, binnen 2 weken in huis.",
+    title: "Origineel cadeau opa 80 jaar: zijn levensverhaal, voor altijd bewaard",
+    description: PAGE_DESCRIPTION,
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -63,12 +76,16 @@ export const metadata: Metadata = {
   },
 };
 
+const DELIVERY_ANSWER = ERFGOED_SOLD_OUT
+  ? "De digitale toegang start direct na betaling, zodat je opa meteen op zijn verjaardag kunt verrassen met de uitnodiging. De fysieke Erfgoed Box is op dit moment tijdelijk uitverkocht; het digitale pakket kun je wel direct cadeau geven."
+  : "De digitale toegang start direct na betaling, zodat je hem desgewenst meteen op zijn verjaardag kunt verrassen. De fysieke Erfgoed Box bezorgen we daarna binnen 2 weken op het opgegeven adres.";
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebPage",
-      name: "Origineel cadeau opa 80 jaar — De Erfgoed Box",
+      name: "Origineel cadeau opa 80 jaar",
       description:
         "De Erfgoed Box legt het levensverhaal van opa vast voor altijd. Een origineel en betekenisvol cadeau voor een 80e verjaardag.",
       url: PAGE_URL,
@@ -91,6 +108,7 @@ const jsonLd = {
         "Een luxe cadeaubox waarmee opa zijn complete levensverhaal vastlegt: 58 hoofdstukken, een persoonlijke gespreksleider, een A5 magneetdoos, een grafiet potlood, een A6 notitieboekje en een USB-stick in walnotenhout.",
       url: PAGE_URL,
       offers: [
+        { code: "VERHAAL", name: "Verhaal (digitaal)", gift: true },
         { code: "ERFGOED", name: "Erfgoed Box (Pakket 1)", gift: true },
         { code: "NALATENSCHAP", name: "Nalatenschap (Pakket 2)", gift: true },
       ],
@@ -127,7 +145,7 @@ const jsonLd = {
           name: "Hoe snel wordt het cadeau geleverd?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "De digitale toegang start direct na betaling, zodat je hem desgewenst meteen op zijn verjaardag kunt verrassen. De fysieke Erfgoed Box bezorgen we daarna binnen 2 weken op het opgegeven adres.",
+            text: DELIVERY_ANSWER,
           },
         },
         {
@@ -188,8 +206,7 @@ const steps = [
   {
     step: "1",
     title: "Kies het pakket",
-    description:
-      "Erfgoed Box (€149) of Nalatenschap (€229). Digitale toegang start direct na betaling.",
+    description: `${PACKAGES[GIFT_CODE].name} (${priceLabel(GIFT_CODE)}). Digitale toegang start direct na betaling.`,
   },
   {
     step: "2",
@@ -201,7 +218,7 @@ const steps = [
     step: "3",
     title: "Opa ontvangt zijn uitnodiging",
     description:
-      "Een warme welkomstmail nodigt hem uit. De luxe doos bezorgen we daarna binnen 2 weken.",
+      "Een warme welkomstmail nodigt hem uit. Hij kan meteen beginnen met vertellen.",
   },
 ];
 
@@ -223,8 +240,7 @@ const faqs = [
   },
   {
     question: "Hoe snel wordt het cadeau geleverd?",
-    answer:
-      "De digitale toegang start direct na betaling, zodat je opa desgewenst meteen op zijn verjaardag kunt verrassen met de uitnodiging. De fysieke Erfgoed Box bezorgen we daarna binnen 2 weken op het opgegeven adres.",
+    answer: DELIVERY_ANSWER,
   },
   {
     question: "Kunnen meerdere familieleden meelezen?",
@@ -291,8 +307,8 @@ export default function CadeauOpa80JaarPage() {
                 asChild
                 className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
               >
-                <Link href="/checkout?package=ERFGOED&gift=true" className="inline-flex items-center">
-                  Bestel de Erfgoed Box — €149 <ArrowRight className="ml-2 h-6 w-6" />
+                <Link href={GIFT_HREF} className="inline-flex items-center">
+                  {GIFT_LABEL} <ArrowRight className="ml-2 h-6 w-6" />
                 </Link>
               </Button>
               <Button
@@ -310,7 +326,9 @@ export default function CadeauOpa80JaarPage() {
               </div>
               <div className="flex items-center gap-2 text-white/95">
                 <CheckCircle className="h-5 w-5 text-green-400" />
-                <span className="font-medium text-sm drop-shadow">Doos bezorgd binnen 2 weken</span>
+                <span className="font-medium text-sm drop-shadow">
+                  {ERFGOED_SOLD_OUT ? "Direct cadeau te geven" : "Doos bezorgd binnen 2 weken"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-white/95">
                 <CheckCircle className="h-5 w-5 text-green-400" />
@@ -387,6 +405,8 @@ export default function CadeauOpa80JaarPage() {
             </div>
           </div>
 
+          <BoxSoldOutNotice className="mb-10 max-w-3xl mx-auto" />
+
           <div className="bg-[#1a1a1a] rounded-2xl p-8 md:p-12 text-center">
             <p className="font-serif text-xl md:text-2xl text-white leading-relaxed max-w-3xl mx-auto">
               Schenk de thee in. Draai de zandloper om. En luister naar 80 jaar
@@ -437,11 +457,15 @@ export default function CadeauOpa80JaarPage() {
               Kies het perfecte verjaardagscadeau
             </h2>
             <p className="text-slate-700">
-              Beide pakketten bevatten de luxe Erfgoed Box. Digitale toegang start
-              direct, de doos bezorgen we binnen 2 weken.
+              {ERFGOED_SOLD_OUT
+                ? "Digitale toegang start direct. Opa krijgt vandaag nog zijn uitnodiging."
+                : "Beide pakketten bevatten de luxe Erfgoed Box. Digitale toegang start direct, de doos bezorgen we binnen 2 weken."}
             </p>
           </div>
 
+          {ERFGOED_SOLD_OUT ? (
+            <GiftOffer recipient="opa" />
+          ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {/* Erfgoed — Pakket 1 */}
             <div className="relative bg-white rounded-2xl border-2 border-[#d4af37] shadow-2xl overflow-hidden">
@@ -535,6 +559,7 @@ export default function CadeauOpa80JaarPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </section>
 
@@ -569,8 +594,8 @@ export default function CadeauOpa80JaarPage() {
 
           <div className="text-center mt-12">
             <Button asChild className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-6">
-              <Link href="/checkout?package=ERFGOED&gift=true">
-                Bestel nu — bezorging binnen 2 weken <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href={GIFT_HREF}>
+                {GIFT_LABEL} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -635,21 +660,19 @@ export default function CadeauOpa80JaarPage() {
               asChild
               className="bg-white text-orange hover:bg-neutral-light text-lg px-10 py-7 shadow-2xl font-semibold"
             >
-              <Link href="/checkout?package=ERFGOED&gift=true">
-                Geef de Erfgoed Box — €149 <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href={GIFT_HREF}>
+                {GIFT_LABEL} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button
               asChild
               className="bg-white/15 backdrop-blur-md hover:bg-white/25 text-white text-lg px-10 py-7 border-2 border-white/40 transition-all"
             >
-              <Link href="/checkout?package=NALATENSCHAP&gift=true">
-                Nalatenschap — €229 eenmalig
-              </Link>
+              <Link href="/register">Eerst gratis proberen</Link>
             </Button>
           </div>
           <p className="text-sm opacity-80 mt-6">
-            Digitale toegang start direct · Doos bezorging binnen 2 weken · 14 dagen bedenktijd
+            Digitale toegang start direct · 14 dagen bedenktijd
           </p>
         </div>
       </section>

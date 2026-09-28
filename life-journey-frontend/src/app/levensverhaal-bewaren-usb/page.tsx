@@ -6,6 +6,7 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { buildProductJsonLd } from "@/lib/pricing";
+import { BoxSoldOutNotice } from "@/components/gift/GiftOffer";
 import {
   ArrowRight,
   CheckCircle,
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
   title:
     "Levensverhaal bewaren op USB én in de cloud — nooit vendor lock-in | BewaardVoorJou.nl",
   description:
-    "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard. Vanaf €149 eenmalig.",
+    "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard, in open formaten.",
   keywords: [
     "levensverhaal bewaren op usb",
     "levensverhaal op usb stick",
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
     title:
       "Levensverhaal bewaren op USB én in de cloud — nooit vendor lock-in",
     description:
-      "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard. Vanaf €149 eenmalig.",
+      "Levensverhaal bewaren op USB-stick én in de cloud. Fysiek in eigen handen, geen lock-in. Dubbel bewaard, in open formaten.",
     siteName: "BewaardVoorJou.nl",
     images: [
       {
@@ -288,6 +289,8 @@ export default function LevensverhaalBewarenUsbPage() {
               je zekerheid en bezit — voor altijd, ook zonder internet of platform.
               Het beste van twee werelden, in één Erfgoed Box.
             </p>
+
+            <BoxSoldOutNotice className="mb-8 max-w-xl" />
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Button

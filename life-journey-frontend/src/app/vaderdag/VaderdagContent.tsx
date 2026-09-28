@@ -6,6 +6,8 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { BoxSoldOutNotice } from "@/components/gift/GiftOffer";
+import { ERFGOED_SOLD_OUT } from "@/lib/pricing";
 import {
   ArrowRight,
   CheckCircle,
@@ -102,6 +104,8 @@ export default function VaderdagContent() {
               Hij hoeft niks voor te bereiden. Gewoon vertellen.
             </p>
 
+            <BoxSoldOutNotice className="mb-8 max-w-xl" />
+
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Button
                 asChild
@@ -128,7 +132,7 @@ export default function VaderdagContent() {
               </div>
               <div className="flex items-center gap-2 text-white/95">
                 <CheckCircle className="h-5 w-5 text-green-400" />
-                <span className="font-medium text-sm drop-shadow">Doos bezorgd binnen 2 weken</span>
+                <span className="font-medium text-sm drop-shadow">{ERFGOED_SOLD_OUT ? "Direct cadeau te geven" : "Doos bezorgd binnen 2 weken"}</span>
               </div>
               <div className="flex items-center gap-2 text-white/95">
                 <CheckCircle className="h-5 w-5 text-green-400" />
