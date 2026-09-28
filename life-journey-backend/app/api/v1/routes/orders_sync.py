@@ -55,9 +55,14 @@ def impactos_sync(
 ):
     """Read-only export voor Impact OS: orders van de laatste `days` dagen.
 
-    Geen PII van de begiftigde (naam wel — nodig voor de bestellingenlijst en
-    fulfillment-overzicht; e-mailadressen bewust niet, Impact OS hoeft die niet
-    te cachen om dit te kunnen tonen/analyseren).
+    Sinds 25 aug 2026 ook shipping_address/card_message/personal_message/
+    recipient_relation: Impact OS regelt de fysieke fulfillment
+    (dagbesteding-flow: adressticker + kaartjestekst), en heeft daarvoor het
+    verzendadres en de door de klant geschreven tekst nodig.
+    gift_card_code blijft bewust buiten de export: die bestaat alleen bij
+    DIGITAAL (niets te verzenden) en is de sleutel tot de publieke cadeaupagina.
+    E-mailadressen (koper én begiftigde) blijven bewust buiten deze export —
+    niet nodig voor een adressticker, dus geen reden om die PII te cachen.
     """
     if not _is_authorized(request):
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -81,6 +86,10 @@ def impactos_sync(
                 "discount_cents": o.discount_cents,
                 "promo_code_used": o.promo_code_used,
                 "recipient_name": o.recipient_name,
+                "recipient_relation": o.recipient_relation,
+                "card_message": o.card_message,
+                "personal_message": o.personal_message,
+                "shipping_address": o.shipping_address,
                 "created_at": o.created_at.isoformat() if o.created_at else None,
                 "paid_at": o.paid_at.isoformat() if o.paid_at else None,
                 "fulfilled_at": o.fulfilled_at.isoformat() if o.fulfilled_at else None,
