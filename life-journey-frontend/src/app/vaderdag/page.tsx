@@ -2,18 +2,31 @@ import type { Metadata } from "next";
 import VaderdagContent from "./VaderdagContent";
 
 export const metadata: Metadata = {
-  title: "Vaderdag cadeau — BewaardVoorJou.nl",
+  // absolute: anders plakt de root-template er nog eens "| Bewaard voor jou" achter.
+  title: { absolute: "Vaderdag cadeau: zijn levensverhaal bewaard | BewaardVoorJou.nl" },
   description:
     "Vaderdag cadeau? Geef je vader zijn levensverhaal, voor altijd bewaard. Maak van Vaderdag een blijvend cadeau. Gratis te starten.",
   alternates: {
     canonical: "https://bewaardvoorjou.nl/vaderdag",
   },
   openGraph: {
-    title: "Vaderdag cadeau — BewaardVoorJou.nl",
+    type: "website",
+    locale: "nl_NL",
+    siteName: "BewaardVoorJou.nl",
+    title: "Vaderdag cadeau: zijn levensverhaal, voor altijd bewaard",
     description:
       "Vaderdag cadeau? Geef je vader zijn levensverhaal, voor altijd bewaard. Maak van Vaderdag een blijvend cadeau. Gratis te starten.",
     url: "https://bewaardvoorjou.nl/vaderdag",
-    images: ["/vaderdag-cadeau.jpg"],
+    // Geen images: vaderdag-cadeau.jpg is staand (816×1306) en wordt in
+    // deelvoorbeelden bijgesneden; opengraph-image.tsx levert 1200×630.
+  },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: "Vaderdag cadeau: zijn levensverhaal, voor altijd bewaard",
+    description: "Geef je vader zijn levensverhaal, voor altijd bewaard. Maak van Vaderdag een blijvend cadeau.",
+    images: ["https://bewaardvoorjou.nl/vaderdag/opengraph-image"],
+    creator: "@bewaardvoorjou",
   },
 };
 

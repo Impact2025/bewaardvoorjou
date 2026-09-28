@@ -36,6 +36,14 @@ export const metadata: Metadata = {
       "Het einde bepaalt hoe iemand een hele loopbaan onthoudt. Zo maak je een afscheid dat écht binnenkomt.",
     siteName: "BewaardVoorJou.nl",
   },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: "Pensioen afscheidscadeau — een afscheid dat blijft",
+    description: "Het einde bepaalt hoe iemand een hele loopbaan onthoudt. Zo maak je een afscheid dat écht binnenkomt.",
+    images: ["https://bewaardvoorjou.nl/pensioen-afscheidscadeau/opengraph-image"],
+    creator: "@bewaardvoorjou",
+  },
 };
 
 const jsonLd = {

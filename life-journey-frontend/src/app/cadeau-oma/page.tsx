@@ -28,7 +28,8 @@ const DESCRIPTION =
   "Op zoek naar een origineel cadeau voor oma, voor haar 70e, 80e of 90e verjaardag? Laat haar vertellen over vroeger. Haar stem en verhalen blijven bewaard.";
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | BewaardVoorJou.nl` },
+  // Korter dan de H1, zodat Google de titel niet afkapt.
+  title: { absolute: "Origineel cadeau voor oma: haar verhaal bewaard | BewaardVoorJou.nl" },
   description: DESCRIPTION,
   keywords: [
     "cadeau oma",

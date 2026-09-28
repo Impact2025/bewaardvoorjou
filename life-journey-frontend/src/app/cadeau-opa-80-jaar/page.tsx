@@ -40,7 +40,7 @@ const PAGE_DESCRIPTION =
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Origineel cadeau opa 80 jaar: zijn levensverhaal, voor altijd bewaard | BewaardVoorJou.nl",
+    absolute: "Origineel cadeau opa 80 jaar: zijn levensverhaal | BewaardVoorJou.nl",
   },
   description: PAGE_DESCRIPTION,
   keywords: [
@@ -65,14 +65,16 @@ export const metadata: Metadata = {
     title: "Origineel cadeau opa 80 jaar: zijn levensverhaal, voor altijd bewaard",
     description: PAGE_DESCRIPTION,
     siteName: "BewaardVoorJou.nl",
-    images: [
-      {
-        url: "/erfgoed-box.jpg",
-        width: 1200,
-        height: 630,
-        alt: "De Erfgoed Box — origineel cadeau voor opa van 80 jaar",
-      },
-    ],
+    // Geen erfgoed-box.jpg: zolang de doos uitverkocht is, zou een gedeelde
+    // link iets tonen wat niet te koop is. opengraph-image.tsx neemt het over.
+  },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: "Origineel cadeau opa 80 jaar: zijn levensverhaal, voor altijd bewaard",
+    description: PAGE_DESCRIPTION,
+    images: ["https://bewaardvoorjou.nl/cadeau-opa-80-jaar/opengraph-image"],
+    creator: "@bewaardvoorjou",
   },
 };
 

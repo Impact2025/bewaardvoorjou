@@ -35,6 +35,14 @@ export const metadata: Metadata = {
       "Geen ding, maar een tastbaar eerbetoon dat dieper raakt dan een envelop met geld.",
     siteName: "BewaardVoorJou.nl",
   },
+  // Eigen twitter-blok: anders erft de pagina titel en tekst van de homepage.
+  twitter: {
+    card: "summary_large_image",
+    title: "Mijlpaal cadeau 50, 60 of 65 jaar — geef betekenis",
+    description: "Geen ding, maar een tastbaar eerbetoon dat dieper raakt dan een envelop met geld.",
+    images: ["https://bewaardvoorjou.nl/mijlpaal-cadeau/opengraph-image"],
+    creator: "@bewaardvoorjou",
+  },
 };
 
 const jsonLd = {
