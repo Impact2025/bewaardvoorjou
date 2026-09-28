@@ -6,8 +6,16 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BoxSoldOutNotice } from "@/components/gift/GiftOffer";
-import { ERFGOED_SOLD_OUT } from "@/lib/pricing";
+import { BoxSoldOutNotice, GiftOffer } from "@/components/gift/GiftOffer";
+import {
+  ERFGOED_SOLD_OUT,
+  NALATENSCHAP_SOLD_OUT,
+  PACKAGES,
+  giftCheckoutPath,
+  giftPackage,
+  priceLabel,
+} from "@/lib/pricing";
+import { nextVaderdag } from "@/lib/vaderdag";
 import {
   ArrowRight,
   CheckCircle,
@@ -20,11 +28,27 @@ import {
   Star,
 } from "lucide-react";
 
+// Wat een bezoeker nu echt kan bestellen (zie giftPackage in lib/pricing.ts).
+const GIFT_CODE = giftPackage();
+const GIFT_LABEL = `Geef ${GIFT_CODE === "ERFGOED" ? "de Erfgoed Box" : "zijn levensverhaal"} — ${priceLabel(GIFT_CODE)}`;
+const GIFT_HREF = giftCheckoutPath(GIFT_CODE);
+
+const VADERDAG = nextVaderdag();
+const VADERDAG_LONG = VADERDAG.toLocaleDateString("nl-NL", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+const VADERDAG_SHORT = VADERDAG.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
+
 const steps = [
   {
     step: "1",
     title: "Kies het pakket",
-    description: "Erfgoed (€149) of Nalatenschap (€229). Digitale toegang start direct na betaling.",
+    description: ERFGOED_SOLD_OUT
+      ? `${PACKAGES[GIFT_CODE].name} (${priceLabel(GIFT_CODE)}). Digitale toegang start direct na betaling.`
+      : "Erfgoed (€149) of Nalatenschap (€229). Digitale toegang start direct na betaling.",
   },
   {
     step: "2",
@@ -34,7 +58,9 @@ const steps = [
   {
     step: "3",
     title: "Hij ontvangt een uitnodiging",
-    description: "Een warme welkomstmail nodigt hem uit. De doos bezorgen we daarna op het opgegeven adres.",
+    description: ERFGOED_SOLD_OUT
+      ? "Een warme welkomstmail nodigt hem uit, op de dag die jij kiest. Hij kan meteen beginnen met vertellen."
+      : "Een warme welkomstmail nodigt hem uit. De doos bezorgen we daarna op het opgegeven adres.",
   },
 ];
 
@@ -86,7 +112,7 @@ export default function VaderdagContent() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange/20 backdrop-blur-md border border-orange/30 text-white text-sm font-medium mb-8 shadow-xl">
               <Sparkles className="h-4 w-4 text-orange-light" />
-              <span>Vaderdag — zondag 21 juni 2026</span>
+              <span>Vaderdag — {VADERDAG_LONG}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-2xl">
@@ -111,8 +137,8 @@ export default function VaderdagContent() {
                 asChild
                 className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-7 rounded-xl shadow-2xl hover:shadow-orange/50 transition-all duration-300 hover:scale-105 font-semibold"
               >
-                <Link href="/checkout?package=ERFGOED&gift=true" className="inline-flex items-center">
-                  Bestel de Erfgoed Box — €149 <ArrowRight className="ml-2 h-6 w-6" />
+                <Link href={GIFT_HREF} className="inline-flex items-center">
+                  {GIFT_LABEL} <ArrowRight className="ml-2 h-6 w-6" />
                 </Link>
               </Button>
               <Button
@@ -149,12 +175,20 @@ export default function VaderdagContent() {
           <div className="flex items-center gap-3">
             <Clock className="h-5 w-5 text-[#d4af37] flex-shrink-0" />
             <div>
-              <p className="text-white font-semibold text-sm">Bestel vóór dinsdag 17 juni voor Vaderdag levering</p>
-              <p className="text-[#aaa] text-xs">Digitale toegang start altijd direct · doos volgt daarna</p>
+              <p className="text-white font-semibold text-sm">
+                {ERFGOED_SOLD_OUT
+                  ? `Ook op Vaderdag zelf (${VADERDAG_SHORT}) nog te geven`
+                  : "Bestel minstens 2 weken vóór Vaderdag voor bezorging van de doos"}
+              </p>
+              <p className="text-[#aaa] text-xs">
+                {ERFGOED_SOLD_OUT
+                  ? "Digitaal cadeau · jij kiest de dag waarop de uitnodiging aankomt"
+                  : "Digitale toegang start altijd direct · doos volgt daarna"}
+              </p>
             </div>
           </div>
           <Link
-            href="/checkout?package=ERFGOED&gift=true"
+            href={GIFT_HREF}
             className="flex-shrink-0 bg-[#d4af37] hover:bg-[#c49e2a] text-[#1a1a1a] font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap"
           >
             Bestel nu →
@@ -200,14 +234,21 @@ export default function VaderdagContent() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange/10 border border-orange/30 text-orange text-xs font-bold mb-4 uppercase tracking-widest">
               <Sparkles className="h-3.5 w-3.5" />
-              Vaderdag deal — t/m 21 juni
+              Voor Vaderdag, {VADERDAG_SHORT}
             </div>
             <h2 className="text-3xl md:text-4xl font-serif font-semibold text-slate-900 mb-4">
               Kies het perfecte cadeau
             </h2>
-            <p className="text-slate-700">5 jaar inbegrepen. Digitale toegang start direct. De doos bezorgen we binnen 2 weken.</p>
+            <p className="text-slate-700">
+              {ERFGOED_SOLD_OUT
+                ? "Digitale toegang start direct. Je vader krijgt zijn uitnodiging op de dag die jij kiest."
+                : "5 jaar inbegrepen. Digitale toegang start direct. De doos bezorgen we binnen 2 weken."}
+            </p>
           </div>
 
+          {ERFGOED_SOLD_OUT ? (
+            <GiftOffer recipient="je vader" />
+          ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {/* Erfgoed */}
             <div className="relative bg-white rounded-2xl border-2 border-[#d4af37] shadow-2xl overflow-hidden">
@@ -297,6 +338,7 @@ export default function VaderdagContent() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </section>
 
@@ -331,8 +373,9 @@ export default function VaderdagContent() {
 
           <div className="text-center mt-12">
             <Button asChild className="bg-orange hover:bg-orange/90 text-white text-lg px-10 py-6">
-              <Link href="/checkout?package=ERFGOED&gift=true">
-                Bestel nu — bezorging binnen 2 weken <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href={GIFT_HREF}>
+                {ERFGOED_SOLD_OUT ? "Bestel nu — direct te geven" : "Bestel nu — bezorging binnen 2 weken"}{" "}
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -381,28 +424,34 @@ export default function VaderdagContent() {
             Zijn verhaal verdient<br className="hidden md:block" /> een thuis
           </h2>
           <p className="text-xl mb-10 opacity-95">
-            Bestel vóór dinsdag 17 juni voor bezorging met Vaderdag.
+            {ERFGOED_SOLD_OUT
+              ? `Geef het op Vaderdag, ${VADERDAG_SHORT}, of gewoon vandaag.`
+              : "Bestel minstens 2 weken vóór Vaderdag voor bezorging van de doos."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               asChild
               className="bg-white text-orange hover:bg-neutral-light text-lg px-10 py-7 shadow-2xl font-semibold"
             >
-              <Link href="/checkout?package=ERFGOED&gift=true">
-                Geef de Erfgoed Box — €149 <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href={GIFT_HREF}>
+                {GIFT_LABEL} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button
-              asChild
-              className="bg-white/15 backdrop-blur-md hover:bg-white/25 text-white text-lg px-10 py-7 border-2 border-white/40 transition-all"
-            >
-              <Link href="/checkout?package=NALATENSCHAP&gift=true">
-                Nalatenschap — €229 eenmalig
-              </Link>
-            </Button>
+            {!NALATENSCHAP_SOLD_OUT && (
+              <Button
+                asChild
+                className="bg-white/15 backdrop-blur-md hover:bg-white/25 text-white text-lg px-10 py-7 border-2 border-white/40 transition-all"
+              >
+                <Link href="/checkout?package=NALATENSCHAP&gift=true">
+                  Nalatenschap — €229 eenmalig
+                </Link>
+              </Button>
+            )}
           </div>
           <p className="text-sm opacity-80 mt-6">
-            Digitale toegang start direct · Doos bezorging binnen 2 weken · 14 dagen bedenktijd
+            {ERFGOED_SOLD_OUT
+              ? "Digitale toegang start direct · 14 dagen bedenktijd"
+              : "Digitale toegang start direct · Doos bezorging binnen 2 weken · 14 dagen bedenktijd"}
           </p>
         </div>
       </section>
