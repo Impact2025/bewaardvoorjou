@@ -436,7 +436,9 @@ export default function Home() {
             <Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Hulp bij je autobiografie →</Link>
             <Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Een digitaal familiearchief →</Link>
             <Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal bewaren op USB →</Link>
-            <Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa & oma →</Link>
+            <Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa van 80 →</Link>
+            <Link href="/cadeau-oma" className="hover:text-orange transition-colors">Een origineel cadeau voor oma →</Link>
+            <Link href="/kerstcadeau-ouders" className="hover:text-orange transition-colors">Kerstcadeau voor ouders →</Link>
             <Link href="/vaderdag" className="hover:text-orange transition-colors">Een betekenisvol vaderdag-cadeau →</Link>
             <Link href="/pensioen-afscheidscadeau" className="hover:text-orange transition-colors">Een pensioen-afscheid dat blijft →</Link>
             <Link href="/mijlpaal-cadeau" className="hover:text-orange transition-colors">Cadeau voor 50, 60 of 65 jaar →</Link>
@@ -444,6 +446,7 @@ export default function Home() {
             <Link href="/kennisbank" className="hover:text-orange transition-colors">Kennisbank: hoe begin je? →</Link>
             <Link href="/blog" className="hover:text-orange transition-colors">Verhalen & inspiratie op de blog →</Link>
             <Link href="/faq" className="hover:text-orange transition-colors">Veelgestelde vragen →</Link>
+            <Link href="/astoldby-alternatief" className="hover:text-orange transition-colors">Vertellen of schrijven: AsToldBy-alternatief →</Link>
           </div>
         </div>
       </section>

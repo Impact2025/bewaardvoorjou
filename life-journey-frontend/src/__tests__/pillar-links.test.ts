@@ -53,6 +53,17 @@ describe("pickPillarLinks", () => {
     expect(picked.length).toBeLessThanOrEqual(2);
   });
 
+  it("stuurt kerst- en ouder-cadeauartikelen naar de kerstpagina", () => {
+    const picked = pickPillarLinks({ slug: "familiearchief-onder-de-kerstboom" });
+    expect(picked.map((p) => p.href)).toContain("/kerstcadeau-ouders");
+  });
+
+  it("stuurt oma-artikelen naar de oma-pagina, niet naar opa", () => {
+    const picked = pickPillarLinks({ slug: "cadeau-voor-oma-van-90" });
+    expect(picked.map((p) => p.href)).toContain("/cadeau-oma");
+    expect(picked.map((p) => p.href)).not.toContain("/cadeau-opa-80-jaar");
+  });
+
   it("geeft niets terug bij count 0", () => {
     expect(pickPillarLinks({ slug: "wat-dan-ook" }, 0)).toEqual([]);
   });

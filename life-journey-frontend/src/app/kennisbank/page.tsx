@@ -5,14 +5,17 @@ import { PublicFooter } from "@/components/layout/PublicFooter";
 import { BookOpen, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: { absolute: "Kennisbank — Alles over levensverhalen vastleggen | BewaardVoorJou.nl" },
+  // Bewust níet op "levensverhaal vastleggen" getarget: die term hoort bij de
+  // pijler /levensverhaal-vastleggen. Deze hub rankte er in sep 2026 zelf op
+  // (pos ~18) en drukte de pijlerpagina weg.
+  title: { absolute: "Kennisbank: gidsen over herinneringen, familie en biografie | BewaardVoorJou.nl" },
   description:
-    "Ontdek hoe je jouw levensverhaal vastlegt, herinneringen ophaalt en je verhaal deelt met familie. Praktische gidsen en tips van BewaardVoorJou.nl.",
+    "Praktische gidsen over herinneringen ophalen, ouders interviewen, familiegeschiedenis en je verhaal veilig delen. Alle artikelen van BewaardVoorJou.nl op één plek.",
   alternates: { canonical: "https://bewaardvoorjou.nl/kennisbank" },
   openGraph: {
     title: "Kennisbank | BewaardVoorJou.nl",
     description:
-      "Praktische gidsen over levensverhalen vastleggen, herinneringen ophalen en veilig delen met familie.",
+      "Praktische gidsen over herinneringen ophalen, ouders interviewen en veilig delen met familie.",
     url: "https://bewaardvoorjou.nl/kennisbank",
   },
 };
@@ -50,7 +53,7 @@ export default async function KennisbankPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Kennisbank — Alles over levensverhalen vastleggen",
+    name: "Kennisbank BewaardVoorJou.nl",
     description:
       "Praktische gidsen, tips en antwoorden op veelgestelde vragen over het vastleggen van je levensverhaal.",
     url: "https://bewaardvoorjou.nl/kennisbank",
@@ -92,10 +95,15 @@ export default async function KennisbankPage() {
               Kennisbank
             </div>
             <h1 className="text-4xl sm:text-5xl font-serif font-semibold text-slate-900 mb-4">
-              Alles over je levensverhaal vastleggen
+              Kennisbank: gidsen, tips en antwoorden
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Praktische gidsen, tips en antwoorden op veelgestelde vragen — zodat jij vandaag nog kunt beginnen.
+              Over herinneringen ophalen, ouders interviewen, familiegeschiedenis en veilig bewaren.
+              Nieuw hier? Lees eerst{" "}
+              <Link href="/levensverhaal-vastleggen" className="text-orange underline hover:no-underline">
+                hoe je een levensverhaal vastlegt
+              </Link>
+              .
             </p>
           </div>
         </section>

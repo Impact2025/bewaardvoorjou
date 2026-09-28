@@ -1,0 +1,45 @@
+# BewaardVoorJou.nl
+
+> BewaardVoorJou.nl is een Nederlands platform waarop mensen hun levensverhaal vastleggen voor kinderen en kleinkinderen. Een geduldige AI-gespreksleider stelt in het Nederlands vragen, verdeeld over 58 hoofdstukken van een leven, en vraagt door op wat iemand vertelt. Antwoorden kunnen worden ingesproken, op video opgenomen of getypt. Alles wordt opgeslagen op servers in Nederland.
+
+Het platform wordt veel als cadeau gegeven: een kind of kleinkind koopt het voor een ouder of grootouder, die een persoonlijke uitnodiging per e-mail ontvangt. Je kunt gratis beginnen met 3 hoofdstukken. Er is ook een aparte variant voor jonge ouders, Bewaard voor Baby, om het eerste levensjaar van een kind vast te leggen.
+
+## Hoofdpagina's
+
+- [Levensverhaal vastleggen](https://bewaardvoorjou.nl/levensverhaal-vastleggen): hoe het werkt en voor wie het bedoeld is
+- [Pakketten en prijzen](https://bewaardvoorjou.nl/pricing): de pakketten, wat erin zit en wat ze kosten
+- [Veelgestelde vragen](https://bewaardvoorjou.nl/faq)
+- [Over ons](https://bewaardvoorjou.nl/about)
+- [Veiligheid en privacy](https://bewaardvoorjou.nl/veilig-digitaal-familiearchief)
+
+## Cadeau
+
+- [Kerstcadeau voor ouders die alles al hebben](https://bewaardvoorjou.nl/kerstcadeau-ouders)
+- [Origineel cadeau voor oma](https://bewaardvoorjou.nl/cadeau-oma)
+- [Origineel cadeau voor opa van 80 jaar](https://bewaardvoorjou.nl/cadeau-opa-80-jaar)
+- [Cadeau voor een mijlpaal: 50, 60 of 65 jaar](https://bewaardvoorjou.nl/mijlpaal-cadeau)
+- [Pensioen-afscheidscadeau](https://bewaardvoorjou.nl/pensioen-afscheidscadeau)
+
+## Schrijven en vergelijken
+
+- [Je levensverhaal opschrijven](https://bewaardvoorjou.nl/levensverhaal-opschrijven)
+- [Hulp bij je autobiografie](https://bewaardvoorjou.nl/autobiografie-hulp)
+- [AsToldBy-alternatief: vertellen in plaats van schrijven](https://bewaardvoorjou.nl/astoldby-alternatief)
+
+## Kennisbank
+
+- [Alle gidsen en artikelen](https://bewaardvoorjou.nl/kennisbank)
+- [25 vragen voor een interview met je ouders](https://bewaardvoorjou.nl/kennisbank/interview-ouders-25-vragen)
+- [Wat kost een levensverhaal?](https://bewaardvoorjou.nl/kennisbank/levensverhaal-laten-schrijven-kosten)
+- [Levensverhaal vastleggen bij dementie](https://bewaardvoorjou.nl/kennisbank/levensverhaal-vastleggen-bij-dementie-gids-mantelzorgers)
+- [Reminiscentie in de zorg](https://bewaardvoorjou.nl/kennisbank/reminiscentie-in-de-zorg-levensverhalen-als-activiteit)
+
+## Baby
+
+- [Bewaard voor Baby](https://bewaardvoorjou.nl/voor-baby): het digitale babyboek
+- [Baby-herinneringen vastleggen](https://bewaardvoorjou.nl/baby-herinneringen-vastleggen)
+
+## Optional
+
+- [Blog](https://bewaardvoorjou.nl/blog)
+- [Sitemap](https://bewaardvoorjou.nl/sitemap.xml)

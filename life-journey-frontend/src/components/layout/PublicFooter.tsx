@@ -55,11 +55,14 @@ export function PublicFooter() {
               <li><Link href="/autobiografie-hulp" className="hover:text-orange transition-colors">Autobiografie schrijven</Link></li>
               <li><Link href="/veilig-digitaal-familiearchief" className="hover:text-orange transition-colors">Digitaal familiearchief</Link></li>
               <li><Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal op USB</Link></li>
-              <li><Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa & oma</Link></li>
+              <li><Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa</Link></li>
+              <li><Link href="/cadeau-oma" className="hover:text-orange transition-colors">Cadeau voor oma</Link></li>
+              <li><Link href="/kerstcadeau-ouders" className="hover:text-orange transition-colors">Kerstcadeau ouders</Link></li>
               <li><Link href="/vaderdag" className="hover:text-orange transition-colors">Vaderdag cadeau</Link></li>
               <li><Link href="/pensioen-afscheidscadeau" className="hover:text-orange transition-colors">Pensioen afscheidscadeau</Link></li>
               <li><Link href="/mijlpaal-cadeau" className="hover:text-orange transition-colors">Mijlpaal cadeau 50/60/65</Link></li>
               <li><Link href="/baby-herinneringen-vastleggen" className="hover:text-orange transition-colors">Baby herinneringen</Link></li>
+              <li><Link href="/astoldby-alternatief" className="hover:text-orange transition-colors">AsToldBy alternatief</Link></li>
             </ul>
           </div>
 

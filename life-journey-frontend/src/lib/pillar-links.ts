@@ -58,6 +58,14 @@ export const PILLARS: Pillar[] = [
     ],
   },
   {
+    // Staat bewust vroeg: bij een gelijke stand wint het seizoensonderwerp
+    // (bijv. "familiearchief-onder-de-kerstboom" → kerst i.p.v. archief).
+    href: "/kerstcadeau-ouders",
+    label: "Kerstcadeau voor ouders die alles al hebben",
+    teaser: "Digitaal, dus ook op 24 december nog te geven.",
+    patterns: ["kerst", "kerstboom", "sinterklaas", "feestdagen", "cadeau ouders", "cadeaus-voor-ouders", "alles al hebben"],
+  },
+  {
     href: "/levensverhaal-opschrijven",
     label: "Je levensverhaal opschrijven",
     teaser: "Liever zelf schrijven? Zo pak je het aan zonder schrijfervaring.",
@@ -101,9 +109,15 @@ export const PILLARS: Pillar[] = [
   },
   {
     href: "/cadeau-opa-80-jaar",
-    label: "Cadeau voor opa & oma",
+    label: "Cadeau voor opa",
     teaser: "Een verjaardagscadeau dat over vijftig jaar nog bestaat.",
-    patterns: ["opa", "oma", "grootouder", "verjaardag", "80 jaar", "kleinkind"],
+    patterns: ["opa", "grootvader", "grootouder", "verjaardag", "80 jaar", "vaderdag"],
+  },
+  {
+    href: "/cadeau-oma",
+    label: "Een origineel cadeau voor oma",
+    teaser: "Haar verhalen en haar stem, bewaard voor de kleinkinderen.",
+    patterns: ["oma", "grootmoeder", "kleinkind", "90 jaar", "moederdag"],
   },
   {
     href: "/mijlpaal-cadeau",
