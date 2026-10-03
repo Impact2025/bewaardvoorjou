@@ -342,6 +342,8 @@ export default function KerstcadeauOudersPage() {
       <RelatedLinks
         links={[
           { href: "/cadeau-oma", label: "Een cadeau voor oma dat blijft" },
+          { href: "/cadeau-moeder-verjaardag", label: "Persoonlijk cadeau voor je moeder" },
+          { href: "/cadeau-vader-verjaardag", label: "Persoonlijk cadeau voor je vader" },
           { href: "/cadeau-opa-80-jaar", label: "Origineel cadeau voor opa van 80 jaar" },
           { href: "/blog/7-persoonlijke-cadeaus-voor-ouders-die-alles-al-hebben", label: "7 persoonlijke cadeaus voor ouders die alles al hebben" },
           { href: "/blog/familiearchief-onder-de-kerstboom", label: "Een familiearchief onder de kerstboom" },

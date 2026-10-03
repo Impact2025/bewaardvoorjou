@@ -64,6 +64,18 @@ async def publish_health(db: Session = Depends(get_db)):
     }
 
 
+# ── Sleutelcontrole voor de frontend-revalidate ────────────────────────────
+@router.post("/verify", tags=["publish"])
+async def verify_publish_key(request: Request):
+    """Controleert alleen of de meegestuurde Bearer de PUBLISH_API_KEY is.
+
+    De frontend (/api/revalidate) gebruikt dit om een publicatie-aanroep te
+    herkennen zonder zelf het geheim te kennen. Geeft nooit inhoud terug."""
+    if not _is_authorized(request):
+        return Response(content='{"ok":false}', status_code=401, media_type="application/json")
+    return {"ok": True}
+
+
 # ── Verwijder een Agent OS-gepubliceerd artikel (slug) ─────────────────────
 @router.delete("/{slug}", tags=["publish"])
 async def delete_published(request: Request, slug: str, db: Session = Depends(get_db)):
@@ -163,11 +175,17 @@ async def _trigger_revalidate(slug: str, section: str) -> None:
     zodat het artikel direct zichtbaar is i.p.v. te wachten op de ISR-window."""
     frontend = (settings.app_base_url or settings.site_url).rstrip("/")
     try:
+        key = getattr(settings, "publish_api_key", None) or ""
         async with httpx.AsyncClient(timeout=10) as client:
-            await client.post(
+            resp = await client.post(
                 f"{frontend}/api/revalidate",
-                json={"slug": slug, "section": _section_path(section)},
+                # De revalidate-route verwacht "knowledge" (niet het URL-pad
+                # "kennisbank") en een Bearer; zonder beide faalde hij stil.
+                json={"slug": slug, "section": section},
+                headers={"Authorization": f"Bearer {key}"},
             )
+            if resp.status_code >= 400:
+                logger.warning(f"Revalidate frontend gaf {resp.status_code} voor {slug}")
     except Exception as e:  # revalidate is best-effort
         logger.warning(f"Revalidate frontend mislukt (niet kritiek): {e}")
 

@@ -24,8 +24,28 @@ async function isAdmin(authHeader: string | null): Promise<boolean> {
   }
 }
 
+/**
+ * De publicatie-pijplijn (AgentOS) stuurt de PUBLISH_API_KEY mee. De backend
+ * bevestigt of die klopt, zodat de frontend het geheim niet zelf hoeft te
+ * kennen.
+ */
+async function isPublishKey(authHeader: string | null): Promise<boolean> {
+  if (!authHeader?.startsWith("Bearer ")) return false;
+  try {
+    const res = await fetch(`${API_BASE}/publish/verify`, {
+      method: "POST",
+      headers: { Authorization: authHeader },
+      cache: "no-store",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin(req.headers.get("authorization")))) {
+  const auth = req.headers.get("authorization");
+  if (!(await isAdmin(auth)) && !(await isPublishKey(auth))) {
     return NextResponse.json({ error: "Niet geautoriseerd" }, { status: 401 });
   }
 

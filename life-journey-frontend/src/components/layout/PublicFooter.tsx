@@ -57,6 +57,8 @@ export function PublicFooter() {
               <li><Link href="/levensverhaal-bewaren-usb" className="hover:text-orange transition-colors">Levensverhaal op USB</Link></li>
               <li><Link href="/cadeau-opa-80-jaar" className="hover:text-orange transition-colors">Cadeau voor opa</Link></li>
               <li><Link href="/cadeau-oma" className="hover:text-orange transition-colors">Cadeau voor oma</Link></li>
+              <li><Link href="/cadeau-moeder-verjaardag" className="hover:text-orange transition-colors">Cadeau voor moeder</Link></li>
+              <li><Link href="/cadeau-vader-verjaardag" className="hover:text-orange transition-colors">Cadeau voor vader</Link></li>
               <li><Link href="/kerstcadeau-ouders" className="hover:text-orange transition-colors">Kerstcadeau ouders</Link></li>
               <li><Link href="/vaderdag" className="hover:text-orange transition-colors">Vaderdag cadeau</Link></li>
               <li><Link href="/pensioen-afscheidscadeau" className="hover:text-orange transition-colors">Pensioen afscheidscadeau</Link></li>

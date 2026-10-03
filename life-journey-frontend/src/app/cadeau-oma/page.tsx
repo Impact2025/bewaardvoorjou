@@ -295,6 +295,7 @@ export default function CadeauOmaPage() {
         links={[
           { href: "/cadeau-opa-80-jaar", label: "Origineel cadeau voor opa van 80 jaar" },
           { href: "/kerstcadeau-ouders", label: "Kerstcadeau voor ouders en grootouders" },
+          { href: "/cadeau-moeder-verjaardag", label: "Persoonlijk cadeau voor je moeder" },
           { href: "/kennisbank/herinneringen-bewaren-kleinkinderen", label: "Herinneringen bewaren voor kleinkinderen: 7 manieren" },
           { href: "/kennisbank/een-ouder-op-afstand-interviewen-levensverhaal-vastleggen", label: "Een ouder op afstand interviewen" },
           { href: "/levensverhaal-vastleggen", label: "Zo leg je een levensverhaal vast" },

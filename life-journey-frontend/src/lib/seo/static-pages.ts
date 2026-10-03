@@ -38,6 +38,8 @@ export const STATIC_SITEMAP_PAGES: StaticSitemapEntry[] = [
   { path: "/levensverhaal-bewaren-usb", priority: 0.8, changeFrequency: "monthly" },
   { path: "/cadeau-opa-80-jaar", priority: 0.8, changeFrequency: "monthly" },
   { path: "/cadeau-oma", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/cadeau-moeder-verjaardag", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/cadeau-vader-verjaardag", priority: 0.8, changeFrequency: "monthly" },
   { path: "/kerstcadeau-ouders", priority: 0.8, changeFrequency: "weekly" },
   { path: "/astoldby-alternatief", priority: 0.7, changeFrequency: "monthly" },
   { path: "/vaderdag", priority: 0.6, changeFrequency: "yearly" },

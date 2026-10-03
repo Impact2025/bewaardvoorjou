@@ -120,6 +120,18 @@ export const PILLARS: Pillar[] = [
     patterns: ["oma", "grootmoeder", "kleinkind", "90 jaar", "moederdag"],
   },
   {
+    href: "/cadeau-moeder-verjaardag",
+    label: "Een persoonlijk cadeau voor je moeder",
+    teaser: "Haar verhaal en haar stem, bewaard voor haar kinderen.",
+    patterns: ["moeder", "mama", "moederdag", "60 jaar", "70 jaar"],
+  },
+  {
+    href: "/cadeau-vader-verjaardag",
+    label: "Een persoonlijk cadeau voor je vader",
+    teaser: "Zijn verhaal en zijn stem, bewaard voor de familie.",
+    patterns: ["vader", "papa", "vaderdag", "60 jaar", "70 jaar"],
+  },
+  {
     href: "/mijlpaal-cadeau",
     label: "Cadeau voor een mijlpaal",
     teaser: "Voor 50, 60 of 65 jaar — of een jubileum dat telt.",

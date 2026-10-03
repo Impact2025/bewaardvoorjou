@@ -64,6 +64,15 @@ describe("pickPillarLinks", () => {
     expect(picked.map((p) => p.href)).not.toContain("/cadeau-opa-80-jaar");
   });
 
+  it("stuurt moeder- en vaderartikelen naar hun eigen cadeaupagina", () => {
+    expect(pickPillarLinks({ slug: "cadeau-voor-moeder-van-70" }).map((p) => p.href)).toContain(
+      "/cadeau-moeder-verjaardag"
+    );
+    expect(pickPillarLinks({ slug: "cadeau-voor-vader-van-60" }).map((p) => p.href)).toContain(
+      "/cadeau-vader-verjaardag"
+    );
+  });
+
   it("geeft niets terug bij count 0", () => {
     expect(pickPillarLinks({ slug: "wat-dan-ook" }, 0)).toEqual([]);
   });

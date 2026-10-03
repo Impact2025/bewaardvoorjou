@@ -22,7 +22,6 @@ import {
   Shield,
   Gift,
   Sparkles,
-  Star,
   Package,
   Coffee,
   Hourglass,
@@ -601,23 +600,6 @@ export default function CadeauOpa80JaarPage() {
               </Link>
             </Button>
           </div>
-        </div>
-      </section>
-
-      {/* ── Quote ── */}
-      <section className="bg-[#1a1a1a] py-16 px-4 text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex justify-center gap-1 mb-5">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-5 w-5 text-[#d4af37] fill-[#d4af37]" />
-            ))}
-          </div>
-          <blockquote className="font-serif text-xl md:text-2xl text-white leading-relaxed mb-6">
-            &ldquo;Voor zijn 80e gaven we opa de Erfgoed Box. Hij vertelde dingen
-            die we nog nooit hadden gehoord. Nu hebben de kleinkinderen zijn stem
-            voor altijd.&rdquo;
-          </blockquote>
-          <p className="text-[#d4af37] font-medium text-sm">— Sanne, 39 jaar · gaf dit aan haar opa van 80</p>
         </div>
       </section>
 
